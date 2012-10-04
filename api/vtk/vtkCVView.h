@@ -5,6 +5,7 @@
   Language: C++
 
   Author: Patrick Emond <emondpd@mcmaster.ca>
+  Author: Dean Inglis <inglisd@mcmaster.ca>
 
 =========================================================================*/
 //

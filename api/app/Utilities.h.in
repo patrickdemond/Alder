@@ -5,6 +5,7 @@
   Language: C++
 
   Author: Patrick Emond <emondpd@mcmaster.ca>
+  Author: Dean Inglis <inglisd@mcmaster.ca>
 
 =========================================================================*/
 //
@@ -19,11 +20,14 @@
 #define ALDER_VERSION_MINOR @ALDER_VERSION_MINOR@
 #define ALDER_VERSION_PATCH @ALDER_VERSION_PATCH@
 
-#define ALDER_ROOT_DIR @ALDER_ROOT_DIR@
-#define ALDER_AUX_DIR @ALDER_AUX_DIR@
-#define ALDER_API_DIR @ALDER_API_DIR@
-#define ALDER_APP_DIR @ALDER_APP_DIR@
-#define ALDER_QT_DIR @ALDER_QT_DIR@
-#define ALDER_VTK_DIR @ALDER_VTK_DIR@
+#define ALDER_ROOT_DIR "@ALDER_ROOT_DIR@"
+#define ALDER_AUX_DIR "@ALDER_AUX_DIR@"
+#define ALDER_API_DIR "@ALDER_API_DIR@"
+#define ALDER_APP_DIR "@ALDER_APP_DIR@"
+#define ALDER_QT_DIR "@ALDER_QT_DIR@"
+#define ALDER_VTK_DIR "@ALDER_VTK_DIR@"
+
+#define ALDER_SALT_STRING "@ALDER_SALT_STRING@"
+#define ALDER_MASTER_PASSWORD ""
 
 #endif // __Utilities_h

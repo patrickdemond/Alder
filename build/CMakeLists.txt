@@ -15,6 +15,9 @@ SET( ALDER_ICON_SIZES 16x16 22x22 24x24 32x32 48x48 64x64 128x128 )
 # Look in the build directory for cmake modules
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/" )
 
+# Create a salt string which can be set at build time
+SET( ALDER_SALT_STRING "this is salt" CACHE STRING "This is salt for encrypting passwords")
+
 # We need VTK
 FIND_PACKAGE( VTK REQUIRED )
 INCLUDE( ${VTK_USE_FILE} )
@@ -42,6 +45,10 @@ SET( ALDER_APP_DIR ${ALDER_API_DIR}/app )
 SET( ALDER_QT_DIR ${ALDER_API_DIR}/ui/qt )
 SET( ALDER_VTK_DIR ${ALDER_API_DIR}/vtk )
 
+IF( NOT EXISTS hash.txt )
+  FILE( REMOVE "${CMAKE_BINARY_DIR}/hash" )
+ENDIF( NOT EXISTS hash.txt )
+
 # Configure the utitlities header
 CONFIGURE_FILE( ${ALDER_APP_DIR}/Utilities.h.in
                 ${PROJECT_BINARY_DIR}/Utilities.h @ONLY IMMEDIATE )
@@ -49,6 +56,12 @@ CONFIGURE_FILE( ${ALDER_APP_DIR}/Utilities.h.in
 # Copy the readme file to build
 CONFIGURE_FILE( ${ALDER_ROOT_DIR}/readme
                 ${PROJECT_BINARY_DIR}/readme COPYONLY )
+
+# Copy the database xml file to the build (if not found)
+IF( NOT EXISTS ${PROJECT_BINARY_DIR}/database.xml )
+  CONFIGURE_FILE( ${ALDER_AUX_DIR}/database.xml
+                  ${PROJECT_BINARY_DIR}/database.xml COPYONLY )
+ENDIF( NOT EXISTS ${PROJECT_BINARY_DIR}/database.xml )
 
 # Set up include directories
 SET( ALDER_INCLUDE_DIR
@@ -58,8 +71,12 @@ SET( ALDER_INCLUDE_DIR
 )
 
 # Set up headers and source
+SET( HASH_SOURCE
+  ${ALDER_AUX_DIR}/hash.cxx
+)
 SET( ALDER_SOURCE
   ${ALDER_API_DIR}/Alder.cxx
+  ${ALDER_VTK_DIR}/vtkAlderDatabase.cxx
 #  ${ALDER_APP_DIR}/Application.cxx
 #  ${ALDER_APP_DIR}/Session.cxx
 #  ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
@@ -94,21 +111,29 @@ INCLUDE_DIRECTORIES(
   ${LIBXML2_INCLUDE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CRYPTO++_INCLUDE_DIR}
 )
 
 # Targets
 ADD_EXECUTABLE( Alder ${ALDER_SOURCE} ${ALDER_UISrcs} ${MOCSrcs} )
+ADD_EXECUTABLE( hash ${HASH_SOURCE} )
 
 TARGET_LINK_LIBRARIES( Alder
   QVTK
   ${QT_LIBRARIES}
   ${LIBXML2_LIBRARIES}
+  ${CRYPTO++_LIBRARIES}
   vtkRendering
   vtkGraphics
   vtkIO
   vtkCommon
 )
 INSTALL( TARGETS Alder RUNTIME DESTINATION bin )
+
+TARGET_LINK_LIBRARIES( hash
+  ${CRYPTO++_LIBRARIES}
+)
+INSTALL( TARGETS hash RUNTIME DESTINATION bin )
 
 ADD_CUSTOM_TARGET( dist
   COMMAND git archive --prefix=${ALDER_ARCHIVE_NAME}/ HEAD

@@ -33,6 +33,12 @@ You will need the Crypto++ development libraries.  You can download these from c
 website or install them using your distro's package manager.
 
 
+MySQL (www.mysql.com)
+---------------------
+You will need to install mysql library files and configure your VTK build to use them (see
+below).
+
+
 CMake (cmake.org)
 -----------------
 There are plenty of pre-compiled binaries of CMake available on the website, or you can download
@@ -66,8 +72,8 @@ VTK uses CMake to set up the build environment the same way that Alder does:
    with your favourite editor and set the following:
 
    CMAKE_BUILD_TYPE:STRING=Release
-   VTK_USE_INFAlder:BOOL=ON
    VTK_USE_QT:BOOL=ON
+   VTK_USE_MYSQL:BOOL=ON
 
 5. Re-run cmake by typing "cmake ." in the build directory.  When it is done you should a message
    something like "Build files have been written to: ..."
@@ -102,4 +108,11 @@ Once you've gone through the process of building VTK using CMake this will seem 
 5. Re-run cmake by typing "cmake ." in the build directory.  When it is done the error message
    should go away and you see "Build files have been written to: ..." once more.
 
-6. You are now ready to build Alder by typing "make".
+6. Make sure to set the salt string to something (anything) other than the default text.
+
+   ALDER_SALT_STRING:STRING=put anything here
+
+7. You are now ready to build Alder by typing "make".
+
+8. Create an admin password using the hash executable and copy/paste the output into the
+   Utilities.h file found in the root of the build directory.
