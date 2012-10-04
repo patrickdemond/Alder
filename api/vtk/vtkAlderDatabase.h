@@ -27,6 +27,7 @@ public:
   static vtkAlderDatabase *New();
   vtkTypeMacro( vtkAlderDatabase, vtkMySQLDatabase );
   void PrintSelf( ostream& os, vtkIndent indent );
+  bool Open( const char *password = 0 );
 
 protected:
   vtkAlderDatabase() {}

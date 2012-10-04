@@ -11,7 +11,8 @@
 #include "Application.h"
 
 #include "Utilities.h"
-#include "Session.h"
+//#include "Session.h"
+#include "vtkAlderDatabase.h"
 #include "vtkCamera.h"
 #include "vtkView.h"
 #include "vtkObjectFactory.h"
@@ -26,26 +27,33 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   Application::Application()
   {
-    this->Session = Session::New();
+//    this->Session = Session::New();
     this->View = vtkView::New();
+    this->Database = vtkAlderDatabase::New();
 
     // link the session and view's camera
-    this->Session->SetCamera( this->View->GetRenderer()->GetActiveCamera() );
+//    this->Session->SetCamera( this->View->GetRenderer()->GetActiveCamera() );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   Application::~Application()
   {
-    if( NULL != this->Session )
-    {
-      this->Session->Delete();
-      this->Session = NULL;
-    }
+//    if( NULL != this->Session )
+//    {
+//      this->Session->Delete();
+//      this->Session = NULL;
+//    }
 
     if( NULL != this->View )
     {
       this->View->Delete();
       this->View = NULL;
+    }
+
+    if( NULL != this->Database )
+    {
+      this->Database->Delete();
+      this->Database = NULL;
     }
   }
 

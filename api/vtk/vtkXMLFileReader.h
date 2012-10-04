@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:  CLSAVis (Canadian Longitudinal Study on Aging Visualizer)
+  Program:  Alder (CLSA Ultrasound Image Viewer)
   Module:   vtkXMLFileReader.h
   Language: C++
 
@@ -12,7 +12,7 @@
 // .NAME vtkXMLFileReader - Generic XML file reader
 //
 // .SECTION Description
-// This abstract class is to be extended by any class which reads XML files.
+// This abstract class must be extended by any class which reads XML files.
 // The parent of this class, vtkAlgorithm, provides many methods for
 // controlling the reading of the data file, see vtkAlgorithm for more
 // information.
@@ -27,11 +27,11 @@
 #include "vtkAlgorithm.h"
 #include "vtkVariant.h"
 
-#include "CVUtilities.h"
+#include "Utilities.h"
 #include <libxml/xmlreader.h>
-#include <stdexcept>
 
-class vtkGraph;
+#include <stdexcept>
+#include <sstream>
 
 class vtkXMLFileReader : public vtkAlgorithm
 {
@@ -41,8 +41,8 @@ public:
 
   // Description:
   // Set/get the file name
-  virtual CVString GetFileName() { return this->FileName; }
-  virtual void SetFileName( const CVString &fileName );
+  virtual std::string GetFileName() { return this->FileName; }
+  virtual void SetFileName( const std::string &fileName );
   
 protected:
   // Description:
@@ -129,11 +129,11 @@ protected:
   // will be parsed next time ParseNode() is called.
   void RewindReader();
 
-  void ReadValue( CVString& value );
+  void ReadValue( std::string& value );
   template<class T> void ReadValue( T& value );
   template<class T> void ReadTuple( T array[], vtkIdType length );
 
-  CVString FileName;
+  std::string FileName;
   xmlTextReader *Reader;
   vtkXMLFileReaderNode CurrentNode;
 
@@ -149,7 +149,7 @@ template<class T> void vtkXMLFileReader::ReadValue( T& value )
   xmlChar *read = xmlTextReaderReadString( this->Reader );
   if( NULL == read )
   {
-    CVString error = "Failed to read ";
+    std::string error = "Failed to read ";
     error += vtkVariant( value ).GetTypeAsString();
     throw( std::runtime_error( error ) );
   }
@@ -164,13 +164,13 @@ template<class T> void vtkXMLFileReader::ReadValue( T& value )
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 template<class T> void vtkXMLFileReader::ReadTuple( T array[], vtkIdType length )
 {
-  CVString string;
+  std::string string;
   this->ReadValue( string );
 
   // split string by spaces
   vtkIdType count = 0;
-  CVStringStream stream( string );
-  CVString word;
+  std::stringstream stream( string );
+  std::string word;
   while( stream >> word )
   {
     // check for overflow

@@ -63,7 +63,7 @@ void vtkXMLFileReader::PrintSelf( ostream &os, vtkIndent indent )
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void vtkXMLFileReader::SetFileName( const CVString &fileName )
+void vtkXMLFileReader::SetFileName( const std::string &fileName )
 {
   vtkDebugMacro( << this->GetClassName() << " (" << this << "): setting "
                  << "FileName to " << fileName.c_str() );
@@ -143,13 +143,13 @@ void vtkXMLFileReader::FreeReader()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void vtkXMLFileReader::ReadValue( CVString& value )
+void vtkXMLFileReader::ReadValue( std::string& value )
 {
   // list of expected elements
   xmlChar *read = xmlTextReaderReadString( this->Reader );
   if( NULL == read )
   {
-    CVString error = "Failed to read ";
+    std::string error = "Failed to read ";
     error += vtkVariant( value ).GetTypeAsString();
     throw( std::runtime_error( error ) );
   }

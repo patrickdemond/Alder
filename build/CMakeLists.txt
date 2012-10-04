@@ -44,6 +44,7 @@ SET( ALDER_API_DIR ${ALDER_ROOT_DIR}/api )
 SET( ALDER_APP_DIR ${ALDER_API_DIR}/app )
 SET( ALDER_QT_DIR ${ALDER_API_DIR}/ui/qt )
 SET( ALDER_VTK_DIR ${ALDER_API_DIR}/vtk )
+SET( ALDER_DB_FILE ${PROJECT_BINARY_DIR}/database.xml )
 
 IF( NOT EXISTS hash.txt )
   FILE( REMOVE "${CMAKE_BINARY_DIR}/hash" )
@@ -58,10 +59,10 @@ CONFIGURE_FILE( ${ALDER_ROOT_DIR}/readme
                 ${PROJECT_BINARY_DIR}/readme COPYONLY )
 
 # Copy the database xml file to the build (if not found)
-IF( NOT EXISTS ${PROJECT_BINARY_DIR}/database.xml )
+IF( NOT EXISTS ${ALDER_DB_FILE} )
   CONFIGURE_FILE( ${ALDER_AUX_DIR}/database.xml
-                  ${PROJECT_BINARY_DIR}/database.xml COPYONLY )
-ENDIF( NOT EXISTS ${PROJECT_BINARY_DIR}/database.xml )
+                  ${ALDER_DB_FILE} COPYONLY )
+ENDIF( NOT EXISTS ${ALDER_DB_FILE} )
 
 # Set up include directories
 SET( ALDER_INCLUDE_DIR
@@ -77,16 +78,22 @@ SET( HASH_SOURCE
 SET( ALDER_SOURCE
   ${ALDER_API_DIR}/Alder.cxx
   ${ALDER_VTK_DIR}/vtkAlderDatabase.cxx
-#  ${ALDER_APP_DIR}/Application.cxx
+  ${ALDER_APP_DIR}/Application.cxx
 #  ${ALDER_APP_DIR}/Session.cxx
-#  ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
+  ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
 #  ${ALDER_VTK_DIR}/vtkXMLFileWriter.cxx
-#  ${ALDER_VTK_DIR}/vtkSessionReader.cxx
-#  ${ALDER_VTK_DIR}/vtkSessionWriter.cxx
+  ${ALDER_VTK_DIR}/vtkXMLDatabaseFileReader.cxx
+#  ${ALDER_VTK_DIR}/vtkXMLSessionFileReader.cxx
+#  ${ALDER_VTK_DIR}/vtkXMLSessionFileWriter.cxx
 #  ${ALDER_VTK_DIR}/vtkView.cxx
   ${ALDER_QT_DIR}/QAboutDialog.cxx
   ${ALDER_QT_DIR}/QMainAlderWindow.cxx
 )
+
+SET_SOURCE_FILES_PROPERTIES(
+  ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
+  ${ALDER_VTK_DIR}/vtkXMLFileWriter.cxx
+  ABSTRACT )
 
 SET( ALDER_UIS
   ${ALDER_QT_DIR}/QAboutDialog.ui

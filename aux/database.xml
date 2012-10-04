@@ -1,7 +1,7 @@
-<database>
-  <name></name>
-  <username></username>
-  <password></password>
-  <server>localhost</server>
-  <port>3306</port>
-</database>
+<Database>
+  <Name></Name>
+  <Username></Username>
+  <Password></Password>
+  <Server>localhost</Server>
+  <Port>3306</Port>
+</Database>
