@@ -1,0 +1,33 @@
+Coding standard
+===============
+
+File Names
+----------
+All classes must contain a CV prefix (for CLSA Vis).  VTK classes would start with vtkCV, QT classes with QCV
+and application classes with simply CV.
+
+Line Lenghts
+------------
+No line should exceed 110 characters
+
+Function (Round) Brackets
+-------------------------
+Control structure and function arguments are always separated by a single space and start/end with a space.
+Also, there is never a space between the control structure or function name and opening round bracking.  For
+instance:
+
+MyFunction( arg1, arg2, arg3 );
+if( test ) process(); // functions with no arguments don't need spaces
+
+Curly Braces
+------------
+Curly braces are placed on separate lines (from code) and indented at the same level as their parent.  For
+instance:
+
+if( var < 10 )
+{ // comments can go here
+  for( i = 0; i < 10; i++ )
+  {
+    // do something here
+  }
+}

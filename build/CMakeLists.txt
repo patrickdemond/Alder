@@ -1,0 +1,136 @@
+CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
+PROJECT( Alder )
+
+# Set the version
+SET( ALDER_VERSION_MAJOR 0 )
+SET( ALDER_VERSION_MINOR 1 )
+SET( ALDER_VERSION_PATCH 0 )
+
+# Set archive name
+SET( ALDER_ARCHIVE_NAME Alder-${ALDER_VERSION_MAJOR}.${ALDER_VERSION_MINOR}.${ALDER_VERSION_PATCH} )
+
+# Icons sizes to build
+SET( ALDER_ICON_SIZES 16x16 22x22 24x24 32x32 48x48 64x64 128x128 )
+
+# Look in the build directory for cmake modules
+set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/" )
+
+# We need VTK
+FIND_PACKAGE( VTK REQUIRED )
+INCLUDE( ${VTK_USE_FILE} )
+
+# We need QT4
+SET( QT_MIN_VERSION 4.0.0 )
+FIND_PACKAGE( Qt4 REQUIRED )
+INCLUDE( ${QT_USE_FILE} )
+
+# We need libxml2
+FIND_PACKAGE( LibXml2 REQUIRED )
+
+# We need Crypto++
+FIND_PACKAGE( CRYPTO++ REQUIRED )
+
+# We need convert
+IF( UNIX AND NOT APPLE )
+  FIND_PACKAGE( ImageMagick COMPONENTS convert REQUIRED )
+ENDIF( UNIX AND NOT APPLE )
+
+SET( ALDER_ROOT_DIR ${PROJECT_SOURCE_DIR}/.. )
+SET( ALDER_AUX_DIR ${ALDER_ROOT_DIR}/aux )
+SET( ALDER_API_DIR ${ALDER_ROOT_DIR}/api )
+SET( ALDER_APP_DIR ${ALDER_API_DIR}/app )
+SET( ALDER_QT_DIR ${ALDER_API_DIR}/ui/qt )
+SET( ALDER_VTK_DIR ${ALDER_API_DIR}/vtk )
+
+# Configure the utitlities header
+CONFIGURE_FILE( ${ALDER_APP_DIR}/Utilities.h.in
+                ${PROJECT_BINARY_DIR}/Utilities.h @ONLY IMMEDIATE )
+
+# Copy the readme file to build
+CONFIGURE_FILE( ${ALDER_ROOT_DIR}/readme
+                ${PROJECT_BINARY_DIR}/readme COPYONLY )
+
+# Set up include directories
+SET( ALDER_INCLUDE_DIR
+  ${ALDER_APP_DIR}
+  ${ALDER_QT_DIR}
+  ${ALDER_VTK_DIR}
+)
+
+# Set up headers and source
+SET( ALDER_SOURCE
+  ${ALDER_API_DIR}/Alder.cxx
+#  ${ALDER_APP_DIR}/Application.cxx
+#  ${ALDER_APP_DIR}/Session.cxx
+#  ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
+#  ${ALDER_VTK_DIR}/vtkXMLFileWriter.cxx
+#  ${ALDER_VTK_DIR}/vtkSessionReader.cxx
+#  ${ALDER_VTK_DIR}/vtkSessionWriter.cxx
+#  ${ALDER_VTK_DIR}/vtkView.cxx
+  ${ALDER_QT_DIR}/QAboutDialog.cxx
+  ${ALDER_QT_DIR}/QMainAlderWindow.cxx
+)
+
+SET( ALDER_UIS
+  ${ALDER_QT_DIR}/QAboutDialog.ui
+  ${ALDER_QT_DIR}/QMainAlderWindow.ui
+)
+
+SET( ALDER_HEADERS
+  ${ALDER_QT_DIR}/QAboutDialog.h
+  ${ALDER_QT_DIR}/QMainAlderWindow.h
+)
+
+# Wrap QT files
+QT4_WRAP_UI( UIHeaders ${ALDER_UIS} )
+QT4_WRAP_CPP( MOCSrcs ${ALDER_HEADERS} )
+ADD_DEFINITIONS( -DQT_GUI_LIBS -DQT_CORE_LIB -DQT3_SUPPORT )
+SET_SOURCE_FILES_PROPERTIES( ${ALDER_SOURCE} PROPERTIES OBJECT_DEPENDS "${UIHeaders}" )
+
+# Use the include path and library for Qt
+INCLUDE_DIRECTORIES(
+  ${ALDER_INCLUDE_DIR}
+  ${QT_INCLUDE_DIR}
+  ${LIBXML2_INCLUDE_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+# Targets
+ADD_EXECUTABLE( Alder ${ALDER_SOURCE} ${ALDER_UISrcs} ${MOCSrcs} )
+
+TARGET_LINK_LIBRARIES( Alder
+  QVTK
+  ${QT_LIBRARIES}
+  ${LIBXML2_LIBRARIES}
+  vtkRendering
+  vtkGraphics
+  vtkIO
+  vtkCommon
+)
+INSTALL( TARGETS Alder RUNTIME DESTINATION bin )
+
+ADD_CUSTOM_TARGET( dist
+  COMMAND git archive --prefix=${ALDER_ARCHIVE_NAME}/ HEAD
+    | bzip2 > ${CMAKE_BINARY_DIR}/${ALDER_ARCHIVE_NAME}.tar.bz2
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
+# Desktop entries and icons
+IF( UNIX AND NOT APPLE )
+  INSTALL( FILES desktop/Alder.desktop DESTINATION share/applications )
+
+  INSTALL( FILES desktop/logo_clsa.png DESTINATION share/icons/hicolor/scalable/apps )
+  FOREACH( SIZE ${ALDER_ICON_SIZES} )
+    ADD_CUSTOM_COMMAND( OUTPUT logo_clsa_${SIZE}.png
+      COMMAND convert -background none -resize ${SIZE} ${ALDER_AUX_DIR}/logo_clsa.png logo_clsa_${SIZE}.png
+      COMMENT "Generating ${SIZE} icon"
+    )
+    SET( ALDER_ICON_FILES ${ALDER_ICON_FILES} logo_clsa_${SIZE}.png )
+    INSTALL( FILES ${CMAKE_BINARY_DIR}/logo_clsa_${SIZE}.png
+      DESTINATION share/icons/hicolor/${SIZE}/apps
+      RENAME logo_clsa.png
+    )
+  ENDFOREACH( SIZE )
+  ADD_CUSTOM_TARGET( icons ALL DEPENDS ${ALDER_ICON_FILES} )
+ENDIF( UNIX AND NOT APPLE )

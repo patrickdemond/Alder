@@ -1,0 +1,246 @@
+/*=========================================================================
+
+  Program:  Alder (CLSA Ultrasound Image Viewer)
+  Module:   QMainAlderWindow.cxx
+  Language: C++
+
+  Author: Patrick Emond <emondpd@mcmaster.ca>
+
+=========================================================================*/
+#include "QMainAlderWindow.h"
+#include "ui_QMainAlderWindow.h"
+
+//#include "Application.h"
+#include "QAboutDialog.h"
+#include "vtkCamera.h"
+#include "vtkCommand.h"
+#include "vtkMath.h"
+#include "vtkPNGWriter.h"
+#include "vtkSmartPointer.h"
+#include "vtkWindowToImageFilter.h"
+
+#include <QCloseEvent>
+#include <QMessageBox>
+#include <QSettings>
+
+/*
+class QMainAlderWindowProgressCommand : public vtkCommand
+{
+public:
+  static QMainAlderWindowProgressCommand *New() { return new QMainAlderWindowProgressCommand; }
+  void Execute( vtkObject *caller, unsigned long eventId, void *callData );
+  Ui_QMainAlderWindow *ui;
+
+protected:
+  QMainAlderWindowProgressCommand() { this->ui = NULL; }
+};
+*/
+
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+/*
+void QMainAlderWindowProgressCommand::Execute(
+  vtkObject *caller, unsigned long eventId, void *callData )
+{
+  if( this->ui )
+  {
+    // display the progress
+    double progress = *( static_cast<double*>( callData ) );
+    int value = vtkMath::Floor( 100 * progress ) + 1;
+    if( 100 < value ) value = 100;
+    if( this->ui->progressBar->value() != value ) this->ui->progressBar->setValue( value );
+
+    // show what's happening in the status bar
+    if( 100 == value )
+    {
+      this->ui->statusbar->clearMessage();
+    }
+    else
+    {
+      // Display data update strings here
+      QString message = QString( "" );
+      if( message.length() ) this->ui->statusbar->showMessage( message );
+
+      // if we want the status bar to look smooth then we can call repaint on it here
+      // however, let's not do that since it substantially slows down processing
+      //this->ui->statusbar->repaint();
+    }
+  }
+}
+*/
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+QMainAlderWindow::QMainAlderWindow( QWidget* parent )
+  : QMainWindow( parent )
+{
+  QMenu *menu;
+  
+  this->ui = new Ui_QMainAlderWindow;
+  this->ui->setupUi( this );
+  
+  // connect the file menu items
+  QObject::connect(
+    this->ui->actionOpenStudy, SIGNAL( triggered() ),
+    this, SLOT( slotOpenStudy() ) );
+  QObject::connect(
+    this->ui->actionPreviousStudy, SIGNAL( triggered() ),
+    this, SLOT( slotPreviousStudy() ) );
+  QObject::connect(
+    this->ui->actionNextStudy, SIGNAL( triggered() ),
+    this, SLOT( slotNextStudy() ) );
+  QObject::connect(
+    this->ui->actionLogin, SIGNAL( triggered() ),
+    this, SLOT( slotLogin() ) );
+  QObject::connect(
+    this->ui->actionUsers, SIGNAL( triggered() ),
+    this, SLOT( slotUsers() ) );
+  QObject::connect(
+    this->ui->actionExit, SIGNAL( triggered() ),
+    qApp, SLOT( closeAllWindows() ) );
+  
+  // connect the help menu items
+  QObject::connect(
+    this->ui->actionAbout, SIGNAL( triggered() ),
+    this, SLOT( slotAbout() ) );
+  QObject::connect(
+    this->ui->actionManual, SIGNAL( triggered() ),
+    this, SLOT( slotManual() ) );
+
+  // set up the observer to update the progress bar
+//  this->ProgressObserver = vtkSmartPointer< QMainAlderWindowProgressCommand >::New();
+//  this->ProgressObserver->ui = this->ui;
+
+  // link the view and the qt render widget
+//  Application *app = Application::GetInstance();
+//  app->GetView()->SetInteractor( this->ui->renderWidget->GetInteractor() );
+//  this->ui->renderWidget->SetRenderWindow( app->GetView()->GetRenderWindow() );
+
+  this->ReadSettings();
+};
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+QMainAlderWindow::~QMainAlderWindow()
+{
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::closeEvent( QCloseEvent *event )
+{
+  this->WriteSettings();
+  event->accept();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotOpenStudy()
+{
+/*
+  QString directory = QFileDialog::getExistingDirectory(
+    this, tr("Open Local Exam"), ".", QFileDialog::ShowDirsOnly );
+  
+  if( "" != directory )
+  {
+    try
+    {
+      Application *app = Application::GetInstance();
+      app->GetView()->SetExamDirectory( directory.toStdString().c_str() );
+      app->GetView()->Render();
+    }
+    catch( std::exception &e )
+    {
+      QMessageBox errorMessage( this );
+      errorMessage.setWindowModality( Qt::WindowModal );
+      errorMessage.setIcon( QMessageBox::Warning );
+      errorMessage.setText( "There was an error while attempting to open the PNG image." );
+      errorMessage.exec();
+    }
+  }
+*/
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotPreviousStudy()
+{
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotNextStudy()
+{
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotLogin()
+{
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotUsers()
+{
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotAbout()
+{
+  QAboutDialog dialog( this );
+  dialog.setModal( true );
+  dialog.setWindowTitle( tr( "About Alder" ) );
+  dialog.exec();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotManual()
+{
+  // TODO: open link to Alder manual
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::ReadSettings()
+{
+  QSettings settings( "CLSA", "Alder" );
+  
+  settings.beginGroup( "MainAlderWindow" );
+  if( settings.contains( "size" ) ) this->resize( settings.value( "size" ).toSize() );
+  if( settings.contains( "pos" ) ) this->move( settings.value( "pos" ).toPoint() );
+  if( settings.contains( "maximized" ) && settings.value( "maximized" ).toBool() )
+    this->showMaximized();
+  settings.endGroup();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::WriteSettings()
+{
+  QSettings settings( "CLSA", "Alder" );
+  
+  settings.beginGroup( "MainAlderWindow" );
+  settings.setValue( "size", this->size() );
+  settings.setValue( "pos", this->pos() );
+  settings.setValue( "maximized", this->isMaximized() );
+  settings.endGroup();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+/*
+void QMainAlderWindow::Render( bool resetCamera )
+{
+  // we're about to do an operation that might take a while, so update the GUI and cursor
+  this->repaint();
+  this->setCursor( Qt::WaitCursor );
+  this->ui->renderWidget->setCursor( Qt::WaitCursor );
+
+  clock_t start = clock();
+  if( resetCamera )
+  {
+    // TODO ResetCamera
+  }
+
+  // TODO Render
+  clock_t end = clock();
+
+  // update the cursor and report how many vertices and edges are currently visible
+  this->setCursor( Qt::ArrowCursor );
+  this->ui->renderWidget->setCursor( Qt::CrossCursor );
+  char buffer[128];
+  sprintf( buffer, "Processing time: %0.2fs",
+    static_cast< double >( end - start ) / CLOCKS_PER_SEC );
+  this->ui->statusbar->showMessage( buffer );
+}
+*/

@@ -1,0 +1,77 @@
+Study
+  functions
+    read
+    write
+  attributes
+    Series array [array of Obj]
+    uid
+    note
+    date reviewed
+
+Series
+  functions
+    add static image
+    remove static image
+  attributes
+    Cineloop array [array of Obj]
+    StaticImage array [array of Obj]
+    laterality
+    current Cineloop
+    current StaticImage
+
+Cineloop
+  functions
+    set slice
+    advance slice
+    reverse slice
+    make static image
+  attributes
+    current slice
+    number of slices
+
+StaticImage
+  functions
+    set cineloop
+    set slice
+    set rating
+    set user
+  attributes
+    cineloop [Obj]
+    rating [1 to 5]
+    user
+    date/time of analysis
+    min IM thickness
+    max IM thickness
+    mean IM thickness
+    sd IM thickness
+    N samples
+
+User
+  functions
+    login( name, password )
+    logout
+  attributes
+    name
+    password
+    session [obj]
+ 
+Session
+  functions
+    load
+    save
+  attributes
+    Study [obj]
+    viewing cineloop or static image
+      cl: cineloop [obj]
+      si: StaticImage [obj]
+    camera [obj]
+    window/level
+
+Configuration
+  database
+    address
+    port
+    user
+    password
+    name
+    type

@@ -1,0 +1,15 @@
+study
+  uid
+
+series
+  study_id
+  type
+  laterality
+
+cineloop
+
+static_image
+  dcs_defined boolean
+
+user
+

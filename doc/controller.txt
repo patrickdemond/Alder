@@ -1,0 +1,45 @@
+Operations
+X login
+X logout
+X load Study
+X next Study
+X prev Study
+X quit
+  select Cineloop
+  select StaticImage
+  select Series
+  set rating
+  advance slice
+  reverse slice
+  manipulate camera
+  window/level
+  add user // restricted
+  delete user // restricted
+  reset password // reset any user password, restricted
+  set password
+
+loadStudyDialog
+  lists all Studies including columns:
+    UID, date, Site, operator, number of series, date reviewed
+      (reviewed => some information added (note, rating, static image))
+  select a study
+
+loginDialog
+  shows username/password boxes
+
+aboutDialog
+  shows version, authors, link to clsa website
+
+mainDialog
+  menu
+    actions
+      load Study [open loadStudyDialog]
+      next Study
+      previous Study
+      ------------------
+      login/logout (only one is visible)
+      user access [restricted]
+      quit (exit program)
+    help
+      about
+      manual [open browser using link to manual]
