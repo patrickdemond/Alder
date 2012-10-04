@@ -28,6 +28,8 @@ public:
   vtkTypeMacro( vtkAlderDatabase, vtkMySQLDatabase );
   void PrintSelf( ostream& os, vtkIndent indent );
   bool Open( const char *password = 0 );
+  bool HasAdministrator();
+  void SetAdministratorPassword( const char* password );
 
 protected:
   vtkAlderDatabase() {}

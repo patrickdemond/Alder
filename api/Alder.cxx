@@ -21,6 +21,9 @@
 
 #include "QMainAlderWindow.h"
 #include <QApplication>
+#include <QInputDialog>
+#include <QObject>
+#include <QString>
 
 #include <stdexcept>
 
@@ -29,9 +32,9 @@ using namespace Alder;
 // main function
 int main( int argc, char** argv )
 {
-  // Open a connection to the database
-  Application *app = Application::GetInstance();
-  if( !app->GetDatabase()->Open() )
+  // Make sure that the database can be connected to
+  vtkAlderDatabase *db = Application::GetInstance()->GetDatabase();
+  if( !db->Open() )
   {
     cout << "Cannot connect to database." << endl;
     return EXIT_FAILURE;
@@ -43,6 +46,18 @@ int main( int argc, char** argv )
   // set main widget for the application to the main window
   QMainAlderWindow mainWindow;
   qapp.setMainWidget( &mainWindow );  
+
+  // check to see if an admin user exists, create if not
+  if( !db->HasAdministrator() )
+  {
+    QString text = QInputDialog::getText(
+      &mainWindow,
+      QObject::tr( "Administrator Password" ),
+      QObject::tr( "Please provide a password for the mandatory administrator account:" ),
+      QLineEdit::PasswordEchoOnEdit );
+    db->SetAdministratorPassword( text.toStdString().c_str() );
+  }
+
   mainWindow.show();
 
   // execute the application, then delete the application
@@ -52,54 +67,3 @@ int main( int argc, char** argv )
   // return the result of the executed application
   return status;
 }
-
-/*
-bool adminUserExists()
-{
-  // url syntax:
-  // mysql://'[[username[':'password]'@']hostname[':'port]]'/'[dbname]
- 
-  vtkSmartPointer<vtkMySQLDatabase> db =
-    vtkSmartPointer<vtkMySQLDatabase>::Take(vtkMySQLDatabase::SafeDownCast(
-            vtkSQLDatabase::CreateFromURL( "mysql://root@localhost/TestDatabase" ) ));
- 
-  bool status = db->Open();
- 
-  std::cout << "Database open? " << status << std::endl;
- 
-  if(!status)
-    {
-    return EXIT_FAILURE;
-    }
- 
-  vtkSmartPointer<vtkSQLQuery> query =
-    vtkSmartPointer<vtkSQLQuery>::Take(db->GetQueryInstance());
- 
-  std::string createQuery( "SELECT PointId FROM TestTable");
-  std::cout << createQuery << std::endl;
-  query->SetQuery( createQuery.c_str() );
-  query->Execute();
- 
-  for ( int col = 0; col < query->GetNumberOfFields(); ++ col )
-    {
-    if ( col > 0 )
-      {
-      cerr << ", ";
-      }
-    cerr << query->GetFieldName( col );
-    }
-  cerr << endl;
-  while ( query->NextRow() )
-    {
-    for ( int field = 0; field < query->GetNumberOfFields(); ++ field )
-      {
-      if ( field > 0 )
-        {
-        cerr << ", ";
-        }
-      cerr << query->DataValue( field ).ToString().c_str();
-      }
-    cerr << endl;
-    }
-}
-*/

@@ -31,4 +31,25 @@
 #define ALDER_SALT_STRING "@ALDER_SALT_STRING@"
 #define ALDER_MASTER_PASSWORD ""
 
+#include <sha.h>
+#include <base64.h>
+
+// main function
+namespace Alder
+{
+  inline void hashString( std::string input, std::string &output )
+  {
+    input += ALDER_SALT_STRING;
+    output = "";
+
+    CryptoPP::SHA256 hash;
+    CryptoPP::StringSource foo(
+      input.c_str(),
+      true,
+      new CryptoPP::HashFilter( hash,
+        new CryptoPP::Base64Encoder(
+          new CryptoPP::StringSink( output ) ) ) );
+  }
+}
+
 #endif // __Utilities_h
