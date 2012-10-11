@@ -44,11 +44,7 @@ SET( ALDER_API_DIR ${ALDER_ROOT_DIR}/api )
 SET( ALDER_APP_DIR ${ALDER_API_DIR}/app )
 SET( ALDER_QT_DIR ${ALDER_API_DIR}/ui/qt )
 SET( ALDER_VTK_DIR ${ALDER_API_DIR}/vtk )
-SET( ALDER_DB_FILE ${PROJECT_BINARY_DIR}/database.xml )
-
-IF( NOT EXISTS hash.txt )
-  FILE( REMOVE "${CMAKE_BINARY_DIR}/hash" )
-ENDIF( NOT EXISTS hash.txt )
+SET( ALDER_CONFIG_FILE ${PROJECT_BINARY_DIR}/config.xml )
 
 # Configure the utitlities header
 CONFIGURE_FILE( ${ALDER_APP_DIR}/Utilities.h.in
@@ -58,11 +54,11 @@ CONFIGURE_FILE( ${ALDER_APP_DIR}/Utilities.h.in
 CONFIGURE_FILE( ${ALDER_ROOT_DIR}/readme
                 ${PROJECT_BINARY_DIR}/readme COPYONLY )
 
-# Copy the database xml file to the build (if not found)
-IF( NOT EXISTS ${ALDER_DB_FILE} )
-  CONFIGURE_FILE( ${ALDER_AUX_DIR}/database.xml
-                  ${ALDER_DB_FILE} COPYONLY )
-ENDIF( NOT EXISTS ${ALDER_DB_FILE} )
+# Copy the config xml file to the build (if not found)
+IF( NOT EXISTS ${ALDER_CONFIG_FILE} )
+  CONFIGURE_FILE( ${ALDER_AUX_DIR}/config.xml
+                  ${ALDER_CONFIG_FILE} COPYONLY )
+ENDIF( NOT EXISTS ${ALDER_CONFIG_FILE} )
 
 # Set up include directories
 SET( ALDER_INCLUDE_DIR
@@ -71,37 +67,41 @@ SET( ALDER_INCLUDE_DIR
   ${ALDER_VTK_DIR}
 )
 
-# Set up headers and source
-SET( HASH_SOURCE
-  ${ALDER_AUX_DIR}/hash.cxx
-)
 SET( ALDER_SOURCE
   ${ALDER_API_DIR}/Alder.cxx
-  ${ALDER_VTK_DIR}/vtkAlderDatabase.cxx
+
+  ${ALDER_APP_DIR}/Configuration.cxx
+  ${ALDER_APP_DIR}/Database.cxx
+  ${ALDER_APP_DIR}/ModelObject.cxx
+  ${ALDER_APP_DIR}/User.cxx
   ${ALDER_APP_DIR}/Application.cxx
-#  ${ALDER_APP_DIR}/Session.cxx
+
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
-#  ${ALDER_VTK_DIR}/vtkXMLFileWriter.cxx
-  ${ALDER_VTK_DIR}/vtkXMLDatabaseFileReader.cxx
-#  ${ALDER_VTK_DIR}/vtkXMLSessionFileReader.cxx
-#  ${ALDER_VTK_DIR}/vtkXMLSessionFileWriter.cxx
-#  ${ALDER_VTK_DIR}/vtkView.cxx
+  ${ALDER_VTK_DIR}/vtkXMLConfigurationFileReader.cxx
+  
+  ${ALDER_QT_DIR}/QAlderApplication.cxx
   ${ALDER_QT_DIR}/QAboutDialog.cxx
+  ${ALDER_QT_DIR}/QUsersDialog.cxx
   ${ALDER_QT_DIR}/QMainAlderWindow.cxx
 )
 
 SET_SOURCE_FILES_PROPERTIES(
+  ${ALDER_APP_DIR}/ModelObject.cxx
+
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
   ${ALDER_VTK_DIR}/vtkXMLFileWriter.cxx
+
   ABSTRACT )
 
 SET( ALDER_UIS
   ${ALDER_QT_DIR}/QAboutDialog.ui
+  ${ALDER_QT_DIR}/QUsersDialog.ui
   ${ALDER_QT_DIR}/QMainAlderWindow.ui
 )
 
 SET( ALDER_HEADERS
   ${ALDER_QT_DIR}/QAboutDialog.h
+  ${ALDER_QT_DIR}/QUsersDialog.h
   ${ALDER_QT_DIR}/QMainAlderWindow.h
 )
 
@@ -123,7 +123,6 @@ INCLUDE_DIRECTORIES(
 
 # Targets
 ADD_EXECUTABLE( Alder ${ALDER_SOURCE} ${ALDER_UISrcs} ${MOCSrcs} )
-ADD_EXECUTABLE( hash ${HASH_SOURCE} )
 
 TARGET_LINK_LIBRARIES( Alder
   QVTK
@@ -136,11 +135,6 @@ TARGET_LINK_LIBRARIES( Alder
   vtkCommon
 )
 INSTALL( TARGETS Alder RUNTIME DESTINATION bin )
-
-TARGET_LINK_LIBRARIES( hash
-  ${CRYPTO++_LIBRARIES}
-)
-INSTALL( TARGETS hash RUNTIME DESTINATION bin )
 
 ADD_CUSTOM_TARGET( dist
   COMMAND git archive --prefix=${ALDER_ARCHIVE_NAME}/ HEAD

@@ -113,6 +113,3 @@ Once you've gone through the process of building VTK using CMake this will seem 
    ALDER_SALT_STRING:STRING=put anything here
 
 7. You are now ready to build Alder by typing "make".
-
-8. Create an admin password using the hash executable and copy/paste the output into the
-   Utilities.h file found in the root of the build directory.

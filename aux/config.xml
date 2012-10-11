@@ -1,0 +1,9 @@
+<Configuration>
+  <Database>
+    <Name></Name>
+    <Username></Username>
+    <Password></Password>
+    <Server>localhost</Server>
+    <Port>3306</Port>
+  </Database>
+</Configuration>

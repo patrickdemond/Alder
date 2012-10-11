@@ -63,14 +63,14 @@ void vtkXMLFileReader::PrintSelf( ostream &os, vtkIndent indent )
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void vtkXMLFileReader::SetFileName( const std::string &fileName )
+void vtkXMLFileReader::SetFileName( std::string filename )
 {
   vtkDebugMacro( << this->GetClassName() << " (" << this << "): setting "
-                 << "FileName to " << fileName.c_str() );
+                 << "FileName to " << filename.c_str() );
 
-  if( fileName != this->FileName )
+  if( filename != this->FileName )
   {
-    this->FileName = fileName;
+    this->FileName = filename;
     this->Modified();
   }
 }

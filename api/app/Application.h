@@ -20,28 +20,35 @@
 #ifndef __Application_h
 #define __Application_h
 
-#include "vtkObject.h"
+#include "ModelObject.h"
 
 #include "Utilities.h"
 
-class vtkAlderDatabase;
+#include <iostream>
+
 class vtkView;
 
 namespace Alder
 {
-//  class Session;
-  class Application : public vtkObject
+  class Configuration;
+  class Database;
+  class Application : public ModelObject
   {
   public:
+    vtkTypeMacro( Application, ModelObject );
     static Application *GetInstance();
     static void DeleteInstance();
+    
+    bool ReadConfiguration( std::string filename );
+    bool ConnectToDatabase();
 
-    vtkTypeMacro( Application, vtkObject );
-    void PrintSelf( ostream& os, vtkIndent indent );
+    bool HasAdministrator();
+    bool IsAdministratorPassword( std::string );
+    void SetAdministratorPassword( std::string );
 
-//    vtkGetObjectMacro( CurrentSession, Session );
-    vtkGetObjectMacro( Database, vtkAlderDatabase );
     vtkGetObjectMacro( View, vtkView );
+    vtkGetObjectMacro( Config, Configuration );
+    vtkGetObjectMacro( DB, Database );
     
   protected:
     Application();
@@ -50,9 +57,9 @@ namespace Alder
     static Application *New();
     static Application *Instance;
 
-//    Session *CurrentSession;
-    vtkAlderDatabase *Database;
     vtkView *View;
+    Configuration *Config;
+    Database *DB;
     
   private:
     Application( const Application& );  // Not implemented.

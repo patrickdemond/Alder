@@ -11,8 +11,7 @@
 #include "QMainAlderWindow.h"
 #include "ui_QMainAlderWindow.h"
 
-//#include "Application.h"
-#include "QAboutDialog.h"
+#include "Application.h"
 #include "vtkCamera.h"
 #include "vtkCommand.h"
 #include "vtkMath.h"
@@ -20,7 +19,11 @@
 #include "vtkSmartPointer.h"
 #include "vtkWindowToImageFilter.h"
 
+#include "QAboutDialog.h"
+#include "QUsersDialog.h"
+
 #include <QCloseEvent>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QSettings>
 
@@ -176,6 +179,34 @@ void QMainAlderWindow::slotLogin()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotUsers()
 {
+  int attempt = 1;
+
+  while( attempt < 4 )
+  {
+    // check for admin password
+    QString text = QInputDialog::getText(
+      this,
+      QObject::tr( "User Management" ),
+      QObject::tr( attempt > 1 ? "Wrong password, try again:" : "Administrator password:" ),
+      QLineEdit::Password );
+    
+    // NULL means the user hit the cancel button
+    if( text.isEmpty() ) break;
+
+    bool correctPassword =
+      Alder::Application::GetInstance()->IsAdministratorPassword( text.toStdString().c_str() );
+  
+    if( correctPassword )
+    {
+      // load the users dialog
+      QUsersDialog usersDialog( this );
+      usersDialog.setModal( true );
+      usersDialog.setWindowTitle( tr( "User Management" ) );
+      usersDialog.exec();
+      break;
+    }
+    attempt++;
+  }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

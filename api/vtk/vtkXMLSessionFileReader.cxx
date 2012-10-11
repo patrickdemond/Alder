@@ -98,11 +98,11 @@ int vtkXMLSessionFileReader::ProcessRequest(
       // parse until we find the session element
       while( this->ParseNode() )
         if( XML_READER_TYPE_ELEMENT == this->CurrentNode.NodeType &&
-            0 == xmlStrcmp( BAD_CAST "Session", this->CurrentNode.Name ) ) break;
+            0 == xmlStrcasecmp( BAD_CAST "Session", this->CurrentNode.Name ) ) break;
 
       // if we never found the session element then throw an exception
       if( XML_READER_TYPE_ELEMENT != this->CurrentNode.NodeType ||
-          0 != xmlStrcmp( BAD_CAST "Session", this->CurrentNode.Name ) )
+          0 != xmlStrcasecmp( BAD_CAST "Session", this->CurrentNode.Name ) )
         throw std::runtime_error( "File does not contain a Session element." );
 
       // list of expected elements
@@ -118,7 +118,7 @@ int vtkXMLSessionFileReader::ProcessRequest(
         // only process opening elements
         if( XML_READER_TYPE_ELEMENT != this->CurrentNode.NodeType ) continue;
 
-        if( 0 == xmlStrcmp( BAD_CAST "Camera", this->CurrentNode.Name ) )
+        if( 0 == xmlStrcasecmp( BAD_CAST "Camera", this->CurrentNode.Name ) )
         {
           vtkSmartPointer< vtkCamera > camera = vtkSmartPointer< vtkCamera >::New();
           this->Read( camera );
@@ -189,7 +189,7 @@ void vtkXMLSessionFileReader::Read( vtkCamera* camera )
     // only process opening elements
     if( XML_READER_TYPE_ELEMENT != this->CurrentNode.NodeType ) continue;
 
-    if( 0 == xmlStrcmp( BAD_CAST "ClippingRange", this->CurrentNode.Name ) )
+    if( 0 == xmlStrcasecmp( BAD_CAST "ClippingRange", this->CurrentNode.Name ) )
     {
       double tuple[2];
       camera->GetClippingRange( tuple );
@@ -197,21 +197,21 @@ void vtkXMLSessionFileReader::Read( vtkCamera* camera )
       camera->SetClippingRange( tuple );
       isClippingRangeFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "Distance", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "Distance", this->CurrentNode.Name ) )
     {
       double value = camera->GetDistance();
       this->ReadValue( value );
       camera->SetDistance( value );
       isDistanceFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "FocalDisk", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "FocalDisk", this->CurrentNode.Name ) )
     {
       double value = camera->GetFocalDisk();
       this->ReadValue( value );
       camera->SetFocalDisk( value );
       isFocalDiskFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "FocalPoint", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "FocalPoint", this->CurrentNode.Name ) )
     {
       double tuple[3];
       camera->GetFocalPoint( tuple );
@@ -219,7 +219,7 @@ void vtkXMLSessionFileReader::Read( vtkCamera* camera )
       camera->SetFocalPoint( tuple );
       isFocalPointFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "ViewShear", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "ViewShear", this->CurrentNode.Name ) )
     {
       double tuple[3];
       camera->GetViewShear( tuple );
@@ -227,21 +227,21 @@ void vtkXMLSessionFileReader::Read( vtkCamera* camera )
       camera->SetViewShear( tuple );
       isViewShearFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "ParallelProjection", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "ParallelProjection", this->CurrentNode.Name ) )
     {
       int value = camera->GetParallelProjection();
       this->ReadValue( value );
       camera->SetParallelProjection( value );
       isParallelProjectionFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "ParallelScale", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "ParallelScale", this->CurrentNode.Name ) )
     {
       double value = camera->GetParallelScale();
       this->ReadValue( value );
       camera->SetParallelScale( value );
       isParallelScaleFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "Position", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "Position", this->CurrentNode.Name ) )
     {
       double tuple[3];
       camera->GetPosition( tuple );
@@ -249,35 +249,35 @@ void vtkXMLSessionFileReader::Read( vtkCamera* camera )
       camera->SetPosition( tuple );
       isPositionFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "LeftEye", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "LeftEye", this->CurrentNode.Name ) )
     {
       int value = camera->GetLeftEye();
       this->ReadValue( value );
       camera->SetLeftEye( value );
       isLeftEyeFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "Thickness", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "Thickness", this->CurrentNode.Name ) )
     {
       double value = camera->GetThickness();
       this->ReadValue( value );
       camera->SetThickness( value );
       isThicknessFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "ViewAngle", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "ViewAngle", this->CurrentNode.Name ) )
     {
       double value = camera->GetViewAngle();
       this->ReadValue( value );
       camera->SetViewAngle( value );
       isViewAngleFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "UseHorizontalViewAngle", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "UseHorizontalViewAngle", this->CurrentNode.Name ) )
     {
       int value = camera->GetUseHorizontalViewAngle();
       this->ReadValue( value );
       camera->SetUseHorizontalViewAngle( value );
       isUseHorizontalViewAngleFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "ViewUp", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "ViewUp", this->CurrentNode.Name ) )
     {
       double tuple[3];
       camera->GetViewUp( tuple );
@@ -285,7 +285,7 @@ void vtkXMLSessionFileReader::Read( vtkCamera* camera )
       camera->SetViewUp( tuple );
       isViewUpFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "WindowCenter", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "WindowCenter", this->CurrentNode.Name ) )
     {
       double tuple[2];
       camera->GetWindowCenter( tuple );
@@ -293,7 +293,7 @@ void vtkXMLSessionFileReader::Read( vtkCamera* camera )
       camera->SetWindowCenter( tuple[0], tuple[1] );
       isWindowCenterFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "ScreenBottomLeft", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "ScreenBottomLeft", this->CurrentNode.Name ) )
     {
       double tuple[3];
       camera->GetScreenBottomLeft( tuple );
@@ -301,7 +301,7 @@ void vtkXMLSessionFileReader::Read( vtkCamera* camera )
       camera->SetScreenBottomLeft( tuple );
       isScreenBottomLeftFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "ScreenBottomRight", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "ScreenBottomRight", this->CurrentNode.Name ) )
     {
       double tuple[3];
       camera->GetScreenBottomRight( tuple );
@@ -309,7 +309,7 @@ void vtkXMLSessionFileReader::Read( vtkCamera* camera )
       camera->SetScreenBottomRight( tuple );
       isScreenBottomRightFound = true;
     }
-    else if( 0 == xmlStrcmp( BAD_CAST "ScreenTopRight", this->CurrentNode.Name ) )
+    else if( 0 == xmlStrcasecmp( BAD_CAST "ScreenTopRight", this->CurrentNode.Name ) )
     {
       double tuple[3];
       camera->GetScreenTopRight( tuple );

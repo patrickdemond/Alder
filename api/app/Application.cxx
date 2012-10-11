@@ -8,17 +8,15 @@
   Author: Dean Inglis <inglisd@mcmaster.ca>
 
 =========================================================================*/
+
 #include "Application.h"
 
-#include "Utilities.h"
-//#include "Session.h"
-#include "vtkAlderDatabase.h"
-#include "vtkCamera.h"
-#include "vtkView.h"
-#include "vtkObjectFactory.h"
-#include "vtkRenderer.h"
+#include "Configuration.h"
+#include "Database.h"
 
-#include <algorithm>
+#include "vtkObjectFactory.h"
+#include "vtkVariant.h"
+#include "vtkView.h"
 
 namespace Alder
 {
@@ -27,33 +25,30 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   Application::Application()
   {
-//    this->Session = Session::New();
     this->View = vtkView::New();
-    this->Database = vtkAlderDatabase::New();
-
-    // link the session and view's camera
-//    this->Session->SetCamera( this->View->GetRenderer()->GetActiveCamera() );
+    this->Config = Configuration::New();
+    this->DB = Database::New();
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   Application::~Application()
   {
-//    if( NULL != this->Session )
-//    {
-//      this->Session->Delete();
-//      this->Session = NULL;
-//    }
-
     if( NULL != this->View )
     {
       this->View->Delete();
       this->View = NULL;
     }
 
-    if( NULL != this->Database )
+    if( NULL != this->Config )
     {
-      this->Database->Delete();
-      this->Database = NULL;
+      this->Config->Delete();
+      this->Config = NULL;
+    }
+
+    if( NULL != this->DB )
+    {
+      this->DB->Delete();
+      this->DB = NULL;
     }
   }
 
@@ -84,8 +79,53 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Application::PrintSelf( ostream &os, vtkIndent indent )
+  bool Application::ReadConfiguration( std::string filename )
   {
-    Superclass::PrintSelf( os, indent );
+    // make sure the file exists
+    ifstream ifile( filename.c_str() );
+    if( !ifile ) return false;
+    return this->Config->Read( filename );
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Application::ConnectToDatabase()
+  {
+    std::string name = this->Config->GetValue( "Database", "Name" );
+    std::string user = this->Config->GetValue( "Database", "Username" );
+    std::string pass = this->Config->GetValue( "Database", "Password" );
+    std::string host = this->Config->GetValue( "Database", "Server" );
+    std::string port = this->Config->GetValue( "Database", "Port" );
+
+    // make sure the database name, user and password are provided
+    if( 0 == name.length() || 0 == user.length() || 0 == pass.length() )
+    {
+      cout << "ERROR: database name, user name and password must be included in "
+           << "configuration file" << endl;
+      return false;
+    }
+
+    // defaint host and port
+    if( 0 == host.length() ) host = "localhost";
+    if( 0 == port.length() ) port = "3306";
+
+    return this->DB->Connect( name, user, pass, host, vtkVariant( port ).ToInt() );
+  }
+  
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Application::HasAdministrator()
+  {
+    return this->DB->HasAdministrator();
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Application::IsAdministratorPassword( std::string password )
+  {
+    return this->DB->IsAdministratorPassword( password );
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Application::SetAdministratorPassword( std::string password )
+  {
+    this->DB->SetAdministratorPassword( password );
   }
 }

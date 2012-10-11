@@ -42,7 +42,7 @@ public:
   // Description:
   // Set/get the file name
   virtual std::string GetFileName() { return this->FileName; }
-  virtual void SetFileName( const std::string &fileName );
+  virtual void SetFileName( std::string fileName );
   
 protected:
   // Description:

@@ -1,14 +1,15 @@
-Study
+Study >>> database table: study
   functions
     read
     write
   attributes
     Series array [array of Obj]
     uid
+    interviewer
     note
     date reviewed
 
-Series
+Series >>> database table: series
   functions
     add static image
     remove static image
@@ -19,7 +20,7 @@ Series
     current Cineloop
     current StaticImage
 
-Cineloop
+Cineloop >>> database table: cineloop
   functions
     set slice
     advance slice
@@ -29,16 +30,12 @@ Cineloop
     current slice
     number of slices
 
-StaticImage
+StaticImage >>> database table: image
   functions
     set cineloop
     set slice
-    set rating
-    set user
   attributes
     cineloop [Obj]
-    rating [1 to 5]
-    user
     date/time of analysis
     min IM thickness
     max IM thickness
@@ -46,7 +43,7 @@ StaticImage
     sd IM thickness
     N samples
 
-User
+User >>> database table: user
   functions
     login( name, password )
     logout
@@ -67,11 +64,13 @@ Session
     camera [obj]
     window/level
 
-Configuration
+Configuration >>> xml file installed in build directory
   database
     address
     port
     user
     password
     name
+
+Database
     type
