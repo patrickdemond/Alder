@@ -21,6 +21,7 @@ class Ui_QAlderApplication;
 class QAlderApplication : public QApplication
 {
 public:
+  QAlderApplication( int &argc, char **argv ) : QApplication( argc, argv ) {}
   bool notify( QObject *pObject, QEvent *pEvent );
 };
 

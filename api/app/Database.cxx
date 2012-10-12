@@ -71,10 +71,10 @@ namespace Alder
       vtkSmartPointer<vtkSQLQuery>::Take( this->MySQLDatabase->GetQueryInstance() );
     std::string hashedPassword;
     Alder::hashString( password, hashedPassword );
-    std::string sql = "REPLACE INTO user SET created_timestamp = NULL, name = 'Administrator', password = '";
-    sql += hashedPassword;
-    sql += "'";
-    query->SetQuery( sql.c_str() );
+    std::stringstream stream;
+    stream << "REPLACE INTO user SET created_timestamp = NULL, name = 'Administrator', password = "
+           << query->EscapeString( hashedPassword );
+    query->SetQuery( stream.str().c_str() );
     query->Execute();
   }
 
@@ -136,12 +136,40 @@ namespace Alder
     // make sure user name isn't blank
     if( 0 == user->name.length() ) throw std::runtime_error( "Trying to create user without username" );
 
-    // make sure password isn't blank
-    if( 0 == user->hashedPassword.length() ) throw std::runtime_error( "Trying to create user without password" );
+    // make sure user name has letters and numbers only
+    for( int i = 0; i < user->name.length(); ++i )
+      if( !isalnum( user->name[i] ) )
+        throw std::runtime_error( "User names must contain letters and numbers only." );
 
     std::stringstream stream;
-    stream << "INSERT INTO user ( created_timestamp, name, password ) VALUES ( NULL,'"
-           << user->name << "','" << user->hashedPassword << "' )";
+    stream << "INSERT INTO user ( created_timestamp, name, password ) VALUES ( NULL,"
+           << query->EscapeString( user->name ) << ","
+           << query->EscapeString( user->hashedPassword )
+           << " )";
+    query->SetQuery( stream.str().c_str() );
+    query->Execute();
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Database::RemoveUser( std::string name )
+  {
+    vtkSmartPointer<Alder::User> user = vtkSmartPointer<Alder::User>::New();
+    user->name = name;
+    user->SetPassword( "password" ); // new users always have the password "password"
+    this->RemoveUser( user );
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Database::RemoveUser( User *user )
+  {
+    vtkSmartPointer<vtkSQLQuery> query =
+      vtkSmartPointer<vtkSQLQuery>::Take( this->MySQLDatabase->GetQueryInstance() );
+    
+    // make sure user name isn't blank
+    if( 0 == user->name.length() ) throw std::runtime_error( "Trying to remove user without username" );
+
+    std::stringstream stream;
+    stream << "DELETE FROM user WHERE name = " << query->EscapeString( user->name );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
   }

@@ -48,7 +48,9 @@ namespace Alder
 
     void AddUser( std::string name );
     void AddUser( User* user );
-    std::vector< vtkSmartPointer<Alder::User> > GetUsers();
+    void RemoveUser( std::string name );
+    void RemoveUser( User* user );
+    std::vector< vtkSmartPointer<User> > GetUsers();
 
   protected:
     Database();

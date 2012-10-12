@@ -21,6 +21,9 @@
 #include <QErrorMessage>
 #include <QFile>
 #include <QInputDialog>
+#include <QList>
+#include <QTableWidget>
+#include <QTableWidgetItem>
 #include <QTextStream>
 
 #include <stdexcept>
@@ -34,20 +37,25 @@ QUsersDialog::QUsersDialog( QWidget* parent )
   this->ui->setupUi( this );
   this->ui->usersTableWidget->horizontalHeader()->setResizeMode( QHeaderView::Stretch );
   this->ui->usersTableWidget->verticalHeader()->setVisible( false );
+  this->ui->usersTableWidget->setSelectionBehavior( QAbstractItemView::SelectRows );
+  this->ui->usersTableWidget->setSelectionMode( QAbstractItemView::SingleSelection );
 
   QObject::connect(
     this->ui->addPushButton, SIGNAL( clicked( bool ) ),
-      this, SLOT( slotAdd() ) );
+    this, SLOT( slotAdd() ) );
   QObject::connect(
     this->ui->removePushButton, SIGNAL( clicked( bool ) ),
-      this, SLOT( slotRemove() ) );
+    this, SLOT( slotRemove() ) );
   QObject::connect(
     this->ui->resetPasswordPushButton, SIGNAL( clicked( bool ) ),
-      this, SLOT( slotResetPassword() ) );
+    this, SLOT( slotResetPassword() ) );
   QObject::connect(
     this->ui->closePushButton, SIGNAL( clicked( bool ) ),
-      this, SLOT( slotClose() ) );
-
+    this, SLOT( slotClose() ) );
+  QObject::connect(
+    this->ui->usersTableWidget, SIGNAL( itemSelectionChanged() ),
+    this, SLOT( slotSelectionChanged() ) );
+  
   this->PopulateUsersTable();
 }
 
@@ -76,17 +84,57 @@ void QUsersDialog::slotAdd()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QUsersDialog::slotRemove()
 {
+  QTableWidgetItem* item;
+  QList<QTableWidgetItem *> list = this->ui->usersTableWidget->selectedItems();
+  if( 0 == list.size() ) return;
+  for( int i = 0; i < list.size(); ++i )
+  {
+    item = list.at( i );
+    if( 0 == item->column() )
+      Alder::Application::GetInstance()->GetDB()->RemoveUser( item->text().toStdString() );
+  }
+  this->PopulateUsersTable();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QUsersDialog::slotResetPassword()
 {
+  QList<QTableWidgetItem *> list = this->ui->usersTableWidget->selectedItems();
+  if( 0 == list.size() ) return;
+  // TODONEXT: what would be nice is if any model object which is directly related
+  // to a table in the DB woudl have a Save() method (like below) which would
+  // write that object's ivars to the DB (ie: active record)
+  // This should be made generic, with maybe a ActiveRecord base class
+
+  /* for instance...
+  for( int i = 0; i < list.size(); ++i )
+  {
+    item = list.at( i );
+    if( 0 == item->column() )
+    {
+      vtkSmartPointer<User> user = Alder::User::GetUser( item->text().toStdString() );
+      if( NULL != user )
+      {
+        user->SetPassword( "password" );
+        user->Save();
+      }
+    }
+  }
+  */
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QUsersDialog::slotClose()
 {
   this->accept();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QUsersDialog::slotSelectionChanged()
+{
+  QList<QTableWidgetItem *> list = this->ui->usersTableWidget->selectedItems();
+  this->ui->removePushButton->setEnabled( 0 != list.size() );
+  this->ui->resetPasswordPushButton->setEnabled( 0 != list.size() );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

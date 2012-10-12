@@ -33,6 +33,7 @@ public slots:
   virtual void slotRemove();
   virtual void slotResetPassword();
   virtual void slotClose();
+  virtual void slotSelectionChanged();
 
 protected:
   void PopulateUsersTable();
