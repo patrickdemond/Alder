@@ -12,6 +12,8 @@
 #include "ui_QMainAlderWindow.h"
 
 #include "Application.h"
+#include "User.h"
+
 #include "vtkCamera.h"
 #include "vtkCommand.h"
 #include "vtkMath.h"
@@ -193,10 +195,9 @@ void QMainAlderWindow::slotUsers()
     // NULL means the user hit the cancel button
     if( text.isEmpty() ) break;
 
-    bool correctPassword =
-      Alder::Application::GetInstance()->IsAdministratorPassword( text.toStdString().c_str() );
-  
-    if( correctPassword )
+    vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
+    user->Load( "name", "administrator" );
+    if( user->IsPassword( text.toStdString().c_str() ) )
     {
       // load the users dialog
       QUsersDialog usersDialog( this );

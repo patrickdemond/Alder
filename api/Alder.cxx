@@ -14,6 +14,7 @@
 //
 
 #include "Application.h"
+#include "User.h"
 #include "Utilities.h"
 
 #include "QMainAlderWindow.h"
@@ -21,6 +22,8 @@
 #include <QInputDialog>
 #include <QObject>
 #include <QString>
+
+#include "vtkSmartPointer.h"
 
 #include <stdexcept>
 
@@ -56,14 +59,21 @@ int main( int argc, char** argv )
     QMainAlderWindow mainWindow;
 
     // check to see if an admin user exists, create if not
-    if( !app->HasAdministrator() )
+    vtkSmartPointer< User > user = vtkSmartPointer< User >::New();
+    if( !user->Load( "name", "administrator" ) )
     {
       QString text = QInputDialog::getText(
         &mainWindow,
         QObject::tr( "Administrator Password" ),
         QObject::tr( "Please provide a password for the mandatory administrator account:" ),
         QLineEdit::Password );
-      if( !text.isEmpty() ) app->SetAdministratorPassword( text.toStdString().c_str() );
+
+      if( !text.isEmpty() )
+      { // create an administrator with the new password
+        user->Set( "name", "administrator" );
+        user->Set( "password", text.toStdString().c_str() );
+        user->Save();
+      }
     }
 
     mainWindow.show();

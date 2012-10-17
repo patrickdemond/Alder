@@ -76,7 +76,10 @@ void QUsersDialog::slotAdd()
   
   if( !text.isEmpty() )
   {
-    Alder::Application::GetInstance()->GetDB()->AddUser( text.toStdString() );
+    vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
+    user->Set( "name", text.toStdString() );
+    user->ResetPassword();
+    user->Save();
     this->PopulateUsersTable();
   }
 }
@@ -91,7 +94,11 @@ void QUsersDialog::slotRemove()
   {
     item = list.at( i );
     if( 0 == item->column() )
-      Alder::Application::GetInstance()->GetDB()->RemoveUser( item->text().toStdString() );
+    {
+      vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
+      user->Load( "name", item->text().toStdString() );
+      user->Remove();
+    }
   }
   this->PopulateUsersTable();
 }
@@ -99,28 +106,23 @@ void QUsersDialog::slotRemove()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QUsersDialog::slotResetPassword()
 {
+  QTableWidgetItem* item;
   QList<QTableWidgetItem *> list = this->ui->usersTableWidget->selectedItems();
   if( 0 == list.size() ) return;
-  // TODONEXT: what would be nice is if any model object which is directly related
-  // to a table in the DB woudl have a Save() method (like below) which would
-  // write that object's ivars to the DB (ie: active record)
-  // This should be made generic, with maybe a ActiveRecord base class
 
-  /* for instance...
   for( int i = 0; i < list.size(); ++i )
   {
     item = list.at( i );
     if( 0 == item->column() )
     {
-      vtkSmartPointer<User> user = Alder::User::GetUser( item->text().toStdString() );
+      vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
       if( NULL != user )
       {
-        user->SetPassword( "password" );
+        user->ResetPassword();
         user->Save();
       }
     }
   }
-  */
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -140,31 +142,33 @@ void QUsersDialog::slotSelectionChanged()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QUsersDialog::PopulateUsersTable()
 {
-//  this->ui->usersTableWidget->clear();
   this->ui->usersTableWidget->setRowCount( 0 );
   QTableWidgetItem *item;
+  vtkVariant *name, *login;
   
-  std::vector< vtkSmartPointer<Alder::User> > users =
-    Alder::Application::GetInstance()->GetDB()->GetUsers();
-  std::vector< vtkSmartPointer<Alder::User> >::iterator it;
-  for( it = users.begin(); it != users.end(); ++it )
+  vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
+  std::vector< vtkSmartPointer< Alder::ActiveRecord > > userList = user->GetAll();
+  std::vector< vtkSmartPointer< Alder::ActiveRecord > >::iterator it;
+  for( it = userList.begin(); it != userList.end(); ++it )
   { // for every user, add a new row
-    Alder::User *user = (*it);
+    Alder::ActiveRecord *user = (*it);
     this->ui->usersTableWidget->insertRow( 0 );
+    name = user->Get( "name" );
+    login = user->Get( "last_login" );
 
     // add name to row
     item = new QTableWidgetItem;
-    item->setText( tr( user->name.c_str() ) );
+    item->setText( tr( name ? name->ToString().c_str() : "" ) );
     this->ui->usersTableWidget->setItem( 0, 0, item );
 
     // add last login to row
     item = new QTableWidgetItem;
-    item->setText( tr( user->lastLogin.c_str() ) );
+    item->setText( tr( login ? login->ToString().c_str() : "" ) );
     this->ui->usersTableWidget->setItem( 0, 1, item );
 
     // add created tiem to row
     item = new QTableWidgetItem;
-    item->setText( tr( user->createdOn.c_str() ) );
+    item->setText( tr( "" ) );
     this->ui->usersTableWidget->setItem( 0, 2, item );
   }
 }

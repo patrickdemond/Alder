@@ -6,9 +6,6 @@ SET( ALDER_VERSION_MAJOR 0 )
 SET( ALDER_VERSION_MINOR 1 )
 SET( ALDER_VERSION_PATCH 0 )
 
-# Set archive name
-SET( ALDER_ARCHIVE_NAME Alder-${ALDER_VERSION_MAJOR}.${ALDER_VERSION_MINOR}.${ALDER_VERSION_PATCH} )
-
 # Icons sizes to build
 SET( ALDER_ICON_SIZES 16x16 22x22 24x24 32x32 48x48 64x64 128x128 )
 
@@ -70,9 +67,15 @@ SET( ALDER_INCLUDE_DIR
 SET( ALDER_SOURCE
   ${ALDER_API_DIR}/Alder.cxx
 
+  ${ALDER_APP_DIR}/ActiveRecord.cxx
+  ${ALDER_APP_DIR}/Cineloop.cxx
   ${ALDER_APP_DIR}/Configuration.cxx
   ${ALDER_APP_DIR}/Database.cxx
+  ${ALDER_APP_DIR}/Image.cxx
   ${ALDER_APP_DIR}/ModelObject.cxx
+  ${ALDER_APP_DIR}/Rating.cxx
+  ${ALDER_APP_DIR}/Series.cxx
+  ${ALDER_APP_DIR}/Study.cxx
   ${ALDER_APP_DIR}/User.cxx
   ${ALDER_APP_DIR}/Application.cxx
 
@@ -86,6 +89,7 @@ SET( ALDER_SOURCE
 )
 
 SET_SOURCE_FILES_PROPERTIES(
+  ${ALDER_APP_DIR}/ActiveRecord.cxx
   ${ALDER_APP_DIR}/ModelObject.cxx
 
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx

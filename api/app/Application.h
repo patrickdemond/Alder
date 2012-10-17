@@ -42,13 +42,12 @@ namespace Alder
     bool ReadConfiguration( std::string filename );
     bool ConnectToDatabase();
 
-    bool HasAdministrator();
-    bool IsAdministratorPassword( std::string );
-    void SetAdministratorPassword( std::string );
-
     vtkGetObjectMacro( View, vtkView );
     vtkGetObjectMacro( Config, Configuration );
     vtkGetObjectMacro( DB, Database );
+
+    ModelObject* Create( std::string className )
+    { return Application::Factory[className](); }
     
   protected:
     Application();
@@ -57,6 +56,7 @@ namespace Alder
     static Application *New();
     static Application *Instance;
 
+    std::map< std::string, ModelObject*(*)() > Factory;
     vtkView *View;
     Configuration *Config;
     Database *DB;
@@ -65,6 +65,8 @@ namespace Alder
     Application( const Application& );  // Not implemented.
     void operator=( const Application& );  // Not implemented.
   };
+
+  template <class T> ModelObject* createInstance() { return T::New(); }
 }
 
 #endif

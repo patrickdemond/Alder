@@ -7,14 +7,14 @@ CREATE SCHEMA IF NOT EXISTS `alder` DEFAULT CHARACTER SET latin1 COLLATE latin1_
 USE `alder` ;
 
 -- -----------------------------------------------------
--- Table `alder`.`study`
+-- Table `alder`.`Study`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `alder`.`study` ;
+DROP TABLE IF EXISTS `alder`.`Study` ;
 
-CREATE  TABLE IF NOT EXISTS `alder`.`study` (
+CREATE  TABLE IF NOT EXISTS `alder`.`Study` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `update_timestamp` TIMESTAMP NOT NULL ,
-  `created_timestamp` TIMESTAMP NOT NULL ,
+  `create_timestamp` TIMESTAMP NOT NULL ,
   `uid` VARCHAR(45) NOT NULL ,
   `site` VARCHAR(45) NOT NULL ,
   `interviewer` VARCHAR(45) NOT NULL ,
@@ -31,14 +31,14 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `alder`.`series`
+-- Table `alder`.`Series`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `alder`.`series` ;
+DROP TABLE IF EXISTS `alder`.`Series` ;
 
-CREATE  TABLE IF NOT EXISTS `alder`.`series` (
+CREATE  TABLE IF NOT EXISTS `alder`.`Series` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `update_timestamp` TIMESTAMP NOT NULL ,
-  `created_timestamp` TIMESTAMP NOT NULL ,
+  `create_timestamp` TIMESTAMP NOT NULL ,
   `study_id` INT UNSIGNED NOT NULL ,
   `laterality` ENUM('right','left') NOT NULL ,
   `type` ENUM('cimt','plaque') NOT NULL ,
@@ -48,42 +48,42 @@ CREATE  TABLE IF NOT EXISTS `alder`.`series` (
   INDEX `dk_type` (`type` ASC) ,
   CONSTRAINT `fk_series_study_id`
     FOREIGN KEY (`study_id` )
-    REFERENCES `alder`.`study` (`id` )
+    REFERENCES `alder`.`Study` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `alder`.`cineloop`
+-- Table `alder`.`Cineloop`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `alder`.`cineloop` ;
+DROP TABLE IF EXISTS `alder`.`Cineloop` ;
 
-CREATE  TABLE IF NOT EXISTS `alder`.`cineloop` (
+CREATE  TABLE IF NOT EXISTS `alder`.`Cineloop` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `update_timestamp` TIMESTAMP NOT NULL ,
-  `created_timestamp` TIMESTAMP NOT NULL ,
+  `create_timestamp` TIMESTAMP NOT NULL ,
   `series_id` INT UNSIGNED NOT NULL ,
   `data` LONGBLOB NOT NULL ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_cineloop_series_id` (`series_id` ASC) ,
   CONSTRAINT `fk_cineloop_series_id`
     FOREIGN KEY (`series_id` )
-    REFERENCES `alder`.`series` (`id` )
+    REFERENCES `alder`.`Series` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `alder`.`image`
+-- Table `alder`.`Image`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `alder`.`image` ;
+DROP TABLE IF EXISTS `alder`.`Image` ;
 
-CREATE  TABLE IF NOT EXISTS `alder`.`image` (
+CREATE  TABLE IF NOT EXISTS `alder`.`Image` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `update_timestamp` TIMESTAMP NOT NULL ,
-  `created_timestamp` TIMESTAMP NOT NULL ,
+  `create_timestamp` TIMESTAMP NOT NULL ,
   `series_id` INT UNSIGNED NOT NULL ,
   `cineloop_id` INT UNSIGNED NOT NULL ,
   `frame` INT NOT NULL ,
@@ -100,26 +100,26 @@ CREATE  TABLE IF NOT EXISTS `alder`.`image` (
   INDEX `dk_cineloop_id_frame` (`cineloop_id` ASC, `frame` ASC) ,
   CONSTRAINT `fk_image_series_id`
     FOREIGN KEY (`series_id` )
-    REFERENCES `alder`.`series` (`id` )
+    REFERENCES `alder`.`Series` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_image_cineloop_id`
     FOREIGN KEY (`cineloop_id` )
-    REFERENCES `alder`.`cineloop` (`id` )
+    REFERENCES `alder`.`Cineloop` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `alder`.`user`
+-- Table `alder`.`User`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `alder`.`user` ;
+DROP TABLE IF EXISTS `alder`.`User` ;
 
-CREATE  TABLE IF NOT EXISTS `alder`.`user` (
+CREATE  TABLE IF NOT EXISTS `alder`.`User` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `update_timestamp` TIMESTAMP NOT NULL ,
-  `created_timestamp` TIMESTAMP NOT NULL ,
+  `create_timestamp` TIMESTAMP NOT NULL ,
   `name` VARCHAR(255) NOT NULL ,
   `password` VARCHAR(255) NOT NULL ,
   `last_login` DATETIME NULL ,
@@ -130,14 +130,14 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `alder`.`rating`
+-- Table `alder`.`Rating`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `alder`.`rating` ;
+DROP TABLE IF EXISTS `alder`.`Rating` ;
 
-CREATE  TABLE IF NOT EXISTS `alder`.`rating` (
+CREATE  TABLE IF NOT EXISTS `alder`.`Rating` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `update_timestamp` TIMESTAMP NOT NULL ,
-  `created_timestamp` TIMESTAMP NOT NULL ,
+  `create_timestamp` TIMESTAMP NOT NULL ,
   `image_id` INT UNSIGNED NOT NULL ,
   `user_id` INT UNSIGNED NOT NULL ,
   `rating` TINYINT(1) NULL ,
@@ -147,12 +147,12 @@ CREATE  TABLE IF NOT EXISTS `alder`.`rating` (
   INDEX `dk_rating` (`rating` ASC) ,
   CONSTRAINT `fk_rating_image_id`
     FOREIGN KEY (`image_id` )
-    REFERENCES `alder`.`image` (`id` )
+    REFERENCES `alder`.`Image` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_rating_user_id`
     FOREIGN KEY (`user_id` )
-    REFERENCES `alder`.`user` (`id` )
+    REFERENCES `alder`.`User` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;

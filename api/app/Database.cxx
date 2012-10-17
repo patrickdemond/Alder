@@ -19,7 +19,7 @@
 #include "vtkMySQLToTableReader.h"
 #include "vtkObjectFactory.h"
 #include "vtkSmartPointer.h"
-#include "vtkSQLQuery.h"
+#include "vtkMySQLQuery.h"
 #include "vtkTable.h"
 #include "vtkVariant.h"
 
@@ -49,56 +49,145 @@ namespace Alder
     this->MySQLDatabase->SetUser( user.c_str() );
     this->MySQLDatabase->SetHostName( host.c_str() );
     this->MySQLDatabase->SetServerPort( port );
-    return this->MySQLDatabase->Open( pass.c_str() );
+    bool success = this->MySQLDatabase->Open( pass.c_str() );
+    this->ReadInformationSchema();
+
+    return success;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  bool Database::HasAdministrator()
+  void Database::ReadInformationSchema()
   {
-    vtkSmartPointer<vtkSQLQuery> query =
-      vtkSmartPointer<vtkSQLQuery>::Take( this->MySQLDatabase->GetQueryInstance() );
-    query->SetQuery( "SELECT COUNT(*) AS total FROM user WHERE name = 'administrator'" );
-    query->Execute();
-    query->NextRow();
-    vtkVariant v = query->DataValue( 0 );
-    return 1 == v.ToInt();
-  }
+    vtkSmartPointer<vtkMySQLQuery> query = this->GetQuery();
 
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Database::SetAdministratorPassword( std::string password )
-  {
-    vtkSmartPointer<vtkSQLQuery> query =
-      vtkSmartPointer<vtkSQLQuery>::Take( this->MySQLDatabase->GetQueryInstance() );
-    std::string hashedPassword;
-    Alder::hashString( password, hashedPassword );
-    std::stringstream stream;
-    stream << "REPLACE INTO user SET created_timestamp = NULL, name = 'Administrator', password = "
-           << query->EscapeString( hashedPassword );
+    std::stringstream stream; 
+    // the following query's first column MUST be table_name (index 0) and second column
+    // MUST be table_column (index 1)
+    stream << "SELECT table_name, column_name, column_type, data_type, column_default, is_nullable "
+           << "FROM information_schema.columns "
+           << "WHERE table_schema = " << query->EscapeString( this->MySQLDatabase->GetDatabaseName() ) << " "
+           << "AND column_name != 'update_timestamp' "
+           << "AND column_name != 'create_timestamp' "
+           << "ORDER BY table_name, ordinal_position";
     query->SetQuery( stream.str().c_str() );
     query->Execute();
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  bool Database::IsAdministratorPassword( std::string password )
-  {
-    // first hash the password argument
-    std::string hashedPassword;
-    Alder::hashString( password, hashedPassword );
-
-    vtkSmartPointer<vtkSQLQuery> query =
-      vtkSmartPointer<vtkSQLQuery>::Take( this->MySQLDatabase->GetQueryInstance() );
-    query->SetQuery( "SELECT password FROM user WHERE name = 'Administrator'" );
-    query->Execute();
-    query->NextRow(); // we can only have one row
-    std::string currentHashedPassword = query->DataValue( 0 ).ToString();
     
-    return hashedPassword == currentHashedPassword;
+    std::string tableName = "";
+    std::map< std::string,std::map< std::string, std::string > > tableMap;
+    while( query->NextRow() )
+    {
+      // if we are starting a new table save the old one and start over
+      if( 0 != tableName.compare( query->DataValue( 0 ).ToString() ) )
+      {
+        if( 0 != tableName.length() ) this->Columns.insert(
+          std::pair< std::string, std::map< std::string,std::map< std::string, std::string > > >(
+            tableName, tableMap ) );
+        tableName = query->DataValue( 0 ).ToString();
+        tableMap.clear();
+      }
+
+      // get this column's details
+      std::map< std::string, std::string > columnMap;
+      for( int c = 2; c < query->GetNumberOfFields(); ++c )
+        columnMap.insert( std::pair< std::string, std::string >(
+          query->GetFieldName( c ), query->DataValue( c ).ToString() ) );
+
+      // add the column to the current table
+      std::string columnName = query->DataValue( 1 ).ToString();
+      tableMap.insert( std::pair< std::string, std::map< std::string, std::string > >(
+        columnName, columnMap ) );
+    }
+
+    // save the last table
+    if( 0 != tableName.length() ) this->Columns.insert(
+      std::pair< std::string, std::map< std::string,std::map< std::string, std::string > > >(
+        tableName, tableMap ) );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::vector< vtkSmartPointer<Alder::User> > Database::GetUsers()
+  std::vector<std::string> Database::GetColumnNames( std::string table )
   {
-    std::vector< vtkSmartPointer<Alder::User> > users;
+    std::map< std::string,std::map< std::string,std::map< std::string, std::string > > >::iterator tablePair;
+    tablePair = this->Columns.find( table );
+    if( this->Columns.end() == tablePair )
+    {
+      std::stringstream error;
+      error << "Tried to get column names for table \"" << table << "\" which doesn't exist";
+      throw std::runtime_error( error.str() );
+    }
+
+    std::map< std::string,std::map< std::string, std::string > > tableMap = tablePair->second;
+    std::vector<std::string> columns;
+    std::map< std::string,std::map< std::string, std::string > >::iterator it;
+    for( it = tableMap.begin(); it != tableMap.end(); ++it ) columns.push_back( it->first );
+
+    return columns;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::string Database::GetColumnDefault( std::string table, std::string column )
+  {
+    std::map< std::string,std::map< std::string,std::map< std::string, std::string > > >::iterator
+      tablePair = this->Columns.find( table );
+    if( this->Columns.end() == tablePair )
+    {
+      std::stringstream error;
+      error << "Tried to get default column value from table \"" << table << "\" which doesn't exist";
+      throw std::runtime_error( error.str() );
+    }
+
+    std::map< std::string,std::map< std::string, std::string > >::iterator
+      columnPair = tablePair->second.find( column );
+    if( tablePair->second.end() == columnPair )
+    {
+      std::stringstream error;
+      error << "Tried to get default column value for \""
+            << table << "." << column << "\" which doesn't exist";
+      throw std::runtime_error( error.str() );
+    }
+
+    std::map< std::string, std::string > columnMap = columnPair->second;
+    return columnMap.find( "column_default" )->second;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Database::IsColumnNullable( std::string table, std::string column )
+  {
+    std::map< std::string,std::map< std::string,std::map< std::string, std::string > > >::iterator
+      tablePair = this->Columns.find( table );
+    if( this->Columns.end() == tablePair )
+    {
+      std::stringstream error;
+      error << "Tried to get column nullable from table \"" << table << "\" which doesn't exist";
+      throw std::runtime_error( error.str() );
+    }
+
+    std::map< std::string,std::map< std::string, std::string > >::iterator
+      columnPair = tablePair->second.find( column );
+    if( tablePair->second.end() == columnPair )
+    {
+      std::stringstream error;
+      error << "Tried to get column nullable for \""
+            << table << "." << column << "\" which doesn't exist";
+      throw std::runtime_error( error.str() );
+    }
+
+    std::map< std::string, std::string > columnMap = columnPair->second;
+    return 0 == columnMap.find( "is_nullable" )->second.compare( "YES" );
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  vtkSmartPointer<vtkMySQLQuery> Database::GetQuery()
+  {
+    return vtkSmartPointer<vtkMySQLQuery>::Take(
+      vtkMySQLQuery::SafeDownCast( this->MySQLDatabase->GetQueryInstance() ) );
+  }
+
+/*
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::vector< vtkSmartPointer<User> > Database::GetUsers()
+  {
+    std::vector< vtkSmartPointer<User> > users;
 
     // get users from the database and populate a vector of User objects
     vtkSmartPointer<vtkMySQLToTableReader> reader = vtkSmartPointer<vtkMySQLToTableReader>::New();
@@ -108,69 +197,14 @@ namespace Alder
     vtkTable *table = reader->GetOutput();
     for( vtkIdType row = 0; row < table->GetNumberOfRows(); ++row )
     {
-      vtkSmartPointer<Alder::User> user = vtkSmartPointer<Alder::User>::New();
+      vtkSmartPointer<User> user = vtkSmartPointer<User>::New();
       user->name = table->GetValueByName( row, "name" ).ToString();
       user->lastLogin = table->GetValueByName( row, "last_login" ).ToString();
-      user->createdOn = table->GetValueByName( row, "created_timestamp" ).ToString();
+      user->createdOn = table->GetValueByName( row, "create_timestamp" ).ToString();
       users.push_back( user );
     }
 
     return users;
   }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Database::AddUser( std::string name )
-  {
-    vtkSmartPointer<Alder::User> user = vtkSmartPointer<Alder::User>::New();
-    user->name = name;
-    user->SetPassword( "password" ); // new users always have the password "password"
-    this->AddUser( user );
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Database::AddUser( User *user )
-  {
-    vtkSmartPointer<vtkSQLQuery> query =
-      vtkSmartPointer<vtkSQLQuery>::Take( this->MySQLDatabase->GetQueryInstance() );
-    
-    // make sure user name isn't blank
-    if( 0 == user->name.length() ) throw std::runtime_error( "Trying to create user without username" );
-
-    // make sure user name has letters and numbers only
-    for( int i = 0; i < user->name.length(); ++i )
-      if( !isalnum( user->name[i] ) )
-        throw std::runtime_error( "User names must contain letters and numbers only." );
-
-    std::stringstream stream;
-    stream << "INSERT INTO user ( created_timestamp, name, password ) VALUES ( NULL,"
-           << query->EscapeString( user->name ) << ","
-           << query->EscapeString( user->hashedPassword )
-           << " )";
-    query->SetQuery( stream.str().c_str() );
-    query->Execute();
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Database::RemoveUser( std::string name )
-  {
-    vtkSmartPointer<Alder::User> user = vtkSmartPointer<Alder::User>::New();
-    user->name = name;
-    user->SetPassword( "password" ); // new users always have the password "password"
-    this->RemoveUser( user );
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Database::RemoveUser( User *user )
-  {
-    vtkSmartPointer<vtkSQLQuery> query =
-      vtkSmartPointer<vtkSQLQuery>::Take( this->MySQLDatabase->GetQueryInstance() );
-    
-    // make sure user name isn't blank
-    if( 0 == user->name.length() ) throw std::runtime_error( "Trying to remove user without username" );
-
-    std::stringstream stream;
-    stream << "DELETE FROM user WHERE name = " << query->EscapeString( user->name );
-    query->SetQuery( stream.str().c_str() );
-    query->Execute();
-  }
+*/
 }

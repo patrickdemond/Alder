@@ -12,7 +12,13 @@
 #include "Application.h"
 
 #include "Configuration.h"
+#include "Cineloop.h"
 #include "Database.h"
+#include "Image.h"
+#include "Rating.h"
+#include "Series.h"
+#include "Study.h"
+#include "User.h"
 
 #include "vtkObjectFactory.h"
 #include "vtkVariant.h"
@@ -28,6 +34,14 @@ namespace Alder
     this->View = vtkView::New();
     this->Config = Configuration::New();
     this->DB = Database::New();
+
+    // populate the factory with all active record classes
+    this->Factory["Cineloop"] = &createInstance<Cineloop>;
+    this->Factory["Image"] = &createInstance<Image>;
+    this->Factory["Rating"] = &createInstance<Rating>;
+    this->Factory["Series"] = &createInstance<Series>;
+    this->Factory["Study"] = &createInstance<Study>;
+    this->Factory["User"] = &createInstance<User>;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -99,7 +113,7 @@ namespace Alder
     // make sure the database name, user and password are provided
     if( 0 == name.length() || 0 == user.length() || 0 == pass.length() )
     {
-      cout << "ERROR: database name, user name and password must be included in "
+      cerr << "ERROR: database name, user name and password must be included in "
            << "configuration file" << endl;
       return false;
     }
@@ -109,23 +123,5 @@ namespace Alder
     if( 0 == port.length() ) port = "3306";
 
     return this->DB->Connect( name, user, pass, host, vtkVariant( port ).ToInt() );
-  }
-  
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  bool Application::HasAdministrator()
-  {
-    return this->DB->HasAdministrator();
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  bool Application::IsAdministratorPassword( std::string password )
-  {
-    return this->DB->IsAdministratorPassword( password );
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Application::SetAdministratorPassword( std::string password )
-  {
-    this->DB->SetAdministratorPassword( password );
   }
 }

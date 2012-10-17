@@ -20,8 +20,10 @@
 #include "ModelObject.h"
 
 #include "vtkSmartPointer.h"
+#include "vtkMySQLQuery.h"
 
 #include <iostream>
+#include <map>
 #include <vector>
 
 class vtkMySQLDatabase;
@@ -42,21 +44,19 @@ namespace Alder
       std::string host,
       int port );
 
-    bool HasAdministrator();
-    void SetAdministratorPassword( std::string password );
-    bool IsAdministratorPassword( std::string password );
+    vtkSmartPointer<vtkMySQLQuery> GetQuery();
 
-    void AddUser( std::string name );
-    void AddUser( User* user );
-    void RemoveUser( std::string name );
-    void RemoveUser( User* user );
-    std::vector< vtkSmartPointer<User> > GetUsers();
+    std::vector<std::string> GetColumnNames( std::string table );
+    std::string GetColumnDefault( std::string table, std::string column );
+    bool IsColumnNullable( std::string table, std::string column );
 
   protected:
     Database();
     ~Database() {}
 
+    void ReadInformationSchema();
     vtkSmartPointer<vtkMySQLDatabase> MySQLDatabase;
+    std::map< std::string,std::map< std::string,std::map< std::string, std::string > > > Columns;
 
   private:
     Database( const Database& ); // Not implemented

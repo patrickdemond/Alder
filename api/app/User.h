@@ -8,41 +8,32 @@
   Author: Dean Inglis <inglisd@mcmaster.ca>
 
 =========================================================================*/
-//
-// .NAME User - User or "central" object
-//
-// .SECTION Description
-//
-// .SECTION See Also
-// UserReader UserWriter
-// 
 
 #ifndef __User_h
 #define __User_h
 
-#include "ModelObject.h"
+#include "ActiveRecord.h"
 
 #include <iostream>
 
 namespace Alder
 {
 //  class Session;
-  class User : public ModelObject
+  class User : public ActiveRecord
   {
   public:
     static User *New();
-    vtkTypeMacro( User, ModelObject );
+    vtkTypeMacro( User, ActiveRecord );
 
-    void SetPassword( std::string );
-
-    std::string name;
-    std::string lastLogin;
-    std::string createdOn;
-    std::string hashedPassword;
+    virtual void ResetPassword();
+    virtual bool IsPassword( std::string );
 
   protected:
-    User();
+    User() {}
     ~User() {}
+
+    std::string GetName() { return "User"; }
+    void SetVariant( std::string column, vtkVariant *value );
 
   private:
     User( const User& ); // Not implemented
