@@ -48,6 +48,7 @@ protected:
   // read/write application GUI settings
   virtual void ReadSettings();
   virtual void WriteSettings();
+  virtual void UpdateInterface();
 
   //virtual void Render( bool resetCamera );
 

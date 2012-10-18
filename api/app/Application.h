@@ -32,6 +32,7 @@ namespace Alder
 {
   class Configuration;
   class Database;
+  class User;
   class Application : public ModelObject
   {
   public:
@@ -45,6 +46,8 @@ namespace Alder
     vtkGetObjectMacro( View, vtkView );
     vtkGetObjectMacro( Config, Configuration );
     vtkGetObjectMacro( DB, Database );
+    vtkGetObjectMacro( ActiveUser, User );
+    virtual void SetActiveUser( User* );
 
     ModelObject* Create( std::string className )
     { return Application::Factory[className](); }
@@ -60,6 +63,7 @@ namespace Alder
     vtkView *View;
     Configuration *Config;
     Database *DB;
+    User *ActiveUser;
     
   private:
     Application( const Application& );  // Not implemented.

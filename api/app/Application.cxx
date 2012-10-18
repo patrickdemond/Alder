@@ -26,6 +26,8 @@
 
 namespace Alder
 {
+  vtkCxxSetObjectMacro( Application, ActiveUser, User );
+
   Application* Application::Instance = NULL; // set the initial application
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -34,6 +36,7 @@ namespace Alder
     this->View = vtkView::New();
     this->Config = Configuration::New();
     this->DB = Database::New();
+    this->ActiveUser = NULL;
 
     // populate the factory with all active record classes
     this->Factory["Cineloop"] = &createInstance<Cineloop>;
@@ -63,6 +66,12 @@ namespace Alder
     {
       this->DB->Delete();
       this->DB = NULL;
+    }
+
+    if( NULL != this->ActiveUser )
+    {
+      this->ActiveUser->Delete();
+      this->ActiveUser = NULL;
     }
   }
 

@@ -434,6 +434,9 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpenStudy">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Open Study</string>
    </property>
@@ -445,11 +448,17 @@
    </property>
   </action>
   <action name="actionPreviousStudy">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Previous Study</string>
    </property>
   </action>
   <action name="actionNextStudy">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Next Study</string>
    </property>

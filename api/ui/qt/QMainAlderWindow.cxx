@@ -22,6 +22,7 @@
 #include "vtkWindowToImageFilter.h"
 
 #include "QAboutDialog.h"
+#include "QLoginDialog.h"
 #include "QUsersDialog.h"
 
 #include <QCloseEvent>
@@ -122,6 +123,7 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
 //  this->ui->renderWidget->SetRenderWindow( app->GetView()->GetRenderWindow() );
 
   this->ReadSettings();
+  this->UpdateInterface();
 };
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -139,28 +141,6 @@ void QMainAlderWindow::closeEvent( QCloseEvent *event )
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotOpenStudy()
 {
-/*
-  QString directory = QFileDialog::getExistingDirectory(
-    this, tr("Open Local Exam"), ".", QFileDialog::ShowDirsOnly );
-  
-  if( "" != directory )
-  {
-    try
-    {
-      Application *app = Application::GetInstance();
-      app->GetView()->SetExamDirectory( directory.toStdString().c_str() );
-      app->GetView()->Render();
-    }
-    catch( std::exception &e )
-    {
-      QMessageBox errorMessage( this );
-      errorMessage.setWindowModality( Qt::WindowModal );
-      errorMessage.setIcon( QMessageBox::Warning );
-      errorMessage.setText( "There was an error while attempting to open the PNG image." );
-      errorMessage.exec();
-    }
-  }
-*/
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -176,6 +156,13 @@ void QMainAlderWindow::slotNextStudy()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotLogin()
 {
+  QLoginDialog dialog( this );
+  dialog.setModal( true );
+  dialog.setWindowTitle( tr( "Login" ) );
+  dialog.exec();
+
+  // active user may have changed so update the interface
+  this->UpdateInterface();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -251,29 +238,7 @@ void QMainAlderWindow::WriteSettings()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-/*
-void QMainAlderWindow::Render( bool resetCamera )
+void QMainAlderWindow::UpdateInterface()
 {
-  // we're about to do an operation that might take a while, so update the GUI and cursor
-  this->repaint();
-  this->setCursor( Qt::WaitCursor );
-  this->ui->renderWidget->setCursor( Qt::WaitCursor );
-
-  clock_t start = clock();
-  if( resetCamera )
-  {
-    // TODO ResetCamera
-  }
-
-  // TODO Render
-  clock_t end = clock();
-
-  // update the cursor and report how many vertices and edges are currently visible
-  this->setCursor( Qt::ArrowCursor );
-  this->ui->renderWidget->setCursor( Qt::CrossCursor );
-  char buffer[128];
-  sprintf( buffer, "Processing time: %0.2fs",
-    static_cast< double >( end - start ) / CLOCKS_PER_SEC );
-  this->ui->statusbar->showMessage( buffer );
+  // TODO: update the interface based on the model
 }
-*/
