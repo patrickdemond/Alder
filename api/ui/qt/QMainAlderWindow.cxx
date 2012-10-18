@@ -156,10 +156,19 @@ void QMainAlderWindow::slotNextStudy()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotLogin()
 {
-  QLoginDialog dialog( this );
-  dialog.setModal( true );
-  dialog.setWindowTitle( tr( "Login" ) );
-  dialog.exec();
+  bool loggedIn = NULL != Alder::Application::GetInstance()->GetActiveUser();
+
+  if( loggedIn )
+  {
+    Alder::Application::GetInstance()->SetActiveUser( NULL );
+  }
+  else
+  {
+    QLoginDialog dialog( this );
+    dialog.setModal( true );
+    dialog.setWindowTitle( tr( "Login" ) );
+    dialog.exec();
+  }
 
   // active user may have changed so update the interface
   this->UpdateInterface();
@@ -240,5 +249,19 @@ void QMainAlderWindow::WriteSettings()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::UpdateInterface()
 {
-  // TODO: update the interface based on the model
+  bool loggedIn = NULL != Alder::Application::GetInstance()->GetActiveUser();
+
+  // login button (login/logout)
+  this->ui->actionLogin->setText( tr( loggedIn ? "Logout" : "Login" ) );
+
+  // only allow study operations when logged in
+  this->ui->actionOpenStudy->setEnabled( loggedIn );
+  this->ui->actionPreviousStudy->setEnabled( loggedIn );
+  this->ui->actionNextStudy->setEnabled( loggedIn );
+  this->ui->previousStudyPushButton->setEnabled( loggedIn );
+  this->ui->nextStudyPushButton->setEnabled( loggedIn );
+  this->ui->addImagePushButton->setEnabled( false );
+  this->ui->removeImagePushButton->setEnabled( false );
+  this->ui->ratingSlider->setEnabled( false );
+  this->ui->notePushButton->setEnabled( false );
 }
