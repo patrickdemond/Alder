@@ -119,8 +119,8 @@ namespace Alder
     std::string host = this->Config->GetValue( "Database", "Server" );
     std::string port = this->Config->GetValue( "Database", "Port" );
 
-    // make sure the database name, user and password are provided
-    if( 0 == name.length() || 0 == user.length() || 0 == pass.length() )
+    // make sure the database and user names are provided
+    if( 0 == name.length() || 0 == user.length() )
     {
       cerr << "ERROR: database name, user name and password must be included in "
            << "configuration file" << endl;
