@@ -1,15 +1,15 @@
 /*=========================================================================
 
   Program:  CLSAVis (Canadian Longitudinal Study on Aging Visualizer)
-  Module:   QUsersDialog.cxx
+  Module:   QUserListDialog.cxx
   Language: C++
 
   Author: Patrick Emond <emondpd@mcmaster.ca>
   Author: Dean Inglis <inglisd@mcmaster.ca>
 
 =========================================================================*/
-#include "QUsersDialog.h"
-#include "ui_QUsersDialog.h"
+#include "QUserListDialog.h"
+#include "ui_QUserListDialog.h"
 
 #include "Application.h"
 #include "Database.h"
@@ -30,15 +30,15 @@
 #include <vector>
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-QUsersDialog::QUsersDialog( QWidget* parent )
+QUserListDialog::QUserListDialog( QWidget* parent )
   : QDialog( parent )
 {
-  this->ui = new Ui_QUsersDialog;
+  this->ui = new Ui_QUserListDialog;
   this->ui->setupUi( this );
-  this->ui->usersTableWidget->horizontalHeader()->setResizeMode( QHeaderView::Stretch );
-  this->ui->usersTableWidget->verticalHeader()->setVisible( false );
-  this->ui->usersTableWidget->setSelectionBehavior( QAbstractItemView::SelectRows );
-  this->ui->usersTableWidget->setSelectionMode( QAbstractItemView::SingleSelection );
+  this->ui->userTableWidget->horizontalHeader()->setResizeMode( QHeaderView::Stretch );
+  this->ui->userTableWidget->verticalHeader()->setVisible( false );
+  this->ui->userTableWidget->setSelectionBehavior( QAbstractItemView::SelectRows );
+  this->ui->userTableWidget->setSelectionMode( QAbstractItemView::SingleSelection );
 
   QObject::connect(
     this->ui->addPushButton, SIGNAL( clicked( bool ) ),
@@ -53,19 +53,19 @@ QUsersDialog::QUsersDialog( QWidget* parent )
     this->ui->closePushButton, SIGNAL( clicked( bool ) ),
     this, SLOT( slotClose() ) );
   QObject::connect(
-    this->ui->usersTableWidget, SIGNAL( itemSelectionChanged() ),
+    this->ui->userTableWidget, SIGNAL( itemSelectionChanged() ),
     this, SLOT( slotSelectionChanged() ) );
   
-  this->PopulateUsersTable();
+  this->UpdateInterface();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-QUsersDialog::~QUsersDialog()
+QUserListDialog::~QUserListDialog()
 {
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QUsersDialog::slotAdd()
+void QUserListDialog::slotAdd()
 {
   // get the new user's name
   QString text = QInputDialog::getText(
@@ -80,15 +80,15 @@ void QUsersDialog::slotAdd()
     user->Set( "name", text.toStdString() );
     user->ResetPassword();
     user->Save();
-    this->PopulateUsersTable();
+    this->UpdateInterface();
   }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QUsersDialog::slotRemove()
+void QUserListDialog::slotRemove()
 {
   QTableWidgetItem* item;
-  QList<QTableWidgetItem *> list = this->ui->usersTableWidget->selectedItems();
+  QList<QTableWidgetItem *> list = this->ui->userTableWidget->selectedItems();
   if( 0 == list.size() ) return;
   for( int i = 0; i < list.size(); ++i )
   {
@@ -100,14 +100,14 @@ void QUsersDialog::slotRemove()
       user->Remove();
     }
   }
-  this->PopulateUsersTable();
+  this->UpdateInterface();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QUsersDialog::slotResetPassword()
+void QUserListDialog::slotResetPassword()
 {
   QTableWidgetItem* item;
-  QList<QTableWidgetItem *> list = this->ui->usersTableWidget->selectedItems();
+  QList<QTableWidgetItem *> list = this->ui->userTableWidget->selectedItems();
   if( 0 == list.size() ) return;
 
   for( int i = 0; i < list.size(); ++i )
@@ -126,23 +126,23 @@ void QUsersDialog::slotResetPassword()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QUsersDialog::slotClose()
+void QUserListDialog::slotClose()
 {
   this->accept();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QUsersDialog::slotSelectionChanged()
+void QUserListDialog::slotSelectionChanged()
 {
-  QList<QTableWidgetItem *> list = this->ui->usersTableWidget->selectedItems();
+  QList<QTableWidgetItem *> list = this->ui->userTableWidget->selectedItems();
   this->ui->removePushButton->setEnabled( 0 != list.size() );
   this->ui->resetPasswordPushButton->setEnabled( 0 != list.size() );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QUsersDialog::PopulateUsersTable()
+void QUserListDialog::UpdateInterface()
 {
-  this->ui->usersTableWidget->setRowCount( 0 );
+  this->ui->userTableWidget->setRowCount( 0 );
   QTableWidgetItem *item;
   vtkVariant *name, *login;
   
@@ -152,23 +152,23 @@ void QUsersDialog::PopulateUsersTable()
   for( it = userList.begin(); it != userList.end(); ++it )
   { // for every user, add a new row
     Alder::ActiveRecord *user = (*it);
-    this->ui->usersTableWidget->insertRow( 0 );
+    this->ui->userTableWidget->insertRow( 0 );
     name = user->Get( "name" );
     login = user->Get( "last_login" );
 
     // add name to row
     item = new QTableWidgetItem;
     item->setText( tr( name ? name->ToString().c_str() : "" ) );
-    this->ui->usersTableWidget->setItem( 0, 0, item );
+    this->ui->userTableWidget->setItem( 0, 0, item );
 
     // add last login to row
     item = new QTableWidgetItem;
     item->setText( tr( login ? login->ToString().c_str() : "" ) );
-    this->ui->usersTableWidget->setItem( 0, 1, item );
+    this->ui->userTableWidget->setItem( 0, 1, item );
 
     // add created tiem to row
     item = new QTableWidgetItem;
     item->setText( tr( "" ) );
-    this->ui->usersTableWidget->setItem( 0, 2, item );
+    this->ui->userTableWidget->setItem( 0, 2, item );
   }
 }

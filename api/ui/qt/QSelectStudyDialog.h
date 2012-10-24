@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:  Alder (CLSA Ultrasound Image Viewer)
-  Module:   QUsersDialog.h
+  Module:   QSelectStudyDialog.h
   Language: C++
 
   Author: Patrick Emond <emondpd@mcmaster.ca>
@@ -9,40 +9,37 @@
 
 =========================================================================*/
 
-#ifndef __QUsersDialog_h
-#define __QUsersDialog_h
+#ifndef __QSelectStudyDialog_h
+#define __QSelectStudyDialog_h
 
 #include <QDialog>
 
 #include "Utilities.h"
 
-class Ui_QUsersDialog;
+class Ui_QSelectStudyDialog;
 
-class QUsersDialog : public QDialog
+class QSelectStudyDialog : public QDialog
 {
   Q_OBJECT
 
 public:
   //constructor
-  QUsersDialog( QWidget* parent = 0 );
+  QSelectStudyDialog( QWidget* parent = 0 );
   //destructor
-  ~QUsersDialog();
+  ~QSelectStudyDialog();
   
 public slots:
-  virtual void slotAdd();
-  virtual void slotRemove();
-  virtual void slotResetPassword();
-  virtual void slotClose();
+  virtual void slotAccepted();
   virtual void slotSelectionChanged();
 
 protected:
-  void PopulateUsersTable();
+  void UpdateInterface();
 
 protected slots:
 
 private:
   // Designer form
-  Ui_QUsersDialog *ui;
+  Ui_QSelectStudyDialog *ui;
 };
 
 #endif

@@ -15,6 +15,7 @@
 #include "ActiveRecord.h"
 
 #include <iostream>
+#include <vector>
 
 namespace Alder
 {
@@ -24,6 +25,7 @@ namespace Alder
   public:
     static Study *New();
     vtkTypeMacro( Study, ActiveRecord );
+    static std::vector< std::string > GetIdentifierList();
 
   protected:
     Study() {}

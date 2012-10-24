@@ -95,8 +95,9 @@ SET( ALDER_SOURCE
   ${ALDER_QT_DIR}/QAlderApplication.cxx
   ${ALDER_QT_DIR}/QAboutDialog.cxx
   ${ALDER_QT_DIR}/QLoginDialog.cxx
-  ${ALDER_QT_DIR}/QUsersDialog.cxx
   ${ALDER_QT_DIR}/QMainAlderWindow.cxx
+  ${ALDER_QT_DIR}/QSelectStudyDialog.cxx
+  ${ALDER_QT_DIR}/QUserListDialog.cxx
 )
 
 SET_SOURCE_FILES_PROPERTIES(
@@ -110,15 +111,17 @@ SET_SOURCE_FILES_PROPERTIES(
 SET( ALDER_UIS
   ${ALDER_QT_DIR}/QAboutDialog.ui
   ${ALDER_QT_DIR}/QLoginDialog.ui
-  ${ALDER_QT_DIR}/QUsersDialog.ui
   ${ALDER_QT_DIR}/QMainAlderWindow.ui
+  ${ALDER_QT_DIR}/QSelectStudyDialog.ui
+  ${ALDER_QT_DIR}/QUserListDialog.ui
 )
 
 SET( ALDER_HEADERS
   ${ALDER_QT_DIR}/QAboutDialog.h
   ${ALDER_QT_DIR}/QLoginDialog.h
-  ${ALDER_QT_DIR}/QUsersDialog.h
   ${ALDER_QT_DIR}/QMainAlderWindow.h
+  ${ALDER_QT_DIR}/QSelectStudyDialog.h
+  ${ALDER_QT_DIR}/QUserListDialog.h
 )
 
 # Wrap QT files

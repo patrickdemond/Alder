@@ -17,4 +17,18 @@
 namespace Alder
 {
   vtkStandardNewMacro( Study );
+
+  std::vector< std::string > Study::GetIdentifierList()
+  {
+    // TODO: implement
+    std::vector< std::string > list;
+    list.push_back( "A123123" );
+    list.push_back( "B234234" );
+    list.push_back( "C123123" );
+    list.push_back( "D234234" );
+    list.push_back( "E123123" );
+    list.push_back( "F234234" );
+    list.push_back( "G123123" );
+    return list;
+  }
 }

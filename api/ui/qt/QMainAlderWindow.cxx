@@ -23,7 +23,8 @@
 
 #include "QAboutDialog.h"
 #include "QLoginDialog.h"
-#include "QUsersDialog.h"
+#include "QSelectStudyDialog.h"
+#include "QUserListDialog.h"
 
 #include <QCloseEvent>
 #include <QInputDialog>
@@ -141,6 +142,18 @@ void QMainAlderWindow::closeEvent( QCloseEvent *event )
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotOpenStudy()
 {
+  bool loggedIn = NULL != Alder::Application::GetInstance()->GetActiveUser();
+
+  if( loggedIn )
+  {
+    QSelectStudyDialog dialog( this );
+    dialog.setModal( true );
+    dialog.setWindowTitle( tr( "Select Study" ) );
+    dialog.exec();
+
+    // active study may have changed so update the interface
+    this->UpdateInterface();
+  }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -196,7 +209,7 @@ void QMainAlderWindow::slotUsers()
     if( user->IsPassword( text.toStdString().c_str() ) )
     {
       // load the users dialog
-      QUsersDialog usersDialog( this );
+      QUserListDialog usersDialog( this );
       usersDialog.setModal( true );
       usersDialog.setWindowTitle( tr( "User Management" ) );
       usersDialog.exec();
