@@ -49,7 +49,7 @@ QSelectStudyDialog::QSelectStudyDialog( QWidget* parent )
     this->ui->studyTableWidget, SIGNAL( itemSelectionChanged() ),
     this, SLOT( slotSelectionChanged() ) );
 
-  this->UpdateInterface();
+  this->updateInterface();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -72,7 +72,7 @@ void QSelectStudyDialog::slotSearch()
   if( ok )
   {
     this->searchText = text;
-    this->UpdateInterface();
+    this->updateInterface();
   }
 }
 
@@ -135,7 +135,7 @@ void QSelectStudyDialog::slotSelectionChanged()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QSelectStudyDialog::UpdateInterface()
+void QSelectStudyDialog::updateInterface()
 {
   this->ui->studyTableWidget->setRowCount( 0 );
   QTableWidgetItem *item;

@@ -123,8 +123,8 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
 //  app->GetView()->SetInteractor( this->ui->renderWidget->GetInteractor() );
 //  this->ui->renderWidget->SetRenderWindow( app->GetView()->GetRenderWindow() );
 
-  this->ReadSettings();
-  this->UpdateInterface();
+  this->readSettings();
+  this->updateInterface();
 };
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -135,7 +135,7 @@ QMainAlderWindow::~QMainAlderWindow()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::closeEvent( QCloseEvent *event )
 {
-  this->WriteSettings();
+  this->writeSettings();
   event->accept();
 }
 
@@ -152,7 +152,7 @@ void QMainAlderWindow::slotOpenStudy()
     dialog.exec();
 
     // active study may have changed so update the interface
-    this->UpdateInterface();
+    this->updateInterface();
   }
 }
 
@@ -184,7 +184,7 @@ void QMainAlderWindow::slotLogin()
   }
 
   // active user may have changed so update the interface
-  this->UpdateInterface();
+  this->updateInterface();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -235,7 +235,7 @@ void QMainAlderWindow::slotManual()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::ReadSettings()
+void QMainAlderWindow::readSettings()
 {
   QSettings settings( "CLSA", "Alder" );
   
@@ -248,7 +248,7 @@ void QMainAlderWindow::ReadSettings()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::WriteSettings()
+void QMainAlderWindow::writeSettings()
 {
   QSettings settings( "CLSA", "Alder" );
   
@@ -260,7 +260,7 @@ void QMainAlderWindow::WriteSettings()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::UpdateInterface()
+void QMainAlderWindow::updateInterface()
 {
   bool loggedIn = NULL != Alder::Application::GetInstance()->GetActiveUser();
 

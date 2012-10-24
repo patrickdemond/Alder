@@ -34,7 +34,7 @@ public slots:
   virtual void slotSelectionChanged();
 
 protected:
-  void UpdateInterface();
+  void updateInterface();
   QString searchText;
 
 protected slots:

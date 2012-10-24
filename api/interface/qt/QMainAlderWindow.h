@@ -46,9 +46,9 @@ protected:
   virtual void closeEvent( QCloseEvent *event );
 
   // read/write application GUI settings
-  virtual void ReadSettings();
-  virtual void WriteSettings();
-  virtual void UpdateInterface();
+  virtual void readSettings();
+  virtual void writeSettings();
+  virtual void updateInterface();
 
   //virtual void Render( bool resetCamera );
 

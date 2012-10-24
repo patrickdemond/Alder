@@ -36,7 +36,7 @@ public slots:
   virtual void slotSelectionChanged();
 
 protected:
-  void UpdateInterface();
+  void updateInterface();
 
 protected slots:
 

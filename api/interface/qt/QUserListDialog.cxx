@@ -56,7 +56,7 @@ QUserListDialog::QUserListDialog( QWidget* parent )
     this->ui->userTableWidget, SIGNAL( itemSelectionChanged() ),
     this, SLOT( slotSelectionChanged() ) );
   
-  this->UpdateInterface();
+  this->updateInterface();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -80,7 +80,7 @@ void QUserListDialog::slotAdd()
     user->Set( "name", text.toStdString() );
     user->ResetPassword();
     user->Save();
-    this->UpdateInterface();
+    this->updateInterface();
   }
 }
 
@@ -100,7 +100,7 @@ void QUserListDialog::slotRemove()
       user->Remove();
     }
   }
-  this->UpdateInterface();
+  this->updateInterface();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -140,7 +140,7 @@ void QUserListDialog::slotSelectionChanged()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QUserListDialog::UpdateInterface()
+void QUserListDialog::updateInterface()
 {
   this->ui->userTableWidget->setRowCount( 0 );
   QTableWidgetItem *item;
