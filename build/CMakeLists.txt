@@ -30,6 +30,9 @@ FIND_PACKAGE( LibXml2 REQUIRED )
 # We need Crypto++
 FIND_PACKAGE( CRYPTO++ REQUIRED )
 
+# We need JSONCpp
+FIND_PACKAGE( JSONCpp REQUIRED )
+
 # We need convert
 IF( UNIX AND NOT APPLE )
   FIND_PACKAGE( ImageMagick COMPONENTS convert REQUIRED )
@@ -42,6 +45,7 @@ SET( ALDER_APP_DIR ${ALDER_API_DIR}/app )
 SET( ALDER_QT_DIR ${ALDER_API_DIR}/ui/qt )
 SET( ALDER_VTK_DIR ${ALDER_API_DIR}/vtk )
 SET( ALDER_CONFIG_FILE ${PROJECT_BINARY_DIR}/config.xml )
+SET( ALDER_OPAL_SCRIPT ${PROJECT_BINARY_DIR}/opal.py )
 
 # Configure the utitlities header
 CONFIGURE_FILE( ${ALDER_APP_DIR}/Utilities.h.in
@@ -51,11 +55,17 @@ CONFIGURE_FILE( ${ALDER_APP_DIR}/Utilities.h.in
 CONFIGURE_FILE( ${ALDER_ROOT_DIR}/readme
                 ${PROJECT_BINARY_DIR}/readme COPYONLY )
 
-# Copy the config xml file to the build (if not found)
+# Copy the config xml file to the build path (if not found)
 IF( NOT EXISTS ${ALDER_CONFIG_FILE} )
   CONFIGURE_FILE( ${ALDER_AUX_DIR}/config.xml
                   ${ALDER_CONFIG_FILE} COPYONLY )
 ENDIF( NOT EXISTS ${ALDER_CONFIG_FILE} )
+
+# Copy the opal script to the build path (if not found)
+IF( NOT EXISTS ${ALDER_OPAL_SCRIPT} )
+  CONFIGURE_FILE( ${ALDER_AUX_DIR}/opal.py
+                  ${ALDER_OPAL_SCRIPT} COPYONLY )
+ENDIF( NOT EXISTS ${ALDER_OPAL_SCRIPT} )
 
 # Set up include directories
 SET( ALDER_INCLUDE_DIR
@@ -95,7 +105,6 @@ SET_SOURCE_FILES_PROPERTIES(
 
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
   ${ALDER_VTK_DIR}/vtkXMLFileWriter.cxx
-
   ABSTRACT )
 
 SET( ALDER_UIS
@@ -126,6 +135,7 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CRYPTO++_INCLUDE_DIR}
+  ${JSONCPP_INCLUDE_DIR}
 )
 
 # Targets
@@ -133,13 +143,14 @@ ADD_EXECUTABLE( Alder ${ALDER_SOURCE} ${ALDER_UISrcs} ${MOCSrcs} )
 
 TARGET_LINK_LIBRARIES( Alder
   QVTK
-  ${QT_LIBRARIES}
-  ${LIBXML2_LIBRARIES}
-  ${CRYPTO++_LIBRARIES}
   vtkRendering
   vtkGraphics
   vtkIO
   vtkCommon
+  ${QT_LIBRARIES}
+  ${LIBXML2_LIBRARIES}
+  ${CRYPTO++_LIBRARIES}
+  ${JSONCPP_LIBRARIES}
 )
 INSTALL( TARGETS Alder RUNTIME DESTINATION bin )
 

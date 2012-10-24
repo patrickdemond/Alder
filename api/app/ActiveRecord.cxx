@@ -201,7 +201,7 @@ namespace Alder
 
     while( query->NextRow() )
     {
-      // TODO: create a new instance of the child class
+      // create a new instance of the child class
       vtkSmartPointer< ActiveRecord > record = vtkSmartPointer< ActiveRecord >::Take(
         ActiveRecord::SafeDownCast( Application::GetInstance()->Create( this->GetName() ) ) );
       record->Load( "id", query->DataValue( 0 ).ToString() );

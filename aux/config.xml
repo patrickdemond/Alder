@@ -6,4 +6,10 @@
     <Server>localhost</Server>
     <Port>3306</Port>
   </Database>
+  <Opal>
+    <Username></Username>
+    <Password></Password>
+    <Server>localhost</Server>
+    <Port>8843</Port>
+  </Opal>
 </Configuration>

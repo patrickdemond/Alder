@@ -264,4 +264,8 @@ void QMainAlderWindow::UpdateInterface()
   this->ui->removeImagePushButton->setEnabled( false );
   this->ui->ratingSlider->setEnabled( false );
   this->ui->notePushButton->setEnabled( false );
+  this->ui->studyTreeWidget->setEnabled( loggedIn );
+
+  // if a study is open then populate the study tree
+  // TODO this->ui->studyTreeWidget->
 }

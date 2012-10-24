@@ -29,7 +29,13 @@ website or install them using your distro's package manager.  The complete SDK i
 
 Crypto++ (www.cryptopp.com)
 ---------------------------
-You will need the Crypto++ development libraries.  You can download these from cryptopp.com
+You will need the Crypto++ development libraries.  You can download these from the cryptopp.com
+website or install them using your distro's package manager.
+
+
+JSON CPP (jsoncpp.sourceforge.net)
+----------------------------------
+You will need the jsoncpp development libraries.  You can download these from the sourceforge
 website or install them using your distro's package manager.
 
 
