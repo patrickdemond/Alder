@@ -18,6 +18,7 @@
 
 #include "vtkSmartPointer.h"
 
+#include <QInputDialog>
 #include <QList>
 #include <QPushButton>
 #include <QTableWidget>
@@ -36,7 +37,11 @@ QSelectStudyDialog::QSelectStudyDialog( QWidget* parent )
   this->ui->studyTableWidget->verticalHeader()->setVisible( false );
   this->ui->studyTableWidget->setSelectionBehavior( QAbstractItemView::SelectItems );
   this->ui->studyTableWidget->setSelectionMode( QAbstractItemView::SingleSelection );
+  this->searchText = "";
 
+  QObject::connect(
+    this->ui->searchPushButton, SIGNAL( clicked( bool ) ),
+    this, SLOT( slotSearch() ) );
   QObject::connect(
     this->ui->buttonBox, SIGNAL( accepted() ),
     this, SLOT( slotAccepted() ) );
@@ -50,6 +55,25 @@ QSelectStudyDialog::QSelectStudyDialog( QWidget* parent )
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QSelectStudyDialog::~QSelectStudyDialog()
 {
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QSelectStudyDialog::slotSearch()
+{
+  bool ok;
+  QString text = QInputDialog::getText(
+    this,
+    QObject::tr( "Search Term" ),
+    QObject::tr( "Provide some or all of the study to search for:" ),
+    QLineEdit::Normal,
+    QString(),
+    &ok );
+
+  if( ok )
+  {
+    this->searchText = text;
+    this->UpdateInterface();
+  }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -121,15 +145,22 @@ void QSelectStudyDialog::UpdateInterface()
   std::vector< std::string > studyList = Alder::Study::GetIdentifierList();
   std::vector< std::string >::iterator it;
   for( it = studyList.begin(); it != studyList.end(); ++it )
-  { // for every third study (starting with the first), add a new row
-    int column = index % 3;
-    if( 0 == column ) this->ui->studyTableWidget->insertRow( 0 );
-
-    // add the study's identifier to the table
-    item = new QTableWidgetItem;
-    item->setText( tr( it->c_str() ) );
-    this->ui->studyTableWidget->setItem( 0, column, item );
-
-    index++;
+  {
+    QString identifier = tr( it->c_str() );
+    // if the search text isn't empty then only add studies with a partial match
+    if( this->searchText.isEmpty() || identifier.contains( this->searchText, Qt::CaseInsensitive ) )
+    {
+      // for every third study (starting with the first), add a new row
+      int column = index % 3;
+      if( 0 == column ) this->ui->studyTableWidget->insertRow( this->ui->studyTableWidget->rowCount() );
+  
+      // add the study's identifier to the table
+      item = new QTableWidgetItem;
+      item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+      item->setText( tr( it->c_str() ) );
+      this->ui->studyTableWidget->setItem( this->ui->studyTableWidget->rowCount() - 1, column, item );
+  
+      index++;
+    }
   }
 }

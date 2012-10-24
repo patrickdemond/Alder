@@ -83,6 +83,7 @@ SET( ALDER_SOURCE
   ${ALDER_MODEL_DIR}/Database.cxx
   ${ALDER_MODEL_DIR}/Image.cxx
   ${ALDER_MODEL_DIR}/ModelObject.cxx
+  ${ALDER_MODEL_DIR}/OpalService.cxx
   ${ALDER_MODEL_DIR}/Rating.cxx
   ${ALDER_MODEL_DIR}/Series.cxx
   ${ALDER_MODEL_DIR}/Study.cxx

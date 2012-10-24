@@ -1,0 +1,57 @@
+/*=========================================================================
+
+  Program:  Alder (CLSA Ultrasound Image Viewer)
+  Module:   OpalService.h
+  Language: C++
+
+  Author: Patrick Emond <emondpd@mcmaster.ca>
+  Author: Dean Inglis <inglisd@mcmaster.ca>
+
+=========================================================================*/
+//
+// .NAME OpalService - The applications connection to the database
+//
+// .SECTION Description
+//
+
+#ifndef __OpalService_h
+#define __OpalService_h
+
+#include "ModelObject.h"
+
+#include "vtkSmartPointer.h"
+#include "vtkMySQLQuery.h"
+
+#include <iostream>
+#include <map>
+#include <vector>
+
+class vtkMySQLOpalService;
+
+namespace Alder
+{
+  class User;
+  class OpalService : public ModelObject
+  {
+  public:
+    static OpalService *New();
+    vtkTypeMacro( OpalService, ModelObject );
+    void Setup( std::string username, std::string password, std::string host, int port );
+
+  protected:
+    OpalService();
+    ~OpalService() {}
+
+    std::map< std::string,std::map< std::string,std::map< std::string, std::string > > > Columns;
+    std::string Username;
+    std::string Password;
+    std::string Host;
+    int Port;
+
+  private:
+    OpalService( const OpalService& ); // Not implemented
+    void operator=( const OpalService& ); // Not implemented
+  };
+}
+
+#endif

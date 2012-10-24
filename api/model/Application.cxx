@@ -15,6 +15,7 @@
 #include "Cineloop.h"
 #include "Database.h"
 #include "Image.h"
+#include "OpalService.h"
 #include "Rating.h"
 #include "Series.h"
 #include "Study.h"
@@ -36,7 +37,15 @@ namespace Alder
     this->View = vtkView::New();
     this->Config = Configuration::New();
     this->DB = Database::New();
+    this->Opal = OpalService::New();
     this->ActiveUser = NULL;
+
+    // setup the opal service
+    std::string user = this->Config->GetValue( "Opal", "Username" );
+    std::string pass = this->Config->GetValue( "Opal", "Password" );
+    std::string host = this->Config->GetValue( "Opal", "Host" );
+    std::string port = this->Config->GetValue( "Opal", "Port" );
+    this->Opal->Setup( user, pass, host, vtkVariant( port ).ToInt() );
 
     // populate the factory with all active record classes
     this->Factory["Cineloop"] = &createInstance<Cineloop>;
@@ -66,6 +75,12 @@ namespace Alder
     {
       this->DB->Delete();
       this->DB = NULL;
+    }
+
+    if( NULL != this->Opal )
+    {
+      this->Opal->Delete();
+      this->Opal = NULL;
     }
 
     if( NULL != this->ActiveUser )
@@ -116,7 +131,7 @@ namespace Alder
     std::string name = this->Config->GetValue( "Database", "Name" );
     std::string user = this->Config->GetValue( "Database", "Username" );
     std::string pass = this->Config->GetValue( "Database", "Password" );
-    std::string host = this->Config->GetValue( "Database", "Server" );
+    std::string host = this->Config->GetValue( "Database", "Host" );
     std::string port = this->Config->GetValue( "Database", "Port" );
 
     // make sure the database and user names are provided

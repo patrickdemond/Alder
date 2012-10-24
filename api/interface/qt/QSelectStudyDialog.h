@@ -29,11 +29,13 @@ public:
   ~QSelectStudyDialog();
   
 public slots:
+  virtual void slotSearch();
   virtual void slotAccepted();
   virtual void slotSelectionChanged();
 
 protected:
   void UpdateInterface();
+  QString searchText;
 
 protected slots:
 

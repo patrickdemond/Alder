@@ -57,8 +57,11 @@
   }
 #endif
 
-#include <sha.h>
 #include <base64.h>
+#include <sha.h>
+#include <sstream>
+#include <stdio.h>
+#include <json/reader.h>
 
 // main function
 namespace Alder
@@ -76,6 +79,17 @@ namespace Alder
         new CryptoPP::Base64Encoder(
           new CryptoPP::StringSink( output ) ) ) );
   }
+
+  inline std::string exec( const char* command )
+  {
+    FILE* pipe = popen( command, "r" );
+    if( !pipe ) return "ERROR";
+    char buffer[128];
+    std::string result = "";
+    while( !feof( pipe ) ) if( fgets( buffer, 128, pipe ) != NULL ) result += buffer;
+    pclose( pipe );
+    return result;
+  } 
 }
 
 #endif // __Utilities_h

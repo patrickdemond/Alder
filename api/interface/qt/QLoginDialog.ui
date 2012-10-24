@@ -38,7 +38,7 @@
      <x>30</x>
      <y>30</y>
      <width>341</width>
-     <height>61</height>
+     <height>62</height>
     </rect>
    </property>
    <layout class="QFormLayout" name="formLayout">
@@ -84,6 +84,11 @@
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>usernameLineEdit</tabstop>
+  <tabstop>passwordLineEdit</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

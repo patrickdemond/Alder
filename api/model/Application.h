@@ -32,6 +32,7 @@ namespace Alder
 {
   class Configuration;
   class Database;
+  class OpalService;
   class User;
   class Application : public ModelObject
   {
@@ -46,6 +47,7 @@ namespace Alder
     vtkGetObjectMacro( View, vtkView );
     vtkGetObjectMacro( Config, Configuration );
     vtkGetObjectMacro( DB, Database );
+    vtkGetObjectMacro( Opal, OpalService );
     vtkGetObjectMacro( ActiveUser, User );
     virtual void SetActiveUser( User* );
 
@@ -63,6 +65,7 @@ namespace Alder
     vtkView *View;
     Configuration *Config;
     Database *DB;
+    OpalService *Opal;
     User *ActiveUser;
     
   private:

@@ -158,16 +158,19 @@ void QUserListDialog::UpdateInterface()
 
     // add name to row
     item = new QTableWidgetItem;
+    item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
     item->setText( tr( name ? name->ToString().c_str() : "" ) );
     this->ui->userTableWidget->setItem( 0, 0, item );
 
     // add last login to row
     item = new QTableWidgetItem;
+    item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
     item->setText( tr( login ? login->ToString().c_str() : "" ) );
     this->ui->userTableWidget->setItem( 0, 1, item );
 
     // add created tiem to row
     item = new QTableWidgetItem;
+    item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
     item->setText( tr( "" ) );
     this->ui->userTableWidget->setItem( 0, 2, item );
   }

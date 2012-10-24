@@ -33,6 +33,7 @@ QLoginDialog::QLoginDialog( QWidget* parent )
     this, SLOT( slotAccepted() ) );
 
   this->ui->passwordLineEdit->setEchoMode( QLineEdit::Password );
+  this->ui->usernameLineEdit->setFocus( Qt::PopupFocusReason ); // make sure username box is focused
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

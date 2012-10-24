@@ -16,10 +16,10 @@
   <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>741</width>
-     <height>541</height>
+     <x>30</x>
+     <y>30</y>
+     <width>701</width>
+     <height>501</height>
     </rect>
    </property>
    <property name="currentIndex">
