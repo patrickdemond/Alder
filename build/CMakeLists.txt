@@ -41,14 +41,14 @@ ENDIF( UNIX AND NOT APPLE )
 SET( ALDER_ROOT_DIR ${PROJECT_SOURCE_DIR}/.. )
 SET( ALDER_AUX_DIR ${ALDER_ROOT_DIR}/aux )
 SET( ALDER_API_DIR ${ALDER_ROOT_DIR}/api )
-SET( ALDER_APP_DIR ${ALDER_API_DIR}/app )
-SET( ALDER_QT_DIR ${ALDER_API_DIR}/ui/qt )
+SET( ALDER_MODEL_DIR ${ALDER_API_DIR}/model )
+SET( ALDER_QT_DIR ${ALDER_API_DIR}/interface/qt )
 SET( ALDER_VTK_DIR ${ALDER_API_DIR}/vtk )
 SET( ALDER_CONFIG_FILE ${PROJECT_BINARY_DIR}/config.xml )
 SET( ALDER_OPAL_SCRIPT ${PROJECT_BINARY_DIR}/opal.py )
 
 # Configure the utitlities header
-CONFIGURE_FILE( ${ALDER_APP_DIR}/Utilities.h.in
+CONFIGURE_FILE( ${ALDER_API_DIR}/Utilities.h.in
                 ${PROJECT_BINARY_DIR}/Utilities.h @ONLY IMMEDIATE )
 
 # Copy the readme file to build
@@ -69,7 +69,7 @@ ENDIF( NOT EXISTS ${ALDER_OPAL_SCRIPT} )
 
 # Set up include directories
 SET( ALDER_INCLUDE_DIR
-  ${ALDER_APP_DIR}
+  ${ALDER_MODEL_DIR}
   ${ALDER_QT_DIR}
   ${ALDER_VTK_DIR}
 )
@@ -77,17 +77,17 @@ SET( ALDER_INCLUDE_DIR
 SET( ALDER_SOURCE
   ${ALDER_API_DIR}/Alder.cxx
 
-  ${ALDER_APP_DIR}/ActiveRecord.cxx
-  ${ALDER_APP_DIR}/Cineloop.cxx
-  ${ALDER_APP_DIR}/Configuration.cxx
-  ${ALDER_APP_DIR}/Database.cxx
-  ${ALDER_APP_DIR}/Image.cxx
-  ${ALDER_APP_DIR}/ModelObject.cxx
-  ${ALDER_APP_DIR}/Rating.cxx
-  ${ALDER_APP_DIR}/Series.cxx
-  ${ALDER_APP_DIR}/Study.cxx
-  ${ALDER_APP_DIR}/User.cxx
-  ${ALDER_APP_DIR}/Application.cxx
+  ${ALDER_MODEL_DIR}/ActiveRecord.cxx
+  ${ALDER_MODEL_DIR}/Cineloop.cxx
+  ${ALDER_MODEL_DIR}/Configuration.cxx
+  ${ALDER_MODEL_DIR}/Database.cxx
+  ${ALDER_MODEL_DIR}/Image.cxx
+  ${ALDER_MODEL_DIR}/ModelObject.cxx
+  ${ALDER_MODEL_DIR}/Rating.cxx
+  ${ALDER_MODEL_DIR}/Series.cxx
+  ${ALDER_MODEL_DIR}/Study.cxx
+  ${ALDER_MODEL_DIR}/User.cxx
+  ${ALDER_MODEL_DIR}/Application.cxx
 
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
   ${ALDER_VTK_DIR}/vtkXMLConfigurationFileReader.cxx
@@ -101,8 +101,8 @@ SET( ALDER_SOURCE
 )
 
 SET_SOURCE_FILES_PROPERTIES(
-  ${ALDER_APP_DIR}/ActiveRecord.cxx
-  ${ALDER_APP_DIR}/ModelObject.cxx
+  ${ALDER_MODEL_DIR}/ActiveRecord.cxx
+  ${ALDER_MODEL_DIR}/ModelObject.cxx
 
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
   ${ALDER_VTK_DIR}/vtkXMLFileWriter.cxx
