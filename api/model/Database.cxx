@@ -182,29 +182,4 @@ namespace Alder
     return vtkSmartPointer<vtkMySQLQuery>::Take(
       vtkMySQLQuery::SafeDownCast( this->MySQLDatabase->GetQueryInstance() ) );
   }
-
-/*
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::vector< vtkSmartPointer<User> > Database::GetUsers()
-  {
-    std::vector< vtkSmartPointer<User> > users;
-
-    // get users from the database and populate a vector of User objects
-    vtkSmartPointer<vtkMySQLToTableReader> reader = vtkSmartPointer<vtkMySQLToTableReader>::New();
-    reader->SetDatabase( this->MySQLDatabase );
-    reader->SetTableName( "user" );
-    reader->Update();
-    vtkTable *table = reader->GetOutput();
-    for( vtkIdType row = 0; row < table->GetNumberOfRows(); ++row )
-    {
-      vtkSmartPointer<User> user = vtkSmartPointer<User>::New();
-      user->name = table->GetValueByName( row, "name" ).ToString();
-      user->lastLogin = table->GetValueByName( row, "last_login" ).ToString();
-      user->createdOn = table->GetValueByName( row, "create_timestamp" ).ToString();
-      users.push_back( user );
-    }
-
-    return users;
-  }
-*/
 }
