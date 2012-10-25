@@ -10,6 +10,8 @@
 =========================================================================*/
 #include "Study.h"
 
+#include "Application.h"
+#include "OpalService.h"
 #include "Utilities.h"
 
 #include "vtkObjectFactory.h"
@@ -20,15 +22,6 @@ namespace Alder
 
   std::vector< std::string > Study::GetIdentifierList()
   {
-    // TODO: implement
-    std::vector< std::string > list;
-    list.push_back( "A123123" );
-    list.push_back( "B234234" );
-    list.push_back( "C123123" );
-    list.push_back( "D234234" );
-    list.push_back( "E123123" );
-    list.push_back( "F234234" );
-    list.push_back( "G123123" );
-    return list;
+    return Application::GetInstance()->GetOpal()->GetIdentifiers( "clsa-dcs-images", "CarotidIntima" );
   }
 }

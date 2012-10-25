@@ -37,6 +37,8 @@ namespace Alder
     static OpalService *New();
     vtkTypeMacro( OpalService, ModelObject );
     void Setup( std::string username, std::string password, std::string host, int port );
+    std::vector< std::string > GetIdentifiers( std::string dataSource, std::string table );
+    void GetValue( std::string dataSource, std::string table, std::string variable );
 
   protected:
     OpalService();

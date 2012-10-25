@@ -36,6 +36,7 @@ public slots:
 protected:
   void updateInterface();
   QString searchText;
+  static const int ColumnCount = 5;
 
 protected slots:
 

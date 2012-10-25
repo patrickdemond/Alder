@@ -37,6 +37,7 @@ QSelectStudyDialog::QSelectStudyDialog( QWidget* parent )
   this->ui->studyTableWidget->verticalHeader()->setVisible( false );
   this->ui->studyTableWidget->setSelectionBehavior( QAbstractItemView::SelectItems );
   this->ui->studyTableWidget->setSelectionMode( QAbstractItemView::SingleSelection );
+  this->ui->studyTableWidget->setColumnCount( QSelectStudyDialog::ColumnCount );
   this->searchText = "";
 
   QObject::connect(
@@ -150,8 +151,8 @@ void QSelectStudyDialog::updateInterface()
     // if the search text isn't empty then only add studies with a partial match
     if( this->searchText.isEmpty() || identifier.contains( this->searchText, Qt::CaseInsensitive ) )
     {
-      // for every third study (starting with the first), add a new row
-      int column = index % 3;
+      // for every fifth study (starting with the first), add a new row
+      int column = index % QSelectStudyDialog::ColumnCount;
       if( 0 == column ) this->ui->studyTableWidget->insertRow( this->ui->studyTableWidget->rowCount() );
   
       // add the study's identifier to the table

@@ -40,13 +40,6 @@ namespace Alder
     this->Opal = OpalService::New();
     this->ActiveUser = NULL;
 
-    // setup the opal service
-    std::string user = this->Config->GetValue( "Opal", "Username" );
-    std::string pass = this->Config->GetValue( "Opal", "Password" );
-    std::string host = this->Config->GetValue( "Opal", "Host" );
-    std::string port = this->Config->GetValue( "Opal", "Port" );
-    this->Opal->Setup( user, pass, host, vtkVariant( port ).ToInt() );
-
     // populate the factory with all active record classes
     this->Factory["Cineloop"] = &createInstance<Cineloop>;
     this->Factory["Image"] = &createInstance<Image>;
@@ -147,5 +140,16 @@ namespace Alder
     if( 0 == port.length() ) port = "3306";
 
     return this->DB->Connect( name, user, pass, host, vtkVariant( port ).ToInt() );
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Application::SetupOpalService()
+  {
+    // setup the opal service
+    std::string user = this->Config->GetValue( "Opal", "Username" );
+    std::string pass = this->Config->GetValue( "Opal", "Password" );
+    std::string host = this->Config->GetValue( "Opal", "Host" );
+    std::string port = this->Config->GetValue( "Opal", "Port" );
+    this->Opal->Setup( user, pass, host, vtkVariant( port ).ToInt() );
   }
 }

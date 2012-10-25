@@ -36,26 +36,24 @@ int main( int argc, char** argv )
 
   try
   {
-    // Make sure that the database can be connected to
-      Application *app = Application::GetInstance();
+    // start by reading the configuration, connecting to the database and setting up the Opal service
+    Application *app = Application::GetInstance();
     if( !app->ReadConfiguration( ALDER_CONFIG_FILE ) )
     {
       cerr << "ERROR: error while reading configuration file \"" << ALDER_CONFIG_FILE << "\"" << endl;
       Application::DeleteInstance();
       return status;
     }
-
     if( !app->ConnectToDatabase() )
     {
       cerr << "ERROR: error while connecting to the database" << endl;
       Application::DeleteInstance();
       return status;
     }
+    app->SetupOpalService();
 
-    // create the qt application object and set some defaults
+    // now create the user interface
     QAlderApplication qapp( argc, argv );
-    
-    // set main widget for the application to the main window
     QMainAlderWindow mainWindow;
 
     // check to see if an admin user exists, create if not
