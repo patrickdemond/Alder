@@ -33,6 +33,7 @@ namespace Alder
   class Configuration;
   class Database;
   class OpalService;
+  class Study;
   class User;
   class Application : public ModelObject
   {
@@ -51,6 +52,8 @@ namespace Alder
     vtkGetObjectMacro( Opal, OpalService );
     vtkGetObjectMacro( ActiveUser, User );
     virtual void SetActiveUser( User* );
+    vtkGetObjectMacro( ActiveStudy, Study );
+    virtual void SetActiveStudy( Study* );
 
     ModelObject* Create( std::string className )
     { return Application::Factory[className](); }
@@ -68,6 +71,7 @@ namespace Alder
     Database *DB;
     OpalService *Opal;
     User *ActiveUser;
+    Study *ActiveStudy;
     
   private:
     Application( const Application& );  // Not implemented.

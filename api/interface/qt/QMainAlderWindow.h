@@ -35,7 +35,8 @@ public slots:
   virtual void slotPreviousStudy();
   virtual void slotNextStudy();
   virtual void slotLogin();
-  virtual void slotUsers();
+  virtual void slotUserManagement();
+  virtual void slotUpdateStudyDatabase();
 
   // help event functions
   virtual void slotAbout();

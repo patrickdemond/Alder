@@ -12,6 +12,7 @@
 #include "ui_QMainAlderWindow.h"
 
 #include "Application.h"
+#include "Study.h"
 #include "User.h"
 
 #include "vtkCamera.h"
@@ -86,7 +87,7 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   this->ui = new Ui_QMainAlderWindow;
   this->ui->setupUi( this );
   
-  // connect the file menu items
+  // connect the menu items
   QObject::connect(
     this->ui->actionOpenStudy, SIGNAL( triggered() ),
     this, SLOT( slotOpenStudy() ) );
@@ -100,8 +101,11 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this->ui->actionLogin, SIGNAL( triggered() ),
     this, SLOT( slotLogin() ) );
   QObject::connect(
-    this->ui->actionUsers, SIGNAL( triggered() ),
-    this, SLOT( slotUsers() ) );
+    this->ui->actionUserManagement, SIGNAL( triggered() ),
+    this, SLOT( slotUserManagement() ) );
+  QObject::connect(
+    this->ui->actionUpdateStudyDatabase, SIGNAL( triggered() ),
+    this, SLOT( slotUpdateStudyDatabase() ) );
   QObject::connect(
     this->ui->actionExit, SIGNAL( triggered() ),
     qApp, SLOT( closeAllWindows() ) );
@@ -188,7 +192,7 @@ void QMainAlderWindow::slotLogin()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotUsers()
+void QMainAlderWindow::slotUserManagement()
 {
   int attempt = 1;
 
@@ -217,6 +221,13 @@ void QMainAlderWindow::slotUsers()
     }
     attempt++;
   }
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotUpdateStudyDatabase()
+{
+  // TODO: add progress bar
+  Alder::Study::UpdateData();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

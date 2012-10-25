@@ -112,6 +112,11 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <column>
+           <property name="text">
+            <string notr="true">1</string>
+           </property>
+          </column>
          </widget>
         </item>
         <item>
@@ -412,8 +417,6 @@
     <addaction name="actionNextStudy"/>
     <addaction name="separator"/>
     <addaction name="actionLogin"/>
-    <addaction name="separator"/>
-    <addaction name="actionUsers"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -423,7 +426,15 @@
     <addaction name="actionAbout"/>
     <addaction name="actionManual"/>
    </widget>
+   <widget class="QMenu" name="menuAdministration">
+    <property name="title">
+     <string>Administration</string>
+    </property>
+    <addaction name="actionUserManagement"/>
+    <addaction name="actionUpdateStudyDatabase"/>
+   </widget>
    <addaction name="menuActions"/>
+   <addaction name="menuAdministration"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -462,9 +473,9 @@
     <string>Login</string>
    </property>
   </action>
-  <action name="actionUsers">
+  <action name="actionManageUsers">
    <property name="text">
-    <string>Users</string>
+    <string>User Management</string>
    </property>
   </action>
   <action name="actionExit">
@@ -480,6 +491,21 @@
   <action name="actionManual">
    <property name="text">
     <string>Manual</string>
+   </property>
+  </action>
+  <action name="actionUpdateData">
+   <property name="text">
+    <string>Update Study Database</string>
+   </property>
+  </action>
+  <action name="actionUserManagement">
+   <property name="text">
+    <string>User Management</string>
+   </property>
+  </action>
+  <action name="actionUpdateStudyDatabase">
+   <property name="text">
+    <string>Update Study Database</string>
    </property>
   </action>
  </widget>

@@ -26,7 +26,8 @@ CREATE  TABLE IF NOT EXISTS `alder`.`Study` (
   INDEX `dk_datetime_reviewed` (`datetime_reviewed` ASC) ,
   INDEX `dk_site` (`site` ASC) ,
   INDEX `dk_datetime_acquired` (`datetime_acquired` ASC) ,
-  INDEX `dk_interviewer` (`interviewer` ASC) )
+  INDEX `dk_interviewer` (`interviewer` ASC) ,
+  UNIQUE INDEX `uq_uid` (`uid` ASC) )
 ENGINE = InnoDB;
 
 

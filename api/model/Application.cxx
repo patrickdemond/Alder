@@ -28,6 +28,7 @@
 namespace Alder
 {
   vtkCxxSetObjectMacro( Application, ActiveUser, User );
+  vtkCxxSetObjectMacro( Application, ActiveStudy, Study );
 
   Application* Application::Instance = NULL; // set the initial application
 
@@ -39,6 +40,7 @@ namespace Alder
     this->DB = Database::New();
     this->Opal = OpalService::New();
     this->ActiveUser = NULL;
+    this->ActiveStudy = NULL;
 
     // populate the factory with all active record classes
     this->Factory["Cineloop"] = &createInstance<Cineloop>;
@@ -80,6 +82,12 @@ namespace Alder
     {
       this->ActiveUser->Delete();
       this->ActiveUser = NULL;
+    }
+
+    if( NULL != this->ActiveStudy )
+    {
+      this->ActiveStudy->Delete();
+      this->ActiveStudy = NULL;
     }
   }
 

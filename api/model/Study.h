@@ -25,6 +25,7 @@ namespace Alder
   public:
     static Study *New();
     vtkTypeMacro( Study, ActiveRecord );
+    static void UpdateData();
     static std::vector< std::string > GetIdentifierList();
 
   protected:

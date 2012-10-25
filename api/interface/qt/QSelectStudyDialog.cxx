@@ -80,52 +80,10 @@ void QSelectStudyDialog::slotSearch()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QSelectStudyDialog::slotAccepted()
 {
-/*
   vtkSmartPointer< Alder::Study > study = vtkSmartPointer< Alder::Study >::New();
-  if( study->Load( "name", this->ui->studynameLineEdit->text().toStdString() ) && study->IsPassword( password ) )
-  { // login successful
-    // if the password matches the default password, force the study to change it
-    while( 0 == password.compare( Alder::Study::GetDefaultPassword() ) )
-    {
-      // prompt for new password
-      QString password1 = QInputDialog::getText(
-        this,
-        QObject::tr( "Change Password" ),
-        QObject::tr( "Please provide a new password (cannot be \"password\") for your account:" ),
-        QLineEdit::Password );
-
-      if( !password1.isEmpty() && password1 != "password" )
-      {
-        // re-prompt to repeat password
-        QString password2 = QInputDialog::getText(
-          this,
-          QObject::tr( "Re-type Password" ),
-          QObject::tr( "Please verify your new password by typing it again:" ),
-          QLineEdit::Password );
-
-        if( password1 == password2 )
-        {
-          // set the replacement password
-          password = password1.toStdString();
-          study->Set( "password", password );
-          study->Save();
-        }
-      }
-    }
-
-    // log in the study
-    Alder::Application::GetInstance()->SetActiveStudy( study );
-    this->accept();
-  }
-  else
-  { // login failed
-    QMessageBox errorMessage( this );
-    errorMessage.setWindowModality( Qt::WindowModal );
-    errorMessage.setIcon( QMessageBox::Warning );
-    errorMessage.setText( tr( "Invalid studyname or password, please try again." ) );
-    errorMessage.exec();
-  }
-*/
+  // study->Load( "uid", TODO: get study UID from UI
+  Alder::Application::GetInstance()->SetActiveStudy( study );
+  this->accept();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
