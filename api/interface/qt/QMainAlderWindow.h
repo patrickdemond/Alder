@@ -15,11 +15,10 @@
 #include <QMainWindow>
 
 #include "Utilities.h"
+
 #include "vtkSmartPointer.h"
 
 class Ui_QMainAlderWindow;
-
-//class QMainAlderWindowProgressCommand;
 
 class QMainAlderWindow : public QMainWindow
 {
@@ -28,6 +27,7 @@ class QMainAlderWindow : public QMainWindow
 public:
   QMainAlderWindow( QWidget* parent = 0 );
   ~QMainAlderWindow();
+
   
 public slots:
   // action event functions
@@ -42,6 +42,7 @@ public slots:
   virtual void slotAbout();
   virtual void slotManual();
 
+
 protected:
   // called whenever the main window is closed
   virtual void closeEvent( QCloseEvent *event );
@@ -51,10 +52,6 @@ protected:
   virtual void writeSettings();
   virtual void updateInterface();
 
-  //virtual void Render( bool resetCamera );
-
-  //vtkSmartPointer< QMainAlderWindowProgressCommand > ProgressObserver;
-  //QString CurrentSessionFileName;
 protected slots:
 
 private:

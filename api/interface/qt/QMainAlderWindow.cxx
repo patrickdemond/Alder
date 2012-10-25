@@ -15,15 +15,9 @@
 #include "Study.h"
 #include "User.h"
 
-#include "vtkCamera.h"
-#include "vtkCommand.h"
-#include "vtkMath.h"
-#include "vtkPNGWriter.h"
-#include "vtkSmartPointer.h"
-#include "vtkWindowToImageFilter.h"
-
 #include "QAboutDialog.h"
 #include "QLoginDialog.h"
+#include "QProgressDialog.h"
 #include "QSelectStudyDialog.h"
 #include "QUserListDialog.h"
 
@@ -32,56 +26,11 @@
 #include <QMessageBox>
 #include <QSettings>
 
-/*
-class QMainAlderWindowProgressCommand : public vtkCommand
-{
-public:
-  static QMainAlderWindowProgressCommand *New() { return new QMainAlderWindowProgressCommand; }
-  void Execute( vtkObject *caller, unsigned long eventId, void *callData );
-  Ui_QMainAlderWindow *ui;
-
-protected:
-  QMainAlderWindowProgressCommand() { this->ui = NULL; }
-};
-*/
-
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-/*
-void QMainAlderWindowProgressCommand::Execute(
-  vtkObject *caller, unsigned long eventId, void *callData )
-{
-  if( this->ui )
-  {
-    // display the progress
-    double progress = *( static_cast<double*>( callData ) );
-    int value = vtkMath::Floor( 100 * progress ) + 1;
-    if( 100 < value ) value = 100;
-    if( this->ui->progressBar->value() != value ) this->ui->progressBar->setValue( value );
-
-    // show what's happening in the status bar
-    if( 100 == value )
-    {
-      this->ui->statusbar->clearMessage();
-    }
-    else
-    {
-      // Display data update strings here
-      QString message = QString( "" );
-      if( message.length() ) this->ui->statusbar->showMessage( message );
-
-      // if we want the status bar to look smooth then we can call repaint on it here
-      // however, let's not do that since it substantially slows down processing
-      //this->ui->statusbar->repaint();
-    }
-  }
-}
-*/
-
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   : QMainWindow( parent )
 {
+  Alder::Application *app = Alder::Application::GetInstance();
   QMenu *menu;
   
   this->ui = new Ui_QMainAlderWindow;
@@ -118,12 +67,7 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this->ui->actionManual, SIGNAL( triggered() ),
     this, SLOT( slotManual() ) );
 
-  // set up the observer to update the progress bar
-//  this->ProgressObserver = vtkSmartPointer< QMainAlderWindowProgressCommand >::New();
-//  this->ProgressObserver->ui = this->ui;
-
   // link the view and the qt render widget
-//  Application *app = Application::GetInstance();
 //  app->GetView()->SetInteractor( this->ui->renderWidget->GetInteractor() );
 //  this->ui->renderWidget->SetRenderWindow( app->GetView()->GetRenderWindow() );
 
@@ -205,7 +149,7 @@ void QMainAlderWindow::slotUserManagement()
       QObject::tr( attempt > 1 ? "Wrong password, try again:" : "Administrator password:" ),
       QLineEdit::Password );
     
-    // NULL means the user hit the cancel button
+    // do nothing if the user hit the cancel button
     if( text.isEmpty() ) break;
 
     vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
@@ -226,8 +170,36 @@ void QMainAlderWindow::slotUserManagement()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotUpdateStudyDatabase()
 {
-  // TODO: add progress bar
-  Alder::Study::UpdateData();
+  int attempt = 1;
+
+  while( attempt < 4 )
+  {
+    // check for admin password
+    QString text = QInputDialog::getText(
+      this,
+      QObject::tr( "User Management" ),
+      QObject::tr( attempt > 1 ? "Wrong password, try again:" : "Administrator password:" ),
+      QLineEdit::Password );
+    
+    // do nothing if the user hit the cancel button
+    if( text.isEmpty() ) break;
+
+    vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
+    user->Load( "name", "administrator" );
+    if( user->IsPassword( text.toStdString().c_str() ) )
+    {
+      // create a progress dialog to observe the progress of the update
+      QProgressDialog dialog( this );
+      dialog.setModal( true );
+      dialog.setWindowTitle( tr( "Updating Study Database" ) );
+      dialog.setMessage( tr( "Please wait while the study database is updated." ) );
+      dialog.open();
+      Alder::Study::UpdateData();
+      dialog.accept();
+      break;
+    }
+    attempt++;
+  }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
