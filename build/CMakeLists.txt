@@ -90,6 +90,7 @@ SET( ALDER_SOURCE
   ${ALDER_MODEL_DIR}/User.cxx
   ${ALDER_MODEL_DIR}/Application.cxx
 
+  ${ALDER_VTK_DIR}/vtkMedicalImageViewer.cxx
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
   ${ALDER_VTK_DIR}/vtkXMLConfigurationFileReader.cxx
   

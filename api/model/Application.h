@@ -26,7 +26,7 @@
 
 #include <iostream>
 
-class vtkView;
+class vtkMedicalImageViewer;
 
 namespace Alder
 {
@@ -46,7 +46,7 @@ namespace Alder
     bool ConnectToDatabase();
     void SetupOpalService();
 
-    vtkGetObjectMacro( View, vtkView );
+    vtkGetObjectMacro( Viewer, vtkMedicalImageViewer );
     vtkGetObjectMacro( Config, Configuration );
     vtkGetObjectMacro( DB, Database );
     vtkGetObjectMacro( Opal, OpalService );
@@ -66,7 +66,7 @@ namespace Alder
     static Application *Instance;
 
     std::map< std::string, ModelObject*(*)() > Factory;
-    vtkView *View;
+    vtkMedicalImageViewer *Viewer;
     Configuration *Config;
     Database *DB;
     OpalService *Opal;

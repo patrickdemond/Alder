@@ -23,7 +23,7 @@
 
 #include "vtkObjectFactory.h"
 #include "vtkVariant.h"
-#include "vtkView.h"
+#include "vtkMedicalImageViewer.h"
 
 namespace Alder
 {
@@ -35,7 +35,8 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   Application::Application()
   {
-    this->View = vtkView::New();
+    this->Viewer = vtkMedicalImageViewer::New();
+    this->Viewer->SetImageToSinusoid();
     this->Config = Configuration::New();
     this->DB = Database::New();
     this->Opal = OpalService::New();
@@ -54,10 +55,10 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   Application::~Application()
   {
-    if( NULL != this->View )
+    if( NULL != this->Viewer )
     {
-      this->View->Delete();
-      this->View = NULL;
+      this->Viewer->Delete();
+      this->Viewer = NULL;
     }
 
     if( NULL != this->Config )

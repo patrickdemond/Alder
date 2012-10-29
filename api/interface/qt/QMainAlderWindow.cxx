@@ -15,6 +15,8 @@
 #include "Study.h"
 #include "User.h"
 
+#include "vtkMedicalImageViewer.h"
+
 #include "QAboutDialog.h"
 #include "QLoginDialog.h"
 #include "QProgressDialog.h"
@@ -68,8 +70,8 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this, SLOT( slotManual() ) );
 
   // link the view and the qt render widget
-//  app->GetView()->SetInteractor( this->ui->renderWidget->GetInteractor() );
-//  this->ui->renderWidget->SetRenderWindow( app->GetView()->GetRenderWindow() );
+  app->GetViewer()->SetInteractor( this->ui->renderWidget->GetInteractor() );
+  this->ui->renderWidget->SetRenderWindow( app->GetViewer()->GetRenderWindow() );
 
   this->readSettings();
   this->updateInterface();
