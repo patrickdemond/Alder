@@ -35,11 +35,6 @@
        <string>Last Login</string>
       </property>
      </column>
-     <column>
-      <property name="text">
-       <string>Created</string>
-      </property>
-     </column>
     </widget>
    </item>
    <item>

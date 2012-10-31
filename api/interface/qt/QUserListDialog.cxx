@@ -144,7 +144,7 @@ void QUserListDialog::updateInterface()
 {
   this->ui->userTableWidget->setRowCount( 0 );
   QTableWidgetItem *item;
-  vtkVariant *name, *login;
+  vtkVariant *v;
   
   std::vector< vtkSmartPointer< Alder::User > > userList;
   Alder::User::GetAll( &userList );
@@ -153,25 +153,19 @@ void QUserListDialog::updateInterface()
   { // for every user, add a new row
     Alder::User *user = (*it);
     this->ui->userTableWidget->insertRow( 0 );
-    name = user->Get( "name" );
-    login = user->Get( "last_login" );
 
     // add name to row
+    v = user->Get( "name" );
     item = new QTableWidgetItem;
     item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-    item->setText( tr( name ? name->ToString().c_str() : "" ) );
+    item->setText( tr( v ? v->ToString().c_str() : "" ) );
     this->ui->userTableWidget->setItem( 0, 0, item );
 
     // add last login to row
+    v = user->Get( "last_login" );
     item = new QTableWidgetItem;
     item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-    item->setText( tr( login ? login->ToString().c_str() : "" ) );
+    item->setText( tr( v ? v->ToString().c_str() : "" ) );
     this->ui->userTableWidget->setItem( 0, 1, item );
-
-    // add created tiem to row
-    item = new QTableWidgetItem;
-    item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-    item->setText( tr( "" ) );
-    this->ui->userTableWidget->setItem( 0, 2, item );
   }
 }

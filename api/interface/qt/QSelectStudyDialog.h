@@ -32,11 +32,13 @@ public slots:
   virtual void slotSearch();
   virtual void slotAccepted();
   virtual void slotSelectionChanged();
+  virtual void slotHeaderClicked( int index );
 
 protected:
   void updateInterface();
   QString searchText;
-  static const int ColumnCount = 5;
+  int sortColumn;
+  Qt::SortOrder sortOrder;
 
 protected slots:
 

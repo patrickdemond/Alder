@@ -33,12 +33,14 @@ QSelectStudyDialog::QSelectStudyDialog( QWidget* parent )
   this->ui = new Ui_QSelectStudyDialog;
   this->ui->setupUi( this );
   this->ui->studyTableWidget->horizontalHeader()->setResizeMode( QHeaderView::Stretch );
-  this->ui->studyTableWidget->horizontalHeader()->setVisible( false );
+  this->ui->studyTableWidget->horizontalHeader()->setClickable( true );
   this->ui->studyTableWidget->verticalHeader()->setVisible( false );
-  this->ui->studyTableWidget->setSelectionBehavior( QAbstractItemView::SelectItems );
+  this->ui->studyTableWidget->setSelectionBehavior( QAbstractItemView::SelectRows );
   this->ui->studyTableWidget->setSelectionMode( QAbstractItemView::SingleSelection );
-  this->ui->studyTableWidget->setColumnCount( QSelectStudyDialog::ColumnCount );
+
   this->searchText = "";
+  this->sortColumn = 0;
+  this->sortOrder = Qt::AscendingOrder;
 
   QObject::connect(
     this->ui->searchPushButton, SIGNAL( clicked( bool ) ),
@@ -49,6 +51,9 @@ QSelectStudyDialog::QSelectStudyDialog( QWidget* parent )
   QObject::connect(
     this->ui->studyTableWidget, SIGNAL( itemSelectionChanged() ),
     this, SLOT( slotSelectionChanged() ) );
+  QObject::connect(
+    this->ui->studyTableWidget->horizontalHeader(), SIGNAL( sectionClicked( int ) ),
+    this, SLOT( slotHeaderClicked( int ) ) );
 
   this->updateInterface();
 }
@@ -94,42 +99,63 @@ void QSelectStudyDialog::slotSelectionChanged()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QSelectStudyDialog::slotHeaderClicked( int index )
+{
+  // reverse order if already sorted
+  if( this->sortColumn == index )
+    this->sortOrder = Qt::AscendingOrder == this->sortOrder ? Qt::DescendingOrder : Qt::AscendingOrder;
+  this->sortColumn = index;
+  this->updateInterface();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QSelectStudyDialog::updateInterface()
 {
   this->ui->studyTableWidget->setRowCount( 0 );
   QTableWidgetItem *item;
+  vtkVariant *v;
   
-  /*
-  vtkSmartPointer< Alder::Study > study = vtkSmartPointer< Alder::Study >::New();
-  std::vector< vtkSmartPointer< Alder::ActiveRecord > > studyList = study->GetAll();
-  std::vector< vtkSmartPointer< Alder::ActiveRecord > >::iterator it;
-  for( study = studyList.begin(); study != studyList.end(); ++study )
-  { // for every study, add a new row
-  }
-  */
-
-  /*
-  int index = 0;
-  std::vector< std::string > studyList = Alder::Study::GetIdentifierList();
-  std::vector< std::string >::iterator it;
+  std::vector< vtkSmartPointer< Alder::Study > > studyList;
+  Alder::Study::GetAll( &studyList );
+  std::vector< vtkSmartPointer< Alder::Study > >::iterator it;
   for( it = studyList.begin(); it != studyList.end(); ++it )
-  {
-    QString identifier = tr( it->c_str() );
-    // if the search text isn't empty then only add studies with a partial match
-    if( this->searchText.isEmpty() || identifier.contains( this->searchText, Qt::CaseInsensitive ) )
+  { // for every study, add a new row
+    Alder::Study *study = (*it);
+    QString uid = tr( study->Get( "uid" )->ToString().c_str() );
+
+    if( this->searchText.isEmpty() || uid.contains( this->searchText, Qt::CaseInsensitive ) )
     {
-      // for every fifth study (starting with the first), add a new row
-      int column = index % QSelectStudyDialog::ColumnCount;
-      if( 0 == column ) this->ui->studyTableWidget->insertRow( this->ui->studyTableWidget->rowCount() );
-  
-      // add the study's identifier to the table
+      this->ui->studyTableWidget->insertRow( 0 );
+
+      // add uid to row
+      v = study->Get( "uid" );
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      item->setText( tr( it->c_str() ) );
-      this->ui->studyTableWidget->setItem( this->ui->studyTableWidget->rowCount() - 1, column, item );
-  
-      index++;
+      item->setText( uid );
+      this->ui->studyTableWidget->setItem( 0, 0, item );
+
+      // add site to row
+      v = study->Get( "site" );
+      item = new QTableWidgetItem;
+      item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+      item->setText( tr( v ? v->ToString().c_str() : "" ) );
+      this->ui->studyTableWidget->setItem( 0, 1, item );
+
+      // add interviewer to row
+      v = study->Get( "interviewer" );
+      item = new QTableWidgetItem;
+      item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+      item->setText( tr( v ? v->ToString().c_str() : "" ) );
+      this->ui->studyTableWidget->setItem( 0, 2, item );
+
+      // add datetime_acquired to row
+      v = study->Get( "datetime_acquired" );
+      item = new QTableWidgetItem;
+      item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+      item->setText( tr( v ? v->ToString().c_str() : "" ) );
+      this->ui->studyTableWidget->setItem( 0, 3, item );
     }
   }
-  */
+
+  this->ui->studyTableWidget->sortItems( this->sortColumn, this->sortOrder );
 }

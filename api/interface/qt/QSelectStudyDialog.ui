@@ -68,7 +68,7 @@
      <item>
       <widget class="QPushButton" name="searchPushButton">
        <property name="text">
-        <string>Search</string>
+        <string>Search UID</string>
        </property>
       </widget>
      </item>
