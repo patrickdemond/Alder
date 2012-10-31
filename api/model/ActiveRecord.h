@@ -14,6 +14,10 @@
 
 #include "ModelObject.h"
 
+#include "Application.h"
+#include "Database.h"
+
+#include "vtkMySQLQuery.h"
 #include "vtkSmartPointer.h"
 #include "vtkVariant.h"
 
@@ -40,7 +44,28 @@ namespace Alder
     virtual bool Load( std::map< std::string, std::string > map );
     virtual void Save();
     virtual void Remove();
-    virtual std::vector< vtkSmartPointer< ActiveRecord > > GetAll();
+    template< class T > static void GetAll( std::vector< vtkSmartPointer< T > > *list )
+    { // we have to implement this here because of the template
+      Application *app = Application::GetInstance();
+      // get the class name of T, return error if not found
+      std::string type = app->GetUnmangledClassName( typeid(T).name() );
+      std::stringstream stream;
+      stream << "SELECT id FROM " << type;
+      vtkSmartPointer<vtkMySQLQuery> query = app->GetDB()->GetQuery();
+
+      //vtkDebugSQLMacro( << stream.str() );
+      query->SetQuery( stream.str().c_str() );
+      query->Execute();
+
+      while( query->NextRow() )
+      {
+        // create a new instance of the child class
+        vtkSmartPointer< T > record = vtkSmartPointer< T >::Take(
+          T::SafeDownCast( app->Create( type ) ) );
+        record->Load( "id", query->DataValue( 0 ).ToString() );
+        list->push_back( record );
+      }
+    }
 
     // Get table column values
     virtual vtkVariant* Get( std::string column );

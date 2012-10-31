@@ -172,6 +172,7 @@ void QMainAlderWindow::slotUserManagement()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotUpdateStudyDatabase()
 {
+/*
   int attempt = 1;
 
   while( attempt < 4 )
@@ -202,6 +203,7 @@ void QMainAlderWindow::slotUpdateStudyDatabase()
     }
     attempt++;
   }
+*/
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

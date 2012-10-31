@@ -189,29 +189,6 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::vector< vtkSmartPointer< ActiveRecord > > ActiveRecord::GetAll()
-  {
-    std::vector< vtkSmartPointer< ActiveRecord > > list;
-    std::stringstream stream;
-    stream << "SELECT id FROM " << this->GetName();
-    vtkSmartPointer<vtkMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
-    vtkDebugSQLMacro( << stream.str() );
-    query->SetQuery( stream.str().c_str() );
-    query->Execute();
-
-    while( query->NextRow() )
-    {
-      // create a new instance of the child class
-      vtkSmartPointer< ActiveRecord > record = vtkSmartPointer< ActiveRecord >::Take(
-        ActiveRecord::SafeDownCast( Application::GetInstance()->Create( this->GetName() ) ) );
-      record->Load( "id", query->DataValue( 0 ).ToString() );
-      list.push_back( record );
-    }
-
-    return list;
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   vtkVariant* ActiveRecord::Get( std::string column )
   {
     // make sure the record is initialized

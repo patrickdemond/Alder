@@ -98,8 +98,17 @@ void QSelectStudyDialog::updateInterface()
 {
   this->ui->studyTableWidget->setRowCount( 0 );
   QTableWidgetItem *item;
-  vtkVariant *name, *login;
   
+  /*
+  vtkSmartPointer< Alder::Study > study = vtkSmartPointer< Alder::Study >::New();
+  std::vector< vtkSmartPointer< Alder::ActiveRecord > > studyList = study->GetAll();
+  std::vector< vtkSmartPointer< Alder::ActiveRecord > >::iterator it;
+  for( study = studyList.begin(); study != studyList.end(); ++study )
+  { // for every study, add a new row
+  }
+  */
+
+  /*
   int index = 0;
   std::vector< std::string > studyList = Alder::Study::GetIdentifierList();
   std::vector< std::string >::iterator it;
@@ -122,4 +131,5 @@ void QSelectStudyDialog::updateInterface()
       index++;
     }
   }
+  */
 }

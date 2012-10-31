@@ -146,12 +146,12 @@ void QUserListDialog::updateInterface()
   QTableWidgetItem *item;
   vtkVariant *name, *login;
   
-  vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
-  std::vector< vtkSmartPointer< Alder::ActiveRecord > > userList = user->GetAll();
-  std::vector< vtkSmartPointer< Alder::ActiveRecord > >::iterator it;
+  std::vector< vtkSmartPointer< Alder::User > > userList;
+  Alder::User::GetAll( &userList );
+  std::vector< vtkSmartPointer< Alder::User > >::iterator it;
   for( it = userList.begin(); it != userList.end(); ++it )
   { // for every user, add a new row
-    Alder::ActiveRecord *user = (*it);
+    Alder::User *user = (*it);
     this->ui->userTableWidget->insertRow( 0 );
     name = user->Get( "name" );
     login = user->Get( "last_login" );

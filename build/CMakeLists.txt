@@ -15,6 +15,9 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/" )
 # Create a salt string which can be set at build time
 SET( ALDER_SALT_STRING "this is salt" CACHE STRING "This is salt for encrypting passwords")
 
+# Define the directory which Alder will store image data
+SET( ALDER_IMAGE_DATA_PATH ${PROJECT_BINARY_DIR}/images CACHE STRING "The path to store image data in" )
+
 # We need VTK
 FIND_PACKAGE( VTK REQUIRED )
 INCLUDE( ${VTK_USE_FILE} )

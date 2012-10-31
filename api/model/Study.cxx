@@ -25,6 +25,7 @@ namespace Alder
   vtkStandardNewMacro( Study );
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  /*
   void Study::UpdateData()
   {
     Application *app = Application::GetInstance();
@@ -91,10 +92,13 @@ namespace Alder
     progress = 1.0;
     app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
   }
+  */
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  /*
   std::vector< std::string > Study::GetIdentifierList()
   {
     return Application::GetInstance()->GetOpal()->GetIdentifiers( "clsa-dcs-images", "CarotidIntima" );
   }
+  */
 }

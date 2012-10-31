@@ -56,7 +56,8 @@ namespace Alder
     virtual void SetActiveStudy( Study* );
 
     ModelObject* Create( std::string className )
-    { return Application::Factory[className](); }
+    { return Application::ConstructorRegistry[className](); }
+    std::string GetUnmangledClassName( std::string mangledName );
     
   protected:
     Application();
@@ -65,7 +66,6 @@ namespace Alder
     static Application *New();
     static Application *Instance;
 
-    std::map< std::string, ModelObject*(*)() > Factory;
     vtkMedicalImageViewer *Viewer;
     Configuration *Config;
     Database *DB;
@@ -76,6 +76,9 @@ namespace Alder
   private:
     Application( const Application& );  // Not implemented.
     void operator=( const Application& );  // Not implemented.
+
+    std::map< std::string, ModelObject*(*)() > ConstructorRegistry;
+    std::map< std::string, std::string > ClassNameRegistry;
   };
 
   template <class T> ModelObject* createInstance() { return T::New(); }

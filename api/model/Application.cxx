@@ -25,6 +25,8 @@
 #include "vtkVariant.h"
 #include "vtkMedicalImageViewer.h"
 
+#include <stdexcept>
+
 namespace Alder
 {
   vtkCxxSetObjectMacro( Application, ActiveUser, User );
@@ -43,13 +45,19 @@ namespace Alder
     this->ActiveUser = NULL;
     this->ActiveStudy = NULL;
 
-    // populate the factory with all active record classes
-    this->Factory["Cineloop"] = &createInstance<Cineloop>;
-    this->Factory["Image"] = &createInstance<Image>;
-    this->Factory["Rating"] = &createInstance<Rating>;
-    this->Factory["Series"] = &createInstance<Series>;
-    this->Factory["Study"] = &createInstance<Study>;
-    this->Factory["User"] = &createInstance<User>;
+    // populate the constructor and class name registries with all active record classes
+    this->ConstructorRegistry["Cineloop"] = &createInstance<Cineloop>;
+    this->ClassNameRegistry["Cineloop"] = typeid(Cineloop).name();
+    this->ConstructorRegistry["Image"] = &createInstance<Image>;
+    this->ClassNameRegistry["Image"] = typeid(Image).name();
+    this->ConstructorRegistry["Rating"] = &createInstance<Rating>;
+    this->ClassNameRegistry["Rating"] = typeid(Rating).name();
+    this->ConstructorRegistry["Series"] = &createInstance<Series>;
+    this->ClassNameRegistry["Series"] = typeid(Series).name();
+    this->ConstructorRegistry["Study"] = &createInstance<Study>;
+    this->ClassNameRegistry["Study"] = typeid(Study).name();
+    this->ConstructorRegistry["User"] = &createInstance<User>;
+    this->ClassNameRegistry["User"] = typeid(User).name();
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -118,6 +126,17 @@ namespace Alder
     }
   }
 
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::string Application::GetUnmangledClassName( std::string mangledName )
+  {
+    std::map< std::string, std::string >::iterator it;
+    for( it = this->ClassNameRegistry.begin(); it != this->ClassNameRegistry.end(); ++it )
+      if( it->second == mangledName ) return it->first;
+    
+    throw std::runtime_error( "Tried to unmangle class name which isn't registered." );
+    return ""; // this will never happen because of the throw
+  }
+  
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool Application::ReadConfiguration( std::string filename )
   {
