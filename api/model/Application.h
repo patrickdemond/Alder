@@ -45,6 +45,7 @@ namespace Alder
     bool ReadConfiguration( std::string filename );
     bool ConnectToDatabase();
     void SetupOpalService();
+    void ResetApplication();
 
     vtkGetObjectMacro( Viewer, vtkMedicalImageViewer );
     vtkGetObjectMacro( Config, Configuration );

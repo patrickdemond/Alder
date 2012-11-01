@@ -65,7 +65,7 @@ CREATE  TABLE IF NOT EXISTS `alder`.`Cineloop` (
   `update_timestamp` TIMESTAMP NOT NULL ,
   `create_timestamp` TIMESTAMP NOT NULL ,
   `series_id` INT UNSIGNED NOT NULL ,
-  `file` VARCHAR(255) NOT NULL ,
+  `number` INT NOT NULL ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_cineloop_series_id` (`series_id` ASC) ,
   CONSTRAINT `fk_cineloop_series_id`

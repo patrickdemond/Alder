@@ -85,8 +85,20 @@ void QSelectStudyDialog::slotSearch()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QSelectStudyDialog::slotAccepted()
 {
-  vtkSmartPointer< Alder::Study > study = vtkSmartPointer< Alder::Study >::New();
-  // study->Load( "uid", TODO: get study UID from UI
+  // get the uid of the selected row
+  vtkSmartPointer< Alder::Study > study;
+  QList<QTableWidgetItem *> list = this->ui->studyTableWidget->selectedItems();
+  if( list.empty() )
+  {
+    study = NULL;
+  }
+  else
+  {
+    QTableWidgetItem *item = list.first();
+    study = vtkSmartPointer< Alder::Study >::New();
+    study->Load( "uid", item->text().toStdString() );
+  }
+
   Alder::Application::GetInstance()->SetActiveStudy( study );
   this->accept();
 }
@@ -120,7 +132,7 @@ void QSelectStudyDialog::updateInterface()
   std::vector< vtkSmartPointer< Alder::Study > >::iterator it;
   for( it = studyList.begin(); it != studyList.end(); ++it )
   { // for every study, add a new row
-    Alder::Study *study = (*it);
+    Alder::Study *study = *it;
     QString uid = tr( study->Get( "uid" )->ToString().c_str() );
 
     if( this->searchText.isEmpty() || uid.contains( this->searchText, Qt::CaseInsensitive ) )

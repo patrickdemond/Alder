@@ -58,6 +58,24 @@
   }
 #endif
 
+#ifdef NDEBUG
+# define vtkDebugSQLWithoutObjectMacro(x)
+#else
+# define vtkDebugSQLWithoutObjectMacro(x)                                     \
+  {                                                                           \
+  if (vtkObject::GetGlobalWarningDisplay())                                   \
+    {                                                                         \
+    vtkOStreamWrapper::EndlType endl;                                         \
+    vtkOStreamWrapper::UseEndl(endl);                                         \
+    vtkOStrStreamWrapper vtkmsg;                                              \
+    vtkmsg << "SQL: In " __FILE__ ", line " << __LINE__ << "\n"               \
+           x  << "\n\n";                                                      \
+    vtkOutputWindowDisplayDebugText(vtkmsg.str());                            \
+    vtkmsg.rdbuf()->freeze(0);                                                \
+    }                                                                         \
+  }
+#endif
+
 #include <base64.h>
 #include <sha.h>
 #include <sstream>

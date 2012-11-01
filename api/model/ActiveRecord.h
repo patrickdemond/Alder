@@ -53,7 +53,31 @@ namespace Alder
       stream << "SELECT id FROM " << type;
       vtkSmartPointer<vtkMySQLQuery> query = app->GetDB()->GetQuery();
 
-      //vtkDebugSQLMacro( << stream.str() );
+      vtkDebugSQLWithoutObjectMacro( << stream.str() );
+      query->SetQuery( stream.str().c_str() );
+      query->Execute();
+
+      while( query->NextRow() )
+      {
+        // create a new instance of the child class
+        vtkSmartPointer< T > record = vtkSmartPointer< T >::Take(
+          T::SafeDownCast( app->Create( type ) ) );
+        record->Load( "id", query->DataValue( 0 ).ToString() );
+        list->push_back( record );
+      }
+    }
+
+    template< class T > void GetList( std::vector< vtkSmartPointer< T > > *list )
+    {
+      Application *app = Application::GetInstance();
+      // get the class name of T, return error if not found
+      std::string type = app->GetUnmangledClassName( typeid(T).name() );
+      std::stringstream stream;
+      stream << "SELECT id FROM " << type << " "
+             << "WHERE " << this->GetName() << "_id = " << this->Get( "id" )->ToString();
+      vtkSmartPointer<vtkMySQLQuery> query = app->GetDB()->GetQuery();
+
+      vtkDebugSQLMacro( << stream.str() );
       query->SetQuery( stream.str().c_str() );
       query->Execute();
 

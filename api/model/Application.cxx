@@ -42,8 +42,7 @@ namespace Alder
     this->Config = Configuration::New();
     this->DB = Database::New();
     this->Opal = OpalService::New();
-    this->ActiveUser = NULL;
-    this->ActiveStudy = NULL;
+    this->ResetApplication();
 
     // populate the constructor and class name registries with all active record classes
     this->ConstructorRegistry["Cineloop"] = &createInstance<Cineloop>;
@@ -179,5 +178,12 @@ namespace Alder
     std::string host = this->Config->GetValue( "Opal", "Host" );
     std::string port = this->Config->GetValue( "Opal", "Port" );
     this->Opal->Setup( user, pass, host, vtkVariant( port ).ToInt() );
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Application::ResetApplication()
+  {
+    this->SetActiveUser( NULL );
+    this->SetActiveStudy( NULL );
   }
 }

@@ -112,11 +112,6 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <column>
-           <property name="text">
-            <string notr="true">1</string>
-           </property>
-          </column>
          </widget>
         </item>
         <item>

@@ -12,6 +12,9 @@
 #include "ui_QMainAlderWindow.h"
 
 #include "Application.h"
+#include "Cineloop.h"
+#include "Image.h"
+#include "Series.h"
 #include "Study.h"
 #include "User.h"
 
@@ -27,6 +30,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSettings>
+#include <QTreeWidgetItem>
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QMainAlderWindow::QMainAlderWindow( QWidget* parent )
@@ -38,6 +42,9 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   this->ui = new Ui_QMainAlderWindow;
   this->ui->setupUi( this );
   
+  // set up child widgets
+  this->ui->studyTreeWidget->header()->hide();
+
   // connect the menu items
   QObject::connect(
     this->ui->actionOpenStudy, SIGNAL( triggered() ),
@@ -123,7 +130,7 @@ void QMainAlderWindow::slotLogin()
 
   if( loggedIn )
   {
-    Alder::Application::GetInstance()->SetActiveUser( NULL );
+    Alder::Application::GetInstance()->ResetApplication();
   }
   else
   {
@@ -249,7 +256,8 @@ void QMainAlderWindow::writeSettings()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::updateInterface()
 {
-  bool loggedIn = NULL != Alder::Application::GetInstance()->GetActiveUser();
+  Alder::Application *app = Alder::Application::GetInstance();
+  bool loggedIn = NULL != app->GetActiveUser();
 
   // login button (login/logout)
   this->ui->actionLogin->setText( tr( loggedIn ? "Logout" : "Login" ) );
@@ -267,5 +275,53 @@ void QMainAlderWindow::updateInterface()
   this->ui->studyTreeWidget->setEnabled( loggedIn );
 
   // if a study is open then populate the study tree
-  // TODO this->ui->studyTreeWidget->
+  this->ui->studyTreeWidget->clear();
+  Alder::Study *study = app->GetActiveStudy();
+  if( study )
+  {
+    // make root the study's UID
+    QTreeWidgetItem *root = new QTreeWidgetItem( this->ui->studyTreeWidget );
+    root->setText( 0, tr( study->Get( "uid" )->ToString().c_str() ) );
+    root->setExpanded( true );
+    this->ui->studyTreeWidget->addTopLevelItem( root );
+
+    // make each series a child of the root
+    std::vector< vtkSmartPointer< Alder::Series > > seriesList;
+    std::vector< vtkSmartPointer< Alder::Series > >::iterator seriesIt;
+    study->GetList( &seriesList );
+    for( seriesIt = seriesList.begin(); seriesIt != seriesList.end(); ++seriesIt )
+    {
+      Alder::Series *series = *seriesIt;
+      QTreeWidgetItem *seriesItem = new QTreeWidgetItem( root );
+      seriesItem->setText( 0, tr( series->Get( "laterality" )->ToString().c_str() ) );
+      seriesItem->setExpanded( true );
+
+      // add the cineloops for this series
+      std::vector< vtkSmartPointer< Alder::Cineloop > > cineloopList;
+      std::vector< vtkSmartPointer< Alder::Cineloop > >::iterator cineloopIt;
+      series->GetList( &cineloopList );
+      for( cineloopIt = cineloopList.begin(); cineloopIt != cineloopList.end(); ++cineloopIt )
+      {
+        Alder::Cineloop *cineloop = *cineloopIt;
+        QString cineloopName = tr( "Cineloop #" );
+        cineloopName += tr( cineloop->Get( "number" )->ToString().c_str() );
+        QTreeWidgetItem *cineloopItem = new QTreeWidgetItem( seriesItem );
+        cineloopItem->setText( 0, cineloopName );
+        cineloopItem->setExpanded( true );
+
+        // add the images for this cineloop
+        std::vector< vtkSmartPointer< Alder::Image > > imageList;
+        std::vector< vtkSmartPointer< Alder::Image > >::iterator imageIt;
+        cineloop->GetList( &imageList );
+        for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
+        {
+          Alder::Image *image = *imageIt;
+          QString imageName = tr( "Frame #" );
+          imageName += tr( image->Get( "frame" )->ToString().c_str() );
+          QTreeWidgetItem *imageItem = new QTreeWidgetItem( cineloopItem );
+          imageItem->setText( 0, imageName );
+        }
+      }
+    }
+  }
 }
