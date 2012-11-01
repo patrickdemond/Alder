@@ -280,9 +280,12 @@ void QMainAlderWindow::updateInterface()
   if( study )
   {
     // make root the study's UID
+    QString name = tr( "Study: " );
+    name += study->Get( "uid" )->ToString().c_str();
     QTreeWidgetItem *root = new QTreeWidgetItem( this->ui->studyTreeWidget );
-    root->setText( 0, tr( study->Get( "uid" )->ToString().c_str() ) );
+    root->setText( 0, name );
     root->setExpanded( true );
+    root->setFlags( Qt::ItemIsEnabled );
     this->ui->studyTreeWidget->addTopLevelItem( root );
 
     // make each exam a child of the root
@@ -292,9 +295,12 @@ void QMainAlderWindow::updateInterface()
     for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
     {
       Alder::Exam *exam = *examIt;
+      name = tr( "Exam: " );
+      name += exam->Get( "laterality" )->ToString().c_str();
       QTreeWidgetItem *examItem = new QTreeWidgetItem( root );
-      examItem->setText( 0, tr( exam->Get( "laterality" )->ToString().c_str() ) );
+      examItem->setText( 0, name );
       examItem->setExpanded( true );
+      examItem->setFlags( Qt::ItemIsEnabled );
 
       // add the cineloops for this exam
       std::vector< vtkSmartPointer< Alder::Cineloop > > cineloopList;
@@ -303,11 +309,12 @@ void QMainAlderWindow::updateInterface()
       for( cineloopIt = cineloopList.begin(); cineloopIt != cineloopList.end(); ++cineloopIt )
       {
         Alder::Cineloop *cineloop = *cineloopIt;
-        QString cineloopName = tr( "Cineloop #" );
-        cineloopName += tr( cineloop->Get( "number" )->ToString().c_str() );
+        name = tr( "Cineloop #" );
+        name += cineloop->Get( "number" )->ToString().c_str();
         QTreeWidgetItem *cineloopItem = new QTreeWidgetItem( examItem );
-        cineloopItem->setText( 0, cineloopName );
+        cineloopItem->setText( 0, name );
         cineloopItem->setExpanded( true );
+        cineloopItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
 
         // add the images for this cineloop
         std::vector< vtkSmartPointer< Alder::Image > > imageList;
@@ -316,10 +323,11 @@ void QMainAlderWindow::updateInterface()
         for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
         {
           Alder::Image *image = *imageIt;
-          QString imageName = tr( "Frame #" );
-          imageName += tr( image->Get( "frame" )->ToString().c_str() );
+          name = tr( "Frame #" );
+          name += image->Get( "frame" )->ToString().c_str();
           QTreeWidgetItem *imageItem = new QTreeWidgetItem( cineloopItem );
-          imageItem->setText( 0, imageName );
+          imageItem->setText( 0, name );
+          imageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
         }
       }
     }
