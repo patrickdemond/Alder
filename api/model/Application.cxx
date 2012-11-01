@@ -17,7 +17,7 @@
 #include "Image.h"
 #include "OpalService.h"
 #include "Rating.h"
-#include "Series.h"
+#include "Exam.h"
 #include "Study.h"
 #include "User.h"
 
@@ -51,8 +51,8 @@ namespace Alder
     this->ClassNameRegistry["Image"] = typeid(Image).name();
     this->ConstructorRegistry["Rating"] = &createInstance<Rating>;
     this->ClassNameRegistry["Rating"] = typeid(Rating).name();
-    this->ConstructorRegistry["Series"] = &createInstance<Series>;
-    this->ClassNameRegistry["Series"] = typeid(Series).name();
+    this->ConstructorRegistry["Exam"] = &createInstance<Exam>;
+    this->ClassNameRegistry["Exam"] = typeid(Exam).name();
     this->ConstructorRegistry["Study"] = &createInstance<Study>;
     this->ClassNameRegistry["Study"] = typeid(Study).name();
     this->ConstructorRegistry["User"] = &createInstance<User>;

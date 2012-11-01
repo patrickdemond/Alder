@@ -1,14 +1,14 @@
 /*=========================================================================
 
   Program:  Alder (CLSA Ultrasound Image Viewer)
-  Module:   Series.cxx
+  Module:   Exam.cxx
   Language: C++
 
   Author: Patrick Emond <emondpd@mcmaster.ca>
   Author: Dean Inglis <inglisd@mcmaster.ca>
 
 =========================================================================*/
-#include "Series.h"
+#include "Exam.h"
 
 #include "Utilities.h"
 
@@ -16,5 +16,5 @@
 
 namespace Alder
 {
-  vtkStandardNewMacro( Series );
+  vtkStandardNewMacro( Exam );
 }

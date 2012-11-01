@@ -1,7 +1,7 @@
 study
   uid
 
-series
+exam
   study_id
   type
   laterality

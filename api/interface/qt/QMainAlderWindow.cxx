@@ -14,7 +14,7 @@
 #include "Application.h"
 #include "Cineloop.h"
 #include "Image.h"
-#include "Series.h"
+#include "Exam.h"
 #include "Study.h"
 #include "User.h"
 
@@ -285,27 +285,27 @@ void QMainAlderWindow::updateInterface()
     root->setExpanded( true );
     this->ui->studyTreeWidget->addTopLevelItem( root );
 
-    // make each series a child of the root
-    std::vector< vtkSmartPointer< Alder::Series > > seriesList;
-    std::vector< vtkSmartPointer< Alder::Series > >::iterator seriesIt;
-    study->GetList( &seriesList );
-    for( seriesIt = seriesList.begin(); seriesIt != seriesList.end(); ++seriesIt )
+    // make each exam a child of the root
+    std::vector< vtkSmartPointer< Alder::Exam > > examList;
+    std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
+    study->GetList( &examList );
+    for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
     {
-      Alder::Series *series = *seriesIt;
-      QTreeWidgetItem *seriesItem = new QTreeWidgetItem( root );
-      seriesItem->setText( 0, tr( series->Get( "laterality" )->ToString().c_str() ) );
-      seriesItem->setExpanded( true );
+      Alder::Exam *exam = *examIt;
+      QTreeWidgetItem *examItem = new QTreeWidgetItem( root );
+      examItem->setText( 0, tr( exam->Get( "laterality" )->ToString().c_str() ) );
+      examItem->setExpanded( true );
 
-      // add the cineloops for this series
+      // add the cineloops for this exam
       std::vector< vtkSmartPointer< Alder::Cineloop > > cineloopList;
       std::vector< vtkSmartPointer< Alder::Cineloop > >::iterator cineloopIt;
-      series->GetList( &cineloopList );
+      exam->GetList( &cineloopList );
       for( cineloopIt = cineloopList.begin(); cineloopIt != cineloopList.end(); ++cineloopIt )
       {
         Alder::Cineloop *cineloop = *cineloopIt;
         QString cineloopName = tr( "Cineloop #" );
         cineloopName += tr( cineloop->Get( "number" )->ToString().c_str() );
-        QTreeWidgetItem *cineloopItem = new QTreeWidgetItem( seriesItem );
+        QTreeWidgetItem *cineloopItem = new QTreeWidgetItem( examItem );
         cineloopItem->setText( 0, cineloopName );
         cineloopItem->setExpanded( true );
 

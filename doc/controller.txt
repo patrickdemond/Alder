@@ -7,7 +7,7 @@ X prev Study
 X quit
   select Cineloop
   select StaticImage
-  select Series
+  select Exam
   set rating
   advance slice
   reverse slice
@@ -20,7 +20,7 @@ X quit
 
 loadStudyDialog
   lists all Studies including columns:
-    UID, date, Site, operator, number of series, date reviewed
+    UID, date, Site, operator, number of exam, date reviewed
       (reviewed => some information added (note, rating, static image))
   select a study
 

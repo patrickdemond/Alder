@@ -3,13 +3,13 @@ Study >>> database table: study
     read
     write
   attributes
-    Series array [array of Obj]
+    Exam array [array of Obj]
     uid
     interviewer
     note
     date reviewed
 
-Series >>> database table: series
+Exam >>> database table: exam
   functions
     add static image
     remove static image

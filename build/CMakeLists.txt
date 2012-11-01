@@ -88,7 +88,7 @@ SET( ALDER_SOURCE
   ${ALDER_MODEL_DIR}/ModelObject.cxx
   ${ALDER_MODEL_DIR}/OpalService.cxx
   ${ALDER_MODEL_DIR}/Rating.cxx
-  ${ALDER_MODEL_DIR}/Series.cxx
+  ${ALDER_MODEL_DIR}/Exam.cxx
   ${ALDER_MODEL_DIR}/Study.cxx
   ${ALDER_MODEL_DIR}/User.cxx
   ${ALDER_MODEL_DIR}/Application.cxx

@@ -32,11 +32,11 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `alder`.`Series`
+-- Table `alder`.`Exam`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `alder`.`Series` ;
+DROP TABLE IF EXISTS `alder`.`Exam` ;
 
-CREATE  TABLE IF NOT EXISTS `alder`.`Series` (
+CREATE  TABLE IF NOT EXISTS `alder`.`Exam` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `update_timestamp` TIMESTAMP NOT NULL ,
   `create_timestamp` TIMESTAMP NOT NULL ,
@@ -44,10 +44,10 @@ CREATE  TABLE IF NOT EXISTS `alder`.`Series` (
   `laterality` ENUM('right','left') NOT NULL ,
   `type` ENUM('cimt','plaque') NOT NULL ,
   PRIMARY KEY (`id`) ,
-  INDEX `fk_series_study_id` (`study_id` ASC) ,
+  INDEX `fk_exam_study_id` (`study_id` ASC) ,
   INDEX `dk_laterality` (`laterality` ASC) ,
   INDEX `dk_type` (`type` ASC) ,
-  CONSTRAINT `fk_series_study_id`
+  CONSTRAINT `fk_exam_study_id`
     FOREIGN KEY (`study_id` )
     REFERENCES `alder`.`Study` (`id` )
     ON DELETE NO ACTION
@@ -64,13 +64,13 @@ CREATE  TABLE IF NOT EXISTS `alder`.`Cineloop` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `update_timestamp` TIMESTAMP NOT NULL ,
   `create_timestamp` TIMESTAMP NOT NULL ,
-  `series_id` INT UNSIGNED NOT NULL ,
+  `exam_id` INT UNSIGNED NOT NULL ,
   `number` INT NOT NULL ,
   PRIMARY KEY (`id`) ,
-  INDEX `fk_cineloop_series_id` (`series_id` ASC) ,
-  CONSTRAINT `fk_cineloop_series_id`
-    FOREIGN KEY (`series_id` )
-    REFERENCES `alder`.`Series` (`id` )
+  INDEX `fk_cineloop_exam_id` (`exam_id` ASC) ,
+  CONSTRAINT `fk_cineloop_exam_id`
+    FOREIGN KEY (`exam_id` )
+    REFERENCES `alder`.`Exam` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -85,7 +85,7 @@ CREATE  TABLE IF NOT EXISTS `alder`.`Image` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `update_timestamp` TIMESTAMP NOT NULL ,
   `create_timestamp` TIMESTAMP NOT NULL ,
-  `series_id` INT UNSIGNED NOT NULL ,
+  `exam_id` INT UNSIGNED NOT NULL ,
   `cineloop_id` INT UNSIGNED NOT NULL ,
   `frame` INT NOT NULL ,
   `interviewer_defined` TINYINT(1) NOT NULL ,
@@ -96,12 +96,12 @@ CREATE  TABLE IF NOT EXISTS `alder`.`Image` (
   `n` INT(11) NULL ,
   `file` VARCHAR(255) NOT NULL ,
   PRIMARY KEY (`id`) ,
-  INDEX `fk_image_series_id` (`series_id` ASC) ,
+  INDEX `fk_image_exam_id` (`exam_id` ASC) ,
   INDEX `fk_image_cineloop_id` (`cineloop_id` ASC) ,
   INDEX `dk_cineloop_id_frame` (`cineloop_id` ASC, `frame` ASC) ,
-  CONSTRAINT `fk_image_series_id`
-    FOREIGN KEY (`series_id` )
-    REFERENCES `alder`.`Series` (`id` )
+  CONSTRAINT `fk_image_exam_id`
+    FOREIGN KEY (`exam_id` )
+    REFERENCES `alder`.`Exam` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_image_cineloop_id`

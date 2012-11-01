@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:  Alder (CLSA Ultrasound Image Viewer)
-  Module:   Series.h
+  Module:   Exam.h
   Language: C++
 
   Author: Patrick Emond <emondpd@mcmaster.ca>
@@ -9,8 +9,8 @@
 
 =========================================================================*/
 
-#ifndef __Series_h
-#define __Series_h
+#ifndef __Exam_h
+#define __Exam_h
 
 #include "ActiveRecord.h"
 
@@ -19,21 +19,21 @@
 namespace Alder
 {
 //  class Session;
-  class Series : public ActiveRecord
+  class Exam : public ActiveRecord
   {
   public:
-    static Series *New();
-    vtkTypeMacro( Series, ActiveRecord );
+    static Exam *New();
+    vtkTypeMacro( Exam, ActiveRecord );
 
   protected:
-    Series() {}
-    ~Series() {}
+    Exam() {}
+    ~Exam() {}
 
-    std::string GetName() { return "Series"; }
+    std::string GetName() { return "Exam"; }
 
   private:
-    Series( const Series& ); // Not implemented
-    void operator=( const Series& ); // Not implemented
+    Exam( const Exam& ); // Not implemented
+    void operator=( const Exam& ); // Not implemented
   };
 }
 
