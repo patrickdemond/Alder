@@ -59,10 +59,11 @@
 #endif
 
 #include <base64.h>
+#include <json/reader.h>
 #include <sha.h>
 #include <sstream>
 #include <stdio.h>
-#include <json/reader.h>
+#include <time.h>
 
 // main function
 namespace Alder
@@ -91,6 +92,15 @@ namespace Alder
     pclose( pipe );
     return result;
   } 
+
+  inline std::string getTime( std::string format )
+  {
+    char buffer[256];
+    time_t rawtime;
+    time( &rawtime );
+    strftime( buffer, 256, format.c_str(), localtime( &rawtime ) );
+    return std::string( buffer );
+  }
 }
 
 #endif // __Utilities_h

@@ -78,8 +78,10 @@ void QLoginDialog::slotAccepted()
       }
     }
 
-    // log in the user
+    // log in the user and mark login time
     Alder::Application::GetInstance()->SetActiveUser( user );
+    user->Set( "last_login", Alder::getTime( "%Y-%m-%d %H:%M:%S" ) );
+    user->Save();
     this->accept();
   }
   else

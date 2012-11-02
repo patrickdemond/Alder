@@ -36,9 +36,13 @@ QUserListDialog::QUserListDialog( QWidget* parent )
   this->ui = new Ui_QUserListDialog;
   this->ui->setupUi( this );
   this->ui->userTableWidget->horizontalHeader()->setResizeMode( QHeaderView::Stretch );
+  this->ui->userTableWidget->horizontalHeader()->setClickable( true );
   this->ui->userTableWidget->verticalHeader()->setVisible( false );
   this->ui->userTableWidget->setSelectionBehavior( QAbstractItemView::SelectRows );
   this->ui->userTableWidget->setSelectionMode( QAbstractItemView::SingleSelection );
+
+  this->sortColumn = 0;
+  this->sortOrder = Qt::AscendingOrder;
 
   QObject::connect(
     this->ui->addPushButton, SIGNAL( clicked( bool ) ),
@@ -55,6 +59,9 @@ QUserListDialog::QUserListDialog( QWidget* parent )
   QObject::connect(
     this->ui->userTableWidget, SIGNAL( itemSelectionChanged() ),
     this, SLOT( slotSelectionChanged() ) );
+  QObject::connect(
+    this->ui->userTableWidget->horizontalHeader(), SIGNAL( sectionClicked( int ) ),
+    this, SLOT( slotHeaderClicked( int ) ) );
   
   this->updateInterface();
 }
@@ -140,6 +147,16 @@ void QUserListDialog::slotSelectionChanged()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QUserListDialog::slotHeaderClicked( int index )
+{
+  // reverse order if already sorted
+  if( this->sortColumn == index )
+    this->sortOrder = Qt::AscendingOrder == this->sortOrder ? Qt::DescendingOrder : Qt::AscendingOrder;
+  this->sortColumn = index;
+  this->updateInterface();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QUserListDialog::updateInterface()
 {
   this->ui->userTableWidget->setRowCount( 0 );
@@ -161,11 +178,13 @@ void QUserListDialog::updateInterface()
     item->setText( tr( v ? v->ToString().c_str() : "" ) );
     this->ui->userTableWidget->setItem( 0, 0, item );
 
-    // add last login to row
+  // add last login to row
     v = user->Get( "last_login" );
     item = new QTableWidgetItem;
     item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
     item->setText( tr( v ? v->ToString().c_str() : "" ) );
     this->ui->userTableWidget->setItem( 0, 1, item );
   }
+
+  this->ui->userTableWidget->sortItems( this->sortColumn, this->sortOrder );
 }

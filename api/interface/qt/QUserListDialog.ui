@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>825</width>
-    <height>568</height>
+    <width>460</width>
+    <height>338</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,7 @@
     <widget class="QTableWidget" name="userTableWidget">
      <property name="minimumSize">
       <size>
-       <width>741</width>
+       <width>400</width>
        <height>0</height>
       </size>
      </property>
@@ -65,7 +65,7 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>Reset Password</string>
+        <string>Password</string>
        </property>
       </widget>
      </item>

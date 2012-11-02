@@ -34,9 +34,12 @@ public slots:
   virtual void slotResetPassword();
   virtual void slotClose();
   virtual void slotSelectionChanged();
+  virtual void slotHeaderClicked( int index );
 
 protected:
   void updateInterface();
+  int sortColumn;
+  Qt::SortOrder sortOrder;
 
 protected slots:
 
