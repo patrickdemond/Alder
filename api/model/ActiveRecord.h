@@ -53,15 +53,13 @@ namespace Alder
       stream << "SELECT id FROM " << type;
       vtkSmartPointer<vtkMySQLQuery> query = app->GetDB()->GetQuery();
 
-      vtkDebugSQLWithoutObjectMacro( << stream.str() );
       query->SetQuery( stream.str().c_str() );
       query->Execute();
 
       while( query->NextRow() )
       {
         // create a new instance of the child class
-        vtkSmartPointer< T > record = vtkSmartPointer< T >::Take(
-          T::SafeDownCast( app->Create( type ) ) );
+        vtkSmartPointer< T > record = vtkSmartPointer< T >::Take( T::SafeDownCast( T::New() ) );
         record->Load( "id", query->DataValue( 0 ).ToString() );
         list->push_back( record );
       }
