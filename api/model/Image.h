@@ -24,12 +24,11 @@ namespace Alder
   public:
     static Image *New();
     vtkTypeMacro( Image, ActiveRecord );
+    std::string GetName() { return "Image"; }
 
   protected:
     Image() {}
     ~Image() {}
-
-    std::string GetName() { return "Image"; }
 
   private:
     Image( const Image& ); // Not implemented

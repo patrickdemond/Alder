@@ -59,7 +59,7 @@
       <item>
        <layout class="QVBoxLayout" name="renderLayout">
         <item>
-         <widget class="QVTKWidget" name="renderWidget" native="true">
+         <widget class="QVTKWidget" name="renderWidget">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -112,6 +112,11 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <column>
+           <property name="text">
+            <string notr="true">1</string>
+           </property>
+          </column>
          </widget>
         </item>
         <item>
@@ -454,6 +459,9 @@
    <property name="text">
     <string>Previous Study</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
   </action>
   <action name="actionNextStudy">
    <property name="enabled">
@@ -462,10 +470,16 @@
    <property name="text">
     <string>Next Study</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
   </action>
   <action name="actionLogin">
    <property name="text">
     <string>Login</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
    </property>
   </action>
   <action name="actionManageUsers">
@@ -476,6 +490,9 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
   <action name="actionAbout">

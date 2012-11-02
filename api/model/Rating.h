@@ -24,12 +24,11 @@ namespace Alder
   public:
     static Rating *New();
     vtkTypeMacro( Rating, ActiveRecord );
+    std::string GetName() { return "Rating"; }
 
   protected:
     Rating() {}
     ~Rating() {}
-
-    std::string GetName() { return "Rating"; }
 
   private:
     Rating( const Rating& ); // Not implemented

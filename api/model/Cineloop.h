@@ -24,12 +24,11 @@ namespace Alder
   public:
     static Cineloop *New();
     vtkTypeMacro( Cineloop, ActiveRecord );
+    std::string GetName() { return "Cineloop"; }
 
   protected:
     Cineloop() {}
     ~Cineloop() {}
-
-    std::string GetName() { return "Cineloop"; }
 
   private:
     Cineloop( const Cineloop& ); // Not implemented

@@ -18,7 +18,11 @@
 
 #include "vtkSmartPointer.h"
 
+#include <map>
+
+namespace Alder { class ActiveRecord; };
 class Ui_QMainAlderWindow;
+class QTreeWidgetItem;
 
 class QMainAlderWindow : public QMainWindow
 {
@@ -37,11 +41,11 @@ public slots:
   virtual void slotLogin();
   virtual void slotUserManagement();
   virtual void slotUpdateStudyDatabase();
+  virtual void slotTreeSelectionChanged();
 
   // help event functions
   virtual void slotAbout();
   virtual void slotManual();
-
 
 protected:
   // called whenever the main window is closed
@@ -50,7 +54,11 @@ protected:
   // read/write application GUI settings
   virtual void readSettings();
   virtual void writeSettings();
+  virtual void updateStudyInformation();
+  virtual void updateStudyTreeWidget();
   virtual void updateInterface();
+
+  std::map< QTreeWidgetItem*, vtkSmartPointer<Alder::ActiveRecord> > treeModelMap;
 
 protected slots:
 

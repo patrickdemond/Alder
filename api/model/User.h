@@ -28,12 +28,12 @@ namespace Alder
     virtual void ResetPassword();
     virtual bool IsPassword( std::string );
     static std::string GetDefaultPassword() { return "password"; }
+    std::string GetName() { return "User"; }
 
   protected:
     User() {}
     ~User() {}
 
-    std::string GetName() { return "User"; }
     void SetVariant( std::string column, vtkVariant *value );
 
   private:

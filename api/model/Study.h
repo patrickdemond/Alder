@@ -27,12 +27,11 @@ namespace Alder
     vtkTypeMacro( Study, ActiveRecord );
 //    static void UpdateData();
 //    static std::vector< std::string > GetIdentifierList();
+    std::string GetName() { return "Study"; }
 
   protected:
     Study() {}
     ~Study() {}
-
-    std::string GetName() { return "Study"; }
 
   private:
     Study( const Study& ); // Not implemented

@@ -24,12 +24,11 @@ namespace Alder
   public:
     static Exam *New();
     vtkTypeMacro( Exam, ActiveRecord );
+    std::string GetName() { return "Exam"; }
 
   protected:
     Exam() {}
     ~Exam() {}
-
-    std::string GetName() { return "Exam"; }
 
   private:
     Exam( const Exam& ); // Not implemented

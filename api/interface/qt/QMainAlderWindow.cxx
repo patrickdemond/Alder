@@ -76,6 +76,10 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this->ui->actionManual, SIGNAL( triggered() ),
     this, SLOT( slotManual() ) );
 
+  QObject::connect(
+    this->ui->studyTreeWidget, SIGNAL( itemSelectionChanged() ),
+    this, SLOT( slotTreeSelectionChanged() ) );
+
   // link the view and the qt render widget
   app->GetViewer()->SetInteractor( this->ui->renderWidget->GetInteractor() );
   this->ui->renderWidget->SetRenderWindow( app->GetViewer()->GetRenderWindow() );
@@ -242,6 +246,12 @@ void QMainAlderWindow::readSettings()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotTreeSelectionChanged()
+{
+  this->updateStudyInformation();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::writeSettings()
 {
   QSettings settings( "CLSA", "Alder" );
@@ -254,29 +264,65 @@ void QMainAlderWindow::writeSettings()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::updateInterface()
+void QMainAlderWindow::updateStudyInformation()
 {
-  Alder::Application *app = Alder::Application::GetInstance();
-  bool loggedIn = NULL != app->GetActiveUser();
+  QString interviewerString = tr( "N/A" );
+  QString siteString = tr( "N/A" );
+  QString dateString = tr( "N/A" );
+  QString minString = tr( "N/A" );
+  QString maxString = tr( "N/A" );
+  QString meanString = tr( "N/A" );
+  QString sdString = tr( "N/A" );
+  QString nString = tr( "N/A" );
 
-  // login button (login/logout)
-  this->ui->actionLogin->setText( tr( loggedIn ? "Logout" : "Login" ) );
+  // fill in the active study information
+  Alder::Study *study = Alder::Application::GetInstance()->GetActiveStudy();
+  if( study )
+  {
+    interviewerString = study->Get( "interviewer" )->ToString().c_str();
+    siteString = study->Get( "site" )->ToString().c_str();
+    dateString = study->Get( "datetime_acquired" )->ToString().c_str();
+  }
 
-  // only allow study operations when logged in
-  this->ui->actionOpenStudy->setEnabled( loggedIn );
-  this->ui->actionPreviousStudy->setEnabled( loggedIn );
-  this->ui->actionNextStudy->setEnabled( loggedIn );
-  this->ui->previousStudyPushButton->setEnabled( loggedIn );
-  this->ui->nextStudyPushButton->setEnabled( loggedIn );
-  this->ui->addImagePushButton->setEnabled( false );
-  this->ui->removeImagePushButton->setEnabled( false );
-  this->ui->ratingSlider->setEnabled( false );
-  this->ui->notePushButton->setEnabled( false );
-  this->ui->studyTreeWidget->setEnabled( loggedIn );
+  // define currently selected item
+  QList<QTreeWidgetItem*> list = this->ui->studyTreeWidget->selectedItems();
+
+  if( 0 < list.size() )
+  {
+    std::map< QTreeWidgetItem*, vtkSmartPointer<Alder::ActiveRecord> >::iterator it;
+    it = this->treeModelMap.find( list.at( 0 ) );
+    if( it != this->treeModelMap.end() )
+    {
+      Alder::ActiveRecord *record = it->second;
+      if( 0 == record->GetName().compare( "Image" ) )
+      {
+        if( record->Get( "min" ) ) minString = record->Get( "min" )->ToString().c_str();
+        if( record->Get( "max" ) ) maxString = record->Get( "max" )->ToString().c_str();
+        if( record->Get( "mean" ) ) meanString = record->Get( "mean" )->ToString().c_str();
+        if( record->Get( "sd" ) ) sdString = record->Get( "sd" )->ToString().c_str();
+        if( record->Get( "n" ) ) nString = record->Get( "n" )->ToString().c_str();
+      }
+    }
+  }
+
+  this->ui->interviewerValueLabel->setText( interviewerString );
+  this->ui->siteValueLabel->setText( siteString );
+  this->ui->dateValueLabel->setText( dateString );
+  this->ui->minValueLabel->setText( minString );
+  this->ui->maxValueLabel->setText( maxString );
+  this->ui->meanValueLabel->setText( meanString );
+  this->ui->sdValueLabel->setText( sdString );
+  this->ui->nValueLabel->setText( nString );
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::updateStudyTreeWidget()
+{
+  Alder::Study *study = Alder::Application::GetInstance()->GetActiveStudy();
 
   // if a study is open then populate the study tree
+  this->treeModelMap.clear();
   this->ui->studyTreeWidget->clear();
-  Alder::Study *study = app->GetActiveStudy();
   if( study )
   {
     // make root the study's UID
@@ -294,10 +340,11 @@ void QMainAlderWindow::updateInterface()
     study->GetList( &examList );
     for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
     {
-      Alder::Exam *exam = *examIt;
+      Alder::Exam *exam = examIt->GetPointer();
       name = tr( "Exam: " );
       name += exam->Get( "laterality" )->ToString().c_str();
       QTreeWidgetItem *examItem = new QTreeWidgetItem( root );
+      this->treeModelMap[examItem] = *examIt;
       examItem->setText( 0, name );
       examItem->setExpanded( true );
       examItem->setFlags( Qt::ItemIsEnabled );
@@ -308,10 +355,11 @@ void QMainAlderWindow::updateInterface()
       exam->GetList( &cineloopList );
       for( cineloopIt = cineloopList.begin(); cineloopIt != cineloopList.end(); ++cineloopIt )
       {
-        Alder::Cineloop *cineloop = *cineloopIt;
+        Alder::Cineloop *cineloop = cineloopIt->GetPointer();
         name = tr( "Cineloop #" );
         name += cineloop->Get( "number" )->ToString().c_str();
         QTreeWidgetItem *cineloopItem = new QTreeWidgetItem( examItem );
+        this->treeModelMap[cineloopItem] = *cineloopIt;
         cineloopItem->setText( 0, name );
         cineloopItem->setExpanded( true );
         cineloopItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
@@ -322,14 +370,41 @@ void QMainAlderWindow::updateInterface()
         cineloop->GetList( &imageList );
         for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
         {
-          Alder::Image *image = *imageIt;
+          Alder::Image *image = imageIt->GetPointer();
           name = tr( "Frame #" );
           name += image->Get( "frame" )->ToString().c_str();
           QTreeWidgetItem *imageItem = new QTreeWidgetItem( cineloopItem );
+          this->treeModelMap[imageItem] = *imageIt;
           imageItem->setText( 0, name );
           imageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
         }
       }
     }
   }
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::updateInterface()
+{
+  Alder::Application *app = Alder::Application::GetInstance();
+  Alder::Study *study = app->GetActiveStudy();
+  bool loggedIn = NULL != app->GetActiveUser();
+
+  // login button (login/logout)
+  this->ui->actionLogin->setText( tr( loggedIn ? "Logout" : "Login" ) );
+
+  // only allow study operations when logged in
+  this->ui->actionOpenStudy->setEnabled( loggedIn );
+  this->ui->actionPreviousStudy->setEnabled( loggedIn );
+  this->ui->actionNextStudy->setEnabled( loggedIn );
+  this->ui->previousStudyPushButton->setEnabled( loggedIn );
+  this->ui->nextStudyPushButton->setEnabled( loggedIn );
+  this->ui->addImagePushButton->setEnabled( false );
+  this->ui->removeImagePushButton->setEnabled( false );
+  this->ui->ratingSlider->setEnabled( false );
+  this->ui->notePushButton->setEnabled( false );
+  this->ui->studyTreeWidget->setEnabled( loggedIn );
+
+  this->updateStudyTreeWidget();
+  this->updateStudyInformation();
 }

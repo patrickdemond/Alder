@@ -99,13 +99,13 @@ namespace Alder
     vtkGetMacro( DebugSQL, bool );
     vtkSetMacro( DebugSQL, bool );
     vtkBooleanMacro( DebugSQL, bool );
+    virtual std::string GetName() = 0;
 
   protected:
     ActiveRecord();
     ~ActiveRecord();
 
     std::string Name() const { return typeid( *this ).name(); }
-    virtual std::string GetName() = 0;
     void Initialize();
     virtual void SetVariant( std::string column, vtkVariant *value );
 
