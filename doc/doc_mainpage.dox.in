@@ -1,0 +1,4 @@
+/*! @mainpage ${PROJECT_NAME} ${ALDER_VERSION_MAJOR}.${ALDER_VERSION_MINOR}.${ALDER_VERSION_PATCH} Documentation
+
+  @image html ${PROJECT_BINARY_DIR}/logo_clsa_128x128.png
+*/

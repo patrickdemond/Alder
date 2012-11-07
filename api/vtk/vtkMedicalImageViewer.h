@@ -83,9 +83,9 @@ public:
   //@{
   /** 
    * Set/Get the input image to the viewer.
-   * @param vtkImageData*
+   * @param input vtkImageData from the output of a reader
    */
-  virtual void SetInput( vtkImageData* );
+  virtual void SetInput( vtkImageData* input );
   virtual vtkImageData* GetInput();
   //@}
 
@@ -238,6 +238,13 @@ public:
   vtkBooleanMacro( MaintainLastWindowLevel, int );
   //@}
 
+  //@{
+  /** Window level control for callbacks and VTK events. */
+  void DoStartWindowLevel();
+  void DoResetWindowLevel();
+  void DoWindowLevel();
+  //@}
+
   /**
    * Get the dimensionality of the image (e.g., 2D, 3D).
    * @return dimension of the image
@@ -333,13 +340,6 @@ protected:
     * @sa OriginalWindow, OriginalLevel
     */
   void InitializeWindowLevel();
-
-  //@{
-  /** Window level control for callbacks and VTK events. */
-  void DoStartWindowLevel();
-  void DoResetWindowLevel();
-  void DoWindowLevel();
-  //@}
 
   int ViewOrientation;              /**< Current view orientation: XY, XZ, YZ */
   double CameraPosition[3][3];      /**< Current camera position */
