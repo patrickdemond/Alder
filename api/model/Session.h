@@ -8,14 +8,18 @@
   Author: Dean Inglis <inglisd@mcmaster.ca>
 
 =========================================================================*/
-//
-// .NAME Session - Session information object
-//
-// .SECTION Description
-//
-// .SECTION See Also
-// SessionReader SessionWriter
-// 
+
+/**
+ * @class Session
+ * @namespace Alder
+ * 
+ * @author Patrick Emond <emondpd@mcmaster.ca>
+ * @author Dean Inglis <inglisd@mcmaster.ca>
+ * 
+ * @brief A class containing all session information
+ * 
+ * TODO: document if class gets used, otherwise remove from project
+ */
 
 #ifndef __Session_h
 #define __Session_h
@@ -25,6 +29,11 @@
 #include "Utilities.h"
 
 class vtkCamera;
+
+/**
+ * @addtogroup Alder
+ * @{
+ */
 
 namespace Alder
 {
@@ -43,8 +52,6 @@ namespace Alder
     void Save( const char* fileName );
     void Load( const char* fileName );
 
-    // Description:
-    // Set/get the camera
     virtual vtkCamera* GetCamera() { return this->Camera; }
     virtual void SetCamera( vtkCamera* );
     
@@ -59,5 +66,7 @@ namespace Alder
     void operator=( const Session& );  // Not implemented.
   };
 }
+
+/** @} end of doxygen group */
 
 #endif

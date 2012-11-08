@@ -9,6 +9,16 @@
 
 =========================================================================*/
 
+/**
+ * @class Exam
+ * @namespace Alder
+ * 
+ * @author Patrick Emond <emondpd@mcmaster.ca>
+ * @author Dean Inglis <inglisd@mcmaster.ca>
+ * 
+ * @brief An active record for the Exam table
+ */
+
 #ifndef __Exam_h
 #define __Exam_h
 
@@ -16,9 +26,13 @@
 
 #include <iostream>
 
+/**
+ * @addtogroup Alder
+ * @{
+ */
+
 namespace Alder
 {
-//  class Session;
   class Exam : public ActiveRecord
   {
   public:
@@ -35,5 +49,7 @@ namespace Alder
     void operator=( const Exam& ); // Not implemented
   };
 }
+
+/** @} end of doxygen group */
 
 #endif

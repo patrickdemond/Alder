@@ -9,6 +9,16 @@
 
 =========================================================================*/
 
+/**
+ * @class Cineloop
+ * @namespace Alder
+ * 
+ * @author Patrick Emond <emondpd@mcmaster.ca>
+ * @author Dean Inglis <inglisd@mcmaster.ca>
+ * 
+ * @brief An active record for the Cineloop table
+ */
+
 #ifndef __Cineloop_h
 #define __Cineloop_h
 
@@ -16,9 +26,13 @@
 
 #include <iostream>
 
+/**
+ * @addtogroup Alder
+ * @{
+ */
+
 namespace Alder
 {
-//  class Session;
   class Cineloop : public ActiveRecord
   {
   public:
@@ -35,5 +49,7 @@ namespace Alder
     void operator=( const Cineloop& ); // Not implemented
   };
 }
+
+/** @} end of doxygen group */
 
 #endif

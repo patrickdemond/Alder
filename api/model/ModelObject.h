@@ -9,11 +9,26 @@
 
 =========================================================================*/
 
+/**
+ * @class ModelObject
+ * @namespace Alder
+ * 
+ * @author Patrick Emond <emondpd@mcmaster.ca>
+ * @author Dean Inglis <inglisd@mcmaster.ca>
+ * 
+ * @brief Base class for all model classes
+ */
+
 #ifndef __ModelObject_h
 #define __ModelObject_h
 
 #include "vtkObject.h"
 #include "vtkSetGet.h"
+
+/**
+ * @addtogroup Alder
+ * @{
+ */
 
 namespace Alder
 {
@@ -31,5 +46,7 @@ namespace Alder
     void operator=( const ModelObject& ); // Not implemented
   };
 }
+
+/** @} end of doxygen group */
 
 #endif
