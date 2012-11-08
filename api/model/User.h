@@ -9,12 +9,30 @@
 
 =========================================================================*/
 
+/**
+ * @class User
+ *
+ * @author Patrick Emond <emondpd@mcmaster.ca>
+ * @author Dean Inglis <inglisd@mcmaster.ca>
+ *
+ * @brief User record.
+ *
+ * User is a child class of ActiveRecord that represents
+ * an entry in the User table of the Alder database.  
+ *
+ */
+
 #ifndef __User_h
 #define __User_h
 
 #include "ActiveRecord.h"
 
 #include <iostream>
+
+/**
+ * @addtogroup Alder
+ * @{
+ */
 
 namespace Alder
 {
@@ -41,5 +59,7 @@ namespace Alder
     void operator=( const User& ); // Not implemented
   };
 }
+
+/** @} end of doxygen group */
 
 #endif

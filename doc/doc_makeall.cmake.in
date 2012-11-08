@@ -1,0 +1,123 @@
+# -------------------------------------------------------------------------
+# Doxygen documentation batch
+# run with cmake -P doc_makeall.cmake
+# -------------------------------------------------------------------------
+
+set(DOXYGEN "@DOXYGEN@")
+set(DOXYGEN_DOT_EXECUTABLE "@DOXYGEN_DOT_EXECUTABLE@")
+
+if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 2.6)
+  message(FATAL_ERROR "error: please use CMake 2.6.2 or later to build Alder documentation")
+  # for file(DOWNLOAD capability *and* endif() without arguments...
+endif(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 2.6)
+
+if(NOT DOXYGEN)
+  message(FATAL_ERROR "error: cannot build Alder documentation without doxygen")
+endif()
+if(NOT DOXYGEN_DOT_EXECUTABLE)
+  message(FATAL_ERROR "error: cannot build Alder documentation without dot")
+endif()
+
+# PROJECT_NAME:
+# Documentation/project name. Used in some of the resulting file names and
+# xrefs to uniquify two or more projects linked together through their 
+# Doxygen's tag files. Mandatory for each documentation set.
+# Note: might be the same as the doxyfile's PROJECT_NAME
+# Example: 
+#   PROJECT_NAME=VTK
+#
+set(PROJECT_NAME Alder)
+
+# DOXYFILE:
+# Path to the Doxygen configuration file (i.e. doxyfile).
+# Example: 
+#   DOXYFILE $DOXTEMP/doxyfile
+#
+set(DOXTEMP "@ALDER_DOXY_DIR@")
+set(DOXYFILE "${DOXTEMP}/config.dox")
+
+# OUTPUT_DIRECTORY ALLOW_ERASE_OUTPUT_DIRECTORY:
+# Path to the Doxygen output directory (where the resulting doc is stored).
+# Note: should be the same as your doxyfile's OUTPUT_DIRECTORY
+# If ON, allows the output directory to be erased when some advanced output
+# file have been produced (HTML Help, or TAR archive for example).
+# Example: 
+#   OUTPUT_DIRECTORY $DOXTEMP/doc
+#   ALLOW_ERASE_OUTPUT_DIRECTORY ON
+#
+set(OUTPUT_DIRECTORY "${DOXTEMP}/doc")
+set(ALLOW_ERASE_OUTPUT_DIRECTORY ON)
+
+# CREATE_HTML_TARZ_ARCHIVE RESULTING_HTML_TARZ_ARCHIVE_FILE:
+# Create a compressed (gzip) tar archive of the html directory (located
+# under the OUTPUT_DIRECTORY), and name of the resulting archive file. 
+# Note: your doxyfile should be configured to enable HTML creation 
+#       (using GENERATE_HTML   YES)
+# Example: 
+#   CREATE_HTML_TARZ_ARCHIVE ON
+#   CREATE_HTML_TARZ_ARCHIVE @DOCUMENTATION_HTML_TARZ@
+#   RESULTING_HTML_TARZ_ARCHIVE_FILE $DOXTEMP/vtk@VTK_MAJOR_VERSION@.@VTK_MINOR_VERSION@-html.tar.gz
+#
+set(CREATE_HTML_TARZ_ARCHIVE @DOCUMENTATION_HTML_TARZ@)
+set(RESULTING_HTML_TARZ_ARCHIVE_FILE "${OUTPUT_DIRECTORY}/Alder-@ALDER_VERSION_MAJOR@.@ALDER_VERSION_MINOR@.@ALDER_VERSION_PATCH@-html.tar.gz")
+
+# ----------------------------------------------------------------------------
+# Print some progress. Be nice to the build watcher.
+
+macro(step n desc)
+  message(STATUS "")
+  message(STATUS "Building Alder docs: step ${n} of 2, (${desc})")
+  message(STATUS "----------------------------------------------------------------------------")
+endmacro()
+
+macro(echo v)
+  message(STATUS "${v}='${${v}}'")
+endmacro()
+
+# ----------------------------------------------------------------------------
+# Values of this script's variables:
+
+message(STATUS "")
+message(STATUS "Building Alder Documentation: initial variable values")
+message(STATUS "----------------------------------------------------------------------------")
+
+foreach(var
+  CMAKE_CURRENT_LIST_FILE
+  CMAKE_MAJOR_VERSION
+  CMAKE_MINOR_VERSION
+  CMAKE_PATCH_VERSION
+  DOXYGEN
+  DOXYGEN_DOT_EXECUTABLE
+  PROJECT_NAME
+  DOXTEMP
+  DOXYFILE
+  OUTPUT_DIRECTORY
+  ALLOW_ERASE_OUTPUT_DIRECTORY
+  RESULTING_HTML_TARZ_ARCHIVE_FILE
+)
+  echo(${var})
+endforeach()
+
+# ----------------------------------------------------------------------------
+# Create the Doxygen doc.
+
+step(1 "run doxygen")
+file(REMOVE_RECURSE "${OUTPUT_DIRECTORY}")
+file(MAKE_DIRECTORY "${OUTPUT_DIRECTORY}")
+execute_process(COMMAND ${DOXYGEN} ${DOXYFILE}
+  RESULT_VARIABLE rv
+)
+
+# ----------------------------------------------------------------------------
+# Create the *.tar.gz file
+
+step(2 "build *.tar.gz file")
+if(CREATE_HTML_TARZ_ARCHIVE)
+  if(NOT RESULTING_HTML_TARZ_ARCHIVE_FILE STREQUAL "")
+    execute_process(COMMAND tar cfz ${RESULTING_HTML_TARZ_ARCHIVE_FILE} ${OUTPUT_DIRECTORY}
+      WORKING_DIRECTORY "${OUTPUT_DIRECTORY}/html"
+      RESULT_VARIABLE rv
+    )
+  endif()
+endif()
+

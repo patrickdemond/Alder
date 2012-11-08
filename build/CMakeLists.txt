@@ -49,6 +49,8 @@ SET( ALDER_QT_DIR ${ALDER_API_DIR}/interface/qt )
 SET( ALDER_VTK_DIR ${ALDER_API_DIR}/vtk )
 SET( ALDER_CONFIG_FILE ${PROJECT_BINARY_DIR}/config.xml )
 SET( ALDER_OPAL_SCRIPT ${PROJECT_BINARY_DIR}/opal.py )
+SET( ALDER_DOC_DIR ${ALDER_ROOT_DIR}/doc )
+SET( ALDER_DOXY_DIR ${PROJECT_BINARY_DIR}/doxygen )
 
 # Configure the utitlities header
 CONFIGURE_FILE( ${ALDER_API_DIR}/Utilities.h.in
@@ -189,3 +191,52 @@ IF( UNIX AND NOT APPLE )
   ENDFOREACH( SIZE )
   ADD_CUSTOM_TARGET( icons ALL DEPENDS ${ALDER_ICON_FILES} )
 ENDIF( UNIX AND NOT APPLE )
+
+# Build doxygen documentation ?
+INCLUDE (${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
+IF( BUILD_DOCUMENTATION )
+
+  SET( HAVE_DOT_YESNO NO )
+  IF( DOT )
+    SET( HAVE_DOT_YESNO YES )
+    IF( NOT DOT_PATH )
+      GET_FILENAME_COMPONENT( DOT_PATH ${DOT} PATH )
+    ENDIF( NOT DOT_PATH )
+  ENDIF( DOT )
+
+  CONFIGURE_FILE(
+    ${ALDER_DOC_DIR}/doc_mainpage.dox.in
+    ${ALDER_DOXY_DIR}/doc_mainpage.dox )
+
+  CONFIGURE_FILE(
+    ${ALDER_DOC_DIR}/doc_makeall.cmake.in
+    ${ALDER_DOXY_DIR}/doc_makeall.cmake
+    @ONLY )
+  
+  CONFIGURE_FILE(
+    ${ALDER_DOC_DIR}/doc_mainpage.dox.in
+    ${ALDER_DOXY_DIR}/doc_mainpage.dox )
+
+  SET( DOXY_INPUT_SOURCE 
+    ${ALDER_API_DIR}
+    ${ALDER_MODEL_DIR}
+    ${ALDER_VTK_DIR}
+    ${ALDER_QT_DIR}
+    ${ALDER_DOXY_DIR}/doc_mainpage.dox )
+
+  string( REPLACE ";" "\" \"" ALDER_DOXY_LIST "${DOXY_INPUT_SOURCE}" )
+  
+  CONFIGURE_FILE(
+    ${ALDER_DOC_DIR}/config.dox.in
+    ${ALDER_DOXY_DIR}/config.dox )
+
+# Uncommenting this block will force a build of the documentation
+# every time cmake is run in the build directory
+# 
+#  execute_process(COMMAND 
+#    ${CMAKE_COMMAND} -P ${ALDER_DOXY_DIR}/doc_makeall.cmake
+#    DEPENDS ${ALDER_DOXY_DIR}/doc_makeall.cmake 
+#    WORKING DIR ${ALDER_DOXY_DIR}/doxygen 
+#    RESULT_VARIABLE rv )
+
+ENDIF( BUILD_DOCUMENTATION )
