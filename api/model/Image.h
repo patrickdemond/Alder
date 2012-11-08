@@ -40,6 +40,11 @@ namespace Alder
     vtkTypeMacro( Image, ActiveRecord );
     std::string GetName() { return "Image"; }
 
+    /**
+     * Get the file name that this record represents
+     */
+    std::string GetFileName();
+
   protected:
     Image() {}
     ~Image() {}

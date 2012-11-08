@@ -36,6 +36,7 @@
 #include "vtkVariant.h"
 
 #include <map>
+#include <stdexcept>
 #include <typeinfo>
 #include <vector>
 
@@ -50,6 +51,11 @@ namespace Alder
   {
   public:
     vtkTypeMacro( ActiveRecord, ModelObject );
+
+    /**
+     * Returns whether this record has a particular column
+     */
+    bool ColumnNameExists( std::string column );
 
     //@{
     /**
@@ -142,6 +148,13 @@ namespace Alder
     virtual vtkVariant* Get( std::string column );
 
     /**
+     * Get the record which has a foreign key in this table.
+     * Note: the record returned must be deleted by the recipient
+     * @throws runtime_error
+     */
+    virtual ActiveRecord* GetRecord( std::string column, std::string columnName = "" );
+
+    /**
      * Set the value of any column in the record.
      * Note: this will only affect the active record in memory, to update the database
      * Save() needs to be called.
@@ -172,6 +185,17 @@ namespace Alder
      * Sets up the record with default values for all table columns
      */
     void Initialize();
+
+    /**
+     * Runs a check to make sure the record exists in the database
+     * @throws runtime_error
+     */
+    inline void AssertPrimaryId()
+    {
+      vtkVariant *id = this->Get( "id" );
+      if( !id || 0 == id->ToString().length() )
+        throw std::runtime_error( "Assert failed: primary id for record is not set" );
+    }
 
     /**
      * Internal method used by Set()

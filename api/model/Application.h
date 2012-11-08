@@ -33,6 +33,7 @@
 #include "Utilities.h"
 
 #include <iostream>
+#include <stdexcept>
 
 class vtkMedicalImageViewer;
 
@@ -88,9 +89,22 @@ namespace Alder
     /**
      * Creates a new instance of a model object given its class name
      * @param className string
+     * @throws runtime_error
      */
     ModelObject* Create( std::string className )
-    { return Application::ConstructorRegistry[className](); }
+    {
+      // make sure the constructor registry has the class name being asked for
+      std::map< std::string, ModelObject*(*)() >::iterator pair;
+      pair = this->ConstructorRegistry.find( className );
+      if( pair == this->ConstructorRegistry.end() )
+      {
+        std::stringstream stream;
+        stream << "Tried to create object of type \""
+               << className << "\" which doesn't exist in the constructor registry";
+        throw std::runtime_error( stream.str() );
+      }
+      return pair->second();
+    }
     
     /**
      * Compilers mangle class names at compile time.  This method provides the

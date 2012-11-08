@@ -40,6 +40,11 @@ namespace Alder
     vtkTypeMacro( Cineloop, ActiveRecord );
     std::string GetName() { return "Cineloop"; }
 
+    /**
+     * Get the file name that this record represents
+     */
+    std::string GetFileName();
+
   protected:
     Cineloop() {}
     ~Cineloop() {}
