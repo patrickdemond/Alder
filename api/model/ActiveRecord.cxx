@@ -51,6 +51,16 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool ActiveRecord::ColumnNameExists( std::string column )
+  {
+    // make sure the record is initialized
+    if( !this->Initialized ) this->Initialize();
+
+    std::map< std::string, vtkVariant* >::iterator pair = this->ColumnValues.find( column );
+    return this->ColumnValues.end() != pair;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void ActiveRecord::Initialize()
   {
     this->DeleteColumnValues();
@@ -64,13 +74,13 @@ namespace Alder
     // database for this purpose.  This is all implemented by the Database model
     for( it = columns.begin(); it != columns.end(); ++it )
     {
-      std::string columnName = *it;
-      std::string columnDefault = db->GetColumnDefault( this->GetName(), columnName );
-      vtkVariant *v = db->IsColumnNullable( this->GetName(), columnName ) &&
+      std::string column = *it;
+      std::string columnDefault = db->GetColumnDefault( this->GetName(), column );
+      vtkVariant *v = db->IsColumnNullable( this->GetName(), column ) &&
                       0 == columnDefault.length()
                     ? NULL
                     : new vtkVariant( columnDefault );
-      this->ColumnValues.insert( std::pair< std::string, vtkVariant* >( columnName, v ) );
+      this->ColumnValues.insert( std::pair< std::string, vtkVariant* >( column, v ) );
     }
 
     this->Initialized = true;
@@ -109,14 +119,14 @@ namespace Alder
 
       for( int c = 0; c < query->GetNumberOfFields(); ++c )
       {
-        std::string columnName = query->GetFieldName( c );
-        if( 0 != columnName.compare( "create_timestamp" ) && 0 != columnName.compare( "update_timestamp" ) )
+        std::string column = query->GetFieldName( c );
+        if( 0 != column.compare( "create_timestamp" ) && 0 != column.compare( "update_timestamp" ) )
         {
-          vtkVariant *v = db->IsColumnNullable( this->GetName(), columnName ) &&
+          vtkVariant *v = db->IsColumnNullable( this->GetName(), column ) &&
                           0 == query->DataValue( c ).ToString().length()
                         ? NULL
                         : new vtkVariant( query->DataValue( c ) );
-          this->ColumnValues.insert( std::pair< std::string, vtkVariant* >( columnName, v ) );
+          this->ColumnValues.insert( std::pair< std::string, vtkVariant* >( column, v ) );
         }
       }
 
@@ -174,10 +184,7 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void ActiveRecord::Remove()
   {
-    // make sure the record has an id
-    vtkVariant *id = this->Get( "id" );
-    if( !id || 0 == id->ToString().length() )
-      throw std::runtime_error( "Tried to remove record with no id" );
+    this->AssertPrimaryId();
 
     vtkSmartPointer<vtkMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
     std::stringstream stream;
@@ -191,28 +198,52 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   vtkVariant* ActiveRecord::Get( std::string column )
   {
-    // make sure the record is initialized
-    if( !this->Initialized ) this->Initialize();
-
-    std::map< std::string, vtkVariant* >::iterator pair = this->ColumnValues.find( column );
-    if( this->ColumnValues.end() == pair )
+    // make sure the column exists
+    if( !this->ColumnNameExists( column ) )
     {
       std::stringstream error;
       error << "Tried to get column \"" << this->GetName() << "." << column << "\" which doesn't exist";
       throw std::runtime_error( error.str() );
     }
 
+    std::map< std::string, vtkVariant* >::iterator pair = this->ColumnValues.find( column );
     return pair->second;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  ActiveRecord* ActiveRecord::GetRecord( std::string table, std::string column )
+  {
+    // if no column name was provided, use the default (table name followed by _id)
+    if( column.empty() )
+    {
+      column = toLower( table );
+      column += "_id";
+    }
+
+    // test to see if correct foreign key exists
+    if( !this->ColumnNameExists( column ) )
+    {
+      std::stringstream error;
+      error << "Tried to get \"" << table << "\" record but column \"" << column << "\" doesn't exist";
+      throw std::runtime_error( error.str() );
+    }
+
+    ActiveRecord *record = NULL;
+    vtkVariant *v = this->Get( column );
+    if( v )
+    { // only create the record if the foreign key is not null
+      record = ActiveRecord::SafeDownCast( Application::GetInstance()->Create( table ) );
+      record->Load( "id", this->Get( column )->ToString() );
+    }
+
+    return record;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void ActiveRecord::SetVariant( std::string column, vtkVariant *value )
   {
-    // make sure the record is initialized
-    if( !this->Initialized ) this->Initialize();
-
-    std::map< std::string, vtkVariant* >::iterator pair = this->ColumnValues.find( column );
-    if( this->ColumnValues.end() == pair )
+    // make sure the column exists
+    if( !this->ColumnNameExists( column ) )
     {
       std::stringstream error;
       error << "Tried to set column \"" << this->GetName() << "." << column << "\" which doesn't exist";
@@ -220,6 +251,7 @@ namespace Alder
     }
 
     // if it exists, delete the old value
+    std::map< std::string, vtkVariant* >::iterator pair = this->ColumnValues.find( column );
     if( pair->second ) delete pair->second;
     pair->second = value;
   }

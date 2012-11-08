@@ -9,6 +9,20 @@
 
 =========================================================================*/
 
+/**
+ * @class ActiveRecord
+ * @namespace Alder
+ * 
+ * @author Patrick Emond <emondpd@mcmaster.ca>
+ * @author Dean Inglis <inglisd@mcmaster.ca>
+ * 
+ * @brief Abstract base class for all active record classes
+ * 
+ * ActiveRecord provides a programming interface to the database.  All classes
+ * which correspond directly to a table (and named exactly the same way) must
+ * extend this class.
+ */
+
 #ifndef __ActiveRecord_h
 #define __ActiveRecord_h
 
@@ -22,8 +36,14 @@
 #include "vtkVariant.h"
 
 #include <map>
+#include <stdexcept>
 #include <typeinfo>
 #include <vector>
+
+/**
+ * @addtogroup Alder
+ * @{
+ */
 
 namespace Alder
 {
@@ -31,6 +51,18 @@ namespace Alder
   {
   public:
     vtkTypeMacro( ActiveRecord, ModelObject );
+
+    /**
+     * Returns whether this record has a particular column
+     */
+    bool ColumnNameExists( std::string column );
+
+    //@{
+    /**
+     * Loads a specific record from the database.  Input parameters must include the values
+     * of a primary or unique key in the corresponding table.
+     * @throws runtime_error
+     */
     bool Load( std::string key, std::string value )
     {
       return this->Load( std::pair< std::string, std::string >( key, value ) );
@@ -42,8 +74,24 @@ namespace Alder
       return this->Load( map );
     }
     virtual bool Load( std::map< std::string, std::string > map );
+    //@}
+
+    /**
+     * Saves the record's current values to the database.  If the record was not loaded
+     * then a new record will be inserted into the database.
+     */
     virtual void Save();
+
+    /**
+     * Removes the current record from the database.
+     * @throws runtime_error
+     */
     virtual void Remove();
+    
+    /**
+     * Provides a list of all records which exist in a table.
+     * @param list vector An existing vector to put all records into.
+     */
     template< class T > static void GetAll( std::vector< vtkSmartPointer< T > > *list )
     { // we have to implement this here because of the template
       Application *app = Application::GetInstance();
@@ -65,6 +113,10 @@ namespace Alder
       }
     }
 
+    /**
+     * Provides a list of all records which are related to a record by foreign key.
+     * @param list vector An existing vector to put all records into.
+     */
     template< class T > void GetList( std::vector< vtkSmartPointer< T > > *list )
     {
       Application *app = Application::GetInstance();
@@ -89,24 +141,66 @@ namespace Alder
       }
     }
 
-    // Get table column values
+    /**
+     * Get the value of any column in the record.
+     * @throws runtime_error
+     */
     virtual vtkVariant* Get( std::string column );
 
-    // Set table column values
+    /**
+     * Get the record which has a foreign key in this table.
+     * Note: the record returned must be deleted by the recipient
+     * @throws runtime_error
+     */
+    virtual ActiveRecord* GetRecord( std::string column, std::string columnName = "" );
+
+    /**
+     * Set the value of any column in the record.
+     * Note: this will only affect the active record in memory, to update the database
+     * Save() needs to be called.
+     */
     template <class T> void Set( std::string column, T value )
     { this->SetVariant( column, new vtkVariant( value ) ); }
 
+    //@{
+    /** 
+     * Defines whether or not to print all SQL statements to cout
+     */
     vtkGetMacro( DebugSQL, bool );
     vtkSetMacro( DebugSQL, bool );
     vtkBooleanMacro( DebugSQL, bool );
+    //@}
+
+    /**
+     * Must be extended by every child class.
+     * Its value is always the name of the class (identical case)
+     */
     virtual std::string GetName() = 0;
 
   protected:
     ActiveRecord();
     ~ActiveRecord();
 
-    std::string Name() const { return typeid( *this ).name(); }
+    /**
+     * Sets up the record with default values for all table columns
+     */
     void Initialize();
+
+    /**
+     * Runs a check to make sure the record exists in the database
+     * @throws runtime_error
+     */
+    inline void AssertPrimaryId()
+    {
+      vtkVariant *id = this->Get( "id" );
+      if( !id || 0 == id->ToString().length() )
+        throw std::runtime_error( "Assert failed: primary id for record is not set" );
+    }
+
+    /**
+     * Internal method used by Set()
+     * @throws runtime_error
+     */
     virtual void SetVariant( std::string column, vtkVariant *value );
 
     std::map<std::string,vtkVariant*> ColumnValues;
@@ -119,4 +213,7 @@ namespace Alder
     void DeleteColumnValues();
   };
 }
+
+/** @} end of doxygen group */
+
 #endif

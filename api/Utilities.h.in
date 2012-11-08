@@ -28,7 +28,6 @@
 #define ALDER_VTK_DIR "@ALDER_VTK_DIR@"
 #define ALDER_CONFIG_FILE "@ALDER_CONFIG_FILE@"
 #define ALDER_OPAL_SCRIPT "@ALDER_OPAL_SCRIPT@"
-#define ALDER_IMAGE_DATA_PATH "@ALDER_IMAGE_DATA_PATH@"
 
 #define ALDER_SALT_STRING "@ALDER_SALT_STRING@"
 #define ALDER_MASTER_PASSWORD ""
@@ -58,7 +57,9 @@
   }
 #endif
 
+#include <algorithm>
 #include <base64.h>
+#include <cctype>
 #include <json/reader.h>
 #include <sha.h>
 #include <sstream>
@@ -100,6 +101,20 @@ namespace Alder
     time( &rawtime );
     strftime( buffer, 256, format.c_str(), localtime( &rawtime ) );
     return std::string( buffer );
+  }
+
+  inline std::string toLower( std::string str )
+  {
+    std::string returnString = str;
+    std::transform( str.begin(), str.end(), returnString.begin(), tolower );
+    return returnString;
+  }
+
+  inline std::string toUpper( std::string str )
+  {
+    std::string returnString = str;
+    std::transform( str.begin(), str.end(), returnString.begin(), toupper );
+    return returnString;
   }
 }
 

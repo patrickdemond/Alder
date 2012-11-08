@@ -11,15 +11,12 @@
 
 /**
  * @class User
- *
+ * @namespace Alder
+ * 
  * @author Patrick Emond <emondpd@mcmaster.ca>
  * @author Dean Inglis <inglisd@mcmaster.ca>
- *
- * @brief User record.
- *
- * User is a child class of ActiveRecord that represents
- * an entry in the User table of the Alder database.  
- *
+ * 
+ * @brief An active record for the User table
  */
 
 #ifndef __User_h
@@ -36,7 +33,6 @@
 
 namespace Alder
 {
-//  class Session;
   class User : public ActiveRecord
   {
   public:

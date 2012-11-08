@@ -9,6 +9,16 @@
 
 =========================================================================*/
 
+/**
+ * @class Study
+ * @namespace Alder
+ * 
+ * @author Patrick Emond <emondpd@mcmaster.ca>
+ * @author Dean Inglis <inglisd@mcmaster.ca>
+ * 
+ * @brief An active record for the Study table
+ */
+
 #ifndef __Study_h
 #define __Study_h
 
@@ -17,9 +27,13 @@
 #include <iostream>
 #include <vector>
 
+/**
+ * @addtogroup Alder
+ * @{
+ */
+
 namespace Alder
 {
-//  class Session;
   class Study : public ActiveRecord
   {
   public:
@@ -38,5 +52,7 @@ namespace Alder
     void operator=( const Study& ); // Not implemented
   };
 }
+
+/** @} end of doxygen group */
 
 #endif

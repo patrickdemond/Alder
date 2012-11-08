@@ -9,6 +9,16 @@
 
 =========================================================================*/
 
+/**
+ * @class Image
+ * @namespace Alder
+ * 
+ * @author Patrick Emond <emondpd@mcmaster.ca>
+ * @author Dean Inglis <inglisd@mcmaster.ca>
+ * 
+ * @brief An active record for the Image table
+ */
+
 #ifndef __Image_h
 #define __Image_h
 
@@ -16,15 +26,24 @@
 
 #include <iostream>
 
+/**
+ * @addtogroup Alder
+ * @{
+ */
+
 namespace Alder
 {
-//  class Session;
   class Image : public ActiveRecord
   {
   public:
     static Image *New();
     vtkTypeMacro( Image, ActiveRecord );
     std::string GetName() { return "Image"; }
+
+    /**
+     * Get the file name that this record represents
+     */
+    std::string GetFileName();
 
   protected:
     Image() {}
@@ -35,5 +54,7 @@ namespace Alder
     void operator=( const Image& ); // Not implemented
   };
 }
+
+/** @} end of doxygen group */
 
 #endif

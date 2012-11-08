@@ -9,6 +9,16 @@
 
 =========================================================================*/
 
+/**
+ * @class Rating
+ * @namespace Alder
+ * 
+ * @author Patrick Emond <emondpd@mcmaster.ca>
+ * @author Dean Inglis <inglisd@mcmaster.ca>
+ * 
+ * @brief An active record for the Rating table
+ */
+
 #ifndef __Rating_h
 #define __Rating_h
 
@@ -16,9 +26,13 @@
 
 #include <iostream>
 
+/**
+ * @addtogroup Alder
+ * @{
+ */
+
 namespace Alder
 {
-//  class Session;
   class Rating : public ActiveRecord
   {
   public:
@@ -35,5 +49,7 @@ namespace Alder
     void operator=( const Rating& ); // Not implemented
   };
 }
+
+/** @} end of doxygen group */
 
 #endif

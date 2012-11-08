@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.5.24, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.5.28, for debian-linux-gnu (i686)
 --
 -- Host: localhost    Database: alder
 -- ------------------------------------------------------
--- Server version	5.5.24-0ubuntu0.12.04.1
+-- Server version	5.5.28-0ubuntu0.12.04.2
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -45,6 +45,38 @@ INSERT INTO `Cineloop` VALUES (1,'2012-11-01 16:22:16','0000-00-00 00:00:00',1,1
 UNLOCK TABLES;
 
 --
+-- Table structure for table `Exam`
+--
+
+DROP TABLE IF EXISTS `Exam`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Exam` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `create_timestamp` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `study_id` int(10) unsigned NOT NULL,
+  `laterality` enum('right','left') NOT NULL,
+  `type` enum('cimt','plaque') NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_exam_study_id` (`study_id`),
+  KEY `dk_laterality` (`laterality`),
+  KEY `dk_type` (`type`),
+  CONSTRAINT `fk_exam_study_id` FOREIGN KEY (`study_id`) REFERENCES `Study` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Exam`
+--
+
+LOCK TABLES `Exam` WRITE;
+/*!40000 ALTER TABLE `Exam` DISABLE KEYS */;
+INSERT INTO `Exam` VALUES (1,'2012-11-01 15:39:51','0000-00-00 00:00:00',1,'left','cimt'),(2,'2012-11-01 15:39:54','0000-00-00 00:00:00',1,'right','cimt'),(3,'2012-11-01 15:39:58','0000-00-00 00:00:00',2,'left','cimt'),(4,'2012-11-01 15:40:01','0000-00-00 00:00:00',2,'right','cimt'),(5,'2012-11-01 15:40:05','0000-00-00 00:00:00',3,'left','cimt'),(6,'2012-11-01 15:40:08','0000-00-00 00:00:00',3,'right','cimt');
+/*!40000 ALTER TABLE `Exam` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `Image`
 --
 
@@ -69,8 +101,8 @@ CREATE TABLE `Image` (
   KEY `fk_image_exam_id` (`exam_id`),
   KEY `fk_image_cineloop_id` (`cineloop_id`),
   KEY `dk_cineloop_id_frame` (`cineloop_id`,`frame`),
-  CONSTRAINT `fk_image_exam_id` FOREIGN KEY (`exam_id`) REFERENCES `Exam` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_image_cineloop_id` FOREIGN KEY (`cineloop_id`) REFERENCES `Cineloop` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `fk_image_cineloop_id` FOREIGN KEY (`cineloop_id`) REFERENCES `Cineloop` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_image_exam_id` FOREIGN KEY (`exam_id`) REFERENCES `Exam` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -80,7 +112,7 @@ CREATE TABLE `Image` (
 
 LOCK TABLES `Image` WRITE;
 /*!40000 ALTER TABLE `Image` DISABLE KEYS */;
-INSERT INTO `Image` VALUES (1,'2012-11-01 16:37:46','0000-00-00 00:00:00',1,1,1,1,NULL,NULL,NULL,NULL,NULL,''),(2,'2012-11-01 16:37:55','0000-00-00 00:00:00',2,4,1,1,NULL,NULL,NULL,NULL,NULL,''),(3,'2012-11-01 16:38:01','0000-00-00 00:00:00',3,7,1,1,NULL,NULL,NULL,NULL,NULL,''),(4,'2012-11-01 16:38:08','0000-00-00 00:00:00',4,10,1,1,NULL,NULL,NULL,NULL,NULL,''),(5,'2012-11-01 16:38:14','0000-00-00 00:00:00',5,13,1,1,NULL,NULL,NULL,NULL,NULL,''),(6,'2012-11-01 16:38:21','0000-00-00 00:00:00',6,16,1,1,NULL,NULL,NULL,NULL,NULL,'');
+INSERT INTO `Image` VALUES (1,'2012-11-02 18:40:05','0000-00-00 00:00:00',1,1,1,1,0.1,1,0.55,1.6,3,''),(2,'2012-11-02 18:40:05','0000-00-00 00:00:00',2,4,1,1,0.2,2,1.1,1.7,4,''),(3,'2012-11-02 18:40:05','0000-00-00 00:00:00',3,7,1,1,0.3,3,1.65,1.8,5,''),(4,'2012-11-02 18:40:05','0000-00-00 00:00:00',4,10,1,1,0.4,4,2.2,1.9,6,''),(5,'2012-11-02 18:40:05','0000-00-00 00:00:00',5,13,1,1,0.5,5,2.75,2,7,''),(6,'2012-11-02 20:16:05','0000-00-00 00:00:00',6,16,1,1,NULL,NULL,NULL,NULL,NULL,'');
 /*!40000 ALTER TABLE `Image` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -114,38 +146,6 @@ CREATE TABLE `Rating` (
 LOCK TABLES `Rating` WRITE;
 /*!40000 ALTER TABLE `Rating` DISABLE KEYS */;
 /*!40000 ALTER TABLE `Rating` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `Exam`
---
-
-DROP TABLE IF EXISTS `Exam`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Exam` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `update_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `create_timestamp` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `study_id` int(10) unsigned NOT NULL,
-  `laterality` enum('right','left') NOT NULL,
-  `type` enum('cimt','plaque') NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `fk_exam_study_id` (`study_id`),
-  KEY `dk_laterality` (`laterality`),
-  KEY `dk_type` (`type`),
-  CONSTRAINT `fk_exam_study_id` FOREIGN KEY (`study_id`) REFERENCES `Study` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `Exam`
---
-
-LOCK TABLES `Exam` WRITE;
-/*!40000 ALTER TABLE `Exam` DISABLE KEYS */;
-INSERT INTO `Exam` VALUES (1,'2012-11-01 15:39:51','0000-00-00 00:00:00',1,'left','cimt'),(2,'2012-11-01 15:39:54','0000-00-00 00:00:00',1,'right','cimt'),(3,'2012-11-01 15:39:58','0000-00-00 00:00:00',2,'left','cimt'),(4,'2012-11-01 15:40:01','0000-00-00 00:00:00',2,'right','cimt'),(5,'2012-11-01 15:40:05','0000-00-00 00:00:00',3,'left','cimt'),(6,'2012-11-01 15:40:08','0000-00-00 00:00:00',3,'right','cimt');
-/*!40000 ALTER TABLE `Exam` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -202,7 +202,7 @@ CREATE TABLE `User` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_name` (`name`),
   KEY `dk_last_login` (`last_login`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -211,7 +211,7 @@ CREATE TABLE `User` (
 
 LOCK TABLES `User` WRITE;
 /*!40000 ALTER TABLE `User` DISABLE KEYS */;
-INSERT INTO `User` VALUES (1,'2012-11-01 14:24:27','2012-11-01 14:24:27','administrator','yQ7sfVQNBaEWRA/M1+/rtNp8yk1we7LEVkpWfZT05OU=\n',NULL),(2,'2012-11-01 14:24:50','2012-11-01 14:24:37','patrick','yQ7sfVQNBaEWRA/M1+/rtNp8yk1we7LEVkpWfZT05OU=\n',NULL);
+INSERT INTO `User` VALUES (1,'2012-11-01 14:24:27','2012-11-01 14:24:27','administrator','yQ7sfVQNBaEWRA/M1+/rtNp8yk1we7LEVkpWfZT05OU=\n',NULL),(2,'2012-11-08 21:25:05','2012-11-01 14:24:37','patrick','yQ7sfVQNBaEWRA/M1+/rtNp8yk1we7LEVkpWfZT05OU=\n','2012-11-08 16:25:05'),(3,'2012-11-08 21:27:23','2012-11-08 21:26:49','dean','UaQCbmX7zli4ifPr75pDOT8pkhCJcaYGkn+qbUfPLek=\n','2012-11-08 16:27:23'),(4,'2012-11-08 21:26:51','2012-11-08 21:26:51','','LniInVkHfMeQZKByzuo/F/CMEEQ8ISwUcyMdKX+mCUk=\n',NULL);
 /*!40000 ALTER TABLE `User` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -224,4 +224,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2012-11-01 12:58:39
+-- Dump completed on 2012-11-08 16:27:55

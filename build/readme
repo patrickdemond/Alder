@@ -119,3 +119,16 @@ Once you've gone through the process of building VTK using CMake this will seem 
    ALDER_SALT_STRING:STRING=put anything here
 
 7. You are now ready to build Alder by typing "make".
+
+
+Building documentation
+======================
+
+1. Install the following packages: doxygen gnuplot graphviz
+
+2. Edit the CMakeCache.txt file, setting BUILD_DOCUMENTATION to ON
+
+3. Re-run cmake in the root of the build directory, this will create a new directory named
+   doxygen.
+
+4. In the doxygen directory run cmake -P doc_makeall.cmake

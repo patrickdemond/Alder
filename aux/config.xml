@@ -12,4 +12,7 @@
     <Host>localhost</Host>
     <Port>8843</Port>
   </Opal>
+  <Path>
+    <ImageData></ImageData>
+  </Path>
 </Configuration>
