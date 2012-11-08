@@ -123,11 +123,9 @@ void QUserListDialog::slotResetPassword()
     if( 0 == item->column() )
     {
       vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
-      if( NULL != user )
-      {
-        user->ResetPassword();
-        user->Save();
-      }
+      user->Load( "name", item->text().toStdString() );
+      user->ResetPassword();
+      user->Save();
     }
   }
 }
