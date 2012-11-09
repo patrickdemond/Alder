@@ -81,8 +81,7 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this, SLOT( slotTreeSelectionChanged() ) );
 
   // link the view and the qt render widget
-  app->GetViewer()->SetInteractor( this->ui->renderWidget->GetInteractor() );
-  this->ui->renderWidget->SetRenderWindow( app->GetViewer()->GetRenderWindow() );
+  app->GetViewer()->SetRenderWindow( this->ui->renderWidget->GetRenderWindow() );
 
   this->readSettings();
   this->updateInterface();
@@ -249,6 +248,30 @@ void QMainAlderWindow::readSettings()
 void QMainAlderWindow::slotTreeSelectionChanged()
 {
   this->updateStudyInformation();
+  
+  QList<QTreeWidgetItem*> list = this->ui->studyTreeWidget->selectedItems();
+  if( 0 < list.size() )
+  {
+    std::map< QTreeWidgetItem*, vtkSmartPointer<Alder::ActiveRecord> >::iterator it;
+    it = this->treeModelMap.find( list.at( 0 ) );
+    if( it != this->treeModelMap.end() )
+    {
+      Alder::ActiveRecord *record = it->second;
+      if( 0 == record->GetName().compare( "Image" ) )
+      {
+        Alder::Image *image = Alder::Image::SafeDownCast( record );
+        Alder::Application::GetInstance()->GetViewer()->Load( image->GetFileName() );
+        // TODO: in some situations we may not want to display the static images
+        // for example, when a reader should be blinded to any previous slice selections
+        // 
+      }
+      else if( 0 == record->GetName().compare( "Cineloop" ) )
+      {
+        Alder::Cineloop *cine = Alder::Cineloop::SafeDownCast( record );
+        Alder::Application::GetInstance()->GetViewer()->Load( cine->GetFileName() );
+      }      
+    }
+  }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
