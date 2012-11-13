@@ -23,22 +23,19 @@
 
 #include "vtkObjectFactory.h"
 #include "vtkVariant.h"
-#include "vtkMedicalImageViewer.h"
 
 #include <stdexcept>
 
 namespace Alder
 {
   vtkCxxSetObjectMacro( Application, ActiveUser, User );
-  vtkCxxSetObjectMacro( Application, ActiveStudy, Study );
+  // Study, Image and Cineloop are manually implemented below
 
   Application* Application::Instance = NULL; // set the initial application
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   Application::Application()
   {
-    this->Viewer = vtkMedicalImageViewer::New();
-    this->Viewer->SetImageToSinusoid();
     this->Config = Configuration::New();
     this->DB = Database::New();
     this->Opal = OpalService::New();
@@ -62,12 +59,6 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   Application::~Application()
   {
-    if( NULL != this->Viewer )
-    {
-      this->Viewer->Delete();
-      this->Viewer = NULL;
-    }
-
     if( NULL != this->Config )
     {
       this->Config->Delete();
@@ -96,6 +87,18 @@ namespace Alder
     {
       this->ActiveStudy->Delete();
       this->ActiveStudy = NULL;
+    }
+
+    if( NULL != this->ActiveImage )
+    {
+      this->ActiveImage->Delete();
+      this->ActiveImage = NULL;
+    }
+
+    if( NULL != this->ActiveCineloop )
+    {
+      this->ActiveCineloop->Delete();
+      this->ActiveCineloop = NULL;
     }
   }
 
@@ -185,5 +188,53 @@ namespace Alder
   {
     this->SetActiveUser( NULL );
     this->SetActiveStudy( NULL );
+    this->SetActiveImage( NULL );
+    this->SetActiveCineloop( NULL );
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Application::SetActiveStudy( Study *study )
+  {
+    if( study != this->ActiveStudy )
+    {
+      if( this->ActiveStudy ) this->ActiveStudy->UnRegister( this );
+      this->ActiveStudy = study;
+      if( this->ActiveStudy ) this->ActiveStudy->Register( this );
+      this->SetActiveImage( NULL );
+      this->SetActiveCineloop( NULL );
+      this->Modified();
+    }
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Application::SetActiveImage( Image *image )
+  {
+    if( image != this->ActiveImage )
+    {
+      if( this->ActiveImage ) this->ActiveImage->UnRegister( this );
+      this->ActiveImage = image;
+      if( this->ActiveImage )
+      {
+        this->SetActiveCineloop( NULL );
+        this->ActiveImage->Register( this );
+      }
+      this->Modified();
+    }
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Application::SetActiveCineloop( Cineloop *cineloop )
+  {
+    if( cineloop != this->ActiveCineloop )
+    {
+      if( this->ActiveCineloop ) this->ActiveCineloop->UnRegister( this );
+      this->ActiveCineloop = cineloop;
+      if( this->ActiveCineloop )
+      {
+        this->SetActiveImage( NULL );
+        this->ActiveCineloop->Register( this );
+      }
+      this->Modified();
+    }
   }
 }

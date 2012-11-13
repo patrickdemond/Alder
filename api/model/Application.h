@@ -35,8 +35,6 @@
 #include <iostream>
 #include <stdexcept>
 
-class vtkMedicalImageViewer;
-
 /**
  * @addtogroup Alder
  * @{
@@ -44,8 +42,10 @@ class vtkMedicalImageViewer;
 
 namespace Alder
 {
+  class Cineloop;
   class Configuration;
   class Database;
+  class Image;
   class OpalService;
   class Study;
   class User;
@@ -77,14 +77,29 @@ namespace Alder
      */
     void ResetApplication();
 
-    vtkGetObjectMacro( Viewer, vtkMedicalImageViewer );
     vtkGetObjectMacro( Config, Configuration );
     vtkGetObjectMacro( DB, Database );
     vtkGetObjectMacro( Opal, OpalService );
     vtkGetObjectMacro( ActiveUser, User );
     virtual void SetActiveUser( User* );
     vtkGetObjectMacro( ActiveStudy, Study );
+    vtkGetObjectMacro( ActiveImage, Image );
+    vtkGetObjectMacro( ActiveCineloop, Cineloop );
+
+    /**
+     * When setting the active study the active image and cineloop are automatically removed
+     */
     virtual void SetActiveStudy( Study* );
+
+    /**
+     * When setting the active image the active cineloop is automatically removed
+     */
+    virtual void SetActiveImage( Image* );
+    
+    /**
+     * When setting the active cineloop the active image is automatically removed
+     */
+    virtual void SetActiveCineloop( Cineloop* );
     
     /**
      * Creates a new instance of a model object given its class name
@@ -121,12 +136,13 @@ namespace Alder
     static Application *New();
     static Application *Instance;
 
-    vtkMedicalImageViewer *Viewer;
     Configuration *Config;
     Database *DB;
     OpalService *Opal;
     User *ActiveUser;
     Study *ActiveStudy;
+    Image *ActiveImage;
+    Cineloop *ActiveCineloop;
     
   private:
     Application( const Application& );  // Not implemented.

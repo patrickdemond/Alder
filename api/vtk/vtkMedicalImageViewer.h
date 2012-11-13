@@ -91,11 +91,13 @@ public:
 
   /**
    * Load an image from file and display.
+   * 
    * If fileName is valid, load the file via vtkGDCMImageReader and display it.
+   * Returns fails if image fails to load.
    * @param fileName Name of a file on disk
-   * @throw runtime_error 
+   * @return boolean
    */
-   void Load( std::string fileName );
+   bool Load( std::string fileName );
 
 
   /**

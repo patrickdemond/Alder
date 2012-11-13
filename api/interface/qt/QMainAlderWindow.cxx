@@ -80,9 +80,6 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this->ui->studyTreeWidget, SIGNAL( itemSelectionChanged() ),
     this, SLOT( slotTreeSelectionChanged() ) );
 
-  // link the view and the qt render widget
-  app->GetViewer()->SetRenderWindow( this->ui->renderWidget->GetRenderWindow() );
-
   this->readSettings();
   this->updateInterface();
 };
@@ -119,11 +116,13 @@ void QMainAlderWindow::slotOpenStudy()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotPreviousStudy()
 {
+  // TODO: implement
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotNextStudy()
 {
+  // TODO: implement
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -182,7 +181,7 @@ void QMainAlderWindow::slotUserManagement()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotUpdateStudyDatabase()
 {
-/*
+/* TODO: implement once Opal is ready
   int attempt = 1;
 
   while( attempt < 4 )
@@ -247,7 +246,7 @@ void QMainAlderWindow::readSettings()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotTreeSelectionChanged()
 {
-  this->updateStudyInformation();
+  Alder::Application *app = Alder::Application::GetInstance();
   
   QList<QTreeWidgetItem*> list = this->ui->studyTreeWidget->selectedItems();
   if( 0 < list.size() )
@@ -257,21 +256,12 @@ void QMainAlderWindow::slotTreeSelectionChanged()
     if( it != this->treeModelMap.end() )
     {
       Alder::ActiveRecord *record = it->second;
-      if( 0 == record->GetName().compare( "Image" ) )
-      {
-        Alder::Image *image = Alder::Image::SafeDownCast( record );
-        Alder::Application::GetInstance()->GetViewer()->Load( image->GetFileName() );
-        // TODO: in some situations we may not want to display the static images
-        // for example, when a reader should be blinded to any previous slice selections
-        // 
-      }
-      else if( 0 == record->GetName().compare( "Cineloop" ) )
-      {
-        Alder::Cineloop *cine = Alder::Cineloop::SafeDownCast( record );
-        Alder::Application::GetInstance()->GetViewer()->Load( cine->GetFileName() );
-      }      
+      app->SetActiveImage( Alder::Image::SafeDownCast( record ) );
+      app->SetActiveCineloop( Alder::Cineloop::SafeDownCast( record ) );
     }
   }
+
+  this->updateInterface();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -307,25 +297,15 @@ void QMainAlderWindow::updateStudyInformation()
     dateString = study->Get( "datetime_acquired" )->ToString().c_str();
   }
 
-  // define currently selected item
-  QList<QTreeWidgetItem*> list = this->ui->studyTreeWidget->selectedItems();
-
-  if( 0 < list.size() )
+  // fill in the active image information (if one is selected)
+  Alder::Image *image = Alder::Application::GetInstance()->GetActiveImage();
+  if( image )
   {
-    std::map< QTreeWidgetItem*, vtkSmartPointer<Alder::ActiveRecord> >::iterator it;
-    it = this->treeModelMap.find( list.at( 0 ) );
-    if( it != this->treeModelMap.end() )
-    {
-      Alder::ActiveRecord *record = it->second;
-      if( 0 == record->GetName().compare( "Image" ) )
-      {
-        if( record->Get( "min" ) ) minString = record->Get( "min" )->ToString().c_str();
-        if( record->Get( "max" ) ) maxString = record->Get( "max" )->ToString().c_str();
-        if( record->Get( "mean" ) ) meanString = record->Get( "mean" )->ToString().c_str();
-        if( record->Get( "sd" ) ) sdString = record->Get( "sd" )->ToString().c_str();
-        if( record->Get( "n" ) ) nString = record->Get( "n" )->ToString().c_str();
-      }
-    }
+    if( image->Get( "min" ) ) minString = image->Get( "min" )->ToString().c_str();
+    if( image->Get( "max" ) ) maxString = image->Get( "max" )->ToString().c_str();
+    if( image->Get( "mean" ) ) meanString = image->Get( "mean" )->ToString().c_str();
+    if( image->Get( "sd" ) ) sdString = image->Get( "sd" )->ToString().c_str();
+    if( image->Get( "n" ) ) nString = image->Get( "n" )->ToString().c_str();
   }
 
   this->ui->interviewerValueLabel->setText( interviewerString );
@@ -407,27 +387,53 @@ void QMainAlderWindow::updateStudyTreeWidget()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::updateMedicalImageWidget()
+{
+  Alder::Image *image = Alder::Application::GetInstance()->GetActiveImage();
+  Alder::Cineloop *cineloop = Alder::Application::GetInstance()->GetActiveCineloop();
+
+  if( image )
+  {
+    this->ui->medicalImageWidget->loadImage( QString( image->GetFileName().c_str() ) );
+    // TODO: in some situations we may not want to display the static images
+    // for example, when a reader should be blinded to any previous slice selections
+  }
+  else if( cineloop )
+  {
+    this->ui->medicalImageWidget->loadImage( QString( cineloop->GetFileName().c_str() ) );
+  }
+  else
+  {
+    this->ui->medicalImageWidget->resetImage();
+  }
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::updateInterface()
 {
   Alder::Application *app = Alder::Application::GetInstance();
   Alder::Study *study = app->GetActiveStudy();
+  Alder::Cineloop *cineloop = app->GetActiveCineloop();
+  Alder::Image *image = app->GetActiveImage();
   bool loggedIn = NULL != app->GetActiveUser();
 
   // login button (login/logout)
   this->ui->actionLogin->setText( tr( loggedIn ? "Logout" : "Login" ) );
 
-  // only allow study operations when logged in
+  // set all widget enable states
   this->ui->actionOpenStudy->setEnabled( loggedIn );
-  this->ui->actionPreviousStudy->setEnabled( loggedIn );
-  this->ui->actionNextStudy->setEnabled( loggedIn );
-  this->ui->previousStudyPushButton->setEnabled( loggedIn );
-  this->ui->nextStudyPushButton->setEnabled( loggedIn );
-  this->ui->addImagePushButton->setEnabled( false );
-  this->ui->removeImagePushButton->setEnabled( false );
-  this->ui->ratingSlider->setEnabled( false );
-  this->ui->notePushButton->setEnabled( false );
-  this->ui->studyTreeWidget->setEnabled( loggedIn );
+  this->ui->actionPreviousStudy->setEnabled( study );
+  this->ui->actionNextStudy->setEnabled( study );
+  this->ui->previousStudyPushButton->setEnabled( study );
+  this->ui->nextStudyPushButton->setEnabled( study );
+  this->ui->addImagePushButton->setEnabled( cineloop );
+  this->ui->removeImagePushButton->setEnabled( image );
+  this->ui->ratingSlider->setEnabled( cineloop || image );
+  this->ui->notePushButton->setEnabled( study );
+  this->ui->studyTreeWidget->setEnabled( study );
+  this->ui->medicalImageWidget->setEnabled( loggedIn );
 
   this->updateStudyTreeWidget();
   this->updateStudyInformation();
+  this->updateMedicalImageWidget();
 }

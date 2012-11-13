@@ -59,19 +59,12 @@
       <item>
        <layout class="QVBoxLayout" name="renderLayout">
         <item>
-         <widget class="QVTKWidget" name="renderWidget">
+         <widget class="QMedicalImageWidget" name="medicalImageWidget" native="true">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QProgressBar" name="progressBar">
-          <property name="value">
-           <number>100</number>
           </property>
          </widget>
         </item>
@@ -523,9 +516,10 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QVTKWidget</class>
+   <class>QMedicalImageWidget</class>
    <extends>QWidget</extends>
-   <header>QVTKWidget.h</header>
+   <header>QMedicalImageWidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

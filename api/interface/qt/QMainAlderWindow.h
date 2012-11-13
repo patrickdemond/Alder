@@ -56,6 +56,7 @@ protected:
   virtual void writeSettings();
   virtual void updateStudyInformation();
   virtual void updateStudyTreeWidget();
+  virtual void updateMedicalImageWidget();
   virtual void updateInterface();
 
   std::map< QTreeWidgetItem*, vtkSmartPointer<Alder::ActiveRecord> > treeModelMap;
