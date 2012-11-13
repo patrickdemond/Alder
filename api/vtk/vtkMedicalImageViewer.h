@@ -90,6 +90,15 @@ public:
   //@}
 
   /**
+   * Load an image from file and display.
+   * If fileName is valid, load the file via vtkGDCMImageReader and display it.
+   * @param fileName Name of a file on disk
+   * @throw runtime_error 
+   */
+   void Load( std::string fileName );
+
+
+  /**
    * Enum constants for orthonormal slice orientations. */
   enum
   {
@@ -300,7 +309,7 @@ protected:
   //@{
   /**
    * Internal methods to build or dismantle the display pipeline.
-   * WARNING: do NOT use!
+   * WARNING: do not use without carefully considering side effects!
    */
   virtual void InstallPipeline();
   virtual void UnInstallPipeline();
@@ -332,8 +341,11 @@ protected:
   double Window;         /**< Current window */
   double Level;          /**< Current level */
 
-
-  /** Callback ids for install and uninstall of callbacks to the interactor */
+  /** 
+   * Callback ids for install and uninstall of callbacks to the interactor.
+   * Callback tags are set in InstallPipeline() and used for callback
+   * removal in UnInstallPipeline()
+   */
   std::vector<unsigned long> WindowLevelCallbackTags;
 
   /** Calculate the original window and level parameters

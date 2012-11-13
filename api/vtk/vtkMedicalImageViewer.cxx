@@ -12,6 +12,7 @@
 
 #include "vtkCamera.h"
 #include "vtkCommand.h"
+#include "vtkGDCMImageReader.h"
 #include "vtkImageActor.h"
 #include "vtkImageData.h"
 #include "vtkImageMapToWindowLevelColors.h"
@@ -177,6 +178,19 @@ void vtkMedicalImageViewer::SetInput( vtkImageData* input )
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void vtkMedicalImageViewer::Load( std::string fileName )
+{
+  vtkGDCMImageReader* reader = vtkGDCMImageReader::New();
+  if( reader->CanReadFile( fileName.c_str() ) )
+  {
+    reader->SetFileName( fileName.c_str() );
+    reader->Update();
+    this->SetInput( reader->GetOutput() );
+  }
+  reader->Delete();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 vtkImageData* vtkMedicalImageViewer::GetInput()
 {
   return vtkImageData::SafeDownCast(this->WindowLevel->GetInput());
@@ -241,6 +255,11 @@ void vtkMedicalImageViewer::SetRenderWindow(vtkRenderWindow *arg)
     this->RenderWindow->Register(this);
 
   this->InstallPipeline();
+
+  if( this->Interactor == NULL && this->RenderWindow )
+  {
+    this->SetInteractor( this->RenderWindow->GetInteractor() );
+  }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
