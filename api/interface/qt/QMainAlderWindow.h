@@ -42,6 +42,7 @@ public slots:
   virtual void slotUserManagement();
   virtual void slotUpdateStudyDatabase();
   virtual void slotTreeSelectionChanged();
+  virtual void slotRatingSliderChanged( int );
 
   // help event functions
   virtual void slotAbout();
@@ -57,6 +58,7 @@ protected:
   virtual void updateStudyInformation();
   virtual void updateStudyTreeWidget();
   virtual void updateMedicalImageWidget();
+  virtual void updateRating();
   virtual void updateInterface();
 
   std::map< QTreeWidgetItem*, vtkSmartPointer<Alder::ActiveRecord> > treeModelMap;

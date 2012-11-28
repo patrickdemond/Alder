@@ -158,9 +158,12 @@ namespace Alder
      * Set the value of any column in the record.
      * Note: this will only affect the active record in memory, to update the database
      * Save() needs to be called.
+     * If you wish to set the value to NULL then use the SetNull() method instead of Set()
      */
     template <class T> void Set( std::string column, T value )
     { this->SetVariant( column, new vtkVariant( value ) ); }
+    void SetNull( std::string column )
+    { this->SetVariant( column, NULL ); }
 
     //@{
     /** 

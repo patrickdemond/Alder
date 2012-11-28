@@ -13,8 +13,9 @@
 
 #include "Application.h"
 #include "Cineloop.h"
-#include "Image.h"
 #include "Exam.h"
+#include "Image.h"
+#include "Rating.h"
 #include "Study.h"
 #include "User.h"
 
@@ -31,6 +32,8 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QTreeWidgetItem>
+
+#include <stdexcept>
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QMainAlderWindow::QMainAlderWindow( QWidget* parent )
@@ -79,6 +82,9 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   QObject::connect(
     this->ui->studyTreeWidget, SIGNAL( itemSelectionChanged() ),
     this, SLOT( slotTreeSelectionChanged() ) );
+  QObject::connect(
+    this->ui->ratingSlider, SIGNAL( valueChanged( int ) ),
+    this, SLOT( slotRatingSliderChanged( int ) ) );
 
   this->readSettings();
   this->updateInterface();
@@ -265,6 +271,35 @@ void QMainAlderWindow::slotTreeSelectionChanged()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotRatingSliderChanged( int value )
+{
+  Alder::Application *app = Alder::Application::GetInstance();
+
+  // make sure we have an active image
+  Alder::User *user = app->GetActiveUser();
+  if( !user ) throw std::runtime_error( "Rating slider modified without an active user" );
+  Alder::Image *image = app->GetActiveImage();
+  if( !image ) throw std::runtime_error( "Rating slider modified without an active image" );
+
+  // See if we have a rating for this user and image
+  std::map< std::string, std::string > map;
+  map["user_id"] = user->Get( "id" )->ToString();
+  map["image_id"] = image->Get( "id" )->ToString();
+  vtkSmartPointer< Alder::Rating > rating = vtkSmartPointer< Alder::Rating >::New();
+  if( !rating->Load( map ) )
+  { // no record exists, set the user and image ids
+    rating->Set( "user_id", user->Get( "id" )->ToInt() );
+    rating->Set( "image_id", image->Get( "id" )->ToInt() );
+  }
+
+  if( 0 == value ) rating->SetNull( "rating" );
+  else rating->Set( "rating", value );
+
+  rating->Save();
+  this->updateRating();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::writeSettings()
 {
   QSettings settings( "CLSA", "Alder" );
@@ -323,11 +358,19 @@ void QMainAlderWindow::updateStudyTreeWidget()
 {
   Alder::Study *study = Alder::Application::GetInstance()->GetActiveStudy();
 
+  // stop the tree's signals until we are done
+  bool oldSignalState = this->ui->studyTreeWidget->blockSignals( true );
+
   // if a study is open then populate the study tree
   this->treeModelMap.clear();
   this->ui->studyTreeWidget->clear();
   if( study )
   {
+    // get the active image/cineloop so that we can highlight it
+    Alder::Image *activeImage = Alder::Application::GetInstance()->GetActiveImage();
+    Alder::Cineloop *activeCineloop = Alder::Application::GetInstance()->GetActiveCineloop();
+    QTreeWidgetItem *selectedItem = NULL;
+
     // make root the study's UID
     QString name = tr( "Study: " );
     name += study->Get( "uid" )->ToString().c_str();
@@ -366,6 +409,8 @@ void QMainAlderWindow::updateStudyTreeWidget()
         cineloopItem->setText( 0, name );
         cineloopItem->setExpanded( true );
         cineloopItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+        if( activeCineloop && activeCineloop->Get( "id" )->ToInt() == cineloop->Get( "id" )->ToInt() )
+          selectedItem = cineloopItem;
 
         // add the images for this cineloop
         std::vector< vtkSmartPointer< Alder::Image > > imageList;
@@ -380,10 +425,17 @@ void QMainAlderWindow::updateStudyTreeWidget()
           this->treeModelMap[imageItem] = *imageIt;
           imageItem->setText( 0, name );
           imageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+          if( activeImage && activeImage->Get( "id" )->ToInt() == image->Get( "id" )->ToInt() )
+            selectedItem = imageItem;
         }
       }
     }
+      
+    if( selectedItem ) this->ui->studyTreeWidget->setCurrentItem( selectedItem );
   }
+
+  // re-enable the tree's signals
+  this->ui->studyTreeWidget->blockSignals( oldSignalState );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -409,6 +461,40 @@ void QMainAlderWindow::updateMedicalImageWidget()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::updateRating()
+{
+  // stop the rating slider's signals until we are done
+  bool oldSignalState = this->ui->ratingSlider->blockSignals( true );
+
+  int ratingValue = 0;
+  Alder::Application *app = Alder::Application::GetInstance();
+
+  // make sure we have an active image
+  Alder::User *user = app->GetActiveUser();
+  Alder::Image *image = app->GetActiveImage();
+
+  if( user && image )
+  {
+    std::map< std::string, std::string > map;
+    map["user_id"] = user->Get( "id" )->ToString();
+    map["image_id"] = image->Get( "id" )->ToString();
+    vtkSmartPointer< Alder::Rating > rating = vtkSmartPointer< Alder::Rating >::New();
+    
+    if( rating->Load( map ) )
+    {
+      vtkVariant *v = rating->Get( "rating" );
+      if( v ) ratingValue = v->ToInt();
+    }
+  }
+
+  this->ui->ratingSlider->setValue( ratingValue );
+  this->ui->ratingValueLabel->setText( 0 == ratingValue ? tr( "N/A" ) : QString::number( ratingValue ) );
+
+  // re-enable the rating slider's signals
+  this->ui->ratingSlider->blockSignals( oldSignalState );
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::updateInterface()
 {
   Alder::Application *app = Alder::Application::GetInstance();
@@ -428,12 +514,13 @@ void QMainAlderWindow::updateInterface()
   this->ui->nextStudyPushButton->setEnabled( study );
   this->ui->addImagePushButton->setEnabled( cineloop );
   this->ui->removeImagePushButton->setEnabled( image );
-  this->ui->ratingSlider->setEnabled( cineloop || image );
-  this->ui->notePushButton->setEnabled( study );
+  this->ui->ratingSlider->setEnabled( image );
+  this->ui->notePushButton->setEnabled( false ); // TODO: notes aren't implemented
   this->ui->studyTreeWidget->setEnabled( study );
   this->ui->medicalImageWidget->setEnabled( loggedIn );
 
   this->updateStudyTreeWidget();
   this->updateStudyInformation();
   this->updateMedicalImageWidget();
+  this->updateRating();
 }
