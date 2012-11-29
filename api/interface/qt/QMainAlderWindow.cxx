@@ -80,6 +80,12 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this, SLOT( slotManual() ) );
 
   QObject::connect(
+    this->ui->previousStudyPushButton, SIGNAL( clicked() ),
+    this, SLOT( slotPreviousStudy() ) );
+  QObject::connect(
+    this->ui->nextStudyPushButton, SIGNAL( clicked() ),
+    this, SLOT( slotNextStudy() ) );
+  QObject::connect(
     this->ui->studyTreeWidget, SIGNAL( itemSelectionChanged() ),
     this, SLOT( slotTreeSelectionChanged() ) );
   QObject::connect(
@@ -122,13 +128,21 @@ void QMainAlderWindow::slotOpenStudy()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotPreviousStudy()
 {
-  // TODO: implement
+  Alder::Application *app = Alder::Application::GetInstance();
+  bool loggedIn = NULL != app->GetActiveUser();
+  Alder::Study *study = app->GetActiveStudy();
+  if( loggedIn && study ) app->SetActiveStudy( study->GetPrevious() );
+  this->updateInterface();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotNextStudy()
 {
-  // TODO: implement
+  Alder::Application *app = Alder::Application::GetInstance();
+  bool loggedIn = NULL != app->GetActiveUser();
+  Alder::Study *study = app->GetActiveStudy();
+  if( loggedIn && study ) app->SetActiveStudy( study->GetNext() );
+  this->updateInterface();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

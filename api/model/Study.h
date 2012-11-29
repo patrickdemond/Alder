@@ -43,6 +43,21 @@ namespace Alder
 //    static std::vector< std::string > GetIdentifierList();
     std::string GetName() { return "Study"; }
 
+    /**
+     * Returns the next study in UID order.
+     */
+    vtkSmartPointer<Study> GetNext();
+
+    /**
+     * Returns the previous study in UID order.
+     */
+    vtkSmartPointer<Study> GetPrevious();
+
+    /**
+     * Returns a vector of all UIDs alphabetically ordered
+     */
+    static std::vector< std::string > GetUIDList();
+
   protected:
     Study() {}
     ~Study() {}
