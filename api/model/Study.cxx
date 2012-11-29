@@ -19,6 +19,7 @@
 #include "vtkSmartPointer.h"
 
 #include <map>
+#include <stdexcept>
 
 namespace Alder
 {
@@ -101,4 +102,89 @@ namespace Alder
     return Application::GetInstance()->GetOpal()->GetIdentifiers( "clsa-dcs-images", "CarotidIntima" );
   }
   */
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  vtkSmartPointer<Study> Study::GetNext()
+  {
+    std::string currentUid = this->Get( "uid" )->ToString();
+    std::vector< std::string > list = Study::GetUIDList();
+    std::vector< std::string >::reverse_iterator it;
+
+    // the list should never be empty (since we are already an instance of study)
+    if( list.empty() ) throw std::runtime_error( "Study list is empty while trying to get next study." );
+    
+    // find this record's uid in the list, return the next one
+    std::string uid;
+    for( it = list.rbegin(); it != list.rend(); it++ )
+    {
+      if( currentUid == *it )
+      {
+        if( list.rbegin() == it )
+        { // first uid matches, get the last uid
+          uid = list.front();
+        }
+        else
+        { // move the iterator to the previous address, get it's value
+          it--;
+          uid = *it;
+        }
+        break;
+      }
+    }
+
+    if( uid.empty() ) throw std::runtime_error( "Study list does not include current UID." );
+
+    vtkSmartPointer<Study> study = vtkSmartPointer<Study>::New();
+    study->Load( "uid", uid );
+    return study;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  vtkSmartPointer<Study> Study::GetPrevious()
+  {
+    std::string currentUid = this->Get( "uid" )->ToString();
+    std::vector< std::string > list = Study::GetUIDList();
+    std::vector< std::string >::iterator it;
+
+    // the list should never be empty (since we are already an instance of study)
+    if( list.empty() ) throw std::runtime_error( "Study list is empty while trying to get next study." );
+    
+    // find this record's uid in the list, return the next one
+    std::string uid;
+    for( it = list.begin(); it != list.end(); it++ )
+    {
+      if( currentUid == *it )
+      {
+        if( list.begin() == it )
+        { // first uid matches, get the last uid
+          uid = list.back();
+        }
+        else
+        { // move the iterator to the previous address, get it's value
+          it--;
+          uid = *it;
+        }
+        break;
+      }
+    }
+
+    if( uid.empty() ) throw std::runtime_error( "Study list does not include current UID." );
+
+    vtkSmartPointer<Study> study = vtkSmartPointer<Study>::New();
+    study->Load( "uid", uid );
+    return study;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::vector< std::string > Study::GetUIDList()
+  {
+    Application *app = Application::GetInstance();
+    vtkSmartPointer<vtkMySQLQuery> query = app->GetDB()->GetQuery();
+    query->SetQuery( "SELECT uid FROM Study ORDER BY uid" );
+    query->Execute();
+
+    std::vector< std::string > list;
+    while( query->NextRow() ) list.push_back( query->DataValue( 0 ).ToString() );
+    return list;
+  }
 }
