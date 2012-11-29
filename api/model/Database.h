@@ -78,7 +78,6 @@ namespace Alder
      * @param table string
      * @throws runtime_error
      */
-
     std::vector<std::string> GetColumnNames( std::string table );
 
     /**
@@ -96,6 +95,16 @@ namespace Alder
      * @throws runtime_error
      */
     bool IsColumnNullable( std::string table, std::string column );
+
+    /**
+     * Returns whether a table's column is a foreign key
+     * NOTE: there's no way to get this information from the information schema so instead
+     *       this method uses the convention that all foreign keys end in "_id"
+     * @param table string
+     * @param column string
+     * @throws runtime_error
+     */
+    bool IsColumnForeignKey( std::string table, std::string column );
 
   protected:
     Database();

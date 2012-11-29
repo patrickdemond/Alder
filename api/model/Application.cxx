@@ -28,9 +28,6 @@
 
 namespace Alder
 {
-  vtkCxxSetObjectMacro( Application, ActiveUser, User );
-  // Study, Image and Cineloop are manually implemented below
-
   Application* Application::Instance = NULL; // set the initial application
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -193,6 +190,26 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Application::SetActiveUser( User *user )
+  {
+    if( user != this->ActiveUser )
+    {
+      if( this->ActiveUser ) this->ActiveUser->UnRegister( this );
+      this->ActiveUser = user;
+      if( this->ActiveUser ) this->ActiveUser->Register( this );
+
+      if( this->ActiveUser )
+      {
+        // get the user's last active study
+        Study *study = Study::SafeDownCast( this->ActiveUser->GetRecord( "Study" ) );
+        this->SetActiveStudy( study );
+        if( study ) study->Delete();
+        this->Modified();
+      }
+    }
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void Application::SetActiveStudy( Study *study )
   {
     if( study != this->ActiveStudy )
@@ -202,6 +219,14 @@ namespace Alder
       if( this->ActiveStudy ) this->ActiveStudy->Register( this );
       this->SetActiveImage( NULL );
       this->SetActiveCineloop( NULL );
+
+      // if there is an active user, save the active study
+      if( this->ActiveUser )
+      {
+        if( study ) this->ActiveUser->Set( "study_id", study->Get( "id" )->ToInt() );
+        else this->ActiveUser->SetNull( "study_id" );
+        this->ActiveUser->Save();
+      }
       this->Modified();
     }
   }

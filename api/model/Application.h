@@ -81,13 +81,19 @@ namespace Alder
     vtkGetObjectMacro( DB, Database );
     vtkGetObjectMacro( Opal, OpalService );
     vtkGetObjectMacro( ActiveUser, User );
-    virtual void SetActiveUser( User* );
     vtkGetObjectMacro( ActiveStudy, Study );
     vtkGetObjectMacro( ActiveImage, Image );
     vtkGetObjectMacro( ActiveCineloop, Cineloop );
 
     /**
-     * When setting the active study the active image and cineloop are automatically removed
+     * When setting the active user the active study will be set to the study stored in the user's
+     * record if the user being set is not null.
+     */
+    virtual void SetActiveUser( User* );
+
+    /**
+     * When setting the active study the active image and cineloop are automatically removed and,
+     * if there is an active user, the active study is stored in the user's record
      */
     virtual void SetActiveStudy( Study* );
 

@@ -94,7 +94,6 @@ CREATE  TABLE IF NOT EXISTS `alder`.`Image` (
   `mean` FLOAT NULL ,
   `sd` FLOAT NULL ,
   `n` INT(11) NULL ,
-  `file` VARCHAR(255) NOT NULL ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_image_exam_id` (`exam_id` ASC) ,
   INDEX `fk_image_cineloop_id` (`cineloop_id` ASC) ,
@@ -124,9 +123,16 @@ CREATE  TABLE IF NOT EXISTS `alder`.`User` (
   `name` VARCHAR(255) NOT NULL ,
   `password` VARCHAR(255) NOT NULL ,
   `last_login` DATETIME NULL ,
+  `study_id` INT UNSIGNED NULL ,
   PRIMARY KEY (`id`) ,
   UNIQUE INDEX `uq_name` (`name` ASC) ,
-  INDEX `dk_last_login` (`last_login` ASC) )
+  INDEX `dk_last_login` (`last_login` ASC) ,
+  INDEX `fk_study_id` (`study_id` ASC) ,
+  CONSTRAINT `fk_user_study_id`
+    FOREIGN KEY (`study_id` )
+    REFERENCES `alder`.`Study` (`id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 

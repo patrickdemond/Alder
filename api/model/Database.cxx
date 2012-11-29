@@ -177,6 +177,32 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Database::IsColumnForeignKey( std::string table, std::string column )
+  {
+    std::map< std::string,std::map< std::string,std::map< std::string, std::string > > >::iterator
+      tablePair = this->Columns.find( table );
+    if( this->Columns.end() == tablePair )
+    {
+      std::stringstream error;
+      error << "Tried to get column foreign key from table \"" << table << "\" which doesn't exist";
+      throw std::runtime_error( error.str() );
+    }
+
+    std::map< std::string,std::map< std::string, std::string > >::iterator
+      columnPair = tablePair->second.find( column );
+    if( tablePair->second.end() == columnPair )
+    {
+      std::stringstream error;
+      error << "Tried to get column foreign key for \""
+            << table << "." << column << "\" which doesn't exist";
+      throw std::runtime_error( error.str() );
+    }
+
+    std::map< std::string, std::string > columnMap = columnPair->second;
+    return 3 <= column.length() && 0 == column.compare( column.length() - 3, 3, "_id" );
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   vtkSmartPointer<vtkMySQLQuery> Database::GetQuery()
   {
     return vtkSmartPointer<vtkMySQLQuery>::Take(
