@@ -123,7 +123,11 @@ namespace Alder
         if( 0 != column.compare( "create_timestamp" ) && 0 != column.compare( "update_timestamp" ) )
         {
           vtkVariant *v = db->IsColumnNullable( this->GetName(), column ) &&
-                          0 == query->DataValue( c ).ToString().length()
+                          // empty string is considered to be null
+                          ( 0 == query->DataValue( c ).ToString().length() ||
+                          // foreign keys with value 0 are considered to be null
+                            ( db->IsColumnForeignKey( this->GetName(), column ) &&
+                              0 == query->DataValue( c ).ToInt() ) )
                         ? NULL
                         : new vtkVariant( query->DataValue( c ) );
           this->ColumnValues.insert( std::pair< std::string, vtkVariant* >( column, v ) );
