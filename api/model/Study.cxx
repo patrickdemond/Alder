@@ -11,7 +11,9 @@
 #include "Study.h"
 
 #include "Application.h"
-#include "OpalService.h"
+#include "Exam.h"
+#include "Image.h"
+//#include "OpalService.h"
 #include "Utilities.h"
 
 #include "vtkCommand.h"
@@ -140,6 +142,12 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Study::Next()
+  {
+    this->Load( "id", this->GetNext()->Get( "id" )->ToString() );
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   vtkSmartPointer<Study> Study::GetPrevious()
   {
     std::string currentUid = this->Get( "uid" )->ToString();
@@ -176,6 +184,12 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Study::Previous()
+  {
+    this->Load( "id", this->GetPrevious()->Get( "id" )->ToString() );
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   std::vector< std::string > Study::GetUIDList()
   {
     Application *app = Application::GetInstance();
@@ -186,5 +200,53 @@ namespace Alder
     std::vector< std::string > list;
     while( query->NextRow() ) list.push_back( query->DataValue( 0 ).ToString() );
     return list;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  int Study::GetImageCount()
+  {
+    // loop through all exams and sum the image count
+    int total = 0;
+
+    // loop through all exams
+    std::vector< vtkSmartPointer< Exam > > examList;
+    std::vector< vtkSmartPointer< Exam > >::iterator examIt;
+    this->GetList( &examList );
+    for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
+    {
+      Exam *exam = *(examIt);
+      total += exam->GetCount( "Image" );
+    }
+
+    return total;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Study::IsRatedBy( User* user )
+  {
+    this->AssertPrimaryId();
+
+    // make sure the user is not null
+    if( !user ) throw std::runtime_error( "Tried to get rating for null user" );
+
+    // loop through all exams
+    std::vector< vtkSmartPointer< Exam > > examList;
+    std::vector< vtkSmartPointer< Exam > >::iterator examIt;
+    this->GetList( &examList );
+    for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
+    {
+      Exam *exam = *(examIt);
+      // loop through all images
+      std::vector< vtkSmartPointer< Image > > imageList;
+      std::vector< vtkSmartPointer< Image > >::iterator imageIt;
+      exam->GetList( &imageList );
+      for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
+      {
+        Image *image = *(imageIt);
+        if( !image->IsRatedBy( user ) ) return false;
+      }
+    }
+
+    return true;
   }
 }

@@ -114,7 +114,7 @@ namespace Alder
     }
 
     /**
-     * Provides a list of all records which are related to a record by foreign key.
+     * Provides a list of all records which are related to this record by foreign key.
      * @param list vector An existing vector to put all records into.
      */
     template< class T > void GetList( std::vector< vtkSmartPointer< T > > *list )
@@ -140,6 +140,12 @@ namespace Alder
         list->push_back( record );
       }
     }
+    
+    /**
+     * Returns the number of records which are related to this record by foreign key.
+     * @param std::string recordType The associated table name.
+     */
+    int GetCount( std::string recordType );
 
     /**
      * Get the value of any column in the record.

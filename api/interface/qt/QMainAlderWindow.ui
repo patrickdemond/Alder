@@ -80,6 +80,13 @@
       <item>
        <layout class="QVBoxLayout" name="panelLayout">
         <item>
+         <widget class="QCheckBox" name="unratedCheckBox">
+          <property name="text">
+           <string>Open unrated studies only</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="studyButtonLayout">
           <item>
            <widget class="QPushButton" name="previousStudyPushButton">
@@ -96,6 +103,13 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QTreeWidget" name="studyTreeWidget">

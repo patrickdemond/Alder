@@ -49,14 +49,35 @@ namespace Alder
     vtkSmartPointer<Study> GetNext();
 
     /**
+     * Makes the current record the next record in UID order.
+     */
+    void Next();
+
+    /**
      * Returns the previous study in UID order.
      */
     vtkSmartPointer<Study> GetPrevious();
 
     /**
+     * Makes the current record the previous record in UID order.
+     */
+    void Previous();
+
+    /**
      * Returns a vector of all UIDs alphabetically ordered
      */
     static std::vector< std::string > GetUIDList();
+
+    /**
+     * Convenience method to determine how many images this study has
+     */
+    int GetImageCount();
+
+    /**
+     * Returns whether a user has rated all images associated with the study.
+     * If the study has no images this method returns true.
+     */
+    bool IsRatedBy( User* user );
 
   protected:
     Study() {}
