@@ -12,15 +12,20 @@
 
 #include "Configuration.h"
 #include "Exam.h"
+#include "Rating.h"
 #include "Study.h"
+#include "User.h"
 #include "Utilities.h"
 
 #include "vtkObjectFactory.h"
+
+#include <stdexcept>
 
 namespace Alder
 {
   vtkStandardNewMacro( Image );
 
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   std::string Image::GetFileName()
   {
     this->AssertPrimaryId();
@@ -40,5 +45,23 @@ namespace Alder
     study->Delete();
 
     return stream.str();
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Image::IsRatedBy( User* user )
+  {
+    this->AssertPrimaryId();
+    
+    // make sure the user is not null
+    if( !user ) throw std::runtime_error( "Tried to get rating for null user" );
+
+    std::map< std::string, std::string > map;
+    map["user_id"] = user->Get( "id" )->ToString();
+    map["image_id"] = this->Get( "id" )->ToString();
+    vtkSmartPointer< Alder::Rating > rating = vtkSmartPointer< Alder::Rating >::New();
+    if( !rating->Load( map ) ) return false;
+
+    // we have found a rating, make sure it is not null
+    return NULL != rating->Get( "rating" );
   }
 }

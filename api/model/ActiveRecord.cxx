@@ -200,6 +200,24 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  int ActiveRecord::GetCount( std::string recordType )
+  {
+    Application *app = Application::GetInstance();
+    std::stringstream stream;
+    stream << "SELECT COUNT(*) FROM " << recordType << " "
+           << "WHERE " << this->GetName() << "_id = " << this->Get( "id" )->ToString();
+    vtkSmartPointer<vtkMySQLQuery> query = app->GetDB()->GetQuery();
+
+    vtkDebugSQLMacro( << stream.str() );
+    query->SetQuery( stream.str().c_str() );
+    query->Execute();
+    
+    // only has one row
+    query->NextRow();
+    return query->DataValue( 0 ).ToInt();
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   vtkVariant* ActiveRecord::Get( std::string column )
   {
     // make sure the column exists

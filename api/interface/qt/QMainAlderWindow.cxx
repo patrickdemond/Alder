@@ -128,21 +128,103 @@ void QMainAlderWindow::slotOpenStudy()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotPreviousStudy()
 {
+  bool found = false;
   Alder::Application *app = Alder::Application::GetInstance();
-  bool loggedIn = NULL != app->GetActiveUser();
-  Alder::Study *study = app->GetActiveStudy();
-  if( loggedIn && study ) app->SetActiveStudy( study->GetPrevious() );
-  this->updateInterface();
+  Alder::User *user = app->GetActiveUser();
+  Alder::Study *activeStudy = app->GetActiveStudy();
+  vtkSmartPointer< Alder::Study > study;
+  if( user && activeStudy )
+  {
+    // check if unrated checkbox is pressed, keep searching for an unrated study
+    if( this->ui->unratedCheckBox->isChecked() )
+    {
+      int currentStudyId = activeStudy->Get( "id" )->ToInt();
+
+      // keep getting the previous study until we find one that has images which are not rated
+      study = activeStudy->GetPrevious();
+      while( study->Get( "id" )->ToInt() != currentStudyId )
+      {
+        if( 0 < study->GetImageCount() && !study->IsRatedBy( user ) )
+        {
+          found = true;
+          break;
+        }
+        study = study->GetPrevious();
+      }
+
+      // warn user if no unrated studies left
+      if( study->Get( "id" )->ToInt() == currentStudyId )
+      {
+        QMessageBox errorMessage( this );
+        errorMessage.setWindowModality( Qt::WindowModal );
+        errorMessage.setIcon( QMessageBox::Warning );
+        errorMessage.setText( tr( "There are no remaining unrated studies available at this time." ) );
+        errorMessage.exec();
+      }
+    }
+    else
+    {
+      study = activeStudy->GetPrevious();
+      found = true;
+    }
+  }
+
+  if( found )
+  {
+    app->SetActiveStudy( study );
+    this->updateInterface();
+  }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotNextStudy()
 {
+  bool found = false;
   Alder::Application *app = Alder::Application::GetInstance();
-  bool loggedIn = NULL != app->GetActiveUser();
-  Alder::Study *study = app->GetActiveStudy();
-  if( loggedIn && study ) app->SetActiveStudy( study->GetNext() );
-  this->updateInterface();
+  Alder::User *user = app->GetActiveUser();
+  Alder::Study *activeStudy = app->GetActiveStudy();
+  vtkSmartPointer< Alder::Study > study;
+  if( user && activeStudy )
+  {
+    // check if unrated checkbox is pressed, keep searching for an unrated study
+    if( this->ui->unratedCheckBox->isChecked() )
+    {
+      int currentStudyId = activeStudy->Get( "id" )->ToInt();
+
+      // keep getting the previous study until we find one that has images which are not rated
+      study = activeStudy->GetNext();
+      while( study->Get( "id" )->ToInt() != currentStudyId )
+      {
+        if( 0 < study->GetImageCount() && !study->IsRatedBy( user ) )
+        {
+          found = true;
+          break;
+        }
+        study = study->GetNext();
+      }
+
+      // warn user if no unrated studies left
+      if( study->Get( "id" )->ToInt() == currentStudyId )
+      {
+        QMessageBox errorMessage( this );
+        errorMessage.setWindowModality( Qt::WindowModal );
+        errorMessage.setIcon( QMessageBox::Warning );
+        errorMessage.setText( tr( "There are no remaining unrated studies available at this time." ) );
+        errorMessage.exec();
+      }
+    }
+    else
+    {
+      study = activeStudy->GetNext();
+      found = true;
+    }
+  }
+
+  if( found )
+  {
+    app->SetActiveStudy( study );
+    this->updateInterface();
+  }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -522,6 +604,7 @@ void QMainAlderWindow::updateInterface()
 
   // set all widget enable states
   this->ui->actionOpenStudy->setEnabled( loggedIn );
+  this->ui->unratedCheckBox->setEnabled( study );
   this->ui->actionPreviousStudy->setEnabled( study );
   this->ui->actionNextStudy->setEnabled( study );
   this->ui->previousStudyPushButton->setEnabled( study );

@@ -33,6 +33,7 @@
 
 namespace Alder
 {
+  class User;
   class Image : public ActiveRecord
   {
   public:
@@ -44,6 +45,11 @@ namespace Alder
      * Get the file name that this record represents
      */
     std::string GetFileName();
+
+    /**
+     * Get whether a particular user has rated this image
+     */
+    bool IsRatedBy( User* user );
 
   protected:
     Image() {}
