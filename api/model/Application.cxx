@@ -223,7 +223,7 @@ namespace Alder
       // if there is an active user, save the active study
       if( this->ActiveUser )
       {
-        if( study ) this->ActiveUser->Set( "study_id", study->Get( "id" )->ToInt() );
+        if( study ) this->ActiveUser->Set( "study_id", study->Get( "id" ).ToInt() );
         else this->ActiveUser->SetNull( "study_id" );
         this->ActiveUser->Save();
       }

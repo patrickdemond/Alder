@@ -159,7 +159,6 @@ void QUserListDialog::updateInterface()
 {
   this->ui->userTableWidget->setRowCount( 0 );
   QTableWidgetItem *item;
-  vtkVariant *v;
   
   std::vector< vtkSmartPointer< Alder::User > > userList;
   Alder::User::GetAll( &userList );
@@ -170,17 +169,15 @@ void QUserListDialog::updateInterface()
     this->ui->userTableWidget->insertRow( 0 );
 
     // add name to row
-    v = user->Get( "name" );
     item = new QTableWidgetItem;
     item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-    item->setText( tr( v ? v->ToString().c_str() : "" ) );
+    item->setText( QString( user->Get( "name" ).ToString().c_str() ) );
     this->ui->userTableWidget->setItem( 0, 0, item );
 
   // add last login to row
-    v = user->Get( "last_login" );
     item = new QTableWidgetItem;
     item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-    item->setText( tr( v ? v->ToString().c_str() : "" ) );
+    item->setText( QString( user->Get( "last_login" ).ToString().c_str() ) );
     this->ui->userTableWidget->setItem( 0, 1, item );
   }
 

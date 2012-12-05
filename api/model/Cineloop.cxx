@@ -32,9 +32,9 @@ namespace Alder
     std::stringstream stream;
     // start with the base image directory
     stream << Application::GetInstance()->GetConfig()->GetValue( "Path", "ImageData" )
-           << "/" << study->Get( "uid" )->ToString()
-           << "/" << exam->Get( "id" )->ToString()
-           << "/Cineloop/" << this->Get( "id" )->ToString() << ".dcm";
+           << "/" << study->Get( "uid" ).ToString()
+           << "/" << exam->Get( "id" ).ToString()
+           << "/Cineloop/" << this->Get( "id" ).ToString() << ".dcm";
 
     exam->Delete();
     study->Delete();

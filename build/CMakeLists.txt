@@ -37,6 +37,9 @@ FIND_PACKAGE( CRYPTO++ REQUIRED )
 # We need JSONCpp
 FIND_PACKAGE( JSONCpp REQUIRED )
 
+# We need MySQL
+FIND_PACKAGE( MySQL REQUIRED )
+
 # We need convert
 IF( UNIX AND NOT APPLE )
   FIND_PACKAGE( ImageMagick COMPONENTS convert REQUIRED )
@@ -97,6 +100,8 @@ SET( ALDER_SOURCE
   ${ALDER_MODEL_DIR}/Application.cxx
 
   ${ALDER_VTK_DIR}/vtkMedicalImageViewer.cxx
+  ${ALDER_VTK_DIR}/vtkAlderMySQLDatabase.cxx
+  ${ALDER_VTK_DIR}/vtkAlderMySQLQuery.cxx
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
   ${ALDER_VTK_DIR}/vtkXMLConfigurationFileReader.cxx
   
@@ -153,6 +158,7 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CRYPTO++_INCLUDE_DIR}
   ${JSONCPP_INCLUDE_DIR}
+  ${MYSQL_INCLUDE_DIRECTORIES}
 )
 
 # Targets

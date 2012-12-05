@@ -125,7 +125,6 @@ void QSelectStudyDialog::updateInterface()
 {
   this->ui->studyTableWidget->setRowCount( 0 );
   QTableWidgetItem *item;
-  vtkVariant *v;
   
   std::vector< vtkSmartPointer< Alder::Study > > studyList;
   Alder::Study::GetAll( &studyList );
@@ -133,38 +132,34 @@ void QSelectStudyDialog::updateInterface()
   for( it = studyList.begin(); it != studyList.end(); ++it )
   { // for every study, add a new row
     Alder::Study *study = *it;
-    QString uid = tr( study->Get( "uid" )->ToString().c_str() );
+    QString uid = QString( study->Get( "uid" ).ToString().c_str() );
 
     if( this->searchText.isEmpty() || uid.contains( this->searchText, Qt::CaseInsensitive ) )
     {
       this->ui->studyTableWidget->insertRow( 0 );
 
       // add uid to row
-      v = study->Get( "uid" );
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
       item->setText( uid );
       this->ui->studyTableWidget->setItem( 0, 0, item );
 
       // add site to row
-      v = study->Get( "site" );
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      item->setText( tr( v ? v->ToString().c_str() : "" ) );
+      item->setText( QString( study->Get( "site" ).ToString().c_str() ) );
       this->ui->studyTableWidget->setItem( 0, 1, item );
 
       // add interviewer to row
-      v = study->Get( "interviewer" );
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      item->setText( tr( v ? v->ToString().c_str() : "" ) );
+      item->setText( QString( study->Get( "interviewer" ).ToString().c_str() ) );
       this->ui->studyTableWidget->setItem( 0, 2, item );
 
       // add datetime_acquired to row
-      v = study->Get( "datetime_acquired" );
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      item->setText( tr( v ? v->ToString().c_str() : "" ) );
+      item->setText( QString( study->Get( "datetime_acquired" ).ToString().c_str() ) );
       this->ui->studyTableWidget->setItem( 0, 3, item );
     }
   }

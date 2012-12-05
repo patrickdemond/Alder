@@ -108,7 +108,7 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   vtkSmartPointer<Study> Study::GetNext()
   {
-    std::string currentUid = this->Get( "uid" )->ToString();
+    std::string currentUid = this->Get( "uid" ).ToString();
     std::vector< std::string > list = Study::GetUIDList();
     std::vector< std::string >::reverse_iterator it;
 
@@ -144,13 +144,13 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void Study::Next()
   {
-    this->Load( "id", this->GetNext()->Get( "id" )->ToString() );
+    this->Load( "id", this->GetNext()->Get( "id" ).ToString() );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   vtkSmartPointer<Study> Study::GetPrevious()
   {
-    std::string currentUid = this->Get( "uid" )->ToString();
+    std::string currentUid = this->Get( "uid" ).ToString();
     std::vector< std::string > list = Study::GetUIDList();
     std::vector< std::string >::iterator it;
 
@@ -186,14 +186,14 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void Study::Previous()
   {
-    this->Load( "id", this->GetPrevious()->Get( "id" )->ToString() );
+    this->Load( "id", this->GetPrevious()->Get( "id" ).ToString() );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   std::vector< std::string > Study::GetUIDList()
   {
     Application *app = Application::GetInstance();
-    vtkSmartPointer<vtkMySQLQuery> query = app->GetDB()->GetQuery();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
     query->SetQuery( "SELECT uid FROM Study ORDER BY uid" );
     query->Execute();
 

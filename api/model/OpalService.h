@@ -29,14 +29,14 @@
 #include "ModelObject.h"
 
 #include "vtkSmartPointer.h"
-#include "vtkMySQLQuery.h"
+#include "vtkAlderMySQLQuery.h"
 
 #include <iostream>
 #include <json/reader.h>
 #include <map>
 #include <vector>
 
-class vtkMySQLOpalService;
+class vtkAlderMySQLOpalService;
 
 /**
  * @addtogroup Alder
