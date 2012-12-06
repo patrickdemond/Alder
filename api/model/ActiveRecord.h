@@ -31,7 +31,7 @@
 #include "Application.h"
 #include "Database.h"
 
-#include "vtkMySQLQuery.h"
+#include "vtkAlderMySQLQuery.h"
 #include "vtkSmartPointer.h"
 #include "vtkVariant.h"
 
@@ -99,7 +99,7 @@ namespace Alder
       std::string type = app->GetUnmangledClassName( typeid(T).name() );
       std::stringstream stream;
       stream << "SELECT id FROM " << type;
-      vtkSmartPointer<vtkMySQLQuery> query = app->GetDB()->GetQuery();
+      vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
       query->SetQuery( stream.str().c_str() );
       query->Execute();
@@ -124,8 +124,8 @@ namespace Alder
       std::string type = app->GetUnmangledClassName( typeid(T).name() );
       std::stringstream stream;
       stream << "SELECT id FROM " << type << " "
-             << "WHERE " << this->GetName() << "_id = " << this->Get( "id" )->ToString();
-      vtkSmartPointer<vtkMySQLQuery> query = app->GetDB()->GetQuery();
+             << "WHERE " << this->GetName() << "_id = " << this->Get( "id" ).ToString();
+      vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
       vtkDebugSQLMacro( << stream.str() );
       query->SetQuery( stream.str().c_str() );
@@ -151,7 +151,7 @@ namespace Alder
      * Get the value of any column in the record.
      * @throws runtime_error
      */
-    virtual vtkVariant* Get( std::string column );
+    virtual vtkVariant Get( std::string column );
 
     /**
      * Get the record which has a foreign key in this table.
@@ -167,9 +167,9 @@ namespace Alder
      * If you wish to set the value to NULL then use the SetNull() method instead of Set()
      */
     template <class T> void Set( std::string column, T value )
-    { this->SetVariant( column, new vtkVariant( value ) ); }
+    { this->SetVariant( column, vtkVariant( value ) ); }
     void SetNull( std::string column )
-    { this->SetVariant( column, NULL ); }
+    { this->SetVariant( column, vtkVariant() ); }
 
     //@{
     /** 
@@ -188,7 +188,7 @@ namespace Alder
 
   protected:
     ActiveRecord();
-    ~ActiveRecord();
+    ~ActiveRecord() {}
 
     /**
      * Sets up the record with default values for all table columns
@@ -201,8 +201,8 @@ namespace Alder
      */
     inline void AssertPrimaryId()
     {
-      vtkVariant *id = this->Get( "id" );
-      if( !id || 0 == id->ToString().length() )
+      vtkVariant id = this->Get( "id" );
+      if( !id.IsValid() || 0 == id.ToInt() )
         throw std::runtime_error( "Assert failed: primary id for record is not set" );
     }
 
@@ -210,9 +210,9 @@ namespace Alder
      * Internal method used by Set()
      * @throws runtime_error
      */
-    virtual void SetVariant( std::string column, vtkVariant *value );
+    virtual void SetVariant( std::string column, vtkVariant value );
 
-    std::map<std::string,vtkVariant*> ColumnValues;
+    std::map<std::string,vtkVariant> ColumnValues;
     bool DebugSQL;
     bool Initialized;
 

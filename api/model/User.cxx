@@ -19,14 +19,13 @@ namespace Alder
   vtkStandardNewMacro( User );
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void User::SetVariant( std::string column, vtkVariant *value )
+  void User::SetVariant( std::string column, vtkVariant value )
   {
-    if( 0 == column.compare( "password" ) && value )
+    if( 0 == column.compare( "password" ) && value.IsValid() )
     { // if we are setting the password override the parent so that we can hash
       std::string hashedPassword;
-      hashString( value->ToString(), hashedPassword );
-      delete value; // replace un-hashed value
-      value = new vtkVariant( hashedPassword );
+      hashString( value.ToString(), hashedPassword );
+      value = vtkVariant( hashedPassword );
     }
 
     this->Superclass::SetVariant( column, value );
@@ -44,6 +43,6 @@ namespace Alder
     // first hash the password argument
     std::string hashedPassword;
     hashString( password, hashedPassword );
-    return 0 == hashedPassword.compare( this->Get( "password" )->ToString() );
+    return 0 == hashedPassword.compare( this->Get( "password" ).ToString() );
   }
 }

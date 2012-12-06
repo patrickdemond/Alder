@@ -14,7 +14,7 @@
 #include "Application.h"
 #include "Database.h"
 
-#include "vtkMySQLQuery.h"
+#include "vtkAlderMySQLQuery.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -30,40 +30,19 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  ActiveRecord::~ActiveRecord()
-  {
-    this->DeleteColumnValues();
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void ActiveRecord::DeleteColumnValues()
-  {
-    std::map<std::string,vtkVariant*>::iterator it;
-    for( it = this->ColumnValues.begin(); it != this->ColumnValues.end(); ++it )
-    {
-      if( it->second )
-      {
-        delete it->second;
-        it->second = NULL;
-      }
-    }
-    this->ColumnValues.clear();
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool ActiveRecord::ColumnNameExists( std::string column )
   {
     // make sure the record is initialized
     if( !this->Initialized ) this->Initialize();
 
-    std::map< std::string, vtkVariant* >::iterator pair = this->ColumnValues.find( column );
+    std::map< std::string, vtkVariant >::iterator pair = this->ColumnValues.find( column );
     return this->ColumnValues.end() != pair;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void ActiveRecord::Initialize()
   {
-    this->DeleteColumnValues();
+    this->ColumnValues.clear();
 
     Database *db = Application::GetInstance()->GetDB();
     std::vector<std::string>::iterator it;
@@ -76,11 +55,7 @@ namespace Alder
     {
       std::string column = *it;
       std::string columnDefault = db->GetColumnDefault( this->GetName(), column );
-      vtkVariant *v = db->IsColumnNullable( this->GetName(), column ) &&
-                      0 == columnDefault.length()
-                    ? NULL
-                    : new vtkVariant( columnDefault );
-      this->ColumnValues.insert( std::pair< std::string, vtkVariant* >( column, v ) );
+      this->ColumnValues.insert( std::pair< std::string, vtkVariant >( column, vtkVariant( columnDefault ) ) );
     }
 
     this->Initialized = true;
@@ -89,10 +64,10 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool ActiveRecord::Load( std::map< std::string, std::string > map )
   {
-    this->DeleteColumnValues();
+    this->ColumnValues.clear();
 
     Database *db = Application::GetInstance()->GetDB();
-    vtkSmartPointer<vtkMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
     std::map< std::string, std::string >::iterator it;
 
     // create an sql statement using the provided map
@@ -121,17 +96,7 @@ namespace Alder
       {
         std::string column = query->GetFieldName( c );
         if( 0 != column.compare( "create_timestamp" ) && 0 != column.compare( "update_timestamp" ) )
-        {
-          vtkVariant *v = db->IsColumnNullable( this->GetName(), column ) &&
-                          // empty string is considered to be null
-                          ( 0 == query->DataValue( c ).ToString().length() ||
-                          // foreign keys with value 0 are considered to be null
-                            ( db->IsColumnForeignKey( this->GetName(), column ) &&
-                              0 == query->DataValue( c ).ToInt() ) )
-                        ? NULL
-                        : new vtkVariant( query->DataValue( c ) );
-          this->ColumnValues.insert( std::pair< std::string, vtkVariant* >( column, v ) );
-        }
+          this->ColumnValues.insert( std::pair< std::string, vtkVariant >( column, query->DataValue( c ) ) );
       }
 
       if( first ) first = false;
@@ -145,8 +110,8 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void ActiveRecord::Save()
   {
-    vtkSmartPointer<vtkMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
-    std::map< std::string, vtkVariant* >::iterator it;
+    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+    std::map< std::string, vtkVariant >::iterator it;
     std::stringstream stream;
 
     bool first = true;
@@ -155,13 +120,13 @@ namespace Alder
       if( 0 != it->first.compare( "id" ) )
       {
         stream << ( first ? "" :  ", " ) << it->first
-               << " = " << ( it->second ? query->EscapeString( it->second->ToString() ) : "NULL" );
+               << " = " << ( it->second.IsValid() ? query->EscapeString( it->second.ToString() ) : "NULL" );
         if( first ) first = false;
       }
     }
 
     // different sql based on whether the record already exists or not
-    if( 0 == this->Get( "id" )->ToString().length() )
+    if( !this->Get( "id" ).IsValid() )
     {
       // add the create_timestamp column
       stream << ( first ? "" :  ", " ) << "create_timestamp = NULL";
@@ -177,7 +142,7 @@ namespace Alder
       std::string s = stream.str();
       stream.str( "" );
       stream << "UPDATE " << this->GetName() << " SET " << s
-             << " WHERE id = " << query->EscapeString( this->Get( "id" )->ToString() );
+             << " WHERE id = " << query->EscapeString( this->Get( "id" ).ToString() );
     }
 
     vtkDebugSQLMacro( << stream.str() );
@@ -190,10 +155,10 @@ namespace Alder
   {
     this->AssertPrimaryId();
 
-    vtkSmartPointer<vtkMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
     std::stringstream stream;
     stream << "DELETE FROM " << this->GetName() << " "
-           << "WHERE id = " << query->EscapeString( this->Get( "id" )->ToString() );
+           << "WHERE id = " << query->EscapeString( this->Get( "id" ).ToString() );
     vtkDebugSQLMacro( << stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
@@ -205,8 +170,8 @@ namespace Alder
     Application *app = Application::GetInstance();
     std::stringstream stream;
     stream << "SELECT COUNT(*) FROM " << recordType << " "
-           << "WHERE " << this->GetName() << "_id = " << this->Get( "id" )->ToString();
-    vtkSmartPointer<vtkMySQLQuery> query = app->GetDB()->GetQuery();
+           << "WHERE " << this->GetName() << "_id = " << this->Get( "id" ).ToString();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
     vtkDebugSQLMacro( << stream.str() );
     query->SetQuery( stream.str().c_str() );
@@ -218,7 +183,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  vtkVariant* ActiveRecord::Get( std::string column )
+  vtkVariant ActiveRecord::Get( std::string column )
   {
     // make sure the column exists
     if( !this->ColumnNameExists( column ) )
@@ -228,7 +193,7 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string, vtkVariant* >::iterator pair = this->ColumnValues.find( column );
+    std::map< std::string, vtkVariant >::iterator pair = this->ColumnValues.find( column );
     return pair->second;
   }
 
@@ -251,18 +216,18 @@ namespace Alder
     }
 
     ActiveRecord *record = NULL;
-    vtkVariant *v = this->Get( column );
-    if( v )
+    vtkVariant v = this->Get( column );
+    if( v.IsValid() )
     { // only create the record if the foreign key is not null
       record = ActiveRecord::SafeDownCast( Application::GetInstance()->Create( table ) );
-      record->Load( "id", this->Get( column )->ToString() );
+      record->Load( "id", this->Get( column ).ToString() );
     }
 
     return record;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void ActiveRecord::SetVariant( std::string column, vtkVariant *value )
+  void ActiveRecord::SetVariant( std::string column, vtkVariant value )
   {
     // make sure the column exists
     if( !this->ColumnNameExists( column ) )
@@ -272,9 +237,7 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    // if it exists, delete the old value
-    std::map< std::string, vtkVariant* >::iterator pair = this->ColumnValues.find( column );
-    if( pair->second ) delete pair->second;
+    std::map< std::string, vtkVariant >::iterator pair = this->ColumnValues.find( column );
     pair->second = value;
   }
 }
