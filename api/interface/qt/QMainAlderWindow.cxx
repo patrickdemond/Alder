@@ -609,8 +609,6 @@ void QMainAlderWindow::updateInterface()
   this->ui->actionNextStudy->setEnabled( study );
   this->ui->previousStudyPushButton->setEnabled( study );
   this->ui->nextStudyPushButton->setEnabled( study );
-  this->ui->addImagePushButton->setEnabled( cineloop );
-  this->ui->removeImagePushButton->setEnabled( image );
   this->ui->ratingSlider->setEnabled( image );
   this->ui->notePushButton->setEnabled( false ); // TODO: notes aren't implemented
   this->ui->studyTreeWidget->setEnabled( study );
