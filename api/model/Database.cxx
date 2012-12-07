@@ -72,41 +72,41 @@ namespace Alder
     query->Execute();
     
     std::string tableName = "";
-    std::map< std::string,std::map< std::string, std::string > > tableMap;
+    std::map< std::string,std::map< std::string, vtkVariant > > tableMap;
     while( query->NextRow() )
     {
       // if we are starting a new table save the old one and start over
       if( 0 != tableName.compare( query->DataValue( 0 ).ToString() ) )
       {
         if( 0 != tableName.length() ) this->Columns.insert(
-          std::pair< std::string, std::map< std::string,std::map< std::string, std::string > > >(
+          std::pair< std::string, std::map< std::string,std::map< std::string, vtkVariant > > >(
             tableName, tableMap ) );
         tableName = query->DataValue( 0 ).ToString();
         tableMap.clear();
       }
 
       // get this column's details
-      std::map< std::string, std::string > columnMap;
+      std::map< std::string, vtkVariant > columnMap;
       for( int c = 2; c < query->GetNumberOfFields(); ++c )
-        columnMap.insert( std::pair< std::string, std::string >(
-          query->GetFieldName( c ), query->DataValue( c ).ToString() ) );
+        columnMap.insert( std::pair< std::string, vtkVariant >(
+          query->GetFieldName( c ), query->DataValue( c ) ) );
 
       // add the column to the current table
       std::string columnName = query->DataValue( 1 ).ToString();
-      tableMap.insert( std::pair< std::string, std::map< std::string, std::string > >(
+      tableMap.insert( std::pair< std::string, std::map< std::string, vtkVariant > >(
         columnName, columnMap ) );
     }
 
     // save the last table
     if( 0 != tableName.length() ) this->Columns.insert(
-      std::pair< std::string, std::map< std::string,std::map< std::string, std::string > > >(
+      std::pair< std::string, std::map< std::string,std::map< std::string, vtkVariant > > >(
         tableName, tableMap ) );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   std::vector<std::string> Database::GetColumnNames( std::string table )
   {
-    std::map< std::string,std::map< std::string,std::map< std::string, std::string > > >::iterator tablePair;
+    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::iterator tablePair;
     tablePair = this->Columns.find( table );
     if( this->Columns.end() == tablePair )
     {
@@ -115,18 +115,18 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string,std::map< std::string, std::string > > tableMap = tablePair->second;
+    std::map< std::string,std::map< std::string, vtkVariant > > tableMap = tablePair->second;
     std::vector<std::string> columns;
-    std::map< std::string,std::map< std::string, std::string > >::iterator it;
+    std::map< std::string,std::map< std::string, vtkVariant > >::iterator it;
     for( it = tableMap.begin(); it != tableMap.end(); ++it ) columns.push_back( it->first );
 
     return columns;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string Database::GetColumnDefault( std::string table, std::string column )
+  vtkVariant Database::GetColumnDefault( std::string table, std::string column )
   {
-    std::map< std::string,std::map< std::string,std::map< std::string, std::string > > >::iterator
+    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::iterator
       tablePair = this->Columns.find( table );
     if( this->Columns.end() == tablePair )
     {
@@ -135,7 +135,7 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string,std::map< std::string, std::string > >::iterator
+    std::map< std::string,std::map< std::string, vtkVariant > >::iterator
       columnPair = tablePair->second.find( column );
     if( tablePair->second.end() == columnPair )
     {
@@ -145,14 +145,14 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string, std::string > columnMap = columnPair->second;
+    std::map< std::string, vtkVariant > columnMap = columnPair->second;
     return columnMap.find( "column_default" )->second;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool Database::IsColumnNullable( std::string table, std::string column )
   {
-    std::map< std::string,std::map< std::string,std::map< std::string, std::string > > >::iterator
+    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::iterator
       tablePair = this->Columns.find( table );
     if( this->Columns.end() == tablePair )
     {
@@ -161,7 +161,7 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string,std::map< std::string, std::string > >::iterator
+    std::map< std::string,std::map< std::string, vtkVariant > >::iterator
       columnPair = tablePair->second.find( column );
     if( tablePair->second.end() == columnPair )
     {
@@ -171,14 +171,14 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string, std::string > columnMap = columnPair->second;
-    return 0 == columnMap.find( "is_nullable" )->second.compare( "YES" );
+    std::map< std::string, vtkVariant > columnMap = columnPair->second;
+    return 0 == columnMap.find( "is_nullable" )->second.ToString().compare( "YES" );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool Database::IsColumnForeignKey( std::string table, std::string column )
   {
-    std::map< std::string,std::map< std::string,std::map< std::string, std::string > > >::iterator
+    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::iterator
       tablePair = this->Columns.find( table );
     if( this->Columns.end() == tablePair )
     {
@@ -187,7 +187,7 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string,std::map< std::string, std::string > >::iterator
+    std::map< std::string,std::map< std::string, vtkVariant > >::iterator
       columnPair = tablePair->second.find( column );
     if( tablePair->second.end() == columnPair )
     {
@@ -197,7 +197,6 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string, std::string > columnMap = columnPair->second;
     return 3 <= column.length() && 0 == column.compare( column.length() - 3, 3, "_id" );
   }
 

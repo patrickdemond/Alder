@@ -54,8 +54,8 @@ namespace Alder
     for( it = columns.begin(); it != columns.end(); ++it )
     {
       std::string column = *it;
-      std::string columnDefault = db->GetColumnDefault( this->GetName(), column );
-      this->ColumnValues.insert( std::pair< std::string, vtkVariant >( column, vtkVariant( columnDefault ) ) );
+      vtkVariant columnDefault = db->GetColumnDefault( this->GetName(), column );
+      this->ColumnValues.insert( std::pair< std::string, vtkVariant >( column, columnDefault ) );
     }
 
     this->Initialized = true;
@@ -126,7 +126,7 @@ namespace Alder
     }
 
     // different sql based on whether the record already exists or not
-    if( !this->Get( "id" ).IsValid() )
+    if( !this->Get( "id" ).IsValid() || 0 == this->Get( "id" ).ToInt() )
     {
       // add the create_timestamp column
       stream << ( first ? "" :  ", " ) << "create_timestamp = NULL";

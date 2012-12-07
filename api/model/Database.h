@@ -29,8 +29,9 @@
 
 #include "ModelObject.h"
 
-#include "vtkSmartPointer.h"
 #include "vtkAlderMySQLQuery.h"
+#include "vtkSmartPointer.h"
+#include "vtkVariant.h"
 
 #include <iostream>
 #include <map>
@@ -86,7 +87,7 @@ namespace Alder
      * @param column string
      * @throws runtime_error
      */
-    std::string GetColumnDefault( std::string table, std::string column );
+    vtkVariant GetColumnDefault( std::string table, std::string column );
 
     /**
      * Returns whether a table's column value may be null
@@ -116,7 +117,7 @@ namespace Alder
      */
     void ReadInformationSchema();
     vtkSmartPointer<vtkAlderMySQLDatabase> MySQLDatabase;
-    std::map< std::string,std::map< std::string,std::map< std::string, std::string > > > Columns;
+    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > > Columns;
 
   private:
     Database( const Database& ); // Not implemented
