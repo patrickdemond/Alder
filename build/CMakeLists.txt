@@ -162,9 +162,9 @@ INCLUDE_DIRECTORIES(
 )
 
 # Targets
-ADD_EXECUTABLE( Alder ${ALDER_SOURCE} ${ALDER_UISrcs} ${MOCSrcs} )
+ADD_EXECUTABLE( alder ${ALDER_SOURCE} ${ALDER_UISrcs} ${MOCSrcs} )
 
-TARGET_LINK_LIBRARIES( Alder
+TARGET_LINK_LIBRARIES( alder
   QVTK
   vtkRendering
   vtkGraphics
@@ -176,7 +176,7 @@ TARGET_LINK_LIBRARIES( Alder
   ${CRYPTO++_LIBRARIES}
   ${JSONCPP_LIBRARIES}
 )
-INSTALL( TARGETS Alder RUNTIME DESTINATION bin )
+INSTALL( TARGETS alder RUNTIME DESTINATION bin )
 
 ADD_CUSTOM_TARGET( dist
   COMMAND git archive --prefix=${ALDER_ARCHIVE_NAME}/ HEAD
@@ -186,7 +186,7 @@ ADD_CUSTOM_TARGET( dist
 
 # Desktop entries and icons
 IF( UNIX AND NOT APPLE )
-  INSTALL( FILES desktop/Alder.desktop DESTINATION share/applications )
+  INSTALL( FILES desktop/alder.desktop DESTINATION share/applications )
 
   INSTALL( FILES desktop/logo_clsa.png DESTINATION share/icons/hicolor/scalable/apps )
   FOREACH( SIZE ${ALDER_ICON_SIZES} )

@@ -48,16 +48,16 @@
  * needs to be freed somehow when it's no longer needed.
  *
  * I'm going to handle this by using my own class
- * (vtkALderMySQLBoundParameter) to hold all the information the user
+ * (vtkAlderMySQLBoundParameter) to hold all the information the user
  * passes in.  At execution time, I'll take those parameters and
  * assemble the array of MYSQL_BIND objects that
- * mysql_stmt_bind_param() expects.  The vtkALderMySQLBoundParameter
+ * mysql_stmt_bind_param() expects.  The vtkAlderMySQLBoundParameter
  * instances will each own the buffers for their data.
  *
  * This is slightly inefficient in that it will generate
  * a few tiny little new[] requests.  If this ever becomes a problem,
  * we can allocate a fixed-size buffer (8 or 16 bytes) inside
- * vtkALderMySQLBoundParameter and use that for the data storage by
+ * vtkAlderMySQLBoundParameter and use that for the data storage by
  * default.  That will still require special-case handling for blobs
  * and strings.
  *
@@ -68,15 +68,15 @@
 
 // ----------------------------------------------------------------------
 
-class vtkALderMySQLBoundParameter
+class vtkAlderMySQLBoundParameter
 {
 public:
-  vtkALderMySQLBoundParameter() :
+  vtkAlderMySQLBoundParameter() :
     IsNull(true), Data(NULL), BufferSize(0), DataLength(0), HasError(false)
     {
     }
 
-  ~vtkALderMySQLBoundParameter()
+  ~vtkAlderMySQLBoundParameter()
     {
       delete [] this->Data;
     }
@@ -183,14 +183,14 @@ bool vtkAlderMySQLIsTypeUnsigned<vtkTypeUInt64>(vtkTypeUInt64)
 // ----------------------------------------------------------------------
 
 // Description:
-// This function will build and populate a vtkALderMySQLBoundParameter
+// This function will build and populate a vtkAlderMySQLBoundParameter
 // struct.  The default implementation works for POD data types (char,
 // int, long, etc).  I'll need to special-case strings and blobs.
 
 template<typename T>
-vtkALderMySQLBoundParameter *vtkBuildBoundParameter(T data_value)
+vtkAlderMySQLBoundParameter *vtkBuildBoundParameter(T data_value)
 {
-  vtkALderMySQLBoundParameter *param = new vtkALderMySQLBoundParameter;
+  vtkAlderMySQLBoundParameter *param = new vtkAlderMySQLBoundParameter;
 
   param->IsNull = false;
   param->IsUnsigned = vtkAlderMySQLIsTypeUnsigned(data_value);
@@ -208,9 +208,9 @@ vtkALderMySQLBoundParameter *vtkBuildBoundParameter(T data_value)
 // strings (i.e. CHAR and VARCHAR fields)
 
 template<>
-vtkALderMySQLBoundParameter *vtkBuildBoundParameter<const char *>(const char *data_value)
+vtkAlderMySQLBoundParameter *vtkBuildBoundParameter<const char *>(const char *data_value)
 {
-  vtkALderMySQLBoundParameter *param = new vtkALderMySQLBoundParameter;
+  vtkAlderMySQLBoundParameter *param = new vtkAlderMySQLBoundParameter;
 
   param->IsNull = false;
   param->IsUnsigned = false;
@@ -226,11 +226,11 @@ vtkALderMySQLBoundParameter *vtkBuildBoundParameter<const char *>(const char *da
 // Description:
 // Alternate signature for vtkBuildBoundParameter to handle blobs
 
-vtkALderMySQLBoundParameter *vtkBuildBoundParameter(const char *data,
+vtkAlderMySQLBoundParameter *vtkBuildBoundParameter(const char *data,
                                                unsigned long length,
                                                bool is_blob)
 {
-  vtkALderMySQLBoundParameter *param = new vtkALderMySQLBoundParameter;
+  vtkAlderMySQLBoundParameter *param = new vtkAlderMySQLBoundParameter;
 
   param->IsNull = false;
   param->IsUnsigned = false;
@@ -264,7 +264,7 @@ public:
   void FreeUserParameterList();
   void FreeBoundParameters();
   bool SetQuery(const char *queryString, MYSQL *db, vtkStdString &error_message);
-  bool SetBoundParameter(int index, vtkALderMySQLBoundParameter *param);
+  bool SetBoundParameter(int index, vtkAlderMySQLBoundParameter *param);
   bool BindParametersToStatement();
 
   // Description:
@@ -282,7 +282,7 @@ public:
   MYSQL_ROW        CurrentRow;
   unsigned long   *CurrentLengths;
 
-  typedef vtksys_stl::vector<vtkALderMySQLBoundParameter *> ParameterList;
+  typedef vtksys_stl::vector<vtkAlderMySQLBoundParameter *> ParameterList;
   ParameterList UserParameterList;
 };
 
@@ -390,7 +390,7 @@ void vtkAlderMySQLQueryInternals::FreeBoundParameters()
 
 // ----------------------------------------------------------------------
 
-bool vtkAlderMySQLQueryInternals::SetBoundParameter(int index, vtkALderMySQLBoundParameter *param)
+bool vtkAlderMySQLQueryInternals::SetBoundParameter(int index, vtkAlderMySQLBoundParameter *param)
 {
   if (index >= static_cast<int>(this->UserParameterList.size()))
     {
