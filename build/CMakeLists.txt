@@ -100,6 +100,7 @@ SET( ALDER_SOURCE
   ${ALDER_MODEL_DIR}/Application.cxx
 
   ${ALDER_VTK_DIR}/vtkMedicalImageViewer.cxx
+  ${ALDER_VTK_DIR}/vtkImageCoordinateWidget.cxx
   ${ALDER_VTK_DIR}/vtkAlderMySQLDatabase.cxx
   ${ALDER_VTK_DIR}/vtkAlderMySQLQuery.cxx
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
