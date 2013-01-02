@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:  Alder (CLSA Ultrasound Image Viewer)
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
   Module:   QMainAlderWindow.cxx
   Language: C++
 
@@ -24,7 +24,7 @@
 #include "QAboutDialog.h"
 #include "QLoginDialog.h"
 #include "QProgressDialog.h"
-#include "QSelectStudyDialog.h"
+#include "QSelectInterviewDialog.h"
 #include "QUserListDialog.h"
 
 #include <QCloseEvent>
@@ -115,7 +115,7 @@ void QMainAlderWindow::slotOpenStudy()
 
   if( loggedIn )
   {
-    QSelectStudyDialog dialog( this );
+    QSelectInterviewDialog dialog( this );
     dialog.setModal( true );
     dialog.setWindowTitle( tr( "Select Study" ) );
     dialog.exec();

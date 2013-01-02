@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:  CLSAVis (Canadian Longitudinal Study on Aging Visualizer)
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
   Module:   QLoginDialog.cxx
   Language: C++
 

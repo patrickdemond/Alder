@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QSelectStudyDialog</class>
- <widget class="QWidget" name="QSelectStudyDialog">
+ <class>QSelectInterviewDialog</class>
+ <widget class="QWidget" name="QSelectInterviewDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,12 +23,12 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Select which study to open.</string>
+      <string>Select which interview records to open.</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QTableWidget" name="studyTableWidget">
+    <widget class="QTableWidget" name="interviewTableWidget">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -48,12 +48,17 @@
      </column>
      <column>
       <property name="text">
-       <string>Site</string>
+       <string>DEXA</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Interviewer</string>
+       <string>Ultrasound</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Retinal</string>
       </property>
      </column>
      <column>
@@ -91,7 +96,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>QSelectStudyDialog</receiver>
+   <receiver>QSelectInterviewDialog</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">

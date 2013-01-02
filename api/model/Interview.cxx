@@ -1,14 +1,14 @@
 /*=========================================================================
 
-  Program:  Alder (CLSA Ultrasound Image Viewer)
-  Module:   Modality.cxx
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
+  Module:   Interview.cxx
   Language: C++
 
   Author: Patrick Emond <emondpd@mcmaster.ca>
   Author: Dean Inglis <inglisd@mcmaster.ca>
 
 =========================================================================*/
-#include "Modality.h"
+#include "Interview.h"
 
 #include "Utilities.h"
 
@@ -16,5 +16,5 @@
 
 namespace Alder
 {
-  vtkStandardNewMacro( Modality );
+  vtkStandardNewMacro( Interview );
 }

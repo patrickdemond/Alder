@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:  Alder (CLSA Ultrasound Image Viewer)
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
   Module:   Application.cxx
   Language: C++
 
@@ -16,7 +16,7 @@
 #include "Database.h"
 #include "Exam.h"
 #include "Image.h"
-#include "Modality.h"
+#include "Interview.h"
 #include "OpalService.h"
 #include "Rating.h"
 #include "Study.h"
@@ -46,8 +46,8 @@ namespace Alder
     this->ClassNameRegistry["Exam"] = typeid(Exam).name();
     this->ConstructorRegistry["Image"] = &createInstance<Image>;
     this->ClassNameRegistry["Image"] = typeid(Image).name();
-    this->ConstructorRegistry["Modality"] = &createInstance<Modality>;
-    this->ClassNameRegistry["Modality"] = typeid(Modality).name();
+    this->ConstructorRegistry["Interview"] = &createInstance<Interview>;
+    this->ClassNameRegistry["Interview"] = typeid(Interview).name();
     this->ConstructorRegistry["Rating"] = &createInstance<Rating>;
     this->ClassNameRegistry["Rating"] = typeid(Rating).name();
     this->ConstructorRegistry["Study"] = &createInstance<Study>;

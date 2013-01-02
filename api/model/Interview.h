@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Program:  Alder (CLSA Ultrasound Image Viewer)
-  Module:   Modality.h
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
+  Module:   Interview.h
   Language: C++
 
   Author: Patrick Emond <emondpd@mcmaster.ca>
@@ -10,17 +10,17 @@
 =========================================================================*/
 
 /**
- * @class Modality
+ * @class Interview
  * @namespace Alder
  * 
  * @author Patrick Emond <emondpd@mcmaster.ca>
  * @author Dean Inglis <inglisd@mcmaster.ca>
  * 
- * @brief An active record for the Modality table
+ * @brief An active record for the Interview table
  */
 
-#ifndef __Modality_h
-#define __Modality_h
+#ifndef __Interview_h
+#define __Interview_h
 
 #include "ActiveRecord.h"
 
@@ -33,20 +33,20 @@
 
 namespace Alder
 {
-  class Modality : public ActiveRecord
+  class Interview : public ActiveRecord
   {
   public:
-    static Modality *New();
-    vtkTypeMacro( Modality, ActiveRecord );
-    std::string GetName() { return "Modality"; }
+    static Interview *New();
+    vtkTypeMacro( Interview, ActiveRecord );
+    std::string GetName() { return "Interview"; }
 
   protected:
-    Modality() {}
-    ~Modality() {}
+    Interview() {}
+    ~Interview() {}
 
   private:
-    Modality( const Modality& ); // Not implemented
-    void operator=( const Modality& ); // Not implemented
+    Interview( const Interview& ); // Not implemented
+    void operator=( const Interview& ); // Not implemented
   };
 }
 

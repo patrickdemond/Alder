@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:  Alder (CLSA Ultrasound Image Viewer)
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
   Module:   Cineloop.cxx
   Language: C++
 
@@ -21,7 +21,7 @@ namespace Alder
 {
   vtkStandardNewMacro( Cineloop );
 
-  std::string Cineloop::GetFileName()
+  std::string Cineloop::GetFileName() // TODO: re-implement (jpg, interview, etc)
   {
     this->AssertPrimaryId();
 

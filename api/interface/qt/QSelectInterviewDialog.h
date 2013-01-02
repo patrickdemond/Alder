@@ -1,7 +1,7 @@
 /*=========================================================================
 
-  Program:  Alder (CLSA Ultrasound Image Viewer)
-  Module:   QSelectStudyDialog.h
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
+  Module:   QSelectInterviewDialog.h
   Language: C++
 
   Author: Patrick Emond <emondpd@mcmaster.ca>
@@ -9,24 +9,24 @@
 
 =========================================================================*/
 
-#ifndef __QSelectStudyDialog_h
-#define __QSelectStudyDialog_h
+#ifndef __QSelectInterviewDialog_h
+#define __QSelectInterviewDialog_h
 
 #include <QDialog>
 
 #include "Utilities.h"
 
-class Ui_QSelectStudyDialog;
+class Ui_QSelectInterviewDialog;
 
-class QSelectStudyDialog : public QDialog
+class QSelectInterviewDialog : public QDialog
 {
   Q_OBJECT
 
 public:
   //constructor
-  QSelectStudyDialog( QWidget* parent = 0 );
+  QSelectInterviewDialog( QWidget* parent = 0 );
   //destructor
-  ~QSelectStudyDialog();
+  ~QSelectInterviewDialog();
   
 public slots:
   virtual void slotSearch();
@@ -44,7 +44,7 @@ protected slots:
 
 private:
   // Designer form
-  Ui_QSelectStudyDialog *ui;
+  Ui_QSelectInterviewDialog *ui;
 };
 
 #endif

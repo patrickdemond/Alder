@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:  Alder (CLSA Ultrasound Image Viewer)
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
   Module:   Image.cxx
   Language: C++
 
@@ -12,6 +12,7 @@
 
 #include "Configuration.h"
 #include "Exam.h"
+#include "Interview.h"
 #include "Rating.h"
 #include "Study.h"
 #include "User.h"
@@ -26,23 +27,25 @@ namespace Alder
   vtkStandardNewMacro( Image );
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string Image::GetFileName()
+  std::string Image::GetFileName() // TODO: re-implement (jpg, interview, etc)
   {
     this->AssertPrimaryId();
 
     // get the study and exam for this record
     Exam *exam = Exam::SafeDownCast( this->GetRecord( "Exam" ) );
     Study *study = Study::SafeDownCast( exam->GetRecord( "Study" ) );
+    Interview *interview = Interview::SafeDownCast( study->GetRecord( "Interview" ) );
 
     std::stringstream stream;
     // start with the base image directory
     stream << Application::GetInstance()->GetConfig()->GetValue( "Path", "ImageData" )
-           << "/" << study->Get( "UId" ).ToString()
+           << "/" << interview->Get( "UId" ).ToString()
            << "/" << exam->Get( "Id" ).ToString()
            << "/Image/" << this->Get( "Id" ).ToString() << ".dcm";
 
     exam->Delete();
     study->Delete();
+    interview->Delete();
 
     return stream.str();
   }

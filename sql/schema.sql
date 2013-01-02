@@ -7,32 +7,18 @@ CREATE SCHEMA IF NOT EXISTS `Alder` DEFAULT CHARACTER SET latin1 ;
 USE `Alder` ;
 
 -- -----------------------------------------------------
--- Table `Alder`.`Participant`
+-- Table `Alder`.`Interview`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `Alder`.`Participant` ;
+DROP TABLE IF EXISTS `Alder`.`Interview` ;
 
-CREATE  TABLE IF NOT EXISTS `Alder`.`Participant` (
+CREATE  TABLE IF NOT EXISTS `Alder`.`Interview` (
   `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `UpdateTimestamp` TIMESTAMP NOT NULL ,
   `CreateTimestamp` TIMESTAMP NOT NULL ,
   `UId` VARCHAR(45) NOT NULL ,
+  `VisitDate` DATE NOT NULL ,
   PRIMARY KEY (`Id`) ,
-  UNIQUE INDEX `uqUId` (`UId` ASC) )
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `Alder`.`Modality`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `Alder`.`Modality` ;
-
-CREATE  TABLE IF NOT EXISTS `Alder`.`Modality` (
-  `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `UpdateTimestamp` TIMESTAMP NOT NULL ,
-  `CreateTimestamp` TIMESTAMP NOT NULL ,
-  `Name` VARCHAR(45) NOT NULL ,
-  PRIMARY KEY (`Id`) ,
-  UNIQUE INDEX `uqName` (`Name` ASC) )
+  UNIQUE INDEX `uqUIdVisitDate` (`UId` ASC, `VisitDate` ASC) )
 ENGINE = InnoDB;
 
 
@@ -45,8 +31,8 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Study` (
   `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `UpdateTimestamp` TIMESTAMP NOT NULL ,
   `CreateTimestamp` TIMESTAMP NOT NULL ,
-  `ParticipantId` INT UNSIGNED NOT NULL ,
-  `ModalityId` INT UNSIGNED NOT NULL ,
+  `InterviewId` INT UNSIGNED NOT NULL ,
+  `Modality` ENUM('Dexa','Ultrasound','Retinal') NOT NULL ,
   `Site` VARCHAR(45) NOT NULL ,
   `Interviewer` VARCHAR(45) NOT NULL ,
   `DatetimeAcquired` DATETIME NOT NULL ,
@@ -54,16 +40,10 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Study` (
   PRIMARY KEY (`Id`) ,
   INDEX `dkDatetimeAcquired` (`DatetimeAcquired` ASC) ,
   INDEX `dkInterviewer` (`Interviewer` ASC) ,
-  INDEX `fkParticipantId` (`ParticipantId` ASC) ,
-  INDEX `fkModalityId` (`ModalityId` ASC) ,
-  CONSTRAINT `fkStudyParticipantId`
-    FOREIGN KEY (`ParticipantId` )
-    REFERENCES `Alder`.`Participant` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fkStudyModalityId`
-    FOREIGN KEY (`ModalityId` )
-    REFERENCES `Alder`.`Modality` (`Id` )
+  INDEX `fkInterviewId` (`InterviewId` ASC) ,
+  CONSTRAINT `fkStudyInterviewId`
+    FOREIGN KEY (`InterviewId` )
+    REFERENCES `Alder`.`Interview` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -156,15 +136,18 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`User` (
   `CreateTimestamp` TIMESTAMP NOT NULL ,
   `Name` VARCHAR(255) NOT NULL ,
   `Password` VARCHAR(255) NOT NULL ,
+  `InterviewId` INT UNSIGNED NOT NULL ,
+  `RateDexa` TINYINT(1) NOT NULL DEFAULT 0 ,
+  `RateUltrasound` TINYINT(1) NOT NULL DEFAULT 0 ,
+  `RateRetinal` TINYINT(1) NOT NULL DEFAULT 0 ,
   `LastLogin` DATETIME NULL DEFAULT NULL ,
-  `StudyId` INT UNSIGNED NULL DEFAULT NULL ,
   PRIMARY KEY (`Id`) ,
   UNIQUE INDEX `uqName` (`Name` ASC) ,
   INDEX `dkLastLogin` (`LastLogin` ASC) ,
-  INDEX `fkStudyId` (`StudyId` ASC) ,
-  CONSTRAINT `fkUserStudyId`
-    FOREIGN KEY (`StudyId` )
-    REFERENCES `Alder`.`Study` (`Id` )
+  INDEX `fkInterviewId` (`InterviewId` ASC) ,
+  CONSTRAINT `fkUserInterviewId`
+    FOREIGN KEY (`InterviewId` )
+    REFERENCES `Alder`.`Interview` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -203,32 +186,6 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Rating` (
   CONSTRAINT `fkRatingCineloopId`
     FOREIGN KEY (`CineloopId` )
     REFERENCES `Alder`.`Cineloop` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `Alder`.`UserHasModality`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `Alder`.`UserHasModality` ;
-
-CREATE  TABLE IF NOT EXISTS `Alder`.`UserHasModality` (
-  `UserId` INT UNSIGNED NOT NULL ,
-  `ModalityId` INT UNSIGNED NOT NULL ,
-  `UpdateTimestamp` TIMESTAMP NOT NULL ,
-  `CreateTimestamp` TIMESTAMP NOT NULL ,
-  PRIMARY KEY (`UserId`, `ModalityId`) ,
-  INDEX `fkModalityId` (`ModalityId` ASC) ,
-  INDEX `fkUserId` (`UserId` ASC) ,
-  CONSTRAINT `fkUserHasModalityUserId`
-    FOREIGN KEY (`UserId` )
-    REFERENCES `Alder`.`User` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fkUserHasModalityModalityId`
-    FOREIGN KEY (`ModalityId` )
-    REFERENCES `Alder`.`Modality` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
