@@ -12,8 +12,10 @@
 
 #include "vtkCamera.h"
 #include "vtkCommand.h"
+#include "vtkCornerAnnotation.h"
 #include "vtkGDCMImageReader.h"
 #include "vtkImageActor.h"
+#include "vtkImageCoordinateWidget.h"
 #include "vtkImageData.h"
 #include "vtkImageMapToWindowLevelColors.h"
 #include "vtkImageSinusoidSource.h"
@@ -58,6 +60,29 @@ public:
 };
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+class vtkCursorWidgetToAnnotationCallback : public vtkCommand
+{
+public:
+  static vtkCursorWidgetToAnnotationCallback *New() {
+    return new vtkCursorWidgetToAnnotationCallback; }
+
+  void Execute( vtkObject *caller, unsigned long vtkNotUsed( event ),
+                void *vtkNotUsed( callData ) )
+  {
+    vtkImageCoordinateWidget* self =
+      reinterpret_cast< vtkImageCoordinateWidget* >( caller );
+    if ( !self || !this->Viewer ) { return; }
+
+    this->Viewer->GetAnnotation()->SetText( 0, self->GetMessageString() );
+    this->Viewer->Render();
+  }
+
+  vtkCursorWidgetToAnnotationCallback():Viewer( 0 ) {}
+
+  vtkMedicalImageViewer *Viewer;
+};
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 vtkMedicalImageViewer::vtkMedicalImageViewer()
 {
   this->RenderWindow    = NULL;
@@ -66,6 +91,26 @@ vtkMedicalImageViewer::vtkMedicalImageViewer()
   this->WindowLevel     = vtkImageMapToWindowLevelColors::New();
   this->Interactor      = NULL;
   this->InteractorStyle = NULL;
+  this->CursorWidget    = vtkImageCoordinateWidget::New();
+  this->Annotation      = vtkCornerAnnotation::New();
+
+  this->Annotation->SetMaximumLineHeight( 0.07 );
+  this->Annotation->SetText( 2, "<slice_and_max>" );
+  this->Annotation->SetText( 3, "<window>\n<level>" );
+  // setting the max font size and linear font scale factor
+  // forces vtkCornerAnnotation to keep its constituent text mappers'
+  // font sizes the same, otherwise, when the location and value
+  // text field dynamically changes width, the font size changes:
+  // see RenderOpaqueGeometry in vtkCornerAnnotation.cxx for details
+  // TODO: the maximum font size should be set via callback mechanism
+  // tied to when the render window changes its size
+
+  this->Annotation->SetMaximumFontSize( 15  );
+  this->Annotation->SetLinearFontScaleFactor( 100 );
+
+  this->Cursor = 1;
+  this->Annotate = 1;
+  this->Interpolate = 0;
 
   this->PlayEvent = vtkCommand::UserEvent + 100;
   this->StopEvent = vtkCommand::UserEvent + 101;
@@ -147,6 +192,17 @@ vtkMedicalImageViewer::~vtkMedicalImageViewer()
   {
     this->InteractorStyle->Delete();
     this->InteractorStyle = NULL;
+  }
+
+  if( this->Annotation )
+  {
+    this->Annotation->Delete();
+    this->Annotation = NULL;
+  }
+  if( this->CursorWidget )
+  {
+    this->CursorWidget->Delete();
+    this->CursorWidget = NULL;
   }
 }
 
@@ -326,11 +382,17 @@ void vtkMedicalImageViewer::InstallPipeline()
     this->Renderer->GetActiveCamera()->ParallelProjectionOn();
     this->Renderer->AddViewProp( this->ImageActor );
   }
+  
+  this->InstallAnnotation();
+  this->InstallCursor();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void vtkMedicalImageViewer::UnInstallPipeline()
 {
+  this->UnInstallCursor();
+  this->UnInstallAnnotation();
+
   if( this->InteractorStyle && !this->WindowLevelCallbackTags.empty() )
   {
     std::vector<unsigned long>::iterator it;
@@ -809,6 +871,106 @@ void vtkMedicalImageViewer::CinePlay()
 void vtkMedicalImageViewer::CineRewind()
 {
   this->SetSlice( this->GetSliceMin() );
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void vtkMedicalImageViewer::InstallAnnotation()
+{
+  if( !this->Renderer || !this->Annotation ) return;
+
+  this->Annotation->SetImageActor( this->ImageActor );
+  this->Annotation->SetWindowLevel( this->WindowLevel );
+  this->Annotation->SetVisibility( this->Annotate );
+  this->Renderer->AddViewProp( this->Annotation );
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void vtkMedicalImageViewer::UnInstallAnnotation()
+{
+  if( !this->Renderer || !this->Annotation ) return;
+
+  this->Annotation->VisibilityOff();
+  this->Renderer->RemoveViewProp( this->Annotation );
+  this->Annotation->SetImageActor( NULL );
+  this->Annotation->SetWindowLevel( NULL );
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void vtkMedicalImageViewer::InstallCursor()
+{
+  if( this->Interactor && this->Renderer && this->GetInput() )
+  {
+    this->CursorWidget->SetDefaultRenderer( this->Renderer );
+    this->CursorWidget->SetInteractor( this->Interactor );
+    this->CursorWidget->SetInput( this->GetInput() );
+    this->CursorWidget->AddViewProp( this->ImageActor );
+
+    if( this->Annotate )
+    {
+      vtkCursorWidgetToAnnotationCallback* cbk =
+        vtkCursorWidgetToAnnotationCallback::New();
+      cbk->Viewer = this;
+      this->CursorWidget->AddObserver( vtkCommand::InteractionEvent, cbk );
+      cbk->Delete();
+    }
+    this->CursorWidget->On();
+  }
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void vtkMedicalImageViewer::UnInstallCursor()
+{
+  if( this->CursorWidget->GetEnabled() )
+  {
+    this->CursorWidget->Off();
+  }
+  this->CursorWidget->RemoveAllProps( );
+  this->CursorWidget->SetInput( NULL );
+  this->CursorWidget->RemoveObservers( vtkCommand::InteractionEvent );
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void vtkMedicalImageViewer::SetCursor( int arg )
+{
+  if( this->Cursor == arg )
+  {
+    return;
+  }
+  this->Cursor = arg;
+
+  if( this->Cursor )
+    this->InstallCursor();
+  else
+    this->UnInstallCursor();
+
+  if( this->GetInput() ) this->Render();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void vtkMedicalImageViewer::SetInterpolate( int arg )
+{
+  this->Interpolate = arg;
+
+  this->CursorWidget->SetCursoringMode( this->Interpolate ?
+    vtkImageCoordinateWidget::Discrete :
+    vtkImageCoordinateWidget::Continuous );
+
+  this->ImageActor->SetInterpolate( this->Interpolate );
+
+  if( this->GetInput() ) this->Render();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void vtkMedicalImageViewer::SetAnnotate( int arg )
+{
+  this->Annotate = arg;
+
+  if( this->Annotate ) 
+    this->InstallAnnotation();
+  else 
+    this->UnInstallAnnotation();
+
+  if( this->GetInput() ) this->Render();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

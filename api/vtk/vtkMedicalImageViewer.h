@@ -58,7 +58,9 @@
 #include "vtkObject.h"
 #include <vector>
 
+class vtkCornerAnnotation;
 class vtkImageActor;
+class vtkImageCoordinateWidget;
 class vtkImageData;
 class vtkImageMapToWindowLevelColors;
 class vtkInteractorStyleImage;
@@ -200,6 +202,7 @@ public:
   vtkGetObjectMacro( ImageActor, vtkImageActor );
   vtkGetObjectMacro( WindowLevel, vtkImageMapToWindowLevelColors );
   vtkGetObjectMacro( InteractorStyle, vtkInteractorStyleImage );
+  vtkGetObjectMacro( Annotation, vtkCornerAnnotation );
   virtual void SetRenderWindow( vtkRenderWindow* );
   virtual void SetRenderer( vtkRenderer* );
   virtual void SetInteractor( vtkRenderWindowInteractor* );
@@ -304,6 +307,40 @@ public:
   vtkGetMacro( StopEvent, int );
   //@}
 
+
+  /**
+   * Turn cursoring on or off.  Cursoring works in concert with
+   * corner annotation.  If cursoring is off, the cursor widget
+   * is disabled but the vtkCornerAnnotation object could still be
+   * used to display other textual overlay content.  If annotation
+   * is off, cursoring can still be active with its output directed
+   * via callback mechanism to another GUI element.
+   */
+  void SetCursor( int );
+  vtkBooleanMacro(Cursor,int);
+  vtkGetMacro(Cursor, int );
+
+  /**
+   * Turn annotation on or off in the render window.
+   */
+  void SetAnnotate( int );
+  vtkBooleanMacro(Annotate,int);
+  vtkGetMacro(Annotate, int );
+
+  /**
+   * Turns interpolation on or off for both the cursor widget
+   * and the image actor simultaneously.  Off state sets the
+   * cursor widget to use discrete cursoring mode: the cursor 
+   * snaps to pixel centers and reads off discrete pixel values,
+   * and the image actor show pixels with nearest neighbor interpolation.
+   * On state sets the cursor widget to use continous cursoring
+   * mode using interpolation of pixel values and the image actor
+   * shows pixels with linear interpolation.
+   */
+  void SetInterpolate( int );
+  vtkBooleanMacro(Interpolate,int);
+  vtkGetMacro(Interpolate, int );
+
 protected:
   vtkMedicalImageViewer();
   ~vtkMedicalImageViewer();
@@ -315,6 +352,10 @@ protected:
    */
   virtual void InstallPipeline();
   virtual void UnInstallPipeline();
+  void InstallCursor();
+  void UnInstallCursor();
+  void InstallAnnotation();
+  void UnInstallAnnotation();
   //@}
 
   //@{
@@ -325,7 +366,13 @@ protected:
   vtkImageActor                   *ImageActor;
   vtkRenderWindowInteractor       *Interactor;
   vtkInteractorStyleImage         *InteractorStyle;
+  vtkImageCoordinateWidget        *CursorWidget;
+  vtkCornerAnnotation             *Annotation;
   //@}
+
+  int Cursor;
+  int Annotate;
+  int Interpolate;
 
   int Slice;        /**< Current slice index */
   int LastSlice[3]; /**< Keeps track of last slice when changing orientation */
@@ -367,8 +414,8 @@ protected:
   void RecordCameraView();
 
 private:
-  vtkMedicalImageViewer(const vtkMedicalImageViewer&);  // Not implemented.
-  void operator=(const vtkMedicalImageViewer&);  // Not implemented.
+  vtkMedicalImageViewer(const vtkMedicalImageViewer&);  /** Not implemented. */
+  void operator=(const vtkMedicalImageViewer&);  /** Not implemented. */
 };
 
 #endif
