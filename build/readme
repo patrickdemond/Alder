@@ -89,7 +89,7 @@ VTK uses CMake to set up the build environment the same way that Alder does:
 
 
 Building Alder
-================
+==============
 
 Once you've gone through the process of building VTK using CMake this will seem familiar.
 
@@ -119,6 +119,26 @@ Once you've gone through the process of building VTK using CMake this will seem 
    ALDER_SALT_STRING:STRING=put anything here
 
 7. You are now ready to build Alder by typing "make".
+
+
+Preparing Database
+==================
+
+(TODO: this process needs to be scripted by CMake)
+
+After building Alder you are now ready to prepare the database.
+
+1. Create database named Alder and grant all priviledges to a user
+
+   EG: create database Alder; grant all on Alder.* to someuser@localhost identified by "somepassword"
+
+2. Go to the sql directory and run the schema.sql and sample.sql scripts into the Alder database
+
+   EG: cat schema.sql sample.sql | mysql Alder -u someuser -p
+
+3. The build procedure (see "Building Alder") will create a config.xml file in the root of the
+   build directory.  Edit the file to include the database and Opal configuration as well as the
+   path you wish image data to reside in.
 
 
 Building documentation

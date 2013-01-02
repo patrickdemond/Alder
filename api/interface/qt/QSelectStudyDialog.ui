@@ -43,7 +43,7 @@
      </property>
      <column>
       <property name="text">
-       <string>UID</string>
+       <string>UId</string>
       </property>
      </column>
      <column>
@@ -68,7 +68,7 @@
      <item>
       <widget class="QPushButton" name="searchPushButton">
        <property name="text">
-        <string>Search UID</string>
+        <string>Search UId</string>
        </property>
       </widget>
      </item>

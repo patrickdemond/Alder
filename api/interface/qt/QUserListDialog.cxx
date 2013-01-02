@@ -84,7 +84,7 @@ void QUserListDialog::slotAdd()
   if( !text.isEmpty() )
   {
     vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
-    user->Set( "name", text.toStdString() );
+    user->Set( "Name", text.toStdString() );
     user->ResetPassword();
     user->Save();
     this->updateInterface();
@@ -103,7 +103,7 @@ void QUserListDialog::slotRemove()
     if( 0 == item->column() )
     {
       vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
-      user->Load( "name", item->text().toStdString() );
+      user->Load( "Name", item->text().toStdString() );
       user->Remove();
     }
   }
@@ -123,7 +123,7 @@ void QUserListDialog::slotResetPassword()
     if( 0 == item->column() )
     {
       vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
-      user->Load( "name", item->text().toStdString() );
+      user->Load( "Name", item->text().toStdString() );
       user->ResetPassword();
       user->Save();
     }
@@ -142,6 +142,14 @@ void QUserListDialog::slotSelectionChanged()
   QList<QTableWidgetItem *> list = this->ui->userTableWidget->selectedItems();
   this->ui->removePushButton->setEnabled( 0 != list.size() );
   this->ui->resetPasswordPushButton->setEnabled( 0 != list.size() );
+
+  // do not allow resetting the password to the admin account
+  if( 0 != list.size() )
+  {
+    QTableWidgetItem *item = list.at( 0 );
+    if( 0 == item->column() && "administrator" == item->text() )
+      this->ui->resetPasswordPushButton->setEnabled( false );
+  }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -171,13 +179,13 @@ void QUserListDialog::updateInterface()
     // add name to row
     item = new QTableWidgetItem;
     item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-    item->setText( QString( user->Get( "name" ).ToString().c_str() ) );
+    item->setText( QString( user->Get( "Name" ).ToString().c_str() ) );
     this->ui->userTableWidget->setItem( 0, 0, item );
 
   // add last login to row
     item = new QTableWidgetItem;
     item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-    item->setText( QString( user->Get( "last_login" ).ToString().c_str() ) );
+    item->setText( QString( user->Get( "LastLogin" ).ToString().c_str() ) );
     this->ui->userTableWidget->setItem( 0, 1, item );
   }
 

@@ -87,21 +87,22 @@ SET( ALDER_SOURCE
   ${ALDER_API_DIR}/Alder.cxx
 
   ${ALDER_MODEL_DIR}/ActiveRecord.cxx
+  ${ALDER_MODEL_DIR}/Application.cxx
   ${ALDER_MODEL_DIR}/Cineloop.cxx
   ${ALDER_MODEL_DIR}/Configuration.cxx
   ${ALDER_MODEL_DIR}/Database.cxx
   ${ALDER_MODEL_DIR}/Image.cxx
+  ${ALDER_MODEL_DIR}/Modality.cxx
   ${ALDER_MODEL_DIR}/ModelObject.cxx
   ${ALDER_MODEL_DIR}/OpalService.cxx
   ${ALDER_MODEL_DIR}/Rating.cxx
   ${ALDER_MODEL_DIR}/Exam.cxx
   ${ALDER_MODEL_DIR}/Study.cxx
   ${ALDER_MODEL_DIR}/User.cxx
-  ${ALDER_MODEL_DIR}/Application.cxx
 
-  ${ALDER_VTK_DIR}/vtkMedicalImageViewer.cxx
   ${ALDER_VTK_DIR}/vtkAlderMySQLDatabase.cxx
   ${ALDER_VTK_DIR}/vtkAlderMySQLQuery.cxx
+  ${ALDER_VTK_DIR}/vtkMedicalImageViewer.cxx
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
   ${ALDER_VTK_DIR}/vtkXMLConfigurationFileReader.cxx
   
@@ -120,7 +121,6 @@ SET_SOURCE_FILES_PROPERTIES(
   ${ALDER_MODEL_DIR}/ModelObject.cxx
 
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
-  ${ALDER_VTK_DIR}/vtkXMLFileWriter.cxx
   ABSTRACT )
 
 SET( ALDER_UIS

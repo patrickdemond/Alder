@@ -85,7 +85,7 @@ void QSelectStudyDialog::slotSearch()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QSelectStudyDialog::slotAccepted()
 {
-  // get the uid of the selected row
+  // get the UId of the selected row
   vtkSmartPointer< Alder::Study > study;
   QList<QTableWidgetItem *> list = this->ui->studyTableWidget->selectedItems();
   if( list.empty() )
@@ -96,7 +96,7 @@ void QSelectStudyDialog::slotAccepted()
   {
     QTableWidgetItem *item = list.first();
     study = vtkSmartPointer< Alder::Study >::New();
-    study->Load( "uid", item->text().toStdString() );
+    study->Load( "UId", item->text().toStdString() );
   }
 
   Alder::Application::GetInstance()->SetActiveStudy( study );
@@ -132,34 +132,34 @@ void QSelectStudyDialog::updateInterface()
   for( it = studyList.begin(); it != studyList.end(); ++it )
   { // for every study, add a new row
     Alder::Study *study = *it;
-    QString uid = QString( study->Get( "uid" ).ToString().c_str() );
+    QString UId = QString( study->Get( "UId" ).ToString().c_str() );
 
-    if( this->searchText.isEmpty() || uid.contains( this->searchText, Qt::CaseInsensitive ) )
+    if( this->searchText.isEmpty() || UId.contains( this->searchText, Qt::CaseInsensitive ) )
     {
       this->ui->studyTableWidget->insertRow( 0 );
 
-      // add uid to row
+      // add UId to row
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      item->setText( uid );
+      item->setText( UId );
       this->ui->studyTableWidget->setItem( 0, 0, item );
 
       // add site to row
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      item->setText( QString( study->Get( "site" ).ToString().c_str() ) );
+      item->setText( QString( study->Get( "Site" ).ToString().c_str() ) );
       this->ui->studyTableWidget->setItem( 0, 1, item );
 
       // add interviewer to row
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      item->setText( QString( study->Get( "interviewer" ).ToString().c_str() ) );
+      item->setText( QString( study->Get( "Interviewer" ).ToString().c_str() ) );
       this->ui->studyTableWidget->setItem( 0, 2, item );
 
       // add datetime_acquired to row
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      item->setText( QString( study->Get( "datetime_acquired" ).ToString().c_str() ) );
+      item->setText( QString( study->Get( "DatetimeAcquired" ).ToString().c_str() ) );
       this->ui->studyTableWidget->setItem( 0, 3, item );
     }
   }

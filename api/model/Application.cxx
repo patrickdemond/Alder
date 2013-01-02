@@ -14,10 +14,11 @@
 #include "Configuration.h"
 #include "Cineloop.h"
 #include "Database.h"
+#include "Exam.h"
 #include "Image.h"
+#include "Modality.h"
 #include "OpalService.h"
 #include "Rating.h"
-#include "Exam.h"
 #include "Study.h"
 #include "User.h"
 
@@ -41,12 +42,14 @@ namespace Alder
     // populate the constructor and class name registries with all active record classes
     this->ConstructorRegistry["Cineloop"] = &createInstance<Cineloop>;
     this->ClassNameRegistry["Cineloop"] = typeid(Cineloop).name();
-    this->ConstructorRegistry["Image"] = &createInstance<Image>;
-    this->ClassNameRegistry["Image"] = typeid(Image).name();
-    this->ConstructorRegistry["Rating"] = &createInstance<Rating>;
-    this->ClassNameRegistry["Rating"] = typeid(Rating).name();
     this->ConstructorRegistry["Exam"] = &createInstance<Exam>;
     this->ClassNameRegistry["Exam"] = typeid(Exam).name();
+    this->ConstructorRegistry["Image"] = &createInstance<Image>;
+    this->ClassNameRegistry["Image"] = typeid(Image).name();
+    this->ConstructorRegistry["Modality"] = &createInstance<Modality>;
+    this->ClassNameRegistry["Modality"] = typeid(Modality).name();
+    this->ConstructorRegistry["Rating"] = &createInstance<Rating>;
+    this->ClassNameRegistry["Rating"] = typeid(Rating).name();
     this->ConstructorRegistry["Study"] = &createInstance<Study>;
     this->ClassNameRegistry["Study"] = typeid(Study).name();
     this->ConstructorRegistry["User"] = &createInstance<User>;
@@ -223,8 +226,8 @@ namespace Alder
       // if there is an active user, save the active study
       if( this->ActiveUser )
       {
-        if( study ) this->ActiveUser->Set( "study_id", study->Get( "id" ).ToInt() );
-        else this->ActiveUser->SetNull( "study_id" );
+        if( study ) this->ActiveUser->Set( "StudyId", study->Get( "Id" ).ToInt() );
+        else this->ActiveUser->SetNull( "StudyId" );
         this->ActiveUser->Save();
       }
       this->Modified();

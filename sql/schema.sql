@@ -2,162 +2,233 @@ SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='';
 
-DROP SCHEMA IF EXISTS `alder` ;
-CREATE SCHEMA IF NOT EXISTS `alder` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci ;
-USE `alder` ;
+DROP SCHEMA IF EXISTS `Alder` ;
+CREATE SCHEMA IF NOT EXISTS `Alder` DEFAULT CHARACTER SET latin1 ;
+USE `Alder` ;
 
 -- -----------------------------------------------------
--- Table `alder`.`Study`
+-- Table `Alder`.`Participant`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `alder`.`Study` ;
+DROP TABLE IF EXISTS `Alder`.`Participant` ;
 
-CREATE  TABLE IF NOT EXISTS `alder`.`Study` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `update_timestamp` TIMESTAMP NOT NULL ,
-  `create_timestamp` TIMESTAMP NOT NULL ,
-  `uid` VARCHAR(45) NOT NULL ,
-  `site` VARCHAR(45) NOT NULL ,
-  `interviewer` VARCHAR(45) NOT NULL ,
-  `datetime_acquired` DATETIME NOT NULL ,
-  `note` TEXT NULL ,
-  PRIMARY KEY (`id`) ,
-  INDEX `dk_uid` (`uid` ASC) ,
-  INDEX `dk_site` (`site` ASC) ,
-  INDEX `dk_datetime_acquired` (`datetime_acquired` ASC) ,
-  INDEX `dk_interviewer` (`interviewer` ASC) ,
-  UNIQUE INDEX `uq_uid` (`uid` ASC) )
+CREATE  TABLE IF NOT EXISTS `Alder`.`Participant` (
+  `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `UpdateTimestamp` TIMESTAMP NOT NULL ,
+  `CreateTimestamp` TIMESTAMP NOT NULL ,
+  `UId` VARCHAR(45) NOT NULL ,
+  PRIMARY KEY (`Id`) ,
+  UNIQUE INDEX `uqUId` (`UId` ASC) )
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `alder`.`Exam`
+-- Table `Alder`.`Modality`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `alder`.`Exam` ;
+DROP TABLE IF EXISTS `Alder`.`Modality` ;
 
-CREATE  TABLE IF NOT EXISTS `alder`.`Exam` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `update_timestamp` TIMESTAMP NOT NULL ,
-  `create_timestamp` TIMESTAMP NOT NULL ,
-  `study_id` INT UNSIGNED NOT NULL ,
-  `laterality` ENUM('right','left') NOT NULL ,
-  `type` ENUM('cimt','plaque') NOT NULL ,
-  PRIMARY KEY (`id`) ,
-  INDEX `fk_exam_study_id` (`study_id` ASC) ,
-  INDEX `dk_laterality` (`laterality` ASC) ,
-  INDEX `dk_type` (`type` ASC) ,
-  CONSTRAINT `fk_exam_study_id`
-    FOREIGN KEY (`study_id` )
-    REFERENCES `alder`.`Study` (`id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+CREATE  TABLE IF NOT EXISTS `Alder`.`Modality` (
+  `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `UpdateTimestamp` TIMESTAMP NOT NULL ,
+  `CreateTimestamp` TIMESTAMP NOT NULL ,
+  `Name` VARCHAR(45) NOT NULL ,
+  PRIMARY KEY (`Id`) ,
+  UNIQUE INDEX `uqName` (`Name` ASC) )
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `alder`.`Cineloop`
+-- Table `Alder`.`Study`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `alder`.`Cineloop` ;
+DROP TABLE IF EXISTS `Alder`.`Study` ;
 
-CREATE  TABLE IF NOT EXISTS `alder`.`Cineloop` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `update_timestamp` TIMESTAMP NOT NULL ,
-  `create_timestamp` TIMESTAMP NOT NULL ,
-  `exam_id` INT UNSIGNED NOT NULL ,
-  `number` INT NOT NULL ,
-  PRIMARY KEY (`id`) ,
-  INDEX `fk_cineloop_exam_id` (`exam_id` ASC) ,
-  CONSTRAINT `fk_cineloop_exam_id`
-    FOREIGN KEY (`exam_id` )
-    REFERENCES `alder`.`Exam` (`id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `alder`.`Image`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `alder`.`Image` ;
-
-CREATE  TABLE IF NOT EXISTS `alder`.`Image` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `update_timestamp` TIMESTAMP NOT NULL ,
-  `create_timestamp` TIMESTAMP NOT NULL ,
-  `exam_id` INT UNSIGNED NOT NULL ,
-  `cineloop_id` INT UNSIGNED NOT NULL ,
-  `frame` INT NOT NULL ,
-  `interviewer_defined` TINYINT(1) NOT NULL ,
-  `min` FLOAT NULL ,
-  `max` FLOAT NULL ,
-  `mean` FLOAT NULL ,
-  `sd` FLOAT NULL ,
-  `n` INT(11) NULL ,
-  PRIMARY KEY (`id`) ,
-  INDEX `fk_image_exam_id` (`exam_id` ASC) ,
-  INDEX `fk_image_cineloop_id` (`cineloop_id` ASC) ,
-  INDEX `dk_cineloop_id_frame` (`cineloop_id` ASC, `frame` ASC) ,
-  CONSTRAINT `fk_image_exam_id`
-    FOREIGN KEY (`exam_id` )
-    REFERENCES `alder`.`Exam` (`id` )
+CREATE  TABLE IF NOT EXISTS `Alder`.`Study` (
+  `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `UpdateTimestamp` TIMESTAMP NOT NULL ,
+  `CreateTimestamp` TIMESTAMP NOT NULL ,
+  `ParticipantId` INT UNSIGNED NOT NULL ,
+  `ModalityId` INT UNSIGNED NOT NULL ,
+  `Site` VARCHAR(45) NOT NULL ,
+  `Interviewer` VARCHAR(45) NOT NULL ,
+  `DatetimeAcquired` DATETIME NOT NULL ,
+  `Note` TEXT NULL DEFAULT NULL ,
+  PRIMARY KEY (`Id`) ,
+  INDEX `dkDatetimeAcquired` (`DatetimeAcquired` ASC) ,
+  INDEX `dkInterviewer` (`Interviewer` ASC) ,
+  INDEX `fkParticipantId` (`ParticipantId` ASC) ,
+  INDEX `fkModalityId` (`ModalityId` ASC) ,
+  CONSTRAINT `fkStudyParticipantId`
+    FOREIGN KEY (`ParticipantId` )
+    REFERENCES `Alder`.`Participant` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_image_cineloop_id`
-    FOREIGN KEY (`cineloop_id` )
-    REFERENCES `alder`.`Cineloop` (`id` )
+  CONSTRAINT `fkStudyModalityId`
+    FOREIGN KEY (`ModalityId` )
+    REFERENCES `Alder`.`Modality` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `alder`.`User`
+-- Table `Alder`.`Exam`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `alder`.`User` ;
+DROP TABLE IF EXISTS `Alder`.`Exam` ;
 
-CREATE  TABLE IF NOT EXISTS `alder`.`User` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `update_timestamp` TIMESTAMP NOT NULL ,
-  `create_timestamp` TIMESTAMP NOT NULL ,
-  `name` VARCHAR(255) NOT NULL ,
-  `password` VARCHAR(255) NOT NULL ,
-  `last_login` DATETIME NULL ,
-  `study_id` INT UNSIGNED NULL ,
-  PRIMARY KEY (`id`) ,
-  UNIQUE INDEX `uq_name` (`name` ASC) ,
-  INDEX `dk_last_login` (`last_login` ASC) ,
-  INDEX `fk_study_id` (`study_id` ASC) ,
-  CONSTRAINT `fk_user_study_id`
-    FOREIGN KEY (`study_id` )
-    REFERENCES `alder`.`Study` (`id` )
+CREATE  TABLE IF NOT EXISTS `Alder`.`Exam` (
+  `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `UpdateTimestamp` TIMESTAMP NOT NULL ,
+  `CreateTimestamp` TIMESTAMP NOT NULL ,
+  `StudyId` INT UNSIGNED NOT NULL ,
+  `Laterality` ENUM('right','left','none') NOT NULL ,
+  `Type` VARCHAR(255) NOT NULL ,
+  PRIMARY KEY (`Id`) ,
+  INDEX `fkExamStudyId` (`StudyId` ASC) ,
+  INDEX `dkLaterality` (`Laterality` ASC) ,
+  INDEX `dkType` (`Type` ASC) ,
+  CONSTRAINT `fkExamStudyId`
+    FOREIGN KEY (`StudyId` )
+    REFERENCES `Alder`.`Study` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `alder`.`Rating`
+-- Table `Alder`.`Cineloop`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `alder`.`Rating` ;
+DROP TABLE IF EXISTS `Alder`.`Cineloop` ;
 
-CREATE  TABLE IF NOT EXISTS `alder`.`Rating` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `update_timestamp` TIMESTAMP NOT NULL ,
-  `create_timestamp` TIMESTAMP NOT NULL ,
-  `image_id` INT UNSIGNED NOT NULL ,
-  `user_id` INT UNSIGNED NOT NULL ,
-  `rating` TINYINT(1) NULL ,
-  PRIMARY KEY (`id`) ,
-  INDEX `fk_rating_image_id` (`image_id` ASC) ,
-  INDEX `fk_rating_user_id` (`user_id` ASC) ,
-  INDEX `dk_rating` (`rating` ASC) ,
-  CONSTRAINT `fk_rating_image_id`
-    FOREIGN KEY (`image_id` )
-    REFERENCES `alder`.`Image` (`id` )
+CREATE  TABLE IF NOT EXISTS `Alder`.`Cineloop` (
+  `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `UpdateTimestamp` TIMESTAMP NOT NULL ,
+  `CreateTimestamp` TIMESTAMP NOT NULL ,
+  `ExamId` INT UNSIGNED NOT NULL ,
+  `Acquisition` INT NOT NULL ,
+  PRIMARY KEY (`Id`) ,
+  INDEX `fkCineloopExamId` (`ExamId` ASC) ,
+  UNIQUE INDEX `uqExamIdAcquisition` (`ExamId` ASC, `Acquisition` ASC) ,
+  CONSTRAINT `fkCineloopExamId`
+    FOREIGN KEY (`ExamId` )
+    REFERENCES `Alder`.`Exam` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Alder`.`Image`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Alder`.`Image` ;
+
+CREATE  TABLE IF NOT EXISTS `Alder`.`Image` (
+  `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `UpdateTimestamp` TIMESTAMP NOT NULL ,
+  `CreateTimestamp` TIMESTAMP NOT NULL ,
+  `ExamId` INT UNSIGNED NOT NULL ,
+  `Acquisition` INT NOT NULL ,
+  `CineloopId` INT UNSIGNED NULL ,
+  PRIMARY KEY (`Id`) ,
+  INDEX `fkImageExamId` (`ExamId` ASC) ,
+  INDEX `fkImageCineloopId` (`CineloopId` ASC) ,
+  INDEX `dkCineloopIdframe` (`CineloopId` ASC) ,
+  UNIQUE INDEX `uqExamIdAcquisition` (`ExamId` ASC, `Acquisition` ASC) ,
+  CONSTRAINT `fkImageExamId`
+    FOREIGN KEY (`ExamId` )
+    REFERENCES `Alder`.`Exam` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_rating_user_id`
-    FOREIGN KEY (`user_id` )
-    REFERENCES `alder`.`User` (`id` )
+  CONSTRAINT `fkImageCineloopId`
+    FOREIGN KEY (`CineloopId` )
+    REFERENCES `Alder`.`Cineloop` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Alder`.`User`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Alder`.`User` ;
+
+CREATE  TABLE IF NOT EXISTS `Alder`.`User` (
+  `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `UpdateTimestamp` TIMESTAMP NOT NULL ,
+  `CreateTimestamp` TIMESTAMP NOT NULL ,
+  `Name` VARCHAR(255) NOT NULL ,
+  `Password` VARCHAR(255) NOT NULL ,
+  `LastLogin` DATETIME NULL DEFAULT NULL ,
+  `StudyId` INT UNSIGNED NULL DEFAULT NULL ,
+  PRIMARY KEY (`Id`) ,
+  UNIQUE INDEX `uqName` (`Name` ASC) ,
+  INDEX `dkLastLogin` (`LastLogin` ASC) ,
+  INDEX `fkStudyId` (`StudyId` ASC) ,
+  CONSTRAINT `fkUserStudyId`
+    FOREIGN KEY (`StudyId` )
+    REFERENCES `Alder`.`Study` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Alder`.`Rating`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Alder`.`Rating` ;
+
+CREATE  TABLE IF NOT EXISTS `Alder`.`Rating` (
+  `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `UpdateTimestamp` TIMESTAMP NOT NULL ,
+  `CreateTimestamp` TIMESTAMP NOT NULL ,
+  `CineloopId` INT UNSIGNED NOT NULL ,
+  `ImageId` INT UNSIGNED NOT NULL ,
+  `UserId` INT UNSIGNED NOT NULL ,
+  `Rating` TINYINT(1) NULL DEFAULT NULL ,
+  PRIMARY KEY (`Id`) ,
+  INDEX `fkImageId` (`ImageId` ASC) ,
+  INDEX `fkUserId` (`UserId` ASC) ,
+  INDEX `dkRating` (`Rating` ASC) ,
+  INDEX `fkCineloopId` (`CineloopId` ASC) ,
+  UNIQUE INDEX `uqImageIdUserId` (`ImageId` ASC, `UserId` ASC) ,
+  UNIQUE INDEX `uqCineloopIdUserId` (`CineloopId` ASC, `UserId` ASC) ,
+  CONSTRAINT `fkRatingImageId`
+    FOREIGN KEY (`ImageId` )
+    REFERENCES `Alder`.`Image` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fkRatingUserId`
+    FOREIGN KEY (`UserId` )
+    REFERENCES `Alder`.`User` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fkRatingCineloopId`
+    FOREIGN KEY (`CineloopId` )
+    REFERENCES `Alder`.`Cineloop` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Alder`.`UserHasModality`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Alder`.`UserHasModality` ;
+
+CREATE  TABLE IF NOT EXISTS `Alder`.`UserHasModality` (
+  `UserId` INT UNSIGNED NOT NULL ,
+  `ModalityId` INT UNSIGNED NOT NULL ,
+  `UpdateTimestamp` TIMESTAMP NOT NULL ,
+  `CreateTimestamp` TIMESTAMP NOT NULL ,
+  PRIMARY KEY (`UserId`, `ModalityId`) ,
+  INDEX `fkModalityId` (`ModalityId` ASC) ,
+  INDEX `fkUserId` (`UserId` ASC) ,
+  CONSTRAINT `fkUserHasModalityUserId`
+    FOREIGN KEY (`UserId` )
+    REFERENCES `Alder`.`User` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fkUserHasModalityModalityId`
+    FOREIGN KEY (`ModalityId` )
+    REFERENCES `Alder`.`Modality` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;

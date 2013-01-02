@@ -56,7 +56,7 @@ int vtkXMLConfigurationFileReader::ProcessRequest(
 
       this->CreateReader();
       
-      // parse until we find the session element
+      // parse until we find the configuration element
       while( this->ParseNode() )
         if( XML_READER_TYPE_ELEMENT == this->CurrentNode.NodeType &&
             0 == xmlStrcasecmp( BAD_CAST "Configuration", this->CurrentNode.Name ) ) break;

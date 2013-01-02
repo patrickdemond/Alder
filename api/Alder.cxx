@@ -58,7 +58,7 @@ int main( int argc, char** argv )
 
     // check to see if an admin user exists, create if not
     vtkSmartPointer< User > user = vtkSmartPointer< User >::New();
-    if( !user->Load( "name", "administrator" ) )
+    if( !user->Load( "Name", "administrator" ) )
     {
       QString text = QInputDialog::getText(
         &mainWindow,
@@ -68,8 +68,8 @@ int main( int argc, char** argv )
 
       if( !text.isEmpty() )
       { // create an administrator with the new password
-        user->Set( "name", "administrator" );
-        user->Set( "password", text.toStdString().c_str() );
+        user->Set( "Name", "administrator" );
+        user->Set( "Password", text.toStdString().c_str() );
         user->Save();
       }
     }
