@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:  Alder (CLSA Ultrasound Image Viewer)
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
   Module:   User.cxx
   Language: C++
 
@@ -21,7 +21,7 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void User::SetVariant( std::string column, vtkVariant value )
   {
-    if( 0 == column.compare( "password" ) && value.IsValid() )
+    if( 0 == column.compare( "Password" ) && value.IsValid() )
     { // if we are setting the password override the parent so that we can hash
       std::string hashedPassword;
       hashString( value.ToString(), hashedPassword );
@@ -34,7 +34,7 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void User::ResetPassword()
   {
-    this->Set( "password", User::GetDefaultPassword() );
+    this->Set( "Password", User::GetDefaultPassword() );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -43,6 +43,6 @@ namespace Alder
     // first hash the password argument
     std::string hashedPassword;
     hashString( password, hashedPassword );
-    return 0 == hashedPassword.compare( this->Get( "password" ).ToString() );
+    return 0 == hashedPassword.compare( this->Get( "Password" ).ToString() );
   }
 }

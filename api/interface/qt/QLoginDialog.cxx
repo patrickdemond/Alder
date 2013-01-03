@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:  CLSAVis (Canadian Longitudinal Study on Aging Visualizer)
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
   Module:   QLoginDialog.cxx
   Language: C++
 
@@ -47,7 +47,7 @@ void QLoginDialog::slotAccepted()
   std::string password = this->ui->passwordLineEdit->text().toStdString();
 
   vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
-  if( user->Load( "name", this->ui->usernameLineEdit->text().toStdString() ) && user->IsPassword( password ) )
+  if( user->Load( "Name", this->ui->usernameLineEdit->text().toStdString() ) && user->IsPassword( password ) )
   { // login successful
     // if the password matches the default password, force the user to change it
     while( 0 == password.compare( Alder::User::GetDefaultPassword() ) )
@@ -59,7 +59,7 @@ void QLoginDialog::slotAccepted()
         QObject::tr( "Please provide a new password (cannot be \"password\") for your account:" ),
         QLineEdit::Password );
 
-      if( !password1.isEmpty() && password1 != "password" )
+      if( !password1.isEmpty() && password1 != QString( Alder::User::GetDefaultPassword().c_str() ) )
       {
         // re-prompt to repeat password
         QString password2 = QInputDialog::getText(
@@ -72,7 +72,7 @@ void QLoginDialog::slotAccepted()
         {
           // set the replacement password
           password = password1.toStdString();
-          user->Set( "password", password );
+          user->Set( "Password", password );
           user->Save();
         }
       }
@@ -80,7 +80,7 @@ void QLoginDialog::slotAccepted()
 
     // log in the user and mark login time
     Alder::Application::GetInstance()->SetActiveUser( user );
-    user->Set( "last_login", Alder::getTime( "%Y-%m-%d %H:%M:%S" ) );
+    user->Set( "LastLogin", Alder::getTime( "%Y-%m-%d %H:%M:%S" ) );
     user->Save();
     this->accept();
   }

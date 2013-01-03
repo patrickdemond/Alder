@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:  Alder (CLSA Ultrasound Image Viewer)
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
   Module:   Image.cxx
   Language: C++
 
@@ -12,6 +12,7 @@
 
 #include "Configuration.h"
 #include "Exam.h"
+#include "Interview.h"
 #include "Rating.h"
 #include "Study.h"
 #include "User.h"
@@ -26,23 +27,25 @@ namespace Alder
   vtkStandardNewMacro( Image );
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string Image::GetFileName()
+  std::string Image::GetFileName() // TODO: re-implement (jpg, interview, etc)
   {
     this->AssertPrimaryId();
 
     // get the study and exam for this record
     Exam *exam = Exam::SafeDownCast( this->GetRecord( "Exam" ) );
     Study *study = Study::SafeDownCast( exam->GetRecord( "Study" ) );
+    Interview *interview = Interview::SafeDownCast( study->GetRecord( "Interview" ) );
 
     std::stringstream stream;
     // start with the base image directory
     stream << Application::GetInstance()->GetConfig()->GetValue( "Path", "ImageData" )
-           << "/" << study->Get( "uid" ).ToString()
-           << "/" << exam->Get( "id" ).ToString()
-           << "/Image/" << this->Get( "id" ).ToString() << ".dcm";
+           << "/" << interview->Get( "UId" ).ToString()
+           << "/" << exam->Get( "Id" ).ToString()
+           << "/Image/" << this->Get( "Id" ).ToString() << ".dcm";
 
     exam->Delete();
     study->Delete();
+    interview->Delete();
 
     return stream.str();
   }
@@ -56,12 +59,12 @@ namespace Alder
     if( !user ) throw std::runtime_error( "Tried to get rating for null user" );
 
     std::map< std::string, std::string > map;
-    map["user_id"] = user->Get( "id" ).ToString();
-    map["image_id"] = this->Get( "id" ).ToString();
+    map["UserId"] = user->Get( "Id" ).ToString();
+    map["ImageId"] = this->Get( "Id" ).ToString();
     vtkSmartPointer< Alder::Rating > rating = vtkSmartPointer< Alder::Rating >::New();
     if( !rating->Load( map ) ) return false;
 
     // we have found a rating, make sure it is not null
-    return rating->Get( "rating" ).IsValid();
+    return rating->Get( "Rating" ).IsValid();
   }
 }

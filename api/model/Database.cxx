@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:  Alder (CLSA Ultrasound Image Viewer)
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
   Module:   Database.cxx
   Language: C++
 
@@ -65,8 +65,8 @@ namespace Alder
     stream << "SELECT table_name, column_name, column_type, data_type, column_default, is_nullable "
            << "FROM information_schema.columns "
            << "WHERE table_schema = " << query->EscapeString( this->MySQLDatabase->GetDatabaseName() ) << " "
-           << "AND column_name != 'update_timestamp' "
-           << "AND column_name != 'create_timestamp' "
+           << "AND column_name != 'UpdateTimestamp' "
+           << "AND column_name != 'CreateTimestamp' "
            << "ORDER BY table_name, ordinal_position";
     query->SetQuery( stream.str().c_str() );
     query->Execute();
@@ -197,7 +197,7 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    return 3 <= column.length() && 0 == column.compare( column.length() - 3, 3, "_id" );
+    return 3 <= column.length() && 0 == column.compare( column.length() - 2, 2, "Id" );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

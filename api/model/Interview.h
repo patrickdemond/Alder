@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:  Alder (CLSA Medical Image Quality Assessment Tool)
-  Module:   ModelObject.h
+  Module:   Interview.h
   Language: C++
 
   Author: Patrick Emond <emondpd@mcmaster.ca>
@@ -10,20 +10,21 @@
 =========================================================================*/
 
 /**
- * @class ModelObject
+ * @class Interview
  * @namespace Alder
  * 
  * @author Patrick Emond <emondpd@mcmaster.ca>
  * @author Dean Inglis <inglisd@mcmaster.ca>
  * 
- * @brief Base class for all model classes
+ * @brief An active record for the Interview table
  */
 
-#ifndef __ModelObject_h
-#define __ModelObject_h
+#ifndef __Interview_h
+#define __Interview_h
 
-#include "vtkObject.h"
-#include "vtkSetGet.h"
+#include "ActiveRecord.h"
+
+#include <iostream>
 
 /**
  * @addtogroup Alder
@@ -32,18 +33,20 @@
 
 namespace Alder
 {
-  class ModelObject : public vtkObject
+  class Interview : public ActiveRecord
   {
   public:
-    vtkTypeMacro( ModelObject, vtkObject );
+    static Interview *New();
+    vtkTypeMacro( Interview, ActiveRecord );
+    std::string GetName() { return "Interview"; }
 
   protected:
-    ModelObject();
-    ~ModelObject() {}
+    Interview() {}
+    ~Interview() {}
 
   private:
-    ModelObject( const ModelObject& ); // Not implemented
-    void operator=( const ModelObject& ); // Not implemented
+    Interview( const Interview& ); // Not implemented
+    void operator=( const Interview& ); // Not implemented
   };
 }
 

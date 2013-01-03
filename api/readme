@@ -1,12 +1,7 @@
 Coding standard
 ===============
 
-File Names
-----------
-All classes must contain a CV prefix (for CLSA Vis).  VTK classes would start with vtkCV, QT classes with QCV
-and application classes with simply CV.
-
-Line Lenghts
+Line Lengths
 ------------
 No line should exceed 110 characters
 

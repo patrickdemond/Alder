@@ -87,22 +87,23 @@ SET( ALDER_SOURCE
   ${ALDER_API_DIR}/Alder.cxx
 
   ${ALDER_MODEL_DIR}/ActiveRecord.cxx
+  ${ALDER_MODEL_DIR}/Application.cxx
   ${ALDER_MODEL_DIR}/Cineloop.cxx
   ${ALDER_MODEL_DIR}/Configuration.cxx
   ${ALDER_MODEL_DIR}/Database.cxx
+  ${ALDER_MODEL_DIR}/Exam.cxx
   ${ALDER_MODEL_DIR}/Image.cxx
+  ${ALDER_MODEL_DIR}/Interview.cxx
   ${ALDER_MODEL_DIR}/ModelObject.cxx
   ${ALDER_MODEL_DIR}/OpalService.cxx
   ${ALDER_MODEL_DIR}/Rating.cxx
-  ${ALDER_MODEL_DIR}/Exam.cxx
   ${ALDER_MODEL_DIR}/Study.cxx
   ${ALDER_MODEL_DIR}/User.cxx
-  ${ALDER_MODEL_DIR}/Application.cxx
 
-  ${ALDER_VTK_DIR}/vtkMedicalImageViewer.cxx
-  ${ALDER_VTK_DIR}/vtkImageCoordinateWidget.cxx
   ${ALDER_VTK_DIR}/vtkAlderMySQLDatabase.cxx
   ${ALDER_VTK_DIR}/vtkAlderMySQLQuery.cxx
+  ${ALDER_VTK_DIR}/vtkImageCoordinateWidget.cxx
+  ${ALDER_VTK_DIR}/vtkMedicalImageViewer.cxx
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
   ${ALDER_VTK_DIR}/vtkXMLConfigurationFileReader.cxx
   
@@ -112,7 +113,7 @@ SET( ALDER_SOURCE
   ${ALDER_QT_DIR}/QMainAlderWindow.cxx
   ${ALDER_QT_DIR}/QMedicalImageWidget.cxx
   ${ALDER_QT_DIR}/QProgressDialog.cxx
-  ${ALDER_QT_DIR}/QSelectStudyDialog.cxx
+  ${ALDER_QT_DIR}/QSelectInterviewDialog.cxx
   ${ALDER_QT_DIR}/QUserListDialog.cxx
 )
 
@@ -121,7 +122,6 @@ SET_SOURCE_FILES_PROPERTIES(
   ${ALDER_MODEL_DIR}/ModelObject.cxx
 
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
-  ${ALDER_VTK_DIR}/vtkXMLFileWriter.cxx
   ABSTRACT )
 
 SET( ALDER_UIS
@@ -130,7 +130,7 @@ SET( ALDER_UIS
   ${ALDER_QT_DIR}/QMainAlderWindow.ui
   ${ALDER_QT_DIR}/QMedicalImageWidget.ui
   ${ALDER_QT_DIR}/QProgressDialog.ui
-  ${ALDER_QT_DIR}/QSelectStudyDialog.ui
+  ${ALDER_QT_DIR}/QSelectInterviewDialog.ui
   ${ALDER_QT_DIR}/QUserListDialog.ui
 )
 
@@ -140,7 +140,7 @@ SET( ALDER_HEADERS
   ${ALDER_QT_DIR}/QMainAlderWindow.h
   ${ALDER_QT_DIR}/QMedicalImageWidget.h
   ${ALDER_QT_DIR}/QProgressDialog.h
-  ${ALDER_QT_DIR}/QSelectStudyDialog.h
+  ${ALDER_QT_DIR}/QSelectInterviewDialog.h
   ${ALDER_QT_DIR}/QUserListDialog.h
 )
 

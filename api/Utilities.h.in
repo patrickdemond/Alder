@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:  Alder (CLSA Ultrasound Image Viewer)
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
   Module:   Utilities.h
   Language: C++
 
@@ -30,7 +30,6 @@
 #define ALDER_OPAL_SCRIPT "@ALDER_OPAL_SCRIPT@"
 
 #define ALDER_SALT_STRING "@ALDER_SALT_STRING@"
-#define ALDER_MASTER_PASSWORD ""
 
 //
 // This macro is used for sql debug statements in instance methods

@@ -1,7 +1,7 @@
 /*=======================================================================
 
   Module:    vtkMedicalImageViewer.h
-  Program:   Alder (CLSA Ultrasound Image Viewer)
+  Program:   Alder (CLSA Medical Image Quality Assessment Tool)
   Language:  C++
   Author:    Patrick Emond <emondpd@mcmaster.ca>
   Author:    Dean Inglis <inglisd@mcmaster.ca>

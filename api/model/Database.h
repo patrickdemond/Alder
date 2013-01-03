@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:  Alder (CLSA Ultrasound Image Viewer)
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
   Module:   Database.h
   Language: C++
 
@@ -100,7 +100,7 @@ namespace Alder
     /**
      * Returns whether a table's column is a foreign key
      * NOTE: there's no way to get this information from the information schema so instead
-     *       this method uses the convention that all foreign keys end in "_id"
+     *       this method uses the convention that all foreign keys end in "Id"
      * @param table string
      * @param column string
      * @throws runtime_error

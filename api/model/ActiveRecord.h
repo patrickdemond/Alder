@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:  Alder (CLSA Ultrasound Image Viewer)
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
   Module:   ActiveRecord.h
   Language: C++
 
@@ -98,7 +98,7 @@ namespace Alder
       // get the class name of T, return error if not found
       std::string type = app->GetUnmangledClassName( typeid(T).name() );
       std::stringstream stream;
-      stream << "SELECT id FROM " << type;
+      stream << "SELECT Id FROM " << type;
       vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
       query->SetQuery( stream.str().c_str() );
@@ -108,7 +108,7 @@ namespace Alder
       {
         // create a new instance of the child class
         vtkSmartPointer< T > record = vtkSmartPointer< T >::Take( T::SafeDownCast( T::New() ) );
-        record->Load( "id", query->DataValue( 0 ).ToString() );
+        record->Load( "Id", query->DataValue( 0 ).ToString() );
         list->push_back( record );
       }
     }
@@ -123,8 +123,8 @@ namespace Alder
       // get the class name of T, return error if not found
       std::string type = app->GetUnmangledClassName( typeid(T).name() );
       std::stringstream stream;
-      stream << "SELECT id FROM " << type << " "
-             << "WHERE " << this->GetName() << "_id = " << this->Get( "id" ).ToString();
+      stream << "SELECT Id FROM " << type << " "
+             << "WHERE " << this->GetName() << "Id = " << this->Get( "Id" ).ToString();
       vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
       vtkDebugSQLMacro( << stream.str() );
@@ -136,7 +136,7 @@ namespace Alder
         // create a new instance of the child class
         vtkSmartPointer< T > record = vtkSmartPointer< T >::Take(
           T::SafeDownCast( app->Create( type ) ) );
-        record->Load( "id", query->DataValue( 0 ).ToString() );
+        record->Load( "Id", query->DataValue( 0 ).ToString() );
         list->push_back( record );
       }
     }
@@ -201,7 +201,7 @@ namespace Alder
      */
     inline void AssertPrimaryId()
     {
-      vtkVariant id = this->Get( "id" );
+      vtkVariant id = this->Get( "Id" );
       if( !id.IsValid() || 0 == id.ToInt() )
         throw std::runtime_error( "Assert failed: primary id for record is not set" );
     }

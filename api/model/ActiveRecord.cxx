@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:  Alder (CLSA Ultrasound Image Viewer)
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
   Module:   ActiveRecord.cxx
   Language: C++
 
@@ -95,7 +95,7 @@ namespace Alder
       for( int c = 0; c < query->GetNumberOfFields(); ++c )
       {
         std::string column = query->GetFieldName( c );
-        if( 0 != column.compare( "create_timestamp" ) && 0 != column.compare( "update_timestamp" ) )
+        if( 0 != column.compare( "CreateTimestamp" ) && 0 != column.compare( "UpdateTimestamp" ) )
           this->ColumnValues.insert( std::pair< std::string, vtkVariant >( column, query->DataValue( c ) ) );
       }
 
@@ -117,7 +117,7 @@ namespace Alder
     bool first = true;
     for( it = this->ColumnValues.begin(); it != this->ColumnValues.end(); ++it )
     {
-      if( 0 != it->first.compare( "id" ) )
+      if( 0 != it->first.compare( "Id" ) )
       {
         stream << ( first ? "" :  ", " ) << it->first
                << " = " << ( it->second.IsValid() ? query->EscapeString( it->second.ToString() ) : "NULL" );
@@ -126,10 +126,10 @@ namespace Alder
     }
 
     // different sql based on whether the record already exists or not
-    if( !this->Get( "id" ).IsValid() || 0 == this->Get( "id" ).ToInt() )
+    if( !this->Get( "Id" ).IsValid() || 0 == this->Get( "Id" ).ToInt() )
     {
-      // add the create_timestamp column
-      stream << ( first ? "" :  ", " ) << "create_timestamp = NULL";
+      // add the CreateTimestamp column
+      stream << ( first ? "" :  ", " ) << "CreateTimestamp = NULL";
 
       // add a new record
       std::string s = stream.str();
@@ -142,7 +142,7 @@ namespace Alder
       std::string s = stream.str();
       stream.str( "" );
       stream << "UPDATE " << this->GetName() << " SET " << s
-             << " WHERE id = " << query->EscapeString( this->Get( "id" ).ToString() );
+             << " WHERE Id = " << query->EscapeString( this->Get( "Id" ).ToString() );
     }
 
     vtkDebugSQLMacro( << stream.str() );
@@ -158,7 +158,7 @@ namespace Alder
     vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
     std::stringstream stream;
     stream << "DELETE FROM " << this->GetName() << " "
-           << "WHERE id = " << query->EscapeString( this->Get( "id" ).ToString() );
+           << "WHERE Id = " << query->EscapeString( this->Get( "Id" ).ToString() );
     vtkDebugSQLMacro( << stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
@@ -170,7 +170,7 @@ namespace Alder
     Application *app = Application::GetInstance();
     std::stringstream stream;
     stream << "SELECT COUNT(*) FROM " << recordType << " "
-           << "WHERE " << this->GetName() << "_id = " << this->Get( "id" ).ToString();
+           << "WHERE " << this->GetName() << "Id = " << this->Get( "Id" ).ToString();
     vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
     vtkDebugSQLMacro( << stream.str() );
@@ -200,11 +200,11 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   ActiveRecord* ActiveRecord::GetRecord( std::string table, std::string column )
   {
-    // if no column name was provided, use the default (table name followed by _id)
+    // if no column name was provided, use the default (table name followed by Id)
     if( column.empty() )
     {
-      column = toLower( table );
-      column += "_id";
+      column = table;
+      column += "Id";
     }
 
     // test to see if correct foreign key exists
@@ -220,7 +220,7 @@ namespace Alder
     if( v.IsValid() )
     { // only create the record if the foreign key is not null
       record = ActiveRecord::SafeDownCast( Application::GetInstance()->Create( table ) );
-      record->Load( "id", this->Get( column ).ToString() );
+      record->Load( "Id", this->Get( column ).ToString() );
     }
 
     return record;

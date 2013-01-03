@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:  Alder (CLSA Ultrasound Image Viewer)
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
   Module:   QMainAlderWindow.cxx
   Language: C++
 
@@ -24,7 +24,7 @@
 #include "QAboutDialog.h"
 #include "QLoginDialog.h"
 #include "QProgressDialog.h"
-#include "QSelectStudyDialog.h"
+#include "QSelectInterviewDialog.h"
 #include "QUserListDialog.h"
 
 #include <QCloseEvent>
@@ -115,7 +115,7 @@ void QMainAlderWindow::slotOpenStudy()
 
   if( loggedIn )
   {
-    QSelectStudyDialog dialog( this );
+    QSelectInterviewDialog dialog( this );
     dialog.setModal( true );
     dialog.setWindowTitle( tr( "Select Study" ) );
     dialog.exec();
@@ -138,11 +138,11 @@ void QMainAlderWindow::slotPreviousStudy()
     // check if unrated checkbox is pressed, keep searching for an unrated study
     if( this->ui->unratedCheckBox->isChecked() )
     {
-      int currentStudyId = activeStudy->Get( "id" ).ToInt();
+      int currentStudyId = activeStudy->Get( "Id" ).ToInt();
 
       // keep getting the previous study until we find one that has images which are not rated
       study = activeStudy->GetPrevious();
-      while( study->Get( "id" ).ToInt() != currentStudyId )
+      while( study->Get( "Id" ).ToInt() != currentStudyId )
       {
         if( 0 < study->GetImageCount() && !study->IsRatedBy( user ) )
         {
@@ -153,7 +153,7 @@ void QMainAlderWindow::slotPreviousStudy()
       }
 
       // warn user if no unrated studies left
-      if( study->Get( "id" ).ToInt() == currentStudyId )
+      if( study->Get( "Id" ).ToInt() == currentStudyId )
       {
         QMessageBox errorMessage( this );
         errorMessage.setWindowModality( Qt::WindowModal );
@@ -189,11 +189,11 @@ void QMainAlderWindow::slotNextStudy()
     // check if unrated checkbox is pressed, keep searching for an unrated study
     if( this->ui->unratedCheckBox->isChecked() )
     {
-      int currentStudyId = activeStudy->Get( "id" ).ToInt();
+      int currentStudyId = activeStudy->Get( "Id" ).ToInt();
 
       // keep getting the previous study until we find one that has images which are not rated
       study = activeStudy->GetNext();
-      while( study->Get( "id" ).ToInt() != currentStudyId )
+      while( study->Get( "Id" ).ToInt() != currentStudyId )
       {
         if( 0 < study->GetImageCount() && !study->IsRatedBy( user ) )
         {
@@ -204,7 +204,7 @@ void QMainAlderWindow::slotNextStudy()
       }
 
       // warn user if no unrated studies left
-      if( study->Get( "id" ).ToInt() == currentStudyId )
+      if( study->Get( "Id" ).ToInt() == currentStudyId )
       {
         QMessageBox errorMessage( this );
         errorMessage.setWindowModality( Qt::WindowModal );
@@ -266,7 +266,7 @@ void QMainAlderWindow::slotUserManagement()
     if( text.isEmpty() ) break;
 
     vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
-    user->Load( "name", "administrator" );
+    user->Load( "Name", "administrator" );
     if( user->IsPassword( text.toStdString().c_str() ) )
     {
       // load the users dialog
@@ -379,17 +379,17 @@ void QMainAlderWindow::slotRatingSliderChanged( int value )
 
   // See if we have a rating for this user and image
   std::map< std::string, std::string > map;
-  map["user_id"] = user->Get( "id" ).ToString();
-  map["image_id"] = image->Get( "id" ).ToString();
+  map["UserId"] = user->Get( "Id" ).ToString();
+  map["ImageId"] = image->Get( "Id" ).ToString();
   vtkSmartPointer< Alder::Rating > rating = vtkSmartPointer< Alder::Rating >::New();
   if( !rating->Load( map ) )
   { // no record exists, set the user and image ids
-    rating->Set( "user_id", user->Get( "id" ).ToInt() );
-    rating->Set( "image_id", image->Get( "id" ).ToInt() );
+    rating->Set( "UserId", user->Get( "Id" ).ToInt() );
+    rating->Set( "ImageId", image->Get( "Id" ).ToInt() );
   }
 
-  if( 0 == value ) rating->SetNull( "rating" );
-  else rating->Set( "rating", value );
+  if( 0 == value ) rating->SetNull( "Rating" );
+  else rating->Set( "Rating", value );
 
   rating->Save();
   this->updateRating();
@@ -413,40 +413,19 @@ void QMainAlderWindow::updateStudyInformation()
   QString interviewerString = tr( "N/A" );
   QString siteString = tr( "N/A" );
   QString dateString = tr( "N/A" );
-  QString minString = tr( "N/A" );
-  QString maxString = tr( "N/A" );
-  QString meanString = tr( "N/A" );
-  QString sdString = tr( "N/A" );
-  QString nString = tr( "N/A" );
 
   // fill in the active study information
   Alder::Study *study = Alder::Application::GetInstance()->GetActiveStudy();
   if( study )
   {
-    interviewerString = study->Get( "interviewer" ).ToString().c_str();
-    siteString = study->Get( "site" ).ToString().c_str();
-    dateString = study->Get( "datetime_acquired" ).ToString().c_str();
-  }
-
-  // fill in the active image information (if one is selected)
-  Alder::Image *image = Alder::Application::GetInstance()->GetActiveImage();
-  if( image )
-  {
-    if( image->Get( "min" ).IsValid() ) minString = image->Get( "min" ).ToString().c_str();
-    if( image->Get( "max" ).IsValid() ) maxString = image->Get( "max" ).ToString().c_str();
-    if( image->Get( "mean" ).IsValid() ) meanString = image->Get( "mean" ).ToString().c_str();
-    if( image->Get( "sd" ).IsValid() ) sdString = image->Get( "sd" ).ToString().c_str();
-    if( image->Get( "n" ).IsValid() ) nString = image->Get( "n" ).ToString().c_str();
+    interviewerString = study->Get( "Interviewer" ).ToString().c_str();
+    siteString = study->Get( "Site" ).ToString().c_str();
+    dateString = study->Get( "DatetimeAcquired" ).ToString().c_str();
   }
 
   this->ui->interviewerValueLabel->setText( interviewerString );
   this->ui->siteValueLabel->setText( siteString );
   this->ui->dateValueLabel->setText( dateString );
-  this->ui->minValueLabel->setText( minString );
-  this->ui->maxValueLabel->setText( maxString );
-  this->ui->meanValueLabel->setText( meanString );
-  this->ui->sdValueLabel->setText( sdString );
-  this->ui->nValueLabel->setText( nString );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -469,7 +448,7 @@ void QMainAlderWindow::updateStudyTreeWidget()
 
     // make root the study's UID
     QString name = tr( "Study: " );
-    name += study->Get( "uid" ).ToString().c_str();
+    name += study->Get( "UId" ).ToString().c_str();
     QTreeWidgetItem *root = new QTreeWidgetItem( this->ui->studyTreeWidget );
     root->setText( 0, name );
     root->setExpanded( true );
@@ -484,7 +463,7 @@ void QMainAlderWindow::updateStudyTreeWidget()
     {
       Alder::Exam *exam = examIt->GetPointer();
       name = tr( "Exam: " );
-      name += exam->Get( "laterality" ).ToString().c_str();
+      name += exam->Get( "Laterality" ).ToString().c_str();
       QTreeWidgetItem *examItem = new QTreeWidgetItem( root );
       this->treeModelMap[examItem] = *examIt;
       examItem->setText( 0, name );
@@ -499,13 +478,13 @@ void QMainAlderWindow::updateStudyTreeWidget()
       {
         Alder::Cineloop *cineloop = cineloopIt->GetPointer();
         name = tr( "Cineloop #" );
-        name += cineloop->Get( "number" ).ToString().c_str();
+        name += cineloop->Get( "Acquisition" ).ToString().c_str();
         QTreeWidgetItem *cineloopItem = new QTreeWidgetItem( examItem );
         this->treeModelMap[cineloopItem] = *cineloopIt;
         cineloopItem->setText( 0, name );
         cineloopItem->setExpanded( true );
         cineloopItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-        if( activeCineloop && activeCineloop->Get( "id" ).ToInt() == cineloop->Get( "id" ).ToInt() )
+        if( activeCineloop && activeCineloop->Get( "Id" ).ToInt() == cineloop->Get( "Id" ).ToInt() )
           selectedItem = cineloopItem;
 
         // add the images for this cineloop
@@ -515,13 +494,13 @@ void QMainAlderWindow::updateStudyTreeWidget()
         for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
         {
           Alder::Image *image = imageIt->GetPointer();
-          name = tr( "Frame #" );
-          name += image->Get( "frame" ).ToString().c_str();
+          name = tr( "Image #" );
+          name += image->Get( "Acquisition" ).ToString().c_str();
           QTreeWidgetItem *imageItem = new QTreeWidgetItem( cineloopItem );
           this->treeModelMap[imageItem] = *imageIt;
           imageItem->setText( 0, name );
           imageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-          if( activeImage && activeImage->Get( "id" ).ToInt() == image->Get( "id" ).ToInt() )
+          if( activeImage && activeImage->Get( "Id" ).ToInt() == image->Get( "Id" ).ToInt() )
             selectedItem = imageItem;
         }
       }
@@ -572,13 +551,13 @@ void QMainAlderWindow::updateRating()
   if( user && image )
   {
     std::map< std::string, std::string > map;
-    map["user_id"] = user->Get( "id" ).ToString();
-    map["image_id"] = image->Get( "id" ).ToString();
+    map["UserId"] = user->Get( "Id" ).ToString();
+    map["ImageId"] = image->Get( "Id" ).ToString();
     vtkSmartPointer< Alder::Rating > rating = vtkSmartPointer< Alder::Rating >::New();
     
     if( rating->Load( map ) )
     {
-      vtkVariant v = rating->Get( "rating" );
+      vtkVariant v = rating->Get( "Rating" );
       if( v.IsValid() ) ratingValue = v.ToInt();
     }
   }
