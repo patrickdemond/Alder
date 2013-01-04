@@ -83,6 +83,12 @@ namespace Alder
       this->ActiveUser = NULL;
     }
 
+    if( NULL != this->ActiveInterview )
+    {
+      this->ActiveInterview->Delete();
+      this->ActiveInterview = NULL;
+    }
+
     if( NULL != this->ActiveStudy )
     {
       this->ActiveStudy->Delete();
@@ -187,6 +193,7 @@ namespace Alder
   void Application::ResetApplication()
   {
     this->SetActiveUser( NULL );
+    this->SetActiveInterview( NULL );
     this->SetActiveStudy( NULL );
     this->SetActiveImage( NULL );
     this->SetActiveCineloop( NULL );
@@ -199,16 +206,37 @@ namespace Alder
     {
       if( this->ActiveUser ) this->ActiveUser->UnRegister( this );
       this->ActiveUser = user;
-      if( this->ActiveUser ) this->ActiveUser->Register( this );
+      if( this->ActiveUser ) 
+      {
+        this->ActiveUser->Register( this );
 
+        // get the user's last active interview
+        Interview *interview = Interview::SafeDownCast( this->ActiveUser->GetRecord( "Interview" ) );
+        this->SetActiveInterview( interview );
+        if( interview ) interview->Delete();
+      }
+      this->Modified();
+    }
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Application::SetActiveInterview( Interview *interview )
+  {
+    if( interview != this->ActiveInterview )
+    {
+      if( this->ActiveInterview ) this->ActiveInterview->UnRegister( this );
+      this->ActiveInterview = interview;
+      if( this->ActiveInterview ) this->ActiveInterview->Register( this );
+      this->SetActiveStudy( NULL );
+
+      // if there is an active user, save the active interview
       if( this->ActiveUser )
       {
-        // get the user's last active study
-        Study *study = Study::SafeDownCast( this->ActiveUser->GetRecord( "Study" ) );
-        this->SetActiveStudy( study );
-        if( study ) study->Delete();
-        this->Modified();
+        if( interview ) this->ActiveUser->Set( "InterviewId", interview->Get( "Id" ).ToInt() );
+        else this->ActiveUser->SetNull( "InterviewId" );
+        this->ActiveUser->Save();
       }
+      this->Modified();
     }
   }
 
@@ -219,16 +247,11 @@ namespace Alder
     {
       if( this->ActiveStudy ) this->ActiveStudy->UnRegister( this );
       this->ActiveStudy = study;
-      if( this->ActiveStudy ) this->ActiveStudy->Register( this );
-      this->SetActiveImage( NULL );
-      this->SetActiveCineloop( NULL );
-
-      // if there is an active user, save the active study
-      if( this->ActiveUser )
+      if( this->ActiveStudy )
       {
-        if( study ) this->ActiveUser->Set( "StudyId", study->Get( "Id" ).ToInt() );
-        else this->ActiveUser->SetNull( "StudyId" );
-        this->ActiveUser->Save();
+        this->ActiveStudy->Register( this );
+        this->SetActiveImage( NULL );
+        this->SetActiveCineloop( NULL );
       }
       this->Modified();
     }

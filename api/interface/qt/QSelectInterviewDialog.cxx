@@ -130,7 +130,6 @@ void QSelectInterviewDialog::updateInterface()
   std::vector< vtkSmartPointer< Alder::Study > > studyList;
   std::vector< vtkSmartPointer< Alder::Study > >::iterator studyIt;
   Alder::Study *study;
-  Alder::Modality *modality;
   
   std::vector< vtkSmartPointer< Alder::Interview > > interviewList;
   Alder::Interview::GetAll( &interviewList );
@@ -151,7 +150,7 @@ void QSelectInterviewDialog::updateInterface()
     for( studyIt = studyList.begin(); studyIt != studyList.end(); ++studyIt )
     {
       study = studyIt->GetPointer();
-      std::string modality = study->Get( "Modality" );
+      std::string modality = study->Get( "Modality" ).ToString();
       if( "Dexa" == modality ) dexa = study->IsRatedBy( user ) ? "rated" : "available";
       else if( "Ultrasound" == modality ) ultrasound = study->IsRatedBy( user ) ? "rated" : "available";
       else if( "Retinal" == modality ) retinal = study->IsRatedBy( user ) ? "rated" : "available";
@@ -186,10 +185,10 @@ void QSelectInterviewDialog::updateInterface()
       item->setText( retinal );
       this->ui->interviewTableWidget->setItem( 0, 3, item );
 
-      // add datetime_acquired to row
+      // add visit date to row
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      item->setText( QString( interview->Get( "DatetimeAcquired" ).ToString().c_str() ) );
+      item->setText( QString( interview->Get( "VisitDate" ).ToString().c_str() ) );
       this->ui->interviewTableWidget->setItem( 0, 4, item );
     }
   }

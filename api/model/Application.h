@@ -46,6 +46,7 @@ namespace Alder
   class Configuration;
   class Database;
   class Image;
+  class Interview;
   class OpalService;
   class Study;
   class User;
@@ -86,7 +87,7 @@ namespace Alder
     vtkGetObjectMacro( ActiveCineloop, Cineloop );
 
     /**
-     * When setting the active user the active study will be set to the study stored in the user's
+     * When setting the active user the active interview will be set to the interview stored in the user's
      * record if the user being set is not null.
      */
     virtual void SetActiveUser( User* );
@@ -106,6 +107,11 @@ namespace Alder
      * When setting the active cineloop the active image is automatically removed
      */
     virtual void SetActiveCineloop( Cineloop* );
+    
+    /**
+     * When setting the active interview the active study is automatically removed
+     */
+    virtual void SetActiveInterview( Interview* );
     
     /**
      * Creates a new instance of a model object given its class name
@@ -149,6 +155,7 @@ namespace Alder
     Study *ActiveStudy;
     Image *ActiveImage;
     Cineloop *ActiveCineloop;
+    Interview *ActiveInterview;
     
   private:
     Application( const Application& );  // Not implemented.
