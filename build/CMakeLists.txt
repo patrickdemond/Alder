@@ -87,6 +87,7 @@ SET( ALDER_SOURCE
   ${ALDER_API_DIR}/Alder.cxx
 
   ${ALDER_MODEL_DIR}/ActiveRecord.cxx
+  ${ALDER_MODEL_DIR}/ActiveRecordWithFile.cxx
   ${ALDER_MODEL_DIR}/Application.cxx
   ${ALDER_MODEL_DIR}/Cineloop.cxx
   ${ALDER_MODEL_DIR}/Configuration.cxx
@@ -119,6 +120,7 @@ SET( ALDER_SOURCE
 
 SET_SOURCE_FILES_PROPERTIES(
   ${ALDER_MODEL_DIR}/ActiveRecord.cxx
+  ${ALDER_MODEL_DIR}/ActiveRecordWithFile.cxx
   ${ALDER_MODEL_DIR}/ModelObject.cxx
 
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx

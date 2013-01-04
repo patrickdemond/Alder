@@ -22,9 +22,7 @@
 #ifndef __Cineloop_h
 #define __Cineloop_h
 
-#include "ActiveRecord.h"
-
-#include <iostream>
+#include "ActiveRecordWithFile.h"
 
 /**
  * @addtogroup Alder
@@ -33,17 +31,12 @@
 
 namespace Alder
 {
-  class Cineloop : public ActiveRecord
+  class Cineloop : public ActiveRecordWithFile
   {
   public:
     static Cineloop *New();
-    vtkTypeMacro( Cineloop, ActiveRecord );
+    vtkTypeMacro( Cineloop, ActiveRecordWithFile );
     std::string GetName() { return "Cineloop"; }
-
-    /**
-     * Get the file name that this record represents
-     */
-    std::string GetFileName();
 
   protected:
     Cineloop() {}
