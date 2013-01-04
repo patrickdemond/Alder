@@ -42,7 +42,6 @@
 
 namespace Alder
 {
-  class Cineloop;
   class Configuration;
   class Database;
   class Image;
@@ -84,7 +83,6 @@ namespace Alder
     vtkGetObjectMacro( ActiveUser, User );
     vtkGetObjectMacro( ActiveStudy, Study );
     vtkGetObjectMacro( ActiveImage, Image );
-    vtkGetObjectMacro( ActiveCineloop, Cineloop );
 
     /**
      * When setting the active user the active interview will be set to the interview stored in the user's
@@ -93,20 +91,15 @@ namespace Alder
     virtual void SetActiveUser( User* );
 
     /**
-     * When setting the active study the active image and cineloop are automatically removed and,
+     * When setting the active study the active image is automatically removed and,
      * if there is an active user, the active study is stored in the user's record
      */
     virtual void SetActiveStudy( Study* );
 
     /**
-     * When setting the active image the active cineloop is automatically removed
+     * Sets the active image
      */
     virtual void SetActiveImage( Image* );
-    
-    /**
-     * When setting the active cineloop the active image is automatically removed
-     */
-    virtual void SetActiveCineloop( Cineloop* );
     
     /**
      * When setting the active interview the active study is automatically removed
@@ -154,7 +147,6 @@ namespace Alder
     User *ActiveUser;
     Study *ActiveStudy;
     Image *ActiveImage;
-    Cineloop *ActiveCineloop;
     Interview *ActiveInterview;
     
   private:

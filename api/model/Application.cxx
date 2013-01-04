@@ -12,7 +12,6 @@
 #include "Application.h"
 
 #include "Configuration.h"
-#include "Cineloop.h"
 #include "Database.h"
 #include "Exam.h"
 #include "Image.h"
@@ -40,8 +39,6 @@ namespace Alder
     this->ResetApplication();
 
     // populate the constructor and class name registries with all active record classes
-    this->ConstructorRegistry["Cineloop"] = &createInstance<Cineloop>;
-    this->ClassNameRegistry["Cineloop"] = typeid(Cineloop).name();
     this->ConstructorRegistry["Exam"] = &createInstance<Exam>;
     this->ClassNameRegistry["Exam"] = typeid(Exam).name();
     this->ConstructorRegistry["Image"] = &createInstance<Image>;
@@ -99,12 +96,6 @@ namespace Alder
     {
       this->ActiveImage->Delete();
       this->ActiveImage = NULL;
-    }
-
-    if( NULL != this->ActiveCineloop )
-    {
-      this->ActiveCineloop->Delete();
-      this->ActiveCineloop = NULL;
     }
   }
 
@@ -196,7 +187,6 @@ namespace Alder
     this->SetActiveInterview( NULL );
     this->SetActiveStudy( NULL );
     this->SetActiveImage( NULL );
-    this->SetActiveCineloop( NULL );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -251,41 +241,11 @@ namespace Alder
       {
         this->ActiveStudy->Register( this );
         this->SetActiveImage( NULL );
-        this->SetActiveCineloop( NULL );
       }
       this->Modified();
     }
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Application::SetActiveImage( Image *image )
-  {
-    if( image != this->ActiveImage )
-    {
-      if( this->ActiveImage ) this->ActiveImage->UnRegister( this );
-      this->ActiveImage = image;
-      if( this->ActiveImage )
-      {
-        this->SetActiveCineloop( NULL );
-        this->ActiveImage->Register( this );
-      }
-      this->Modified();
-    }
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Application::SetActiveCineloop( Cineloop *cineloop )
-  {
-    if( cineloop != this->ActiveCineloop )
-    {
-      if( this->ActiveCineloop ) this->ActiveCineloop->UnRegister( this );
-      this->ActiveCineloop = cineloop;
-      if( this->ActiveCineloop )
-      {
-        this->SetActiveImage( NULL );
-        this->ActiveCineloop->Register( this );
-      }
-      this->Modified();
-    }
-  }
+  vtkCxxSetObjectMacro( Application, ActiveImage, Image );
 }

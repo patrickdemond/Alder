@@ -22,7 +22,7 @@
 #ifndef __Image_h
 #define __Image_h
 
-#include "ActiveRecordWithFile.h"
+#include "ActiveRecord.h"
 
 /**
  * @addtogroup Alder
@@ -32,12 +32,29 @@
 namespace Alder
 {
   class User;
-  class Image : public ActiveRecordWithFile
+  class Image : public ActiveRecord
   {
   public:
     static Image *New();
-    vtkTypeMacro( Image, ActiveRecordWithFile );
+    vtkTypeMacro( Image, ActiveRecord );
     std::string GetName() { return "Image"; }
+
+    /**
+     * Get the full path to where the image associated with this record belongs.
+     */
+    std::string GetFilePath();
+
+    /**
+     * Get the file name that this record represents (including path)
+     * NOTE: this method depends on the file already existing, if it doesn't already
+     * exist it will throw an exception
+     */
+    std::string GetFileName();
+
+    /**
+     * Get whether a particular user has rated this image
+     */
+    bool IsRatedBy( User* user );
 
   protected:
     Image() {}

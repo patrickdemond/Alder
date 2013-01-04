@@ -12,7 +12,6 @@
 #include "ui_QMainAlderWindow.h"
 
 #include "Application.h"
-#include "Cineloop.h"
 #include "Exam.h"
 #include "Image.h"
 #include "Rating.h"
@@ -359,7 +358,6 @@ void QMainAlderWindow::slotTreeSelectionChanged()
     {
       Alder::ActiveRecord *record = it->second;
       app->SetActiveImage( Alder::Image::SafeDownCast( record ) );
-      app->SetActiveCineloop( Alder::Cineloop::SafeDownCast( record ) );
     }
   }
 
@@ -441,9 +439,8 @@ void QMainAlderWindow::updateStudyTreeWidget()
   this->ui->studyTreeWidget->clear();
   if( study )
   {
-    // get the active image/cineloop so that we can highlight it
+    // get the active image so that we can highlight it
     Alder::Image *activeImage = Alder::Application::GetInstance()->GetActiveImage();
-    Alder::Cineloop *activeCineloop = Alder::Application::GetInstance()->GetActiveCineloop();
     QTreeWidgetItem *selectedItem = NULL;
 
     // make root the study's UID
@@ -470,38 +467,43 @@ void QMainAlderWindow::updateStudyTreeWidget()
       examItem->setExpanded( true );
       examItem->setFlags( Qt::ItemIsEnabled );
 
-      // add the cineloops for this exam
-      std::vector< vtkSmartPointer< Alder::Cineloop > > cineloopList;
-      std::vector< vtkSmartPointer< Alder::Cineloop > >::iterator cineloopIt;
-      exam->GetList( &cineloopList );
-      for( cineloopIt = cineloopList.begin(); cineloopIt != cineloopList.end(); ++cineloopIt )
+      // add the images for this exam
+      std::vector< vtkSmartPointer< Alder::Image > > imageList;
+      std::vector< vtkSmartPointer< Alder::Image > >::iterator imageIt;
+      exam->GetList( &imageList );
+      for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
       {
-        Alder::Cineloop *cineloop = cineloopIt->GetPointer();
-        name = tr( "Cineloop #" );
-        name += cineloop->Get( "Acquisition" ).ToString().c_str();
-        QTreeWidgetItem *cineloopItem = new QTreeWidgetItem( examItem );
-        this->treeModelMap[cineloopItem] = *cineloopIt;
-        cineloopItem->setText( 0, name );
-        cineloopItem->setExpanded( true );
-        cineloopItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-        if( activeCineloop && activeCineloop->Get( "Id" ).ToInt() == cineloop->Get( "Id" ).ToInt() )
-          selectedItem = cineloopItem;
-
-        // add the images for this cineloop
-        std::vector< vtkSmartPointer< Alder::Image > > imageList;
-        std::vector< vtkSmartPointer< Alder::Image > >::iterator imageIt;
-        cineloop->GetList( &imageList );
-        for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
+        Alder::Image *image = imageIt->GetPointer();
+        
+        // don't show images with parents (that happens in the loop below instead)
+        if( !image->Get( "ParentImageId" ).IsValid() )
         {
-          Alder::Image *image = imageIt->GetPointer();
           name = tr( "Image #" );
           name += image->Get( "Acquisition" ).ToString().c_str();
-          QTreeWidgetItem *imageItem = new QTreeWidgetItem( cineloopItem );
+          QTreeWidgetItem *imageItem = new QTreeWidgetItem( examItem );
           this->treeModelMap[imageItem] = *imageIt;
           imageItem->setText( 0, name );
+          imageItem->setExpanded( true );
           imageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
           if( activeImage && activeImage->Get( "Id" ).ToInt() == image->Get( "Id" ).ToInt() )
             selectedItem = imageItem;
+
+          // add child images for this image
+          std::vector< vtkSmartPointer< Alder::Image > > childImageList;
+          std::vector< vtkSmartPointer< Alder::Image > >::iterator childImageIt;
+          image->GetList( &childImageList );
+          for( childImageIt = childImageList.begin(); childImageIt != childImageList.end(); ++childImageIt )
+          {
+            Alder::Image *childImage = childImageIt->GetPointer();
+            name = tr( "Image #" );
+            name += childImage->Get( "Acquisition" ).ToString().c_str();
+            QTreeWidgetItem *childImageItem = new QTreeWidgetItem( imageItem );
+            this->treeModelMap[childImageItem] = *childImageIt;
+            childImageItem->setText( 0, name );
+            childImageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+            if( activeImage && activeImage->Get( "Id" ).ToInt() == childImage->Get( "Id" ).ToInt() )
+              selectedItem = childImageItem;
+          }
         }
       }
     }
@@ -517,17 +519,10 @@ void QMainAlderWindow::updateStudyTreeWidget()
 void QMainAlderWindow::updateMedicalImageWidget()
 {
   Alder::Image *image = Alder::Application::GetInstance()->GetActiveImage();
-  Alder::Cineloop *cineloop = Alder::Application::GetInstance()->GetActiveCineloop();
 
   if( image )
   {
     this->ui->medicalImageWidget->loadImage( QString( image->GetFileName().c_str() ) );
-    // TODO: in some situations we may not want to display the static images
-    // for example, when a reader should be blinded to any previous slice selections
-  }
-  else if( cineloop )
-  {
-    this->ui->medicalImageWidget->loadImage( QString( cineloop->GetFileName().c_str() ) );
   }
   else
   {
@@ -574,7 +569,6 @@ void QMainAlderWindow::updateInterface()
 {
   Alder::Application *app = Alder::Application::GetInstance();
   Alder::Study *study = app->GetActiveStudy();
-  Alder::Cineloop *cineloop = app->GetActiveCineloop();
   Alder::Image *image = app->GetActiveImage();
   bool loggedIn = NULL != app->GetActiveUser();
 
