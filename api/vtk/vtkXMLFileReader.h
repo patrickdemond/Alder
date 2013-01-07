@@ -8,18 +8,22 @@
   Author: Dean Inglis <inglisd@mcmaster.ca>
 
 =========================================================================*/
-//
-// .NAME vtkXMLFileReader - Generic XML file reader
-//
-// .SECTION Description
-// This abstract class must be extended by any class which reads XML files.
-// The parent of this class, vtkAlgorithm, provides many methods for
-// controlling the reading of the data file, see vtkAlgorithm for more
-// information.
-//
-// .SECTION See Also
-// vtkAlgorithm
-// 
+
+/**
+ * @class vtkXMLFileReader
+ *
+ * @author Patrick Emond <emondpd@mcmaster.ca>
+ * @author Dean Inglis <inglisd@mcmaster.ca>
+ *
+ * @brief Generic XML file reader.
+ *
+ * This abstract class must be extended by any class which reads XML files.
+ * The parent of this class, vtkAlgorithm, provides many methods for
+ * controlling the reading of the data file, see vtkAlgorithm for more
+ * information.
+ *
+ * @see vtkAlgorithm
+ */
 
 #ifndef __vtkXMLFileReader_h
 #define __vtkXMLFileReader_h
@@ -27,7 +31,6 @@
 #include "vtkAlgorithm.h"
 #include "vtkVariant.h"
 
-//#include "Utilities.h"
 #include <libxml/xmlreader.h>
 
 #include <stdexcept>
@@ -39,14 +42,16 @@ public:
   vtkTypeMacro( vtkXMLFileReader, vtkAlgorithm );
   void PrintSelf( ostream& os, vtkIndent indent );
 
-  // Description:
-  // Set/get the file name
+  /**
+   * Set/Get the file name
+   */
   virtual std::string GetFileName() { return this->FileName; }
   virtual void SetFileName( std::string fileName );
   
 protected:
-  // Description:
-  // Internal struct for managing nodes
+  /**
+   * Internal struct for managing nodes
+   */
   struct vtkXMLFileReaderNode
   {
     vtkXMLFileReaderNode() { this->Clear(); }
@@ -109,24 +114,28 @@ protected:
   virtual int ProcessRequest(
     vtkInformation *, vtkInformationVector **, vtkInformationVector * );
 
-  // Description:
-  // Opens and parses the current XML file.
-  // An exception is thrown if the file cannot be opened.
+  /**
+   * Opens and parses the current XML file.
+   * An exception is thrown if the file cannot be opened.
+   */
   void CreateReader();
 
-  // Description:
-  // Closes the current file.
+  /** 
+   * Closes the current file.
+   */
   void FreeReader();
 
-  // Description:
-  // Parses the next node in the XML file.  Make sure to use Open() before calling this method.
-  // Returns 1 if a new node has been parsed or 0 if the end of the file has been reached.
-  // An exception is thrown if there is a parsing error.
+  /** 
+   * Parses the next node in the XML file.  Make sure to use Open() before calling this method.
+   * Returns 1 if a new node has been parsed or 0 if the end of the file has been reached.
+   * An exception is thrown if there is a parsing error.
+   */
   int ParseNode();
 
-  // Description:
-  // Points the current node to the beginning of the file so that the first node in the file
-  // will be parsed next time ParseNode() is called.
+  /** 
+   * Points the current node to the beginning of the file so that the first node in the file
+   * will be parsed next time ParseNode() is called.
+   */
   void RewindReader();
 
   void ReadValue( std::string& value );
@@ -138,14 +147,14 @@ protected:
   vtkXMLFileReaderNode CurrentNode;
 
 private:
-  vtkXMLFileReader( const vtkXMLFileReader& );  // Not implemented.
-  void operator=( const vtkXMLFileReader& );  // Not implemented.
+  vtkXMLFileReader( const vtkXMLFileReader& );  /** Not implemented. */
+  void operator=( const vtkXMLFileReader& );  /** Not implemented. */
 };
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 template<class T> void vtkXMLFileReader::ReadValue( T& value )
 {
-  // list of expected elements
+  /** list of expected elements
   xmlChar *read = xmlTextReaderReadString( this->Reader );
   if( NULL == read )
   {
@@ -158,7 +167,7 @@ template<class T> void vtkXMLFileReader::ReadValue( T& value )
   bool valid = true;
   value = v.ToNumeric( &valid, &value );
 
-  // TODO: warn if attribute "type" doesn't match T's type
+  /** TODO: warn if attribute "type" doesn't match T's type */
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -167,13 +176,13 @@ template<class T> void vtkXMLFileReader::ReadTuple( T array[], vtkIdType length 
   std::string string;
   this->ReadValue( string );
 
-  // split string by spaces
+  /** split string by spaces */
   vtkIdType count = 0;
   std::stringstream stream( string );
   std::string word;
   while( stream >> word )
   {
-    // check for overflow
+    /** check for overflow */
     if( count >= length )
     {
       vtkWarningMacro( "More than " << length << " elements found in tuple." );
@@ -185,11 +194,11 @@ template<class T> void vtkXMLFileReader::ReadTuple( T array[], vtkIdType length 
     count++;
   }
 
-  // warn if not enough values were found
+  /** warn if not enough values were found */
   if( count < length )
     vtkWarningMacro( "Expecting " << length << " elements in tuple, " << count << " found." );
 
-  // TODO: warn if attribute "type" doesn't match T's type
+  /** TODO: warn if attribute "type" doesn't match T's type */
 }
 
 #endif

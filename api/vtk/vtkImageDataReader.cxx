@@ -1,32 +1,24 @@
 /*=========================================================================
 
-  Program:   Teneos VTK extension library
-  Module:    $RCSfile: vtkImageDataReader.cxx,v $
+  Module:    vtkImageDataReader.cxx
+  Program:   Alder (CLSA Medical Image Quality Assessment Tool)
   Language:  C++
-  Date:      $Date: 2011-02-28 19:06:02 $
-  Version:   $Revision: 1.32 $
-
-  Copyright (c) Dean Inglis, Patrick Emond
-  All rights reserved.
-  See Copyright.txt for details.
+  Author:    Patrick Emond <emondpd@mcmaster.ca>
+  Author:    Dean Inglis <inglisd@mcmaster.ca>
 
 =========================================================================*/
 #include "vtkImageDataReader.h"
 
 #include "Utilities.h"
 
-// VTK
-#include "vtkImageData.h"
-#include "vtkObjectFactory.h"
-
-// VTK Readers
-// all readers wrapped by this class should be included here
 #include "vtkBMPReader.h"
 #include "vtkGDCMImageReader.h"
 #include "vtkGESignaReader.h"
+#include "vtkImageData.h"
 #include "vtkJPEGReader.h"
 #include "vtkMetaImageReader.h"
 #include "vtkMINCImageReader.h"
+#include "vtkObjectFactory.h"
 #include "vtkPNGReader.h"
 #include "vtkPNMReader.h"
 #include "vtkSLCReader.h"
@@ -34,7 +26,6 @@
 #include "vtkTIFFReader.h"
 #include "vtkXMLImageDataReader.h"
 
-// System
 #include <sstream>
 #include <stdexcept>
 
