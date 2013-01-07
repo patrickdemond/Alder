@@ -40,9 +40,45 @@ namespace Alder
     vtkTypeMacro( Interview, ActiveRecord );
     std::string GetName() { return "Interview"; }
 
+    /**
+     * Returns the next interview in UId/VisitDate order.
+     */
+    vtkSmartPointer<Interview> GetNext();
+
+    /**
+     * Makes the current record the next record in UId/VisitDate order.
+     */
+    void Next();
+
+    /**
+     * Returns the previous interview in UId/VisitDate order.
+     */
+    vtkSmartPointer<Interview> GetPrevious();
+
+    /**
+     * Makes the current record the previous record in UId/VisitDate order.
+     */
+    void Previous();
+
+    /**
+     * Convenience method to determine how many images this interview has
+     */
+    int GetImageCount();
+
+    /**
+     * Returns whether a user has rated all images associated with the interview.
+     * If the interview has no images this method returns true.
+     */
+    bool IsRatedBy( User* user );
+
   protected:
     Interview() {}
     ~Interview() {}
+
+    /**
+     * Returns a vector of all UId/VisitDate pairs ordered by UId then VisitDate
+     */
+    static std::vector< std::pair< std::string, std::string > > GetUIdVisitDateList();
 
   private:
     Interview( const Interview& ); // Not implemented

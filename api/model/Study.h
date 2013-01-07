@@ -44,31 +44,6 @@ namespace Alder
     std::string GetName() { return "Study"; }
 
     /**
-     * Returns the next study in UId order.
-     */
-    vtkSmartPointer<Study> GetNext();
-
-    /**
-     * Makes the current record the next record in UId order.
-     */
-    void Next();
-
-    /**
-     * Returns the previous study in UId order.
-     */
-    vtkSmartPointer<Study> GetPrevious();
-
-    /**
-     * Makes the current record the previous record in UId order.
-     */
-    void Previous();
-
-    /**
-     * Returns a vector of all UIds alphabetically ordered
-     */
-    static std::vector< std::string > GetUIdList();
-
-    /**
      * Convenience method to determine how many images this study has
      */
     int GetImageCount();

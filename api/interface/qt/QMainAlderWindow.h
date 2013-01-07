@@ -35,12 +35,12 @@ public:
   
 public slots:
   // action event functions
-  virtual void slotOpenStudy();
-  virtual void slotPreviousStudy();
-  virtual void slotNextStudy();
+  virtual void slotOpenInterview();
+  virtual void slotPreviousInterview();
+  virtual void slotNextInterview();
   virtual void slotLogin();
   virtual void slotUserManagement();
-  virtual void slotUpdateStudyDatabase();
+  virtual void slotUpdateDatabase();
   virtual void slotTreeSelectionChanged();
   virtual void slotRatingSliderChanged( int );
 
@@ -55,8 +55,8 @@ protected:
   // read/write application GUI settings
   virtual void readSettings();
   virtual void writeSettings();
-  virtual void updateStudyInformation();
-  virtual void updateStudyTreeWidget();
+  virtual void updateInformation();
+  virtual void updateInterviewTreeWidget();
   virtual void updateMedicalImageWidget();
   virtual void updateRating();
   virtual void updateInterface();

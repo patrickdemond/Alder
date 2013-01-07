@@ -47,7 +47,6 @@ namespace Alder
   class Image;
   class Interview;
   class OpalService;
-  class Study;
   class User;
   class Application : public ModelObject
   {
@@ -81,7 +80,7 @@ namespace Alder
     vtkGetObjectMacro( DB, Database );
     vtkGetObjectMacro( Opal, OpalService );
     vtkGetObjectMacro( ActiveUser, User );
-    vtkGetObjectMacro( ActiveStudy, Study );
+    vtkGetObjectMacro( ActiveInterview, Interview );
     vtkGetObjectMacro( ActiveImage, Image );
 
     /**
@@ -91,20 +90,15 @@ namespace Alder
     virtual void SetActiveUser( User* );
 
     /**
-     * When setting the active study the active image is automatically removed and,
-     * if there is an active user, the active study is stored in the user's record
+     * When setting the active interview the active image is automatically removed and,
+     * if there is an active user, the active interview is stored in the user's record
      */
-    virtual void SetActiveStudy( Study* );
+    virtual void SetActiveInterview( Interview* );
 
     /**
      * Sets the active image
      */
     virtual void SetActiveImage( Image* );
-    
-    /**
-     * When setting the active interview the active study is automatically removed
-     */
-    virtual void SetActiveInterview( Interview* );
     
     /**
      * Creates a new instance of a model object given its class name
@@ -145,9 +139,8 @@ namespace Alder
     Database *DB;
     OpalService *Opal;
     User *ActiveUser;
-    Study *ActiveStudy;
-    Image *ActiveImage;
     Interview *ActiveInterview;
+    Image *ActiveImage;
     
   private:
     Application( const Application& );  // Not implemented.

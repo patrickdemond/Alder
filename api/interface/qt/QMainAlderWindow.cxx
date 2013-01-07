@@ -14,6 +14,7 @@
 #include "Application.h"
 #include "Exam.h"
 #include "Image.h"
+#include "Interview.h"
 #include "Rating.h"
 #include "Study.h"
 #include "User.h"
@@ -45,18 +46,18 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   this->ui->setupUi( this );
   
   // set up child widgets
-  this->ui->studyTreeWidget->header()->hide();
+  this->ui->interviewTreeWidget->header()->hide();
 
   // connect the menu items
   QObject::connect(
-    this->ui->actionOpenStudy, SIGNAL( triggered() ),
-    this, SLOT( slotOpenStudy() ) );
+    this->ui->actionOpenInterview, SIGNAL( triggered() ),
+    this, SLOT( slotOpenInterview() ) );
   QObject::connect(
-    this->ui->actionPreviousStudy, SIGNAL( triggered() ),
-    this, SLOT( slotPreviousStudy() ) );
+    this->ui->actionPreviousInterview, SIGNAL( triggered() ),
+    this, SLOT( slotPreviousInterview() ) );
   QObject::connect(
-    this->ui->actionNextStudy, SIGNAL( triggered() ),
-    this, SLOT( slotNextStudy() ) );
+    this->ui->actionNextInterview, SIGNAL( triggered() ),
+    this, SLOT( slotNextInterview() ) );
   QObject::connect(
     this->ui->actionLogin, SIGNAL( triggered() ),
     this, SLOT( slotLogin() ) );
@@ -64,8 +65,8 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this->ui->actionUserManagement, SIGNAL( triggered() ),
     this, SLOT( slotUserManagement() ) );
   QObject::connect(
-    this->ui->actionUpdateStudyDatabase, SIGNAL( triggered() ),
-    this, SLOT( slotUpdateStudyDatabase() ) );
+    this->ui->actionUpdateDatabase, SIGNAL( triggered() ),
+    this, SLOT( slotUpdateDatabase() ) );
   QObject::connect(
     this->ui->actionExit, SIGNAL( triggered() ),
     qApp, SLOT( closeAllWindows() ) );
@@ -79,13 +80,13 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this, SLOT( slotManual() ) );
 
   QObject::connect(
-    this->ui->previousStudyPushButton, SIGNAL( clicked() ),
-    this, SLOT( slotPreviousStudy() ) );
+    this->ui->previousInterviewPushButton, SIGNAL( clicked() ),
+    this, SLOT( slotPreviousInterview() ) );
   QObject::connect(
-    this->ui->nextStudyPushButton, SIGNAL( clicked() ),
-    this, SLOT( slotNextStudy() ) );
+    this->ui->nextInterviewPushButton, SIGNAL( clicked() ),
+    this, SLOT( slotNextInterview() ) );
   QObject::connect(
-    this->ui->studyTreeWidget, SIGNAL( itemSelectionChanged() ),
+    this->ui->interviewTreeWidget, SIGNAL( itemSelectionChanged() ),
     this, SLOT( slotTreeSelectionChanged() ) );
   QObject::connect(
     this->ui->ratingSlider, SIGNAL( valueChanged( int ) ),
@@ -108,7 +109,7 @@ void QMainAlderWindow::closeEvent( QCloseEvent *event )
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotOpenStudy()
+void QMainAlderWindow::slotOpenInterview()
 {
   bool loggedIn = NULL != Alder::Application::GetInstance()->GetActiveUser();
 
@@ -116,43 +117,43 @@ void QMainAlderWindow::slotOpenStudy()
   {
     QSelectInterviewDialog dialog( this );
     dialog.setModal( true );
-    dialog.setWindowTitle( tr( "Select Study" ) );
+    dialog.setWindowTitle( tr( "Select Interview" ) );
     dialog.exec();
 
-    // active study may have changed so update the interface
+    // active interview may have changed so update the interface
     this->updateInterface();
   }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotPreviousStudy()
+void QMainAlderWindow::slotPreviousInterview()
 {
   bool found = false;
   Alder::Application *app = Alder::Application::GetInstance();
   Alder::User *user = app->GetActiveUser();
-  Alder::Study *activeStudy = app->GetActiveStudy();
-  vtkSmartPointer< Alder::Study > study;
-  if( user && activeStudy )
+  Alder::Interview *activeInterview = app->GetActiveInterview();
+  vtkSmartPointer< Alder::Interview > interview;
+  if( user && activeInterview )
   {
-    // check if unrated checkbox is pressed, keep searching for an unrated study
+    // check if unrated checkbox is pressed, keep searching for an unrated interview
     if( this->ui->unratedCheckBox->isChecked() )
     {
-      int currentStudyId = activeStudy->Get( "Id" ).ToInt();
+      int currentInterviewId = activeInterview->Get( "Id" ).ToInt();
 
-      // keep getting the previous study until we find one that has images which are not rated
-      study = activeStudy->GetPrevious();
-      while( study->Get( "Id" ).ToInt() != currentStudyId )
+      // keep getting the previous interview until we find one that has images which are not rated
+      interview = activeInterview->GetPrevious();
+      while( interview->Get( "Id" ).ToInt() != currentInterviewId )
       {
-        if( 0 < study->GetImageCount() && !study->IsRatedBy( user ) )
+        if( 0 < interview->GetImageCount() && !interview->IsRatedBy( user ) )
         {
           found = true;
           break;
         }
-        study = study->GetPrevious();
+        interview = interview->GetPrevious();
       }
 
       // warn user if no unrated studies left
-      if( study->Get( "Id" ).ToInt() == currentStudyId )
+      if( interview->Get( "Id" ).ToInt() == currentInterviewId )
       {
         QMessageBox errorMessage( this );
         errorMessage.setWindowModality( Qt::WindowModal );
@@ -163,47 +164,47 @@ void QMainAlderWindow::slotPreviousStudy()
     }
     else
     {
-      study = activeStudy->GetPrevious();
+      interview = activeInterview->GetPrevious();
       found = true;
     }
   }
 
   if( found )
   {
-    app->SetActiveStudy( study );
+    app->SetActiveInterview( interview );
     this->updateInterface();
   }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotNextStudy()
+void QMainAlderWindow::slotNextInterview()
 {
   bool found = false;
   Alder::Application *app = Alder::Application::GetInstance();
   Alder::User *user = app->GetActiveUser();
-  Alder::Study *activeStudy = app->GetActiveStudy();
-  vtkSmartPointer< Alder::Study > study;
-  if( user && activeStudy )
+  Alder::Interview *activeInterview = app->GetActiveInterview();
+  vtkSmartPointer< Alder::Interview > interview;
+  if( user && activeInterview )
   {
-    // check if unrated checkbox is pressed, keep searching for an unrated study
+    // check if unrated checkbox is pressed, keep searching for an unrated interview
     if( this->ui->unratedCheckBox->isChecked() )
     {
-      int currentStudyId = activeStudy->Get( "Id" ).ToInt();
+      int currentInterviewId = activeInterview->Get( "Id" ).ToInt();
 
-      // keep getting the previous study until we find one that has images which are not rated
-      study = activeStudy->GetNext();
-      while( study->Get( "Id" ).ToInt() != currentStudyId )
+      // keep getting the previous interview until we find one that has images which are not rated
+      interview = activeInterview->GetNext();
+      while( interview->Get( "Id" ).ToInt() != currentInterviewId )
       {
-        if( 0 < study->GetImageCount() && !study->IsRatedBy( user ) )
+        if( 0 < interview->GetImageCount() && !interview->IsRatedBy( user ) )
         {
           found = true;
           break;
         }
-        study = study->GetNext();
+        interview = interview->GetNext();
       }
 
       // warn user if no unrated studies left
-      if( study->Get( "Id" ).ToInt() == currentStudyId )
+      if( interview->Get( "Id" ).ToInt() == currentInterviewId )
       {
         QMessageBox errorMessage( this );
         errorMessage.setWindowModality( Qt::WindowModal );
@@ -214,14 +215,14 @@ void QMainAlderWindow::slotNextStudy()
     }
     else
     {
-      study = activeStudy->GetNext();
+      interview = activeInterview->GetNext();
       found = true;
     }
   }
 
   if( found )
   {
-    app->SetActiveStudy( study );
+    app->SetActiveInterview( interview );
     this->updateInterface();
   }
 }
@@ -280,7 +281,7 @@ void QMainAlderWindow::slotUserManagement()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotUpdateStudyDatabase()
+void QMainAlderWindow::slotUpdateDatabase()
 {
 /* TODO: implement once Opal is ready
   int attempt = 1;
@@ -304,10 +305,10 @@ void QMainAlderWindow::slotUpdateStudyDatabase()
       // create a progress dialog to observe the progress of the update
       QProgressDialog dialog( this );
       dialog.setModal( true );
-      dialog.setWindowTitle( tr( "Updating Study Database" ) );
-      dialog.setMessage( tr( "Please wait while the study database is updated." ) );
+      dialog.setWindowTitle( tr( "Updating Database" ) );
+      dialog.setMessage( tr( "Please wait while the database is updated." ) );
       dialog.open();
-      Alder::Study::UpdateData();
+      Alder::Interview::UpdateData();
       dialog.accept();
       break;
     }
@@ -349,7 +350,7 @@ void QMainAlderWindow::slotTreeSelectionChanged()
 {
   Alder::Application *app = Alder::Application::GetInstance();
   
-  QList<QTreeWidgetItem*> list = this->ui->studyTreeWidget->selectedItems();
+  QList<QTreeWidgetItem*> list = this->ui->interviewTreeWidget->selectedItems();
   if( 0 < list.size() )
   {
     std::map< QTreeWidgetItem*, vtkSmartPointer<Alder::ActiveRecord> >::iterator it;
@@ -406,19 +407,20 @@ void QMainAlderWindow::writeSettings()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::updateStudyInformation()
+void QMainAlderWindow::updateInformation()
 {
   QString interviewerString = tr( "N/A" );
   QString siteString = tr( "N/A" );
   QString dateString = tr( "N/A" );
 
   // fill in the active study information
-  Alder::Study *study = Alder::Application::GetInstance()->GetActiveStudy();
-  if( study )
+  Alder::Interview *interview = Alder::Application::GetInstance()->GetActiveInterview();
+  if( interview )
   {
-    interviewerString = study->Get( "Interviewer" ).ToString().c_str();
-    siteString = study->Get( "Site" ).ToString().c_str();
-    dateString = study->Get( "DatetimeAcquired" ).ToString().c_str();
+    // TODO: get study from active image
+    //interviewerString = study->Get( "Interviewer" ).ToString().c_str();
+    //siteString = study->Get( "Site" ).ToString().c_str();
+    //dateString = study->Get( "DatetimeAcquired" ).ToString().c_str();
   }
 
   this->ui->interviewerValueLabel->setText( interviewerString );
@@ -427,92 +429,117 @@ void QMainAlderWindow::updateStudyInformation()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::updateStudyTreeWidget()
+void QMainAlderWindow::updateInterviewTreeWidget()
 {
-  Alder::Study *study = Alder::Application::GetInstance()->GetActiveStudy();
+  Alder::Interview *interview = Alder::Application::GetInstance()->GetActiveInterview();
 
   // stop the tree's signals until we are done
-  bool oldSignalState = this->ui->studyTreeWidget->blockSignals( true );
+  bool oldSignalState = this->ui->interviewTreeWidget->blockSignals( true );
 
-  // if a study is open then populate the study tree
+  // if a interview is open then populate the interview tree
   this->treeModelMap.clear();
-  this->ui->studyTreeWidget->clear();
-  if( study )
+  this->ui->interviewTreeWidget->clear();
+  if( interview )
   {
     // get the active image so that we can highlight it
     Alder::Image *activeImage = Alder::Application::GetInstance()->GetActiveImage();
     QTreeWidgetItem *selectedItem = NULL;
 
-    // make root the study's UID
-    QString name = tr( "Study: " );
-    name += study->Get( "UId" ).ToString().c_str();
-    QTreeWidgetItem *root = new QTreeWidgetItem( this->ui->studyTreeWidget );
+    // make root the interview's UID and date
+    QString name = tr( "Interview: " );
+    name += interview->Get( "UId" ).ToString().c_str();
+    name += " (";
+    name += interview->Get( "VisitDate" ).ToString().c_str();
+    name += ")";
+    QTreeWidgetItem *root = new QTreeWidgetItem( this->ui->interviewTreeWidget );
     root->setText( 0, name );
     root->setExpanded( true );
     root->setFlags( Qt::ItemIsEnabled );
-    this->ui->studyTreeWidget->addTopLevelItem( root );
+    this->ui->interviewTreeWidget->addTopLevelItem( root );
 
-    // make each exam a child of the root
-    std::vector< vtkSmartPointer< Alder::Exam > > examList;
-    std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
-    study->GetList( &examList );
-    for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
+    // make each study a child of the root
+    std::vector< vtkSmartPointer< Alder::Study > > studyList;
+    std::vector< vtkSmartPointer< Alder::Study > >::iterator studyIt;
+    interview->GetList( &studyList );
+    for( studyIt = studyList.begin(); studyIt != studyList.end(); ++studyIt )
     {
-      Alder::Exam *exam = examIt->GetPointer();
-      name = tr( "Exam: " );
-      name += exam->Get( "Laterality" ).ToString().c_str();
-      QTreeWidgetItem *examItem = new QTreeWidgetItem( root );
-      this->treeModelMap[examItem] = *examIt;
-      examItem->setText( 0, name );
-      examItem->setExpanded( true );
-      examItem->setFlags( Qt::ItemIsEnabled );
+      Alder::Study *study = studyIt->GetPointer();
+      name = tr( "Study: " );
+      name += study->Get( "Modality" ).ToString().c_str();
+      QTreeWidgetItem *studyItem = new QTreeWidgetItem( root );
+      this->treeModelMap[studyItem] = *studyIt;
+      studyItem->setText( 0, name );
+      studyItem->setExpanded( false );
+      studyItem->setFlags( Qt::ItemIsEnabled );
 
-      // add the images for this exam
-      std::vector< vtkSmartPointer< Alder::Image > > imageList;
-      std::vector< vtkSmartPointer< Alder::Image > >::iterator imageIt;
-      exam->GetList( &imageList );
-      for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
+      // make each exam a child of the study
+      std::vector< vtkSmartPointer< Alder::Exam > > examList;
+      std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
+      study->GetList( &examList );
+      for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
       {
-        Alder::Image *image = imageIt->GetPointer();
-        
-        // don't show images with parents (that happens in the loop below instead)
-        if( !image->Get( "ParentImageId" ).IsValid() )
+        Alder::Exam *exam = examIt->GetPointer();
+        name = tr( "Exam" ) + ": ";
+        std::string laterality = exam->Get( "Laterality" ).ToString();
+        if( "none" != laterality )
         {
-          name = tr( "Image #" );
-          name += image->Get( "Acquisition" ).ToString().c_str();
-          QTreeWidgetItem *imageItem = new QTreeWidgetItem( examItem );
-          this->treeModelMap[imageItem] = *imageIt;
-          imageItem->setText( 0, name );
-          imageItem->setExpanded( true );
-          imageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-          if( activeImage && activeImage->Get( "Id" ).ToInt() == image->Get( "Id" ).ToInt() )
-            selectedItem = imageItem;
+          name += laterality.c_str();
+          name += " ";
+        }
+        name += exam->Get( "Type" ).ToString().c_str();
+        QTreeWidgetItem *examItem = new QTreeWidgetItem( studyItem );
+        this->treeModelMap[examItem] = *examIt;
+        examItem->setText( 0, name );
+        examItem->setExpanded( true );
+        examItem->setFlags( Qt::ItemIsEnabled );
 
-          // add child images for this image
-          std::vector< vtkSmartPointer< Alder::Image > > childImageList;
-          std::vector< vtkSmartPointer< Alder::Image > >::iterator childImageIt;
-          image->GetList( &childImageList );
-          for( childImageIt = childImageList.begin(); childImageIt != childImageList.end(); ++childImageIt )
+        // add the images for this exam
+        std::vector< vtkSmartPointer< Alder::Image > > imageList;
+        std::vector< vtkSmartPointer< Alder::Image > >::iterator imageIt;
+        exam->GetList( &imageList );
+        for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
+        {
+          Alder::Image *image = imageIt->GetPointer();
+          
+          // don't show images with parents (that happens in the loop below instead)
+          if( !image->Get( "ParentImageId" ).IsValid() )
           {
-            Alder::Image *childImage = childImageIt->GetPointer();
             name = tr( "Image #" );
-            name += childImage->Get( "Acquisition" ).ToString().c_str();
-            QTreeWidgetItem *childImageItem = new QTreeWidgetItem( imageItem );
-            this->treeModelMap[childImageItem] = *childImageIt;
-            childImageItem->setText( 0, name );
-            childImageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-            if( activeImage && activeImage->Get( "Id" ).ToInt() == childImage->Get( "Id" ).ToInt() )
-              selectedItem = childImageItem;
+            name += image->Get( "Acquisition" ).ToString().c_str();
+            QTreeWidgetItem *imageItem = new QTreeWidgetItem( examItem );
+            this->treeModelMap[imageItem] = *imageIt;
+            imageItem->setText( 0, name );
+            imageItem->setExpanded( true );
+            imageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+            if( activeImage && activeImage->Get( "Id" ).ToInt() == image->Get( "Id" ).ToInt() )
+              selectedItem = imageItem;
+
+            // add child images for this image
+            std::vector< vtkSmartPointer< Alder::Image > > childImageList;
+            std::vector< vtkSmartPointer< Alder::Image > >::iterator childImageIt;
+            image->GetChildList( &childImageList );
+            for( childImageIt = childImageList.begin(); childImageIt != childImageList.end(); ++childImageIt )
+            {
+              Alder::Image *childImage = childImageIt->GetPointer();
+              name = tr( "Image #" );
+              name += childImage->Get( "Acquisition" ).ToString().c_str();
+              QTreeWidgetItem *childImageItem = new QTreeWidgetItem( imageItem );
+              this->treeModelMap[childImageItem] = *childImageIt;
+              childImageItem->setText( 0, name );
+              childImageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+              if( activeImage && activeImage->Get( "Id" ).ToInt() == childImage->Get( "Id" ).ToInt() )
+                selectedItem = childImageItem;
+            }
           }
         }
       }
     }
       
-    if( selectedItem ) this->ui->studyTreeWidget->setCurrentItem( selectedItem );
+    if( selectedItem ) this->ui->interviewTreeWidget->setCurrentItem( selectedItem );
   }
 
   // re-enable the tree's signals
-  this->ui->studyTreeWidget->blockSignals( oldSignalState );
+  this->ui->interviewTreeWidget->blockSignals( oldSignalState );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -568,7 +595,7 @@ void QMainAlderWindow::updateRating()
 void QMainAlderWindow::updateInterface()
 {
   Alder::Application *app = Alder::Application::GetInstance();
-  Alder::Study *study = app->GetActiveStudy();
+  Alder::Interview *interview = app->GetActiveInterview();
   Alder::Image *image = app->GetActiveImage();
   bool loggedIn = NULL != app->GetActiveUser();
 
@@ -576,19 +603,19 @@ void QMainAlderWindow::updateInterface()
   this->ui->actionLogin->setText( tr( loggedIn ? "Logout" : "Login" ) );
 
   // set all widget enable states
-  this->ui->actionOpenStudy->setEnabled( loggedIn );
-  this->ui->unratedCheckBox->setEnabled( study );
-  this->ui->actionPreviousStudy->setEnabled( study );
-  this->ui->actionNextStudy->setEnabled( study );
-  this->ui->previousStudyPushButton->setEnabled( study );
-  this->ui->nextStudyPushButton->setEnabled( study );
+  this->ui->actionOpenInterview->setEnabled( loggedIn );
+  this->ui->unratedCheckBox->setEnabled( interview );
+  this->ui->actionPreviousInterview->setEnabled( interview );
+  this->ui->actionNextInterview->setEnabled( interview );
+  this->ui->previousInterviewPushButton->setEnabled( interview );
+  this->ui->nextInterviewPushButton->setEnabled( interview );
   this->ui->ratingSlider->setEnabled( image );
   this->ui->notePushButton->setEnabled( false ); // TODO: notes aren't implemented
-  this->ui->studyTreeWidget->setEnabled( study );
+  this->ui->interviewTreeWidget->setEnabled( interview );
   this->ui->medicalImageWidget->setEnabled( loggedIn );
 
-  this->updateStudyTreeWidget();
-  this->updateStudyInformation();
+  this->updateInterviewTreeWidget();
+  this->updateInformation();
   this->updateMedicalImageWidget();
   this->updateRating();
 }

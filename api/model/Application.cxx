@@ -86,10 +86,10 @@ namespace Alder
       this->ActiveInterview = NULL;
     }
 
-    if( NULL != this->ActiveStudy )
+    if( NULL != this->ActiveInterview )
     {
-      this->ActiveStudy->Delete();
-      this->ActiveStudy = NULL;
+      this->ActiveInterview->Delete();
+      this->ActiveInterview = NULL;
     }
 
     if( NULL != this->ActiveImage )
@@ -185,7 +185,6 @@ namespace Alder
   {
     this->SetActiveUser( NULL );
     this->SetActiveInterview( NULL );
-    this->SetActiveStudy( NULL );
     this->SetActiveImage( NULL );
   }
 
@@ -216,8 +215,11 @@ namespace Alder
     {
       if( this->ActiveInterview ) this->ActiveInterview->UnRegister( this );
       this->ActiveInterview = interview;
-      if( this->ActiveInterview ) this->ActiveInterview->Register( this );
-      this->SetActiveStudy( NULL );
+      if( this->ActiveInterview )
+      {
+        this->ActiveInterview->Register( this );
+        this->SetActiveImage( NULL );
+      }
 
       // if there is an active user, save the active interview
       if( this->ActiveUser )
@@ -225,22 +227,6 @@ namespace Alder
         if( interview ) this->ActiveUser->Set( "InterviewId", interview->Get( "Id" ).ToInt() );
         else this->ActiveUser->SetNull( "InterviewId" );
         this->ActiveUser->Save();
-      }
-      this->Modified();
-    }
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Application::SetActiveStudy( Study *study )
-  {
-    if( study != this->ActiveStudy )
-    {
-      if( this->ActiveStudy ) this->ActiveStudy->UnRegister( this );
-      this->ActiveStudy = study;
-      if( this->ActiveStudy )
-      {
-        this->ActiveStudy->Register( this );
-        this->SetActiveImage( NULL );
       }
       this->Modified();
     }

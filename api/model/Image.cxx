@@ -103,4 +103,26 @@ namespace Alder
     // we have found a rating, make sure it is not null
     return rating->Get( "Rating" ).IsValid();
   }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Image::GetChildList( std::vector< vtkSmartPointer< Image > > *list )
+  {
+    Application *app = Application::GetInstance();
+    std::stringstream stream;
+    stream << "SELECT Id FROM Image "
+           << "WHERE ParentImageId = " << this->Get( "Id" ).ToString();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
+
+    vtkDebugSQLMacro( << stream.str() );
+    query->SetQuery( stream.str().c_str() );
+    query->Execute();
+
+    while( query->NextRow() )
+    {
+      // create a new instance of the child class
+      vtkSmartPointer< Image > record = vtkSmartPointer< Image >::New();
+      record->Load( "Id", query->DataValue( 0 ).ToString() );
+      list->push_back( record );
+    }
+  }
 }

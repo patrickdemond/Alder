@@ -25,7 +25,7 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   ActiveRecord::ActiveRecord()
   {
-    this->DebugSQL = false;
+    this->DebugSQL = true;
     this->Initialized = false;
   }
 
