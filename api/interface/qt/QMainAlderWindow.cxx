@@ -25,6 +25,7 @@
 #include "QLoginDialog.h"
 #include "QProgressDialog.h"
 #include "QSelectInterviewDialog.h"
+#include "QStudyNoteDialog.h"
 #include "QUserListDialog.h"
 
 #include <QCloseEvent>
@@ -91,6 +92,9 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   QObject::connect(
     this->ui->ratingSlider, SIGNAL( valueChanged( int ) ),
     this, SLOT( slotRatingSliderChanged( int ) ) );
+  QObject::connect(
+    this->ui->notePushButton, SIGNAL( clicked() ),
+    this, SLOT( slotOpenNote() ) );
 
   this->readSettings();
   this->updateInterface();
@@ -395,6 +399,21 @@ void QMainAlderWindow::slotRatingSliderChanged( int value )
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotOpenNote()
+{
+  Alder::Application *app = Alder::Application::GetInstance();
+
+  // make sure we have an active image
+  Alder::Image *image = app->GetActiveImage();
+  if( !image ) throw std::runtime_error( "Open note button cliecked without an active image" );
+
+  QStudyNoteDialog dialog( this );
+  dialog.setModal( true );
+  dialog.setWindowTitle( tr( "Study Note" ) );
+  dialog.exec();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::writeSettings()
 {
   QSettings settings( "CLSA", "Alder" );
@@ -423,16 +442,12 @@ void QMainAlderWindow::updateInformation()
     if( image )
     {
       vtkSmartPointer< Alder::Exam > exam;
-      if( image->GetRecord( exam ) )
+      vtkSmartPointer< Alder::Study > study;
+      if( image->GetRecord( exam ) && exam->GetRecord( study ) )
       {
-        vtkSmartPointer< Alder::Study > study;
-        if( exam->GetRecord( study ) )
-        {
-
-          interviewerString = study->Get( "Interviewer" ).ToString().c_str();
-          siteString = study->Get( "Site" ).ToString().c_str();
-          dateString = study->Get( "DatetimeAcquired" ).ToString().c_str();
-        }
+        interviewerString = study->Get( "Interviewer" ).ToString().c_str();
+        siteString = study->Get( "Site" ).ToString().c_str();
+        dateString = study->Get( "DatetimeAcquired" ).ToString().c_str();
       }
     }
   }
@@ -624,7 +639,7 @@ void QMainAlderWindow::updateInterface()
   this->ui->previousInterviewPushButton->setEnabled( interview );
   this->ui->nextInterviewPushButton->setEnabled( interview );
   this->ui->ratingSlider->setEnabled( image );
-  this->ui->notePushButton->setEnabled( false ); // TODO: notes aren't implemented
+  this->ui->notePushButton->setEnabled( image );
   this->ui->interviewTreeWidget->setEnabled( interview );
   this->ui->medicalImageWidget->setEnabled( loggedIn );
 
