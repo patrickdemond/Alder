@@ -14,8 +14,6 @@
 
 #include <QDialog>
 
-#include "Utilities.h"
-
 class Ui_QSelectInterviewDialog;
 
 class QSelectInterviewDialog : public QDialog

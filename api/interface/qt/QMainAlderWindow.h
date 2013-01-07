@@ -14,8 +14,6 @@
 
 #include <QMainWindow>
 
-#include "Utilities.h"
-
 #include "vtkSmartPointer.h"
 
 #include <map>

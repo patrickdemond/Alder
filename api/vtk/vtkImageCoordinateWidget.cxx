@@ -180,12 +180,11 @@ vtkProp* vtkImageCoordinateWidget::GetNthProp( int id )
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void vtkImageCoordinateWidget::SetCursoringMode( int mode )
 {
-  if( this->CursoringMode == mode )
-  {
-    return;
-  }
-
-  this->CursoringMode = mode < 0 ? 0 : mode > 1 ? 1 : mode;
+  this->CursoringMode = 
+    mode < vtkImageCoordinateWidget::Discrete ?
+    vtkImageCoordinateWidget::Discrete :
+    mode > vtkImageCoordinateWidget::Continuous ?
+    vtkImageCoordinateWidget::Continuous : mode;
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -630,9 +629,6 @@ void vtkImageCoordinateWidget::UpdateDiscreteCursor( double *q )
     // we have a valid pick already, just enforce bounds check
     iq[i] = ( iqtemp < extent[2*i] ) ? extent[2*i] : \
           ( ( iqtemp > extent[2*i+1] ) ? extent[2*i+1] : iqtemp );
-
-    // compute image to world coords
-    q[i] = iq[i]*spacing[i] + origin[i]; 
 
     this->CurrentCursorPosition[i] = iq[i];
   }

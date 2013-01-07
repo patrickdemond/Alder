@@ -14,8 +14,6 @@
 
 #include <QDialog>
 
-#include "Utilities.h"
-
 class Ui_QLoginDialog;
 
 class QLoginDialog : public QDialog

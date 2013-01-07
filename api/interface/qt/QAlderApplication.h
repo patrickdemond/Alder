@@ -14,8 +14,6 @@
 
 #include <QApplication>
 
-#include "Utilities.h"
-
 class Ui_QAlderApplication;
 
 class QAlderApplication : public QApplication

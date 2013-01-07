@@ -13,10 +13,10 @@
 #include "vtkCamera.h"
 #include "vtkCommand.h"
 #include "vtkCornerAnnotation.h"
-#include "vtkGDCMImageReader.h"
 #include "vtkImageActor.h"
 #include "vtkImageCoordinateWidget.h"
 #include "vtkImageData.h"
+#include "vtkImageDataReader.h"
 #include "vtkImageMapToWindowLevelColors.h"
 #include "vtkImageSinusoidSource.h"
 #include "vtkImageSliceMapper.h"
@@ -237,15 +237,14 @@ void vtkMedicalImageViewer::SetInput( vtkImageData* input )
 bool vtkMedicalImageViewer::Load( std::string fileName )
 {
   bool success = false;
-  vtkGDCMImageReader* reader = vtkGDCMImageReader::New();
-  if( reader->CanReadFile( fileName.c_str() ) )
+  if( vtkImageDataReader::IsValidFileName( fileName.c_str() ) )
   {
+    vtkImageDataReader* reader = vtkImageDataReader::New();
     reader->SetFileName( fileName.c_str() );
-    reader->Update();
     this->SetInput( reader->GetOutput() );
     success = true;
+    reader->Delete();
   }
-  reader->Delete();
 
   return success;
 }
@@ -950,10 +949,9 @@ void vtkMedicalImageViewer::SetCursor( int arg )
 void vtkMedicalImageViewer::SetInterpolate( int arg )
 {
   this->Interpolate = arg;
-
   this->CursorWidget->SetCursoringMode( this->Interpolate ?
-    vtkImageCoordinateWidget::Discrete :
-    vtkImageCoordinateWidget::Continuous );
+    vtkImageCoordinateWidget::Continuous :
+    vtkImageCoordinateWidget::Discrete );
 
   this->ImageActor->SetInterpolate( this->Interpolate );
 

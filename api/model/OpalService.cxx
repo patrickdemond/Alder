@@ -52,7 +52,7 @@ namespace Alder
            << " --user " << this->Username 
            << " --password " << this->Password
            << " --ws \"" << servicePath << "\"";
-    std::string result = exec( stream.str().c_str() );
+    std::string result = Utilities::exec( stream.str().c_str() );
     if( 0 == result.length() )
       throw std::runtime_error( "Invalid response from Opal service" );
     else if( !reader.parse( result.c_str(), root ) )

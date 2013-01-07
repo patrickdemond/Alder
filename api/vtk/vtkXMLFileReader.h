@@ -27,7 +27,7 @@
 #include "vtkAlgorithm.h"
 #include "vtkVariant.h"
 
-#include "Utilities.h"
+//#include "Utilities.h"
 #include <libxml/xmlreader.h>
 
 #include <stdexcept>

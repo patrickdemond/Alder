@@ -14,8 +14,6 @@
 
 #include <QDialog>
 
-#include "Utilities.h"
-
 #include "vtkCommand.h"
 #include "vtkSmartPointer.h"
 

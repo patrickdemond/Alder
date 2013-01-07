@@ -14,8 +14,6 @@
 
 #include <QDialog>
 
-#include "Utilities.h"
-
 class Ui_QUserListDialog;
 
 class QUserListDialog : public QDialog
