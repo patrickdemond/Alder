@@ -14,7 +14,6 @@
 #include "Application.h"
 #include "Database.h"
 #include "User.h"
-#include "Utilities.h"
 
 #include "vtkSmartPointer.h"
 

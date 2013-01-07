@@ -9,7 +9,6 @@
 
 =========================================================================*/
 #include "User.h"
-
 #include "Utilities.h"
 
 #include "vtkObjectFactory.h"
@@ -24,7 +23,7 @@ namespace Alder
     if( 0 == column.compare( "Password" ) && value.IsValid() )
     { // if we are setting the password override the parent so that we can hash
       std::string hashedPassword;
-      hashString( value.ToString(), hashedPassword );
+      Utilities::hashString( value.ToString(), hashedPassword );
       value = vtkVariant( hashedPassword );
     }
 
@@ -42,7 +41,7 @@ namespace Alder
   {
     // first hash the password argument
     std::string hashedPassword;
-    hashString( password, hashedPassword );
+    Utilities::hashString( password, hashedPassword );
     return 0 == hashedPassword.compare( this->Get( "Password" ).ToString() );
   }
 }

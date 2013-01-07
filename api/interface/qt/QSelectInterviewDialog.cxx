@@ -15,7 +15,6 @@
 #include "Database.h"
 #include "Interview.h"
 #include "Study.h"
-#include "Utilities.h"
 
 #include "vtkSmartPointer.h"
 

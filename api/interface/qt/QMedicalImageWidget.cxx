@@ -27,6 +27,7 @@ QMedicalImageWidget::QMedicalImageWidget( QWidget* parent )
   this->ui->setupUi( this );
   this->viewer = vtkMedicalImageViewer::New();
   this->viewer->SetRenderWindow( this->ui->vtkWidget->GetRenderWindow() );
+  this->viewer->InterpolateOff();
   this->resetImage();
 
   QObject::connect(
@@ -80,7 +81,7 @@ void QMedicalImageWidget::updateInterface()
     this->ui->scrollBar->setVisible( false );
   }
   else
-  { // show the slider and update the its range
+  { // show the slider and update its range
     this->ui->scrollBar->setVisible( true );
     
     int min = this->viewer->GetSliceMin();

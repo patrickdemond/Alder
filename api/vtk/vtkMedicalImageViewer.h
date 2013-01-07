@@ -72,8 +72,8 @@ class vtkMedicalImageViewer : public vtkObject
 {
 public:
   static vtkMedicalImageViewer *New();
-  vtkTypeMacro(vtkMedicalImageViewer,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  vtkTypeMacro( vtkMedicalImageViewer, vtkObject );
+  void PrintSelf( ostream& os, vtkIndent indent );
 
   /**
    * Force render the display.
@@ -100,7 +100,6 @@ public:
    * @return boolean
    */
    bool Load( std::string fileName );
-
 
   /**
    * Enum constants for orthonormal slice orientations. */
@@ -219,7 +218,6 @@ public:
   void SetMappingToColorAlpha();
   void SetMappingToColor();
   //@}
-
   
   /**
    * Get window.
@@ -306,7 +304,6 @@ public:
   vtkGetMacro( PlayEvent, int );
   vtkGetMacro( StopEvent, int );
   //@}
-
 
   /**
    * Turn cursoring on or off.  Cursoring works in concert with
