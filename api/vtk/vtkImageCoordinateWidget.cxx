@@ -20,6 +20,7 @@
 #include "vtkImageActor.h"
 #include "vtkImageData.h"
 #include "vtkMath.h"
+#include "vtkNew.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkPropPicker.h"
@@ -27,6 +28,7 @@
 #include "vtkRenderer.h"
 
 vtkStandardNewMacro( vtkImageCoordinateWidget );
+vtkCxxSetObjectMacro( vtkImageCoordinateWidget, UserTransform, vtkHomogeneousTransform );
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 vtkImageCoordinateWidget::vtkImageCoordinateWidget()
@@ -103,26 +105,6 @@ void vtkImageCoordinateWidget::SetPicker( vtkAbstractPropPicker* picker )
       }
     }
   }
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void vtkImageCoordinateWidget::SetUserTransform( vtkHomogeneousTransform *transform )
-{
-  if( transform == this->UserTransform )
-  {
-    return;
-  }
-  if( this->UserTransform )
-  {
-    this->UserTransform->Delete();
-    this->UserTransform = NULL;
-  }
-  if( transform )
-  {
-    this->UserTransform = transform;
-    this->UserTransform->Register( this );
-  }
-  this->Modified();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -565,7 +547,7 @@ void vtkImageCoordinateWidget::UpdateContinuousCursor( double *q )
   vtkPointData* pd = this->ImageData->GetPointData();
   if( !pd ) return;
 
-  vtkPointData* outPD = vtkPointData::New();
+  vtkNew< vtkPointData > outPD;
   outPD->InterpolateAllocate( pd, 1, 1 );
 
   // Use tolerance as a function of size of source data
@@ -596,8 +578,6 @@ void vtkImageCoordinateWidget::UpdateContinuousCursor( double *q )
       this->CurrentImageValue[ c ] = tuple[ c ];
     }
   }
-
-  outPD->Delete();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

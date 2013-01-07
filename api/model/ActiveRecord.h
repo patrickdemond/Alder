@@ -117,14 +117,17 @@ namespace Alder
      * Provides a list of all records which are related to this record by foreign key.
      * @param list vector An existing vector to put all records into.
      */
-    template< class T > void GetList( std::vector< vtkSmartPointer< T > > *list )
+    template< class T > void GetList( std::vector< vtkSmartPointer< T > > *list, std::string column = "" )
     {
+      // if no column name was provided, use the default (table name followed by Id)
+      if( column.empty() ) column = this->GetName() + "Id";
+
       Application *app = Application::GetInstance();
       // get the class name of T, return error if not found
       std::string type = app->GetUnmangledClassName( typeid(T).name() );
       std::stringstream stream;
       stream << "SELECT Id FROM " << type << " "
-             << "WHERE " << this->GetName() << "Id = " << this->Get( "Id" ).ToString();
+             << "WHERE " << column << " = " << this->Get( "Id" ).ToString();
       vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
       vtkDebugSQLMacro( << stream.str() );
@@ -155,10 +158,35 @@ namespace Alder
 
     /**
      * Get the record which has a foreign key in this table.
-     * Note: the record returned must be deleted by the recipient
+     * @param std::string column An alternate column name to use instead of the default <table>Id
+     * @return True if the record is found, false if not
      * @throws runtime_error
      */
-    virtual ActiveRecord* GetRecord( std::string column, std::string columnName = "" );
+    template <class T> bool GetRecord( vtkSmartPointer< T > &record, std::string column = "" )
+    {
+      Application *app = Application::GetInstance();
+      std::string table = app->GetUnmangledClassName( typeid(T).name() );
+
+      // if no column name was provided, use the default (table name followed by Id)
+      if( column.empty() ) column = table + "Id";
+
+      // test to see if correct foreign key exists
+      if( !this->ColumnNameExists( column ) )
+      {
+        std::stringstream error;
+        error << "Tried to get \"" << table << "\" record but column \"" << column << "\" doesn't exist";
+        throw std::runtime_error( error.str() );
+      }
+
+      vtkVariant v = this->Get( column );
+      if( v.IsValid() )
+      { // only create the record if the foreign key is not null
+        record.TakeReference( T::SafeDownCast( Application::GetInstance()->Create( table ) ) );
+        record->Load( "Id", this->Get( column ).ToString() );
+      }
+
+      return v.IsValid();
+    }
 
     /**
      * Set the value of any column in the record.

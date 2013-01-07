@@ -417,10 +417,24 @@ void QMainAlderWindow::updateInformation()
   Alder::Interview *interview = Alder::Application::GetInstance()->GetActiveInterview();
   if( interview )
   {
-    // TODO: get study from active image
-    //interviewerString = study->Get( "Interviewer" ).ToString().c_str();
-    //siteString = study->Get( "Site" ).ToString().c_str();
-    //dateString = study->Get( "DatetimeAcquired" ).ToString().c_str();
+    // get study from active image
+    Alder::Image *image = Alder::Application::GetInstance()->GetActiveImage();
+
+    if( image )
+    {
+      vtkSmartPointer< Alder::Exam > exam;
+      if( image->GetRecord( exam ) )
+      {
+        vtkSmartPointer< Alder::Study > study;
+        if( exam->GetRecord( study ) )
+        {
+
+          interviewerString = study->Get( "Interviewer" ).ToString().c_str();
+          siteString = study->Get( "Site" ).ToString().c_str();
+          dateString = study->Get( "DatetimeAcquired" ).ToString().c_str();
+        }
+      }
+    }
   }
 
   this->ui->interviewerValueLabel->setText( interviewerString );
@@ -517,7 +531,7 @@ void QMainAlderWindow::updateInterviewTreeWidget()
             // add child images for this image
             std::vector< vtkSmartPointer< Alder::Image > > childImageList;
             std::vector< vtkSmartPointer< Alder::Image > >::iterator childImageIt;
-            image->GetChildList( &childImageList );
+            image->GetList( &childImageList, "ParentImageId" );
             for( childImageIt = childImageList.begin(); childImageIt != childImageList.end(); ++childImageIt )
             {
               Alder::Image *childImage = childImageIt->GetPointer();

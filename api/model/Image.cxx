@@ -33,9 +33,17 @@ namespace Alder
     this->AssertPrimaryId();
 
     // get the study and exam for this record
-    Exam *exam = Exam::SafeDownCast( this->GetRecord( "Exam" ) );
-    Study *study = Study::SafeDownCast( exam->GetRecord( "Study" ) );
-    Interview *interview = Interview::SafeDownCast( study->GetRecord( "Interview" ) );
+    vtkSmartPointer< Exam > exam;
+    if( !this->GetRecord( exam ) )
+      throw std::runtime_error( "Image has no parent exam!" );
+
+    vtkSmartPointer< Study > study;
+    if( !exam->GetRecord( study ) )
+      throw std::runtime_error( "Exam has no parent study!" );
+
+    vtkSmartPointer< Interview > interview;
+    if( !study->GetRecord( interview ) )
+      throw std::runtime_error( "Study has no parent interview!" );
 
     std::stringstream stream;
     // get the path of the file (we don't know file type yet)
@@ -43,10 +51,6 @@ namespace Alder
            << "/" << interview->Get( "Id" ).ToString()
            << "/" << study->Get( "Id" ).ToString()
            << "/" << exam->Get( "Id" ).ToString();
-
-    exam->Delete();
-    study->Delete();
-    interview->Delete();
 
     return stream.str();
   }
@@ -102,27 +106,5 @@ namespace Alder
 
     // we have found a rating, make sure it is not null
     return rating->Get( "Rating" ).IsValid();
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Image::GetChildList( std::vector< vtkSmartPointer< Image > > *list )
-  {
-    Application *app = Application::GetInstance();
-    std::stringstream stream;
-    stream << "SELECT Id FROM Image "
-           << "WHERE ParentImageId = " << this->Get( "Id" ).ToString();
-    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
-
-    vtkDebugSQLMacro( << stream.str() );
-    query->SetQuery( stream.str().c_str() );
-    query->Execute();
-
-    while( query->NextRow() )
-    {
-      // create a new instance of the child class
-      vtkSmartPointer< Image > record = vtkSmartPointer< Image >::New();
-      record->Load( "Id", query->DataValue( 0 ).ToString() );
-      list->push_back( record );
-    }
   }
 }
