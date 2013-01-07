@@ -417,10 +417,21 @@ void QMainAlderWindow::updateInformation()
   Alder::Interview *interview = Alder::Application::GetInstance()->GetActiveInterview();
   if( interview )
   {
-    // TODO: get study from active image
-    //interviewerString = study->Get( "Interviewer" ).ToString().c_str();
-    //siteString = study->Get( "Site" ).ToString().c_str();
-    //dateString = study->Get( "DatetimeAcquired" ).ToString().c_str();
+    // get study from active image
+    Alder::Image *image = Alder::Application::GetInstance()->GetActiveImage();
+
+    if( image )
+    {
+      Alder::Exam *exam = Alder::Exam::SafeDownCast( image->GetRecord( "Exam" ) );
+      Alder::Study *study = Alder::Study::SafeDownCast( exam->GetRecord( "Study" ) );
+
+      interviewerString = study->Get( "Interviewer" ).ToString().c_str();
+      siteString = study->Get( "Site" ).ToString().c_str();
+      dateString = interview->Get( "DatetimeAcquired" ).ToString().c_str();
+
+      exam->Delete();
+      study->Delete();
+    }
   }
 
   this->ui->interviewerValueLabel->setText( interviewerString );

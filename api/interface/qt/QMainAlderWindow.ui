@@ -91,7 +91,7 @@
           <item>
            <widget class="QPushButton" name="previousInterviewPushButton">
             <property name="text">
-             <string>Prev Interview</string>
+             <string>Previous Interview</string>
             </property>
            </widget>
           </item>
@@ -118,6 +118,12 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>300</width>
+            <height>0</height>
+           </size>
           </property>
           <column>
            <property name="text">
