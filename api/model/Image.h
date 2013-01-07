@@ -24,8 +24,6 @@
 
 #include "ActiveRecord.h"
 
-#include <iostream>
-
 /**
  * @addtogroup Alder
  * @{
@@ -42,7 +40,14 @@ namespace Alder
     std::string GetName() { return "Image"; }
 
     /**
-     * Get the file name that this record represents
+     * Get the full path to where the image associated with this record belongs.
+     */
+    std::string GetFilePath();
+
+    /**
+     * Get the file name that this record represents (including path)
+     * NOTE: this method depends on the file already existing, if it doesn't already
+     * exist it will throw an exception
      */
     std::string GetFileName();
 
@@ -50,6 +55,12 @@ namespace Alder
      * Get whether a particular user has rated this image
      */
     bool IsRatedBy( User* user );
+
+    /**
+     * Get a list of child images associated with the current image
+     * @param list vector An existing vector to put all records into.
+     */
+    void GetChildList( std::vector< vtkSmartPointer< Image > > *list );
 
   protected:
     Image() {}

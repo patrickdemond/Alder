@@ -42,13 +42,11 @@
 
 namespace Alder
 {
-  class Cineloop;
   class Configuration;
   class Database;
   class Image;
   class Interview;
   class OpalService;
-  class Study;
   class User;
   class Application : public ModelObject
   {
@@ -82,9 +80,8 @@ namespace Alder
     vtkGetObjectMacro( DB, Database );
     vtkGetObjectMacro( Opal, OpalService );
     vtkGetObjectMacro( ActiveUser, User );
-    vtkGetObjectMacro( ActiveStudy, Study );
+    vtkGetObjectMacro( ActiveInterview, Interview );
     vtkGetObjectMacro( ActiveImage, Image );
-    vtkGetObjectMacro( ActiveCineloop, Cineloop );
 
     /**
      * When setting the active user the active interview will be set to the interview stored in the user's
@@ -93,25 +90,15 @@ namespace Alder
     virtual void SetActiveUser( User* );
 
     /**
-     * When setting the active study the active image and cineloop are automatically removed and,
-     * if there is an active user, the active study is stored in the user's record
-     */
-    virtual void SetActiveStudy( Study* );
-
-    /**
-     * When setting the active image the active cineloop is automatically removed
-     */
-    virtual void SetActiveImage( Image* );
-    
-    /**
-     * When setting the active cineloop the active image is automatically removed
-     */
-    virtual void SetActiveCineloop( Cineloop* );
-    
-    /**
-     * When setting the active interview the active study is automatically removed
+     * When setting the active interview the active image is automatically removed and,
+     * if there is an active user, the active interview is stored in the user's record
      */
     virtual void SetActiveInterview( Interview* );
+
+    /**
+     * Sets the active image
+     */
+    virtual void SetActiveImage( Image* );
     
     /**
      * Creates a new instance of a model object given its class name
@@ -152,10 +139,8 @@ namespace Alder
     Database *DB;
     OpalService *Opal;
     User *ActiveUser;
-    Study *ActiveStudy;
-    Image *ActiveImage;
-    Cineloop *ActiveCineloop;
     Interview *ActiveInterview;
+    Image *ActiveImage;
     
   private:
     Application( const Application& );  // Not implemented.

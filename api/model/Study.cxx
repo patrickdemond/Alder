@@ -106,109 +106,11 @@ namespace Alder
   */
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  vtkSmartPointer<Study> Study::GetNext()
-  {
-    std::string currentUid = this->Get( "UId" ).ToString();
-    std::vector< std::string > list = Study::GetUIdList();
-    std::vector< std::string >::reverse_iterator it;
-
-    // the list should never be empty (since we are already an instance of study)
-    if( list.empty() ) throw std::runtime_error( "Study list is empty while trying to get next study." );
-    
-    // find this record's UId in the list, return the next one
-    std::string UId;
-    for( it = list.rbegin(); it != list.rend(); it++ )
-    {
-      if( currentUid == *it )
-      {
-        if( list.rbegin() == it )
-        { // first UId matches, get the last UId
-          UId = list.front();
-        }
-        else
-        { // move the iterator to the previous address, get it's value
-          it--;
-          UId = *it;
-        }
-        break;
-      }
-    }
-
-    if( UId.empty() ) throw std::runtime_error( "Study list does not include current UId." );
-
-    vtkSmartPointer<Study> study = vtkSmartPointer<Study>::New();
-    study->Load( "UId", UId );
-    return study;
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Study::Next()
-  {
-    this->Load( "Id", this->GetNext()->Get( "Id" ).ToString() );
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  vtkSmartPointer<Study> Study::GetPrevious()
-  {
-    std::string currentUid = this->Get( "UId" ).ToString();
-    std::vector< std::string > list = Study::GetUIdList();
-    std::vector< std::string >::iterator it;
-
-    // the list should never be empty (since we are already an instance of study)
-    if( list.empty() ) throw std::runtime_error( "Study list is empty while trying to get next study." );
-    
-    // find this record's UId in the list, return the next one
-    std::string UId;
-    for( it = list.begin(); it != list.end(); it++ )
-    {
-      if( currentUid == *it )
-      {
-        if( list.begin() == it )
-        { // first UId matches, get the last UId
-          UId = list.back();
-        }
-        else
-        { // move the iterator to the previous address, get it's value
-          it--;
-          UId = *it;
-        }
-        break;
-      }
-    }
-
-    if( UId.empty() ) throw std::runtime_error( "Study list does not include current UId." );
-
-    vtkSmartPointer<Study> study = vtkSmartPointer<Study>::New();
-    study->Load( "UId", UId );
-    return study;
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Study::Previous()
-  {
-    this->Load( "Id", this->GetPrevious()->Get( "Id" ).ToString() );
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::vector< std::string > Study::GetUIdList()
-  {
-    Application *app = Application::GetInstance();
-    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
-    query->SetQuery( "SELECT UId FROM Study ORDER BY UId" );
-    query->Execute();
-
-    std::vector< std::string > list;
-    while( query->NextRow() ) list.push_back( query->DataValue( 0 ).ToString() );
-    return list;
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   int Study::GetImageCount()
   {
     // loop through all exams and sum the image count
     int total = 0;
 
-    // loop through all exams
     std::vector< vtkSmartPointer< Exam > > examList;
     std::vector< vtkSmartPointer< Exam > >::iterator examIt;
     this->GetList( &examList );

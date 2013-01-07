@@ -74,28 +74,6 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `Alder`.`Cineloop`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `Alder`.`Cineloop` ;
-
-CREATE  TABLE IF NOT EXISTS `Alder`.`Cineloop` (
-  `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `UpdateTimestamp` TIMESTAMP NOT NULL ,
-  `CreateTimestamp` TIMESTAMP NOT NULL ,
-  `ExamId` INT UNSIGNED NOT NULL ,
-  `Acquisition` INT NOT NULL ,
-  PRIMARY KEY (`Id`) ,
-  INDEX `fkCineloopExamId` (`ExamId` ASC) ,
-  UNIQUE INDEX `uqExamIdAcquisition` (`ExamId` ASC, `Acquisition` ASC) ,
-  CONSTRAINT `fkCineloopExamId`
-    FOREIGN KEY (`ExamId` )
-    REFERENCES `Alder`.`Exam` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `Alder`.`Image`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `Alder`.`Image` ;
@@ -106,20 +84,19 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Image` (
   `CreateTimestamp` TIMESTAMP NOT NULL ,
   `ExamId` INT UNSIGNED NOT NULL ,
   `Acquisition` INT NOT NULL ,
-  `CineloopId` INT UNSIGNED NULL ,
+  `ParentImageId` INT UNSIGNED NULL ,
   PRIMARY KEY (`Id`) ,
   INDEX `fkImageExamId` (`ExamId` ASC) ,
-  INDEX `fkImageCineloopId` (`CineloopId` ASC) ,
-  INDEX `dkCineloopIdframe` (`CineloopId` ASC) ,
   UNIQUE INDEX `uqExamIdAcquisition` (`ExamId` ASC, `Acquisition` ASC) ,
+  INDEX `fkImageParentImageId` (`ParentImageId` ASC) ,
   CONSTRAINT `fkImageExamId`
     FOREIGN KEY (`ExamId` )
     REFERENCES `Alder`.`Exam` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fkImageCineloopId`
-    FOREIGN KEY (`CineloopId` )
-    REFERENCES `Alder`.`Cineloop` (`Id` )
+  CONSTRAINT `fkImageParentImageId`
+    FOREIGN KEY (`ParentImageId` )
+    REFERENCES `Alder`.`Image` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -162,7 +139,6 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Rating` (
   `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `UpdateTimestamp` TIMESTAMP NOT NULL ,
   `CreateTimestamp` TIMESTAMP NOT NULL ,
-  `CineloopId` INT UNSIGNED NOT NULL ,
   `ImageId` INT UNSIGNED NOT NULL ,
   `UserId` INT UNSIGNED NOT NULL ,
   `Rating` TINYINT(1) NULL DEFAULT NULL ,
@@ -170,9 +146,7 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Rating` (
   INDEX `fkImageId` (`ImageId` ASC) ,
   INDEX `fkUserId` (`UserId` ASC) ,
   INDEX `dkRating` (`Rating` ASC) ,
-  INDEX `fkCineloopId` (`CineloopId` ASC) ,
   UNIQUE INDEX `uqImageIdUserId` (`ImageId` ASC, `UserId` ASC) ,
-  UNIQUE INDEX `uqCineloopIdUserId` (`CineloopId` ASC, `UserId` ASC) ,
   CONSTRAINT `fkRatingImageId`
     FOREIGN KEY (`ImageId` )
     REFERENCES `Alder`.`Image` (`Id` )
@@ -181,11 +155,6 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Rating` (
   CONSTRAINT `fkRatingUserId`
     FOREIGN KEY (`UserId` )
     REFERENCES `Alder`.`User` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fkRatingCineloopId`
-    FOREIGN KEY (`CineloopId` )
-    REFERENCES `Alder`.`Cineloop` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;

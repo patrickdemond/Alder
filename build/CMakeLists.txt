@@ -88,7 +88,6 @@ SET( ALDER_SOURCE
 
   ${ALDER_MODEL_DIR}/ActiveRecord.cxx
   ${ALDER_MODEL_DIR}/Application.cxx
-  ${ALDER_MODEL_DIR}/Cineloop.cxx
   ${ALDER_MODEL_DIR}/Configuration.cxx
   ${ALDER_MODEL_DIR}/Database.cxx
   ${ALDER_MODEL_DIR}/Exam.cxx
@@ -177,6 +176,7 @@ TARGET_LINK_LIBRARIES( alder
   ${LIBXML2_LIBRARIES}
   ${CRYPTO++_LIBRARIES}
   ${JSONCPP_LIBRARIES}
+  ${MYSQL_LIBRARY}
 )
 INSTALL( TARGETS alder RUNTIME DESTINATION bin )
 

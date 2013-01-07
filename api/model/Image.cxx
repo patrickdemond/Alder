@@ -18,6 +18,7 @@
 #include "User.h"
 #include "Utilities.h"
 
+#include "vtkDirectory.h"
 #include "vtkObjectFactory.h"
 
 #include <stdexcept>
@@ -27,7 +28,7 @@ namespace Alder
   vtkStandardNewMacro( Image );
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string Image::GetFileName() // TODO: re-implement (jpg, interview, etc)
+  std::string Image::GetFilePath()
   {
     this->AssertPrimaryId();
 
@@ -37,17 +38,52 @@ namespace Alder
     Interview *interview = Interview::SafeDownCast( study->GetRecord( "Interview" ) );
 
     std::stringstream stream;
-    // start with the base image directory
+    // get the path of the file (we don't know file type yet)
     stream << Application::GetInstance()->GetConfig()->GetValue( "Path", "ImageData" )
-           << "/" << interview->Get( "UId" ).ToString()
-           << "/" << exam->Get( "Id" ).ToString()
-           << "/Image/" << this->Get( "Id" ).ToString() << ".dcm";
+           << "/" << interview->Get( "Id" ).ToString()
+           << "/" << study->Get( "Id" ).ToString()
+           << "/" << exam->Get( "Id" ).ToString();
 
     exam->Delete();
     study->Delete();
     interview->Delete();
 
     return stream.str();
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::string Image::GetFileName()
+  {
+    // make sure the path exists
+    std::string path = this->GetFilePath();
+
+    // now look for image files in that directory
+    vtkSmartPointer< vtkDirectory > directory = vtkSmartPointer< vtkDirectory >::New();
+    
+    if( !directory->Open( path.c_str() ) )
+    {
+      std::stringstream error;
+      error << "Tried to get image file but the path \"" << path << "\" does not exist.";
+      throw std::runtime_error( error.str() );
+    }
+
+    // we don't know the file type yet, search for all files which have our Id
+    std::string id = this->Get( "Id" ).ToString();
+    for( vtkIdType index = 0; index < directory->GetNumberOfFiles(); index++ )
+    {
+      std::string filename = directory->GetFile( index );
+      if( filename.substr( 0, id.length() ) == id )
+      {
+        std::stringstream name;
+        name << path << "/" << filename;
+        return name.str();
+      }
+    }
+
+    // if we get here then the file was not found
+    std::stringstream error;
+    error << "Tried to get image file in \"" << path << "\" but the file does not exist.";
+    throw std::runtime_error( error.str() );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -66,5 +102,27 @@ namespace Alder
 
     // we have found a rating, make sure it is not null
     return rating->Get( "Rating" ).IsValid();
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Image::GetChildList( std::vector< vtkSmartPointer< Image > > *list )
+  {
+    Application *app = Application::GetInstance();
+    std::stringstream stream;
+    stream << "SELECT Id FROM Image "
+           << "WHERE ParentImageId = " << this->Get( "Id" ).ToString();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
+
+    vtkDebugSQLMacro( << stream.str() );
+    query->SetQuery( stream.str().c_str() );
+    query->Execute();
+
+    while( query->NextRow() )
+    {
+      // create a new instance of the child class
+      vtkSmartPointer< Image > record = vtkSmartPointer< Image >::New();
+      record->Load( "Id", query->DataValue( 0 ).ToString() );
+      list->push_back( record );
+    }
   }
 }

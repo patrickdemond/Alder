@@ -94,9 +94,11 @@ void QSelectInterviewDialog::slotAccepted()
   }
   else
   {
-    QTableWidgetItem *item = list.first();
+    std::map< std::string, std::string > map;
+    map["UId"] = list.at( 0 )->text().toStdString();
+    map["VisitDate"] = list.at( 1 )->text().toStdString();
     interview = vtkSmartPointer< Alder::Interview >::New();
-    interview->Load( "UId", item->text().toStdString() );
+    interview->Load( map );
   }
 
   Alder::Application::GetInstance()->SetActiveInterview( interview );
@@ -166,28 +168,28 @@ void QSelectInterviewDialog::updateInterface()
       item->setText( UId );
       this->ui->interviewTableWidget->setItem( 0, 0, item );
 
+      // add visit date to row
+      item = new QTableWidgetItem;
+      item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+      item->setText( QString( interview->Get( "VisitDate" ).ToString().c_str() ) );
+      this->ui->interviewTableWidget->setItem( 0, 1, item );
+
       // add dexa interview to row
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
       item->setText( dexa );
-      this->ui->interviewTableWidget->setItem( 0, 1, item );
+      this->ui->interviewTableWidget->setItem( 0, 2, item );
 
       // add ultrasound interview to row
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
       item->setText( ultrasound );
-      this->ui->interviewTableWidget->setItem( 0, 2, item );
+      this->ui->interviewTableWidget->setItem( 0, 3, item );
 
       // add retinal interview to row
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
       item->setText( retinal );
-      this->ui->interviewTableWidget->setItem( 0, 3, item );
-
-      // add visit date to row
-      item = new QTableWidgetItem;
-      item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      item->setText( QString( interview->Get( "VisitDate" ).ToString().c_str() ) );
       this->ui->interviewTableWidget->setItem( 0, 4, item );
     }
   }

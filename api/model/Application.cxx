@@ -12,7 +12,6 @@
 #include "Application.h"
 
 #include "Configuration.h"
-#include "Cineloop.h"
 #include "Database.h"
 #include "Exam.h"
 #include "Image.h"
@@ -40,8 +39,6 @@ namespace Alder
     this->ResetApplication();
 
     // populate the constructor and class name registries with all active record classes
-    this->ConstructorRegistry["Cineloop"] = &createInstance<Cineloop>;
-    this->ClassNameRegistry["Cineloop"] = typeid(Cineloop).name();
     this->ConstructorRegistry["Exam"] = &createInstance<Exam>;
     this->ClassNameRegistry["Exam"] = typeid(Exam).name();
     this->ConstructorRegistry["Image"] = &createInstance<Image>;
@@ -89,22 +86,16 @@ namespace Alder
       this->ActiveInterview = NULL;
     }
 
-    if( NULL != this->ActiveStudy )
+    if( NULL != this->ActiveInterview )
     {
-      this->ActiveStudy->Delete();
-      this->ActiveStudy = NULL;
+      this->ActiveInterview->Delete();
+      this->ActiveInterview = NULL;
     }
 
     if( NULL != this->ActiveImage )
     {
       this->ActiveImage->Delete();
       this->ActiveImage = NULL;
-    }
-
-    if( NULL != this->ActiveCineloop )
-    {
-      this->ActiveCineloop->Delete();
-      this->ActiveCineloop = NULL;
     }
   }
 
@@ -194,9 +185,7 @@ namespace Alder
   {
     this->SetActiveUser( NULL );
     this->SetActiveInterview( NULL );
-    this->SetActiveStudy( NULL );
     this->SetActiveImage( NULL );
-    this->SetActiveCineloop( NULL );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -226,8 +215,11 @@ namespace Alder
     {
       if( this->ActiveInterview ) this->ActiveInterview->UnRegister( this );
       this->ActiveInterview = interview;
-      if( this->ActiveInterview ) this->ActiveInterview->Register( this );
-      this->SetActiveStudy( NULL );
+      if( this->ActiveInterview )
+      {
+        this->ActiveInterview->Register( this );
+        this->SetActiveImage( NULL );
+      }
 
       // if there is an active user, save the active interview
       if( this->ActiveUser )
@@ -241,51 +233,5 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Application::SetActiveStudy( Study *study )
-  {
-    if( study != this->ActiveStudy )
-    {
-      if( this->ActiveStudy ) this->ActiveStudy->UnRegister( this );
-      this->ActiveStudy = study;
-      if( this->ActiveStudy )
-      {
-        this->ActiveStudy->Register( this );
-        this->SetActiveImage( NULL );
-        this->SetActiveCineloop( NULL );
-      }
-      this->Modified();
-    }
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Application::SetActiveImage( Image *image )
-  {
-    if( image != this->ActiveImage )
-    {
-      if( this->ActiveImage ) this->ActiveImage->UnRegister( this );
-      this->ActiveImage = image;
-      if( this->ActiveImage )
-      {
-        this->SetActiveCineloop( NULL );
-        this->ActiveImage->Register( this );
-      }
-      this->Modified();
-    }
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Application::SetActiveCineloop( Cineloop *cineloop )
-  {
-    if( cineloop != this->ActiveCineloop )
-    {
-      if( this->ActiveCineloop ) this->ActiveCineloop->UnRegister( this );
-      this->ActiveCineloop = cineloop;
-      if( this->ActiveCineloop )
-      {
-        this->SetActiveImage( NULL );
-        this->ActiveCineloop->Register( this );
-      }
-      this->Modified();
-    }
-  }
+  vtkCxxSetObjectMacro( Application, ActiveImage, Image );
 }
