@@ -198,35 +198,6 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  ActiveRecord* ActiveRecord::GetRecord( std::string table, std::string column )
-  {
-    // if no column name was provided, use the default (table name followed by Id)
-    if( column.empty() )
-    {
-      column = table;
-      column += "Id";
-    }
-
-    // test to see if correct foreign key exists
-    if( !this->ColumnNameExists( column ) )
-    {
-      std::stringstream error;
-      error << "Tried to get \"" << table << "\" record but column \"" << column << "\" doesn't exist";
-      throw std::runtime_error( error.str() );
-    }
-
-    ActiveRecord *record = NULL;
-    vtkVariant v = this->Get( column );
-    if( v.IsValid() )
-    { // only create the record if the foreign key is not null
-      record = ActiveRecord::SafeDownCast( Application::GetInstance()->Create( table ) );
-      record->Load( "Id", this->Get( column ).ToString() );
-    }
-
-    return record;
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void ActiveRecord::SetVariant( std::string column, vtkVariant value )
   {
     // make sure the column exists

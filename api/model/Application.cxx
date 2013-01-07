@@ -200,9 +200,8 @@ namespace Alder
         this->ActiveUser->Register( this );
 
         // get the user's last active interview
-        Interview *interview = Interview::SafeDownCast( this->ActiveUser->GetRecord( "Interview" ) );
-        this->SetActiveInterview( interview );
-        if( interview ) interview->Delete();
+        vtkSmartPointer< Interview > interview;
+        if( this->ActiveUser->GetRecord( interview ) ) this->SetActiveInterview( interview );
       }
       this->Modified();
     }

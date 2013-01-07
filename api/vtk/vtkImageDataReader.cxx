@@ -18,10 +18,12 @@
 #include "vtkJPEGReader.h"
 #include "vtkMetaImageReader.h"
 #include "vtkMINCImageReader.h"
+#include "vtkNew.h"
 #include "vtkObjectFactory.h"
 #include "vtkPNGReader.h"
 #include "vtkPNMReader.h"
 #include "vtkSLCReader.h"
+#include "vtkSmartPointer.h"
 #include "vtkStringArray.h"
 #include "vtkTIFFReader.h"
 #include "vtkXMLImageDataReader.h"
@@ -30,6 +32,7 @@
 #include <stdexcept>
 
 vtkStandardNewMacro( vtkImageDataReader );
+vtkCxxSetObjectMacro( vtkImageDataReader, Reader, vtkAlgorithm );
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 vtkImageDataReader::vtkImageDataReader()
@@ -48,41 +51,10 @@ vtkImageDataReader::~vtkImageDataReader()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void vtkImageDataReader::SetReader( vtkAlgorithm* reader )
-{
-  if( this->Reader != reader )
-  {
-    if( this->Reader ) 
-    {
-      this->Reader->UnRegister( this );
-    }
-    this->Reader = reader;
-    if( this->Reader )
-    {
-      this->Reader->Register( this );
-    }
-    this->Modified();
-  }
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void vtkImageDataReader::SetFileName( const char* fileName )
 {
-  bool unknownFileType = false;
   std::string fileExtension, filePath, fileNameOnly, 
     fileNameStr( fileName );
-
-  vtkBMPReader*          BMPReader;
-  vtkGDCMImageReader*    GdcmReader;
-  vtkGESignaReader*      GESignaReader;
-  vtkJPEGReader*         JPEGReader;
-  vtkMetaImageReader*    MetaImageReader;
-  vtkMINCImageReader*    MINCImageReader;
-  vtkPNGReader*          PNGReader;
-  vtkPNMReader*          PNMReader;
-  vtkSLCReader*          SLCReader;
-  vtkTIFFReader*         TIFFReader;
-  vtkXMLImageDataReader* XMLImageDataReader;
 
   if( this->FileName.empty() && fileName == NULL )
   {
@@ -125,28 +97,29 @@ void vtkImageDataReader::SetFileName( const char* fileName )
   fileNameOnly = Alder::Utilities::getFilenameName( this->FileName );
   
   // need an instance of all readers to scan valid extensions
-  BMPReader          = vtkBMPReader::New();
-  GdcmReader         = vtkGDCMImageReader::New();
-  GESignaReader      = vtkGESignaReader::New();
-  JPEGReader         = vtkJPEGReader::New();
-  MetaImageReader    = vtkMetaImageReader::New();
-  MINCImageReader    = vtkMINCImageReader::New();
-  PNGReader          = vtkPNGReader::New();
-  PNMReader          = vtkPNMReader::New();
-  SLCReader          = vtkSLCReader::New();
-  TIFFReader         = vtkTIFFReader::New();
-  XMLImageDataReader = vtkXMLImageDataReader::New();
+  vtkSmartPointer< vtkBMPReader > BMPReader = vtkSmartPointer< vtkBMPReader >::New();
+  vtkSmartPointer< vtkGDCMImageReader > GDCMImageReader = vtkSmartPointer< vtkGDCMImageReader >::New();
+  vtkSmartPointer< vtkGESignaReader > GESignaReader = vtkSmartPointer< vtkGESignaReader >::New();
+  vtkSmartPointer< vtkJPEGReader > JPEGReader = vtkSmartPointer< vtkJPEGReader >::New();
+  vtkSmartPointer< vtkMetaImageReader > MetaImageReader = vtkSmartPointer< vtkMetaImageReader >::New();
+  vtkSmartPointer< vtkMINCImageReader > MINCImageReader = vtkSmartPointer< vtkMINCImageReader >::New();
+  vtkSmartPointer< vtkPNGReader > PNGReader = vtkSmartPointer< vtkPNGReader >::New();
+  vtkSmartPointer< vtkPNMReader > PNMReader = vtkSmartPointer< vtkPNMReader >::New();
+  vtkSmartPointer< vtkSLCReader > SLCReader = vtkSmartPointer< vtkSLCReader >::New();
+  vtkSmartPointer< vtkTIFFReader > TIFFReader = vtkSmartPointer< vtkTIFFReader >::New();
+  vtkSmartPointer< vtkXMLImageDataReader > XMLImageDataReader =
+    vtkSmartPointer< vtkXMLImageDataReader >::New();
 
   // search through each reader to see which 'likes' the file extension
 
   if( std::string::npos != Alder::Utilities::toLower(
-        GdcmReader->GetFileExtensions() ).find( fileExtension ) )
+        GDCMImageReader->GetFileExtensions() ).find( fileExtension ) )
   { // DICOM
-    this->SetReader( GdcmReader );
+    this->SetReader( GDCMImageReader );
   }
-  else if( GdcmReader->CanReadFile( this->FileName.c_str() ) )
+  else if( GDCMImageReader->CanReadFile( this->FileName.c_str() ) )
   {
-    this->SetReader( GdcmReader );
+    this->SetReader( GDCMImageReader );
   }
   else if( std::string::npos != Alder::Utilities::toLower(
     BMPReader->GetFileExtensions() ).find( fileExtension ) )
@@ -230,29 +203,7 @@ void vtkImageDataReader::SetFileName( const char* fileName )
   else // don't know how to handle this file, set the reader to NULL and
        // mark the file type as unknown
   {
-    if( this->Reader ) 
-    {
-      this->Reader->Delete();
-      this->Reader = NULL;
-    }
-    unknownFileType = true;
-  }
-
-  // delete all the readers (valid reader is now referenced in this->Reader
-  BMPReader->Delete();
-  GdcmReader->Delete();
-  GESignaReader->Delete();
-  JPEGReader->Delete();
-  MetaImageReader->Delete();
-  MINCImageReader->Delete();
-  PNGReader->Delete();
-  PNMReader->Delete();
-  SLCReader->Delete();
-  TIFFReader->Delete();
-  XMLImageDataReader->Delete();
-
-  if( unknownFileType )
-  {
+    this->SetReader( NULL );
     std::stringstream error;
     error << "Unable to read '" << fileNameOnly << "', unknown file type.";
     throw std::runtime_error( error.str() );
@@ -270,38 +221,26 @@ bool vtkImageDataReader::IsValidFileName( const char* fileName )
   bool knownFileType = false;
   std::string fileExtension;
 
-  vtkBMPReader*          BMPReader;
-  vtkGDCMImageReader*    GdcmReader;
-  vtkGESignaReader*      GESignaReader;
-  vtkJPEGReader*         JPEGReader;
-  vtkMetaImageReader*    MetaImageReader;
-  vtkMINCImageReader*    MINCImageReader;
-  vtkPNGReader*          PNGReader;
-  vtkPNMReader*          PNMReader;
-  vtkSLCReader*          SLCReader;
-  vtkTIFFReader*         TIFFReader;
-  vtkXMLImageDataReader* XMLImageDataReader;
-
   // ok, we have a valid file or directory name, get some details
   fileExtension = Alder::Utilities::getFileExtension(
     Alder::Utilities::toLower( fileName ) );
 
   // we need an instance of all readers so we can scan extensions
-  BMPReader          = vtkBMPReader::New();
-  GdcmReader         = vtkGDCMImageReader::New();
-  GESignaReader      = vtkGESignaReader::New();
-  JPEGReader         = vtkJPEGReader::New();
-  MetaImageReader    = vtkMetaImageReader::New();
-  MINCImageReader    = vtkMINCImageReader::New();
-  PNGReader          = vtkPNGReader::New();
-  PNMReader          = vtkPNMReader::New();
-  SLCReader          = vtkSLCReader::New();
-  TIFFReader         = vtkTIFFReader::New();
-  XMLImageDataReader = vtkXMLImageDataReader::New();
+  vtkNew< vtkBMPReader > BMPReader;
+  vtkNew< vtkGDCMImageReader > GDCMImageReader;
+  vtkNew< vtkGESignaReader > GESignaReader;
+  vtkNew< vtkJPEGReader > JPEGReader;
+  vtkNew< vtkMetaImageReader > MetaImageReader;
+  vtkNew< vtkMINCImageReader > MINCImageReader;
+  vtkNew< vtkPNGReader > PNGReader;
+  vtkNew< vtkPNMReader > PNMReader;
+  vtkNew< vtkSLCReader > SLCReader;
+  vtkNew< vtkTIFFReader > TIFFReader;
+  vtkNew< vtkXMLImageDataReader > XMLImageDataReader;
 
   // now search through each reader to see which 'likes' the file extension
   if( std::string::npos != Alder::Utilities::toLower(
-        GdcmReader->GetFileExtensions() ).find( fileExtension ) )
+        GDCMImageReader->GetFileExtensions() ).find( fileExtension ) )
   { // DICOM
     knownFileType = true;
   }
@@ -386,24 +325,11 @@ bool vtkImageDataReader::IsValidFileName( const char* fileName )
   }
   else // last ditch effort to read a dicom
   {
-    if( GdcmReader->CanReadFile( fileName ) )
+    if( GDCMImageReader->CanReadFile( fileName ) )
     {
       knownFileType = true;
     }
   }
-
-  // delete all the readers (valid reader is now referenced in this->Reader
-  BMPReader->Delete();
-  GdcmReader->Delete();
-  GESignaReader->Delete();
-  JPEGReader->Delete();
-  MetaImageReader->Delete();
-  MINCImageReader->Delete();
-  PNGReader->Delete();
-  PNMReader->Delete();
-  SLCReader->Delete();
-  TIFFReader->Delete();
-  XMLImageDataReader->Delete();
 
   return knownFileType;
 }

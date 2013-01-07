@@ -21,10 +21,12 @@
 #include "vtkImageSinusoidSource.h"
 #include "vtkImageSliceMapper.h"
 #include "vtkInteractorStyleImage.h"
+#include "vtkNew.h"
 #include "vtkObjectFactory.h"
 #include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkSmartPointer.h"
 
 vtkStandardNewMacro( vtkMedicalImageViewer );
 
@@ -143,14 +145,8 @@ vtkMedicalImageViewer::vtkMedicalImageViewer()
   }
 
   // Setup the pipeline
-
-  vtkRenderWindow *renwin = vtkRenderWindow::New();
-  this->SetRenderWindow( renwin );
-  renwin->Delete();
-
-  vtkRenderer *ren = vtkRenderer::New();
-  this->SetRenderer( ren );
-  ren->Delete();
+  this->SetRenderWindow( vtkSmartPointer< vtkRenderWindow >::New() );
+  this->SetRenderer( vtkSmartPointer< vtkRenderer >::New() );
 
   this->CineState = vtkMedicalImageViewer::STOP;
 }
@@ -239,11 +235,10 @@ bool vtkMedicalImageViewer::Load( std::string fileName )
   bool success = false;
   if( vtkImageDataReader::IsValidFileName( fileName.c_str() ) )
   {
-    vtkImageDataReader* reader = vtkImageDataReader::New();
+    vtkNew< vtkImageDataReader > reader;
     reader->SetFileName( fileName.c_str() );
     this->SetInput( reader->GetOutput() );
     success = true;
-    reader->Delete();
   }
 
   return success;
@@ -362,7 +357,7 @@ void vtkMedicalImageViewer::InstallPipeline()
 
   if( this->Interactor && this->InteractorStyle )
   {
-    vtkWindowLevelCallback *cbk = vtkWindowLevelCallback::New();
+    vtkSmartPointer< vtkWindowLevelCallback > cbk = vtkSmartPointer< vtkWindowLevelCallback >::New();
     cbk->Viewer = this;
      
     this->WindowLevelCallbackTags.push_back( 
@@ -373,7 +368,6 @@ void vtkMedicalImageViewer::InstallPipeline()
       this->InteractorStyle->AddObserver( vtkCommand::EndWindowLevelEvent, cbk ) );
     this->WindowLevelCallbackTags.push_back( 
       this->InteractorStyle->AddObserver( vtkCommand::ResetWindowLevelEvent, cbk ) );
-    cbk->Delete();
   }
 
   if( this->Renderer )
@@ -549,7 +543,7 @@ int vtkMedicalImageViewer::GetImageDimensionality()
 void vtkMedicalImageViewer::SetImageToSinusoid()
 {
   // Create the sinusoid default image like MicroView does
-  vtkImageSinusoidSource* sinusoid = vtkImageSinusoidSource::New();
+  vtkNew< vtkImageSinusoidSource > sinusoid;
   sinusoid->SetPeriod( 32 );
   sinusoid->SetPhase( 0 );
   sinusoid->SetAmplitude( 255 );
@@ -560,8 +554,6 @@ void vtkMedicalImageViewer::SetImageToSinusoid()
 
   this->SetInput( sinusoid->GetOutput() );
   this->SetSlice( 15 );
-
-  sinusoid->Delete();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -906,11 +898,10 @@ void vtkMedicalImageViewer::InstallCursor()
 
     if( this->Annotate )
     {
-      vtkCursorWidgetToAnnotationCallback* cbk =
-        vtkCursorWidgetToAnnotationCallback::New();
+      vtkSmartPointer< vtkCursorWidgetToAnnotationCallback > cbk =
+        vtkSmartPointer< vtkCursorWidgetToAnnotationCallback >::New();
       cbk->Viewer = this;
       this->CursorWidget->AddObserver( vtkCommand::InteractionEvent, cbk );
-      cbk->Delete();
     }
     this->CursorWidget->On();
   }

@@ -56,12 +56,6 @@ namespace Alder
      */
     bool IsRatedBy( User* user );
 
-    /**
-     * Get a list of child images associated with the current image
-     * @param list vector An existing vector to put all records into.
-     */
-    void GetChildList( std::vector< vtkSmartPointer< Image > > *list );
-
   protected:
     Image() {}
     ~Image() {}
