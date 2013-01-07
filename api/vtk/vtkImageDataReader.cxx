@@ -52,7 +52,15 @@ void vtkImageDataReader::SetReader( vtkAlgorithm* reader )
 {
   if( this->Reader != reader )
   {
+    if( this->Reader ) 
+    {
+      this->Reader->UnRegister( this );
+    }
     this->Reader = reader;
+    if( this->Reader )
+    {
+      this->Reader->Register( this );
+    }
     this->Modified();
   }
 }
@@ -106,19 +114,17 @@ void vtkImageDataReader::SetFileName( const char* fileName )
   }
 
   // make sure FileName exists, throw an exception if it doesn't
-  if( Alder::Utilities::fileExists( this->FileName ) )
+  if( !Alder::Utilities::fileExists( this->FileName ) )
   {
     std::stringstream error;
     error << "File '" << this->FileName << "' not found.";
     throw std::runtime_error( error.str() );
   }
 
-  // ok, we have a valid file name, get some details
-
   fileExtension = Alder::Utilities::getFileExtension( this->FileName );
   fileNameOnly = Alder::Utilities::getFilenameName( this->FileName );
   
-  // we need an instance of all readers so we can scan extensions
+  // need an instance of all readers to scan valid extensions
   BMPReader          = vtkBMPReader::New();
   GdcmReader         = vtkGDCMImageReader::New();
   GESignaReader      = vtkGESignaReader::New();
@@ -131,7 +137,7 @@ void vtkImageDataReader::SetFileName( const char* fileName )
   TIFFReader         = vtkTIFFReader::New();
   XMLImageDataReader = vtkXMLImageDataReader::New();
 
-  // now search through each reader to see which 'likes' the file extension
+  // search through each reader to see which 'likes' the file extension
 
   if( std::string::npos != Alder::Utilities::toLower(
         GdcmReader->GetFileExtensions() ).find( fileExtension ) )
