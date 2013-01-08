@@ -114,6 +114,7 @@ SET( ALDER_SOURCE
   ${ALDER_QT_DIR}/QMedicalImageWidget.cxx
   ${ALDER_QT_DIR}/QProgressDialog.cxx
   ${ALDER_QT_DIR}/QSelectInterviewDialog.cxx
+  ${ALDER_QT_DIR}/QStudyNoteDialog.cxx
   ${ALDER_QT_DIR}/QUserListDialog.cxx
 )
 
@@ -131,6 +132,7 @@ SET( ALDER_UIS
   ${ALDER_QT_DIR}/QMedicalImageWidget.ui
   ${ALDER_QT_DIR}/QProgressDialog.ui
   ${ALDER_QT_DIR}/QSelectInterviewDialog.ui
+  ${ALDER_QT_DIR}/QStudyNoteDialog.ui
   ${ALDER_QT_DIR}/QUserListDialog.ui
 )
 
@@ -141,6 +143,7 @@ SET( ALDER_HEADERS
   ${ALDER_QT_DIR}/QMedicalImageWidget.h
   ${ALDER_QT_DIR}/QProgressDialog.h
   ${ALDER_QT_DIR}/QSelectInterviewDialog.h
+  ${ALDER_QT_DIR}/QStudyNoteDialog.h
   ${ALDER_QT_DIR}/QUserListDialog.h
 )
 
