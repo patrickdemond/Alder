@@ -13,6 +13,7 @@
 #include "vtkCamera.h"
 #include "vtkCommand.h"
 #include "vtkCornerAnnotation.h"
+#include "vtkDataArray.h"
 #include "vtkImageActor.h"
 #include "vtkImageCoordinateWidget.h"
 #include "vtkImageData.h"
@@ -23,6 +24,7 @@
 #include "vtkInteractorStyleImage.h"
 #include "vtkNew.h"
 #include "vtkObjectFactory.h"
+#include "vtkPointData.h"
 #include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
@@ -79,7 +81,8 @@ public:
     this->Viewer->Render();
   }
 
-  vtkCursorWidgetToAnnotationCallback():Viewer( 0 ) {}
+  vtkCursorWidgetToAnnotationCallback():Viewer( 0 ){}
+  ~vtkCursorWidgetToAnnotationCallback(){ this->Viewer = NULL; }
 
   vtkMedicalImageViewer *Viewer;
 };
@@ -195,6 +198,7 @@ vtkMedicalImageViewer::~vtkMedicalImageViewer()
     this->Annotation->Delete();
     this->Annotation = NULL;
   }
+
   if( this->CursorWidget )
   {
     this->CursorWidget->Delete();
@@ -419,8 +423,30 @@ void vtkMedicalImageViewer::InitializeWindowLevel()
   input->UpdateInformation();
   input->Update();
 
-  double dataMin = input->GetScalarRange()[0];
-  double dataMax = input->GetScalarRange()[1];
+  int components = input->GetNumberOfScalarComponents();
+
+  double dataMin = input->GetScalarTypeMax();
+  double dataMax = input->GetScalarTypeMin();
+
+  if( components == 1 )
+  {
+    dataMin = input->GetScalarRange()[0];
+    dataMax = input->GetScalarRange()[1];
+  }
+  else
+  {
+    vtkDataArray* data = NULL;
+    if( input->GetPointData() && (data = input->GetPointData()->GetScalars()) != NULL )
+    {
+      for( int i = 0; i < components; ++i )
+      {
+        double min = data->GetRange(i)[0];
+        double max = data->GetRange(i)[1];
+        if( dataMin > min ) dataMin = min;
+        if( dataMax < max ) dataMax = max;
+      }
+    }
+  }
 
   if( this->MaintainLastWindowLevel )
   {
@@ -450,6 +476,8 @@ void vtkMedicalImageViewer::InitializeWindowLevel()
   }
   else
   {
+    this->OriginalWindow = 255;
+    this->OriginalLevel = 127.5;
     this->SetColorWindowLevel( 255, 127.5 );
   }
 }
@@ -968,15 +996,25 @@ void vtkMedicalImageViewer::PrintSelf( ostream& os, vtkIndent indent )
   this->Superclass::PrintSelf( os, indent );
 
   os << indent << "RenderWindow:\n";
-  this->RenderWindow->PrintSelf( os, indent.GetNextIndent() );
+  if( this->RenderWindow )
+  {
+    this->RenderWindow->PrintSelf( os, indent.GetNextIndent() );
+  }
+  else
+  {
+    os << "None";
+  }
+  
   os << indent << "Renderer:\n";
-  this->Renderer->PrintSelf( os, indent.GetNextIndent() );
-  os << indent << "ImageActor:\n";
-  this->ImageActor->PrintSelf( os, indent.GetNextIndent() );
-  os << indent << "WindowLevel:\n" << endl;
-  this->WindowLevel->PrintSelf( os, indent.GetNextIndent() );
-  os << indent << "Slice: " << this->Slice << endl;
-  os << indent << "ViewOrientation: " << this->ViewOrientation << endl;
+  if( this->Renderer )
+  {
+    this->Renderer->PrintSelf( os, indent.GetNextIndent() );
+  }
+  else
+  {
+    os << "None";
+  }
+
   os << indent << "InteractorStyle: " << endl;
   if( this->InteractorStyle )
   {
@@ -987,4 +1025,28 @@ void vtkMedicalImageViewer::PrintSelf( ostream& os, vtkIndent indent )
   {
     os << "None";
   }
+  
+  os << indent << "Interactor: " << endl;
+  if( this->Interactor )
+  {
+    os << "\n";
+    this->Interactor->PrintSelf( os, indent.GetNextIndent() );
+  }
+  else
+  {
+    os << "None";
+  }
+
+  os << indent << "ImageActor:\n";
+  this->ImageActor->PrintSelf( os, indent.GetNextIndent() );
+  
+  os << indent << "WindowLevel:\n" << endl;
+  this->WindowLevel->PrintSelf( os, indent.GetNextIndent() );
+  
+  os << indent << "Slice: " << this->Slice << endl;
+  os << indent << "ViewOrientation: " << this->ViewOrientation << endl;
+  os << indent << "MaintainLastWindowLevel: " << this->MaintainLastWindowLevel << endl;
+  os << indent << "Annotate: " << this->Annotate << endl;
+  os << indent << "Cursor: " << this->Cursor << endl;
+  os << indent << "Interpolate: " << this->Interpolate << endl;
 }

@@ -19,8 +19,6 @@
 #include "Study.h"
 #include "User.h"
 
-#include "vtkMedicalImageViewer.h"
-
 #include "QAboutDialog.h"
 #include "QLoginDialog.h"
 #include "QProgressDialog.h"
