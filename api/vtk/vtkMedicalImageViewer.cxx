@@ -12,15 +12,14 @@
 
 #include "vtkCamera.h"
 #include "vtkCommand.h"
-#include "vtkCornerAnnotation.h"
+#include "vtkAlderCornerAnnotation.h"
 #include "vtkDataArray.h"
 #include "vtkImageActor.h"
 #include "vtkImageCoordinateWidget.h"
 #include "vtkImageData.h"
 #include "vtkImageDataReader.h"
-#include "vtkImageMapToWindowLevelColors.h"
 #include "vtkImageSinusoidSource.h"
-#include "vtkImageSliceMapper.h"
+#include "vtkImageWindowLevel.h"
 #include "vtkInteractorStyleImage.h"
 #include "vtkNew.h"
 #include "vtkObjectFactory.h"
@@ -93,20 +92,20 @@ vtkMedicalImageViewer::vtkMedicalImageViewer()
   this->RenderWindow    = NULL;
   this->Renderer        = NULL;
   this->ImageActor      = vtkImageActor::New();
-  this->WindowLevel     = vtkImageMapToWindowLevelColors::New();
+  this->WindowLevel     = vtkImageWindowLevel::New();
   this->Interactor      = NULL;
   this->InteractorStyle = NULL;
   this->CursorWidget    = vtkImageCoordinateWidget::New();
-  this->Annotation      = vtkCornerAnnotation::New();
+  this->Annotation      = vtkAlderCornerAnnotation::New();
 
   this->Annotation->SetMaximumLineHeight( 0.07 );
   this->Annotation->SetText( 2, "<slice_and_max>" );
   this->Annotation->SetText( 3, "<window>\n<level>" );
   // setting the max font size and linear font scale factor
-  // forces vtkCornerAnnotation to keep its constituent text mappers'
+  // forces vtkAlderCornerAnnotation to keep its constituent text mappers'
   // font sizes the same, otherwise, when the location and value
   // text field dynamically changes width, the font size changes:
-  // see RenderOpaqueGeometry in vtkCornerAnnotation.cxx for details
+  // see RenderOpaqueGeometry in vtkAlderCornerAnnotation.cxx for details
   // TODO: the maximum font size should be set via callback mechanism
   // tied to when the render window changes its size
 

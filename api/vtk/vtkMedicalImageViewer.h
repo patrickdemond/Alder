@@ -19,7 +19,7 @@
  * vtkMedicalImageViewer is a convenience class for 
  * displaying a 2D image.  It packages up the functionality found in 
  * vtkRenderWindow, vtkRenderer, vtkImageActor and 
- * vtkImageMapToWindowLevelColors into a single easy to use
+ * vtkImageWindowLevel into a single easy to use
  * class.  This class also creates an image interactor style
  * (vtkInteractorStyleImage) that allows zooming and panning of images, and
  * supports interactive window/level operations on the image. Note that
@@ -50,7 +50,7 @@
  * Note that pressing 'r' will reset the window/level and pressing
  * shift+'r' or control+'r' will reset the camera.
  *
- * @see vtkRenderWindow vtkRenderer vtkImageActor vtkImageMapToWindowLevelColors
+ * @see vtkRenderWindow vtkRenderer vtkImageActor vtkImageWindowLevel
  */
 #ifndef __vtkMedicalImageViewer_h
 #define __vtkMedicalImageViewer_h
@@ -58,11 +58,11 @@
 #include "vtkObject.h"
 #include <vector>
 
-class vtkCornerAnnotation;
+class vtkAlderCornerAnnotation;
 class vtkImageActor;
 class vtkImageCoordinateWidget;
 class vtkImageData;
-class vtkImageMapToWindowLevelColors;
+class vtkImageWindowLevel;
 class vtkInteractorStyleImage;
 class vtkRenderWindow;
 class vtkRenderer;
@@ -199,9 +199,9 @@ public:
   vtkGetObjectMacro( RenderWindow, vtkRenderWindow );
   vtkGetObjectMacro( Renderer, vtkRenderer );
   vtkGetObjectMacro( ImageActor, vtkImageActor );
-  vtkGetObjectMacro( WindowLevel, vtkImageMapToWindowLevelColors );
+  vtkGetObjectMacro( WindowLevel, vtkImageWindowLevel );
   vtkGetObjectMacro( InteractorStyle, vtkInteractorStyleImage );
-  vtkGetObjectMacro( Annotation, vtkCornerAnnotation );
+  vtkGetObjectMacro( Annotation, vtkAlderCornerAnnotation );
   virtual void SetRenderWindow( vtkRenderWindow* );
   virtual void SetRenderer( vtkRenderer* );
   virtual void SetInteractor( vtkRenderWindowInteractor* );
@@ -209,7 +209,7 @@ public:
 
   //@{
   /**
-   * Configure the vtkImageMapToWindowLevelColors ivar.
+   * Configure the vtkImageWindowLevel ivar.
    * Configuration is set automatically according to the number
    * of scalar components per pixel/voxel.
    * @see SetInput()
@@ -308,7 +308,7 @@ public:
   /**
    * Turn cursoring on or off.  Cursoring works in concert with
    * corner annotation.  If cursoring is off, the cursor widget
-   * is disabled but the vtkCornerAnnotation object could still be
+   * is disabled but the vtkAlderCornerAnnotation object could still be
    * used to display other textual overlay content.  If annotation
    * is off, cursoring can still be active with its output directed
    * via callback mechanism to another GUI element.
@@ -357,14 +357,14 @@ protected:
 
   //@{
   /** VTK object ivars that constitute the visualization/interaction pipeline. */
-  vtkImageMapToWindowLevelColors  *WindowLevel;
-  vtkRenderWindow                 *RenderWindow;
-  vtkRenderer                     *Renderer;
-  vtkImageActor                   *ImageActor;
-  vtkRenderWindowInteractor       *Interactor;
-  vtkInteractorStyleImage         *InteractorStyle;
-  vtkImageCoordinateWidget        *CursorWidget;
-  vtkCornerAnnotation             *Annotation;
+  vtkImageWindowLevel       *WindowLevel;
+  vtkRenderWindow           *RenderWindow;
+  vtkRenderer               *Renderer;
+  vtkImageActor             *ImageActor;
+  vtkRenderWindowInteractor *Interactor;
+  vtkInteractorStyleImage   *InteractorStyle;
+  vtkImageCoordinateWidget  *CursorWidget;
+  vtkAlderCornerAnnotation       *Annotation;
   //@}
 
   int Cursor;

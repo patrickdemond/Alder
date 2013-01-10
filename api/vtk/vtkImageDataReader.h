@@ -41,6 +41,7 @@ public:
   vtkTypeMacro( vtkImageDataReader, vtkObject );
   void PrintSelf( ostream& os, vtkIndent indent );
 
+  //@{
   /**
    * Set/Get the file name to be opened by the reader.
    * If a directory is selected then the reader will attempt to open all
@@ -48,6 +49,7 @@ public:
    */
   virtual void SetFileName( const char* );
   std::string GetFileName(){ return this->FileName; }
+  //@}
 
   /**
    * Returns a reference to a vtkImageData object created by opening the
@@ -90,8 +92,8 @@ protected:
   vtkTimeStamp ReadMTime;
   
 private:
-  vtkImageDataReader( const vtkImageDataReader& );  // Not implemented.
-  void operator=( const vtkImageDataReader& );  // Not implemented.
+  vtkImageDataReader( const vtkImageDataReader& );  /** Not implemented. */
+  void operator=( const vtkImageDataReader& );  /** Not implemented. */
 };
 
 #endif
