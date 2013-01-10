@@ -99,10 +99,12 @@ SET( ALDER_SOURCE
   ${ALDER_MODEL_DIR}/Study.cxx
   ${ALDER_MODEL_DIR}/User.cxx
 
+  ${ALDER_VTK_DIR}/vtkAlderCornerAnnotation.cxx
   ${ALDER_VTK_DIR}/vtkAlderMySQLDatabase.cxx
   ${ALDER_VTK_DIR}/vtkAlderMySQLQuery.cxx
   ${ALDER_VTK_DIR}/vtkImageCoordinateWidget.cxx
   ${ALDER_VTK_DIR}/vtkImageDataReader.cxx
+  ${ALDER_VTK_DIR}/vtkImageWindowLevel.cxx
   ${ALDER_VTK_DIR}/vtkMedicalImageViewer.cxx
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
   ${ALDER_VTK_DIR}/vtkXMLConfigurationFileReader.cxx
