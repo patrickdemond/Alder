@@ -141,6 +141,9 @@ public:
   /** Get the readout as a char string. */
   const char* GetMessageString(){ return this->MessageString.c_str(); }
 
+  /** Force the widget to update its message string */
+  void UpdateMessageString();
+
 protected:
   vtkImageCoordinateWidget();
   ~vtkImageCoordinateWidget();
@@ -194,8 +197,8 @@ protected:
   std::string MessageString;
 
 private:
-  vtkImageCoordinateWidget( const vtkImageCoordinateWidget& );  //Not implemented
-  void operator=( const vtkImageCoordinateWidget& );  //Not implemented
+  vtkImageCoordinateWidget( const vtkImageCoordinateWidget& );  /** Not implemented */
+  void operator=( const vtkImageCoordinateWidget& );  /** Not implemented */
 };
 
 #endif

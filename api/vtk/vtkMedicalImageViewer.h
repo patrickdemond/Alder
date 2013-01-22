@@ -364,7 +364,7 @@ protected:
   vtkRenderWindowInteractor *Interactor;
   vtkInteractorStyleImage   *InteractorStyle;
   vtkImageCoordinateWidget  *CursorWidget;
-  vtkAlderCornerAnnotation       *Annotation;
+  vtkAlderCornerAnnotation  *Annotation;
   //@}
 
   int Cursor;

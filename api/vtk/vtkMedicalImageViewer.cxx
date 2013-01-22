@@ -655,6 +655,13 @@ void vtkMedicalImageViewer::SetSlice( int slice )
   this->Modified();
 
   this->UpdateDisplayExtent();
+
+  if( this->Cursor && this->Annotate )
+  {
+    this->CursorWidget->UpdateMessageString();
+    this->Annotation->SetText( 0, this->CursorWidget->GetMessageString() );
+  }
+
   this->Render();
 }
 
@@ -858,7 +865,7 @@ void vtkMedicalImageViewer::CineLoop()
              this->CineState != vtkMedicalImageViewer::STOP; ++i )
     {
       this->SetSlice( i );
-      this->InvokeEvent( this->PlayEvent, this );
+      this->InvokeEvent( this->PlayEvent );
     }
   }while( this->CineState != vtkMedicalImageViewer::STOP );
 }
@@ -867,7 +874,7 @@ void vtkMedicalImageViewer::CineLoop()
 void vtkMedicalImageViewer::CineStop()
 {
   this->CineState = vtkMedicalImageViewer::STOP;
-  this->InvokeEvent( this->StopEvent, this );
+  this->InvokeEvent( this->StopEvent );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -880,7 +887,7 @@ void vtkMedicalImageViewer::CinePlay()
            this->CineState != vtkMedicalImageViewer::STOP; ++i )
   {
     this->SetSlice( i );
-    this->InvokeEvent( this->PlayEvent, this );
+    this->InvokeEvent( this->PlayEvent );
   }
   this->CineStop();
 }
@@ -900,6 +907,12 @@ void vtkMedicalImageViewer::InstallAnnotation()
   this->Annotation->SetWindowLevel( this->WindowLevel );
   this->Annotation->SetVisibility( this->Annotate );
   this->Renderer->AddViewProp( this->Annotation );
+
+  this->Annotation->SetText( 2, "" );
+  if( this->GetInput() && this->GetImageDimensionality() > 2 )
+  {
+    this->Annotation->SetText( 2, "<slice_and_max>" );
+  }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

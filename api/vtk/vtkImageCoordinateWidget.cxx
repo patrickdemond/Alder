@@ -110,15 +110,21 @@ void vtkImageCoordinateWidget::SetPicker( vtkAbstractPropPicker* picker )
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void vtkImageCoordinateWidget::AddViewProp( vtkProp *prop )
 {
-  this->PropCollection->AddItem( prop );
-  this->Picker->AddPickList( prop );
+  if( prop )
+  {
+    this->PropCollection->AddItem( prop );
+    this->Picker->AddPickList( prop );
+  }  
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void vtkImageCoordinateWidget::RemoveProp( vtkProp *prop )
 {
-  this->PropCollection->RemoveItem( prop );
-  this->Picker->DeletePickList( prop );
+  if( prop )
+  {
+    this->PropCollection->RemoveItem( prop );
+    this->Picker->DeletePickList( prop );
+  }  
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -421,6 +427,14 @@ int vtkImageCoordinateWidget::GetCursorData9(
   }
 
   return retVal;
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void vtkImageCoordinateWidget::UpdateMessageString()
+{
+  int X, Y;
+  this->Interactor->GetLastEventPosition( X, Y );
+  this->UpdateCursor( X, Y );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
