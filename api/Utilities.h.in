@@ -90,6 +90,29 @@ namespace Alder
             new CryptoPP::StringSink( output ) ) ) );
     }
 
+    inline static void base64String( std::string input, std::string &output )
+    {
+      output = "";
+
+      CryptoPP::StringSource foo(
+        input.c_str(),
+        true,
+        new CryptoPP::Base64Encoder(
+          new CryptoPP::StringSink( output ) ) );
+    }
+
+    inline static size_t writePointerToFile( void *ptr, size_t size, size_t nmemb, FILE *stream )
+    {
+      size_t written = fwrite( ptr, size, nmemb, stream );
+      return written;
+    }
+
+    inline static size_t writePointerToString( void *ptr, size_t size, size_t count, void *stream )
+    {
+      ( (std::string*) stream )->append( (char*) ptr, 0, size * count );
+      return size * count;
+    }
+
     inline static std::string exec( const char* command )
     {
       FILE* pipe = popen( command, "r" );

@@ -88,11 +88,13 @@ namespace Alder
     ~OpalService() {}
 
     /**
-     * Returns the response provided by Opal for a given service path
+     * Returns the response provided by Opal for a given service path, or if fileName is not
+     * empty then writes the response to the given filename (returning an empty json value.
      * @param servicePath string
+     * @param fileName string
      * @throws runtime_error
      */
-    virtual Json::Value Read( std::string servicePath );
+    virtual Json::Value Read( std::string servicePath, std::string fileName = "" );
 
     std::map< std::string,std::map< std::string,std::map< std::string, std::string > > > Columns;
     std::string Username;
