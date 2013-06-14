@@ -43,11 +43,7 @@ vtkImageDataReader::vtkImageDataReader()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 vtkImageDataReader::~vtkImageDataReader()
 {
-  if( this->Reader )
-  {
-    this->Reader->Delete();
-    this->Reader = NULL;
-  }
+  this->SetReader( NULL );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

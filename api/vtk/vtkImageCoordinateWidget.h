@@ -24,10 +24,12 @@
  *
  * @see vtk3DWidget vtkBoxWidget vtkLineWidget  vtkPlaneWidget vtkPointWidget
  */
+
 #ifndef __vtkImageCoordinateWidget_h
 #define __vtkImageCoordinateWidget_h
 
-#include "vtkInteractorObserver.h"
+#include <vtkInteractorObserver.h>
+#include <vtkSmartPointer.h>
 
 #include <vector>
 #include <string>
@@ -187,10 +189,10 @@ protected:
   // Objects
 
   // The prop(s) we want to pick on
-  vtkPropCollection*       PropCollection;
+  vtkSmartPointer<vtkPropCollection> PropCollection;
   // The prop's picker
-  vtkAbstractPropPicker*   Picker;
-  // The data pertaining to but not necessarily being owned by the input prop
+  vtkAbstractPropPicker* Picker;
+  // The image pertaining to but not necessarily being owned by the input prop
   vtkImageData*            ImageData;
   vtkHomogeneousTransform* UserTransform;
 

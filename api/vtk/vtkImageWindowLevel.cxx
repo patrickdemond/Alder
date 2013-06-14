@@ -7,15 +7,15 @@
   Author:    Dean Inglis <inglisd@mcmaster.ca>
 
 =========================================================================*/
-#include "vtkImageWindowLevel.h"
+#include <vtkImageWindowLevel.h>
 
-#include "vtkDataArray.h"
-#include "vtkImageData.h"
-#include "vtkInformation.h"
-#include "vtkInformationVector.h"
-#include "vtkObjectFactory.h"
-#include "vtkPointData.h"
-#include "vtkScalarsToColors.h"
+#include <vtkDataArray.h>
+#include <vtkImageData.h>
+#include <vtkInformation.h>
+#include <vtkInformationVector.h>
+#include <vtkObjectFactory.h>
+#include <vtkPointData.h>
+#include <vtkScalarsToColors.h>
 
 vtkStandardNewMacro(vtkImageWindowLevel);
 

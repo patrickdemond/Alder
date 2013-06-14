@@ -103,9 +103,11 @@ SET( ALDER_SOURCE
   ${ALDER_MODEL_DIR}/Study.cxx
   ${ALDER_MODEL_DIR}/User.cxx
 
-  ${ALDER_VTK_DIR}/vtkAlderCornerAnnotation.cxx
+  ${ALDER_VTK_DIR}/vtkAnimationPlayer.cxx
   ${ALDER_VTK_DIR}/vtkAlderMySQLDatabase.cxx
   ${ALDER_VTK_DIR}/vtkAlderMySQLQuery.cxx
+  ${ALDER_VTK_DIR}/vtkCustomCornerAnnotation.cxx
+  ${ALDER_VTK_DIR}/vtkFrameAnimationPlayer.cxx
   ${ALDER_VTK_DIR}/vtkImageCoordinateWidget.cxx
   ${ALDER_VTK_DIR}/vtkImageDataReader.cxx
   ${ALDER_VTK_DIR}/vtkImageWindowLevel.cxx
@@ -128,6 +130,7 @@ SET_SOURCE_FILES_PROPERTIES(
   ${ALDER_MODEL_DIR}/ActiveRecord.cxx
   ${ALDER_MODEL_DIR}/ModelObject.cxx
 
+  ${ALDER_VTK_DIR}/vtkAnimationPlayer.cxx
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
   ABSTRACT )
 

@@ -1,34 +1,33 @@
 /*=========================================================================
 
-  Module:    vtkAlderCornerAnnotation.cxx
+  Module:    vtkCustomCornerAnnotation.cxx
   Program:   Alder (CLSA Medical Image Quality Assessment Tool)
   Language:  C++
   Author:    Patrick Emond <emondpd@mcmaster.ca>
   Author:    Dean Inglis <inglisd@mcmaster.ca>
 
 =========================================================================*/
-#include "vtkAlderCornerAnnotation.h"
+#include <vtkCustomCornerAnnotation.h>
 
-#include "vtkAlgorithmOutput.h"
-#include "vtkImageActor.h"
-#include "vtkImageData.h"
-#include "vtkImageWindowLevel.h"
-#include "vtkObjectFactory.h"
-#include "vtkPropCollection.h"
-#include "vtkTextMapper.h"
-#include "vtkTextProperty.h"
-#include "vtkViewport.h"
-#include "vtkWindow.h"
+#include <vtkAlgorithmOutput.h>
+#include <vtkImageActor.h>
+#include <vtkImageData.h>
+#include <vtkImageWindowLevel.h>
+#include <vtkObjectFactory.h>
+#include <vtkPropCollection.h>
+#include <vtkTextMapper.h>
+#include <vtkTextProperty.h>
+#include <vtkViewport.h>
+#include <vtkWindow.h>
 
-vtkStandardNewMacro(vtkAlderCornerAnnotation);
+vtkStandardNewMacro(vtkCustomCornerAnnotation);
 
-vtkSetObjectImplementationMacro(vtkAlderCornerAnnotation,ImageActor,vtkImageActor);
-vtkSetObjectImplementationMacro(vtkAlderCornerAnnotation,WindowLevel,
-                                vtkImageWindowLevel);
-vtkCxxSetObjectMacro(vtkAlderCornerAnnotation,TextProperty,vtkTextProperty);
+vtkSetObjectImplementationMacro( vtkCustomCornerAnnotation, ImageActor, vtkImageActor );
+vtkSetObjectImplementationMacro( vtkCustomCornerAnnotation, WindowLevel, vtkImageWindowLevel );
+vtkCxxSetObjectMacro( vtkCustomCornerAnnotation, TextProperty, vtkTextProperty );
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-vtkAlderCornerAnnotation::vtkAlderCornerAnnotation()
+vtkCustomCornerAnnotation::vtkCustomCornerAnnotation()
 {
   this->PositionCoordinate->SetCoordinateSystemToNormalizedViewport();
   this->PositionCoordinate->SetValue(0.2,0.85);
@@ -42,21 +41,23 @@ vtkAlderCornerAnnotation::vtkAlderCornerAnnotation()
   this->LinearFontScaleFactor    = 5.0;
   this->NonlinearFontScaleFactor = 0.35;
   this->FontSize = 15;
+  this->TextProperty = NULL;
 
-  this->TextProperty = vtkTextProperty::New();
-  this->TextProperty->ShadowOff();
+  vtkSmartPointer<vtkTextProperty> tprop = vtkSmartPointer<vtkTextProperty>::New();
+  tprop->ShadowOff();
+  this->SetTextProperty(tprop);
 
   for (int i = 0; i < 4; i++)
     {
-    this->CornerText[i] = NULL;
-    this->TextMapper[i] = vtkTextMapper::New();
-    this->TextActor[i] = vtkActor2D::New();
+    this->CornerText[i].clear();
+    this->TextMapper[i] = vtkSmartPointer<vtkTextMapper>::New();
+    this->TextActor[i] = vtkSmartPointer<vtkActor2D>::New();
     this->TextActor[i]->SetMapper(this->TextMapper[i]);
     }
   
-  this->ImageActor = NULL;
+  this->ImageActor = 0;
   this->LastImageActor = 0;
-  this->WindowLevel = NULL;
+  this->WindowLevel = 0;
   
   this->LevelShift = 0;
   this->LevelScale = 1;
@@ -65,19 +66,11 @@ vtkAlderCornerAnnotation::vtkAlderCornerAnnotation()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-vtkAlderCornerAnnotation::~vtkAlderCornerAnnotation()
+vtkCustomCornerAnnotation::~vtkCustomCornerAnnotation()
 {
-  this->SetTextProperty(NULL);
-
-  for (int i = 0; i < 4; i++)
-    {
-    delete [] this->CornerText[i];
-    this->TextMapper[i]->Delete();
-    this->TextActor[i]->Delete();
-    }
-  
-  this->SetWindowLevel(NULL);
-  this->SetImageActor(NULL);
+  this->SetTextProperty(0);
+  this->SetWindowLevel(0);
+  this->SetImageActor(0);
 }
 
 /**
@@ -86,7 +79,7 @@ vtkAlderCornerAnnotation::~vtkAlderCornerAnnotation()
  * resources to release.
  */
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void vtkAlderCornerAnnotation::ReleaseGraphicsResources(vtkWindow *win)
+void vtkCustomCornerAnnotation::ReleaseGraphicsResources(vtkWindow *win)
 {
   this->Superclass::ReleaseGraphicsResources(win);
   for (int i = 0; i < 4; i++)
@@ -95,8 +88,10 @@ void vtkAlderCornerAnnotation::ReleaseGraphicsResources(vtkWindow *win)
     }
 }
 
+#define text_swap(a,b,c){a=b;b=c;c=a;}
+
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void vtkAlderCornerAnnotation::TextReplace(vtkImageActor *ia,
+void vtkCustomCornerAnnotation::TextReplace(vtkImageActor *ia,
                                       vtkImageWindowLevel *wl)
 {
   int i;
@@ -105,7 +100,7 @@ void vtkAlderCornerAnnotation::TextReplace(vtkImageActor *ia,
   char *rpos, *tmp;
   double window = 0, level = 0;
   long int windowi = 0, leveli = 0;
-  vtkImageData *wl_input = NULL, *ia_input = NULL;
+  vtkImageData *wl_input = 0, *ia_input = 0;
   int input_type_is_float = 0;
 
   if (wl)
@@ -114,8 +109,8 @@ void vtkAlderCornerAnnotation::TextReplace(vtkImageActor *ia,
     window *= this->LevelScale;
     level = wl->GetLevel();    
     level = level * this->LevelScale + this->LevelShift;
-    windowi = (long int)window;
-    leveli = (long int)level;
+    windowi = static_cast<long int>(window);
+    leveli = static_cast<long int>(level);
     wl_input = vtkImageData::SafeDownCast(wl->GetInput());
     if (wl_input)
       {
@@ -139,15 +134,15 @@ void vtkAlderCornerAnnotation::TextReplace(vtkImageActor *ia,
   // search for tokens, replace and then assign to TextMappers
   for (i = 0; i < 4; i++)
     {
-    if (this->CornerText[i] && strlen(this->CornerText[i]))
+    if ( !this->CornerText[i].empty() )
       {
-      text = new char [strlen(this->CornerText[i])+1000];
-      text2 = new char [strlen(this->CornerText[i])+1000];
-      strcpy(text,this->CornerText[i]);
+      text = new char [this->CornerText[i].size()+1000];
+      text2 = new char [this->CornerText[i].size()+1000];
+      strcpy(text,this->CornerText[i].c_str());
 
       // now do the replacements
 
-      rpos = strstr(text,"<image>");
+      rpos = strstr(text,"<image>");  //pointer to first occurence of <image> in text
       while (rpos)
         {
         *rpos = '\0';
@@ -159,9 +154,7 @@ void vtkAlderCornerAnnotation::TextReplace(vtkImageActor *ia,
           {
           sprintf(text2,"%s%s",text,rpos+7);
           }
-        tmp = text;
-        text = text2;
-        text2 = tmp;
+        text_swap(tmp,text,text2); 
         rpos = strstr(text,"<image>");
         }
 
@@ -177,9 +170,7 @@ void vtkAlderCornerAnnotation::TextReplace(vtkImageActor *ia,
           {
           sprintf(text2,"%s%s",text,rpos+15);
           }
-        tmp = text;
-        text = text2;
-        text2 = tmp;
+        text_swap(tmp,text,text2); 
         rpos = strstr(text,"<image_and_max>");
         }
 
@@ -195,9 +186,7 @@ void vtkAlderCornerAnnotation::TextReplace(vtkImageActor *ia,
           {
           sprintf(text2,"%s%s",text,rpos+7);
           }
-        tmp = text;
-        text = text2;
-        text2 = tmp;
+        text_swap(tmp,text,text2);
         rpos = strstr(text,"<slice>");
         }
 
@@ -213,9 +202,7 @@ void vtkAlderCornerAnnotation::TextReplace(vtkImageActor *ia,
           {
           sprintf(text2,"%s%s",text,rpos+15);
           }
-        tmp = text;
-        text = text2;
-        text2 = tmp;
+        text_swap(tmp,text,text2);
         rpos = strstr(text,"<slice_and_max>");
         }
 
@@ -246,9 +233,7 @@ void vtkAlderCornerAnnotation::TextReplace(vtkImageActor *ia,
           {
           sprintf(text2,"%s%s",text,rpos+11);
           }
-        tmp = text;
-        text = text2;
-        text2 = tmp;
+        text_swap(tmp,text,text2);
         rpos = strstr(text,"<slice_pos>");
         }
 
@@ -271,9 +256,7 @@ void vtkAlderCornerAnnotation::TextReplace(vtkImageActor *ia,
           {
           sprintf(text2,"%s%s",text,rpos+8);
           }
-        tmp = text;
-        text = text2;
-        text2 = tmp;
+        text_swap(tmp,text,text2);
         rpos = strstr(text,"<window>");
         }
 
@@ -296,9 +279,7 @@ void vtkAlderCornerAnnotation::TextReplace(vtkImageActor *ia,
           {
           sprintf(text2,"%s%s",text,rpos+7);
           }
-        tmp = text;
-        text = text2;
-        text2 = tmp;
+        text_swap(tmp,text,text2);
         rpos = strstr(text,"<level>");
         }
 
@@ -321,9 +302,7 @@ void vtkAlderCornerAnnotation::TextReplace(vtkImageActor *ia,
           {
           sprintf(text2,"%s%s",text,rpos+14);
           }
-        tmp = text;
-        text = text2;
-        text2 = tmp;
+        text_swap(tmp,text,text2);
         rpos = strstr(text,"<window_level>");
         }
 
@@ -339,7 +318,7 @@ void vtkAlderCornerAnnotation::TextReplace(vtkImageActor *ia,
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-int vtkAlderCornerAnnotation::RenderOverlay(vtkViewport *viewport)
+int vtkCustomCornerAnnotation::RenderOverlay(vtkViewport *viewport)
 {
   // Everything is built, just have to render
   // only render if font is at least minimum font
@@ -354,7 +333,7 @@ int vtkAlderCornerAnnotation::RenderOverlay(vtkViewport *viewport)
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-int vtkAlderCornerAnnotation::RenderOpaqueGeometry(vtkViewport *viewport)
+int vtkCustomCornerAnnotation::RenderOpaqueGeometry(vtkViewport *viewport)
 {
   int fontSize;
   int i;
@@ -376,7 +355,7 @@ int vtkAlderCornerAnnotation::RenderOpaqueGeometry(vtkViewport *viewport)
   
   // Is there an image actor ?
   vtkImageWindowLevel *wl = this->WindowLevel;
-  vtkImageActor *ia = NULL;  
+  vtkImageActor *ia = 0;  
   if (this->ImageActor)
     {
     ia = this->ImageActor;
@@ -594,13 +573,13 @@ int vtkAlderCornerAnnotation::RenderOpaqueGeometry(vtkViewport *viewport)
 
 /** Does this prop have some translucent polygonal geometry? */
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-int vtkAlderCornerAnnotation::HasTranslucentPolygonalGeometry()
+int vtkCustomCornerAnnotation::HasTranslucentPolygonalGeometry()
 {
   return 0;
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void vtkAlderCornerAnnotation::SetTextActorsPosition(int vsize[2])
+void vtkCustomCornerAnnotation::SetTextActorsPosition(int vsize[2])
 {
   this->TextActor[0]->SetPosition(5, 5);
   this->TextActor[1]->SetPosition(vsize[0] - 5, 5);
@@ -609,7 +588,7 @@ void vtkAlderCornerAnnotation::SetTextActorsPosition(int vsize[2])
 }
       
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void vtkAlderCornerAnnotation::SetTextActorsJustification()
+void vtkCustomCornerAnnotation::SetTextActorsJustification()
 {
   vtkTextProperty *tprop = this->TextMapper[0]->GetTextProperty();
   tprop->SetJustificationToLeft();
@@ -629,37 +608,34 @@ void vtkAlderCornerAnnotation::SetTextActorsJustification()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void vtkAlderCornerAnnotation::SetText(int i, const char *text)
+void vtkCustomCornerAnnotation::SetText(int i, const char *text)
 {
-  if (i < 0 || i > 3)
+  if (i < 0 || i > 3 )
     {
     return;
     }
 
-  if (!text || 
-      (this->CornerText[i] && text && (!strcmp(this->CornerText[i],text))))
+  if ( this->CornerText[i].compare( text ) == 0 )
     { 
     return;
     } 
-  delete [] this->CornerText[i];
-  this->CornerText[i] = new char [strlen(text)+1];
-  strcpy(this->CornerText[i],text);
+  this->CornerText[i] = text;
   this->Modified();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-const char* vtkAlderCornerAnnotation::GetText(int i)
+const char* vtkCustomCornerAnnotation::GetText(int i)
 {
   if (i < 0 || i > 3)
     {
-    return NULL;
+    return 0;
     }
 
-  return this->CornerText[i];
+  return this->CornerText[i].c_str();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void vtkAlderCornerAnnotation::ClearAllTexts()
+void vtkCustomCornerAnnotation::ClearAllTexts()
 {
   for (int i = 0; i < 4; i++)
     {
@@ -668,7 +644,7 @@ void vtkAlderCornerAnnotation::ClearAllTexts()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void vtkAlderCornerAnnotation::CopyAllTextsFrom(vtkAlderCornerAnnotation *ca)
+void vtkCustomCornerAnnotation::CopyAllTextsFrom(vtkCustomCornerAnnotation *ca)
 {
   for (int i = 0; i < 4; i++)
     {
@@ -677,7 +653,7 @@ void vtkAlderCornerAnnotation::CopyAllTextsFrom(vtkAlderCornerAnnotation *ca)
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void vtkAlderCornerAnnotation::PrintSelf(ostream& os, vtkIndent indent)
+void vtkCustomCornerAnnotation::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
   os << indent << "ImageActor: " << this->GetImageActor() << endl;
