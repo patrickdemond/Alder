@@ -10,11 +10,18 @@
 =========================================================================*/
 #include "Interview.h"
 
-#include "Study.h"
+#include "Application.h"
+#include "Exam.h"
+#include "OpalService.h"
 #include "User.h"
 #include "Utilities.h"
 
+#include "vtkCommand.h"
 #include "vtkObjectFactory.h"
+#include "vtkSmartPointer.h"
+
+#include <map>
+#include <stdexcept>
 
 namespace Alder
 {
@@ -131,16 +138,16 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   int Interview::GetImageCount()
   {
-    // loop through all studies and sum the image count
+    // loop through all exams and sum the image count
     int total = 0;
 
-    std::vector< vtkSmartPointer< Study > > studyList;
-    std::vector< vtkSmartPointer< Study > >::iterator studyIt;
-    this->GetList( &studyList );
-    for( studyIt = studyList.begin(); studyIt != studyList.end(); ++studyIt )
+    std::vector< vtkSmartPointer< Exam > > examList;
+    std::vector< vtkSmartPointer< Exam > >::iterator examIt;
+    this->GetList( &examList );
+    for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
     {
-      Study *study = *(studyIt);
-      total += study->GetImageCount();
+      Exam *exam = *(examIt);
+      total += exam->GetCount( "Image" );
     }
 
     return total;
@@ -154,15 +161,112 @@ namespace Alder
     // make sure the user is not null
     if( !user ) throw std::runtime_error( "Tried to get rating for null user" );
 
-    std::vector< vtkSmartPointer< Study > > studyList;
-    std::vector< vtkSmartPointer< Study > >::iterator studyIt;
-    this->GetList( &studyList );
-    for( studyIt = studyList.begin(); studyIt != studyList.end(); ++studyIt )
+    std::vector< vtkSmartPointer< Exam > > examList;
+    std::vector< vtkSmartPointer< Exam > >::iterator examIt;
+    this->GetList( &examList );
+    for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
     {
-      Study *study = *(studyIt);
-      if( !study->IsRatedBy( user ) ) return false;
+      Exam *exam = *(examIt);
+      if( !exam->IsRatedBy( user ) ) return false;
     }
 
     return true;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Interview::Update()
+  {
+    Application *app = Application::GetInstance();
+    OpalService *opal = app->GetOpal();
+
+    bool found;
+    std::map< std::string, std::string > map;
+    std::vector< vtkSmartPointer< Exam > > examList;
+    std::vector< vtkSmartPointer< Exam > >::iterator examIt;
+
+    // make sure all stages exist
+
+    // get the list of this interview's existing exams
+    this->GetList( &examList );
+
+    // get exam metadata from Opal for this interview
+    map = opal->GetRow( "alder", "Exam", this->Get( "UId" ).ToString() );
+
+    /*
+    // check for CarotidIntima exam
+    if( 0 == map["CarotidIntima.Stage"].compare( "Completed" ) )
+    {
+      found = false;
+      // search to see if this exam already exists
+      for( examIt = ultrasoundExamList.begin(); examIt != ultrasoundExamList.end(); ++examIt )
+      {
+        if( 0 == examIt->Get( "Type" ).ToString().compare( "CarotidIntima" ) )
+        {
+          found = true;
+          break;
+        }
+      }
+
+      if( !found )
+      {
+        vtkSmartPointer<Exam> exam = vtkSmartPointer<Exam>::New();
+        exam->Set( 
+      }
+    }
+    */
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Interview::UpdateData()
+  {
+    cout << "UpdateData" << endl;
+    Application *app = Application::GetInstance();
+    OpalService *opal = app->GetOpal();
+
+    double progress = 0.0;
+    app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
+
+    // get a list of all interview start dates
+    std::map< std::string, std::map< std::string, std::string > > list;
+    std::map< std::string, std::string > map, key;
+    std::map< std::string, std::map< std::string, std::string > >::iterator it;
+    bool done = false;
+    int limit = 100;
+    int index = 0;
+
+    std::vector< std::string > identifierList = opal->GetIdentifiers( "alder", "Interview" );
+    double size = (double) identifierList.size();
+
+    cout << "starting" << endl;
+    do
+    {
+      list = opal->GetRows( "alder", "Interview", index, limit );
+      cout << list.size() << endl;
+
+      for( it = list.begin(); it != list.end(); ++it )
+      {
+        cout << "."; cout.flush();
+        std::string UId = it->first;
+        map = it->second;
+
+        // create a unique value map to load the interview
+        key["UId"] = UId;
+        key["VisitDate"] = map["VisitDate"].substr( 0, 10 );
+
+        vtkSmartPointer< Interview > interview = vtkSmartPointer< Interview >::New();
+        if( !interview->Load( key ) )
+        { // only write to the database if the data is missing
+          interview->Set( "UId", UId );
+          interview->Set( map );
+          interview->Save();
+        }
+      }
+      cout << endl;
+
+      // prepare the next block of start dates
+      index += list.size();
+      progress = index / size;
+      app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
+    } while ( !list.empty() );
   }
 }

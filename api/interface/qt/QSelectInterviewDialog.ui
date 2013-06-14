@@ -58,12 +58,12 @@
      </column>
      <column>
       <property name="text">
-       <string>Ultrasound</string>
+       <string>Retinal</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Retinal</string>
+       <string>Ultrasound</string>
       </property>
      </column>
     </widget>

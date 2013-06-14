@@ -10,6 +10,7 @@
 =========================================================================*/
 #include "Exam.h"
 
+#include "Image.h"
 #include "Utilities.h"
 
 #include "vtkObjectFactory.h"
@@ -17,4 +18,25 @@
 namespace Alder
 {
   vtkStandardNewMacro( Exam );
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Exam::IsRatedBy( User* user )
+  {
+    this->AssertPrimaryId();
+
+    // make sure the user is not null
+    if( !user ) throw std::runtime_error( "Tried to get rating for null user" );
+
+    // loop through all images
+    std::vector< vtkSmartPointer< Image > > imageList;
+    std::vector< vtkSmartPointer< Image > >::iterator imageIt;
+    this->GetList( &imageList );
+    for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
+    {
+      Image *image = *(imageIt);
+      if( !image->IsRatedBy( user ) ) return false;
+    }
+
+    return true;
+  }
 }

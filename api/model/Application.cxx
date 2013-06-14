@@ -18,7 +18,6 @@
 #include "Interview.h"
 #include "OpalService.h"
 #include "Rating.h"
-#include "Study.h"
 #include "User.h"
 
 #include "vtkObjectFactory.h"
@@ -47,8 +46,6 @@ namespace Alder
     this->ClassNameRegistry["Interview"] = typeid(Interview).name();
     this->ConstructorRegistry["Rating"] = &createInstance<Rating>;
     this->ClassNameRegistry["Rating"] = typeid(Rating).name();
-    this->ConstructorRegistry["Study"] = &createInstance<Study>;
-    this->ClassNameRegistry["Study"] = typeid(Study).name();
     this->ConstructorRegistry["User"] = &createInstance<User>;
     this->ClassNameRegistry["User"] = typeid(User).name();
   }

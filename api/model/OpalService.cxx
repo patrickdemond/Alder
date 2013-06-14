@@ -68,7 +68,8 @@ namespace Alder
     if( !curl ) 
       throw std::runtime_error( "Unable to create cURL connection to Opal" );
 
-    // put the credentials in a header
+    // put the credentials in a header and the option to return data in json format
+    headers = curl_slist_append( headers, "Accept: application/json" );
     headers = curl_slist_append( headers, credentials.c_str() );
 
     // if we are writing to a file, open it
@@ -127,28 +128,98 @@ namespace Alder
   }
   
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::map< std::string, std::string > OpalService::GetValueList(
-      std::string dataSource, std::string table, std::string variable, int offset, int limit )
+  std::map< std::string, std::map< std::string, std::string > > OpalService::GetRows(
+    std::string dataSource, std::string table, int offset, int limit )
   {
+    std::map< std::string, std::map< std::string, std::string > > list;
+    std::string identifier, key, value;
     std::stringstream stream;
+
     stream << "/datasource/" << dataSource << "/table/" << table
-           << "/valueSets?offset=" << offset << "&limit=" << limit
-           << "&select=name().eq('" << variable << "')";
+           << "/valueSets?offset=" << offset << "&limit=" << limit;
     Json::Value root = this->Read( stream.str() );
     
-    std::map< std::string, std::string > list;
     for( int i = 0; i < root["valueSets"].size(); ++i )
     {
-      std::string identifier = root["valueSets"][i].get( "identifier", "" ).asString();
-      std::string value = root["valueSets"][i]["values"][0].get( "value", "" ).asString();
-      if( 0 < identifier.length() && 0 < value.length() ) list[identifier] = value;
+      identifier = root["valueSets"][i].get( "identifier", "" ).asString();
+
+      if( 0 < identifier.length() )
+      {
+        std::map< std::string, std::string > map;
+        for( int j = 0; j < root["valueSets"][i]["values"].size(); ++j )
+        {
+          key = root["variables"][j].asString();
+          value = root["valueSets"][i]["values"][j].get( "value", "" ).asString();
+          map[key] = value;
+        }
+        list[identifier] = map;
+      }
     }
 
     return list;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void OpalService::GetValue( std::string dataSource, std::string table, std::string variable )
+  std::map< std::string, std::string > OpalService::GetRow(
+    std::string dataSource, std::string table, std::string identifier )
   {
+    std::map< std::string, std::string > map;
+    std::string key, value;
+    std::stringstream stream;
+
+    stream << "/datasource/" << dataSource << "/table/" << table
+           << "/valueSet/" << identifier;
+    Json::Value root = this->Read( stream.str() );
+    
+    identifier = root["valueSets"][0].get( "identifier", "" ).asString();
+
+    if( 0 < identifier.length() )
+    {
+      for( int j = 0; j < root["valueSets"][0]["values"].size(); ++j )
+      {
+        key = root["variables"][j].asString();
+        value = root["valueSets"][0]["values"][j].get( "value", "" ).asString();
+        map[key] = value;
+      }
+    }
+
+    return map;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::map< std::string, std::string > OpalService::GetColumn(
+    std::string dataSource, std::string table, std::string variable, int offset, int limit )
+  {
+    std::map< std::string, std::string > map;
+    std::string identifier, value;
+    std::stringstream stream;
+
+    stream << "/datasource/" << dataSource << "/table/" << table
+           << "/valueSets?offset=" << offset << "&limit=" << limit
+           << "&select=name().eq('" << variable << "')";
+    Json::Value root = this->Read( stream.str() );
+    
+    for( int i = 0; i < root["valueSets"].size(); ++i )
+    {
+      identifier = root["valueSets"][i].get( "identifier", "" ).asString();
+
+      if( 0 < identifier.length() )
+      {
+        value = root["valueSets"][i]["values"][0].get( "value", "" ).asString();
+        map[identifier] = value;
+      }
+    }
+
+    return map;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::string OpalService::GetValue(
+    std::string dataSource, std::string table, std::string identifier, std::string variable )
+  {
+    std::stringstream stream;
+    stream << "/datasource/" << dataSource << "/table/" << table
+           << "/valueSet/" << identifier << "/variable/" << variable;
+    return this->Read( stream.str() ).get( "value", "" ).asString();
   }
 }

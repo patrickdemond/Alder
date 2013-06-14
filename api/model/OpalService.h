@@ -65,23 +65,46 @@ namespace Alder
     std::vector< std::string > GetIdentifiers( std::string dataSource, std::string table );
 
     /**
-     * Returns a map of all values for a particular data source, table and variable
+     * Returns all variables for all identifiers limited by the offset and limit parameters
+     * @param dataSource string
+     * @param table string
+     * @param offset int The offset to begin the list at.
+     * @param limit int The limit of how many key/value pairs to return
+     */
+    std::map< std::string, std::map< std::string, std::string > > GetRows(
+      std::string dataSource, std::string table,
+      int offset = 0, int limit = 100 );
+
+    /**
+     * Returns all variables for a given identifier
+     * @param dataSource string
+     * @param table string
+     * @param identifier string
+     */
+    std::map< std::string, std::string > GetRow(
+      std::string dataSource, std::string table, std::string identifier );
+
+    /**
+     * Returns all values for a particular variable limited by the offset and limit parameters
      * @param dataSource string
      * @param table string
      * @param variable string
      * @param offset int The offset to begin the list at.
      * @param limit int The limit of how many key/value pairs to return
      */
-    std::map< std::string, std::string > GetValueList(
-      std::string dataSource, std::string table, std::string variable, int offset = 0, int limit = 100 );
+    std::map< std::string, std::string > GetColumn(
+      std::string dataSource, std::string table, std::string variable,
+      int offset = 0, int limit = 100 );
 
     /**
-     * Returns the value of a particular data source, table and variable name
+     * Returns a particular variable for a given identifier
      * @param dataSource string
      * @param table string
+     * @param identifier string
      * @param variable string
      */
-    void GetValue( std::string dataSource, std::string table, std::string variable );
+    std::string GetValue(
+      std::string dataSource, std::string table, std::string identifier, std::string variable );
 
   protected:
     OpalService();

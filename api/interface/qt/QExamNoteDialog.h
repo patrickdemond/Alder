@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:  Alder (CLSA Medical Image Quality Assessment Tool)
-  Module:   QStudyNoteDialog.h
+  Module:   QExamNoteDialog.h
   Language: C++
 
   Author: Patrick Emond <emondpd@mcmaster.ca>
@@ -9,24 +9,24 @@
 
 =========================================================================*/
 
-#ifndef __QStudyNoteDialog_h
-#define __QStudyNoteDialog_h
+#ifndef __QExamNoteDialog_h
+#define __QExamNoteDialog_h
 
 #include <QDialog>
 
-class Ui_QStudyNoteDialog;
+class Ui_QExamNoteDialog;
 
 class QAbstractButton;
 
-class QStudyNoteDialog : public QDialog
+class QExamNoteDialog : public QDialog
 {
   Q_OBJECT
 
 public:
   //constructor
-  QStudyNoteDialog( QWidget* parent = 0 );
+  QExamNoteDialog( QWidget* parent = 0 );
   //destructor
-  ~QStudyNoteDialog();
+  ~QExamNoteDialog();
   
 public slots:
   void close();
@@ -38,7 +38,7 @@ protected slots:
 
 private:
   // Designer form
-  Ui_QStudyNoteDialog *ui;
+  Ui_QExamNoteDialog *ui;
 };
 
 #endif

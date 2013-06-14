@@ -40,6 +40,12 @@ namespace Alder
     vtkTypeMacro( Exam, ActiveRecord );
     std::string GetName() { return "Exam"; }
 
+    /**
+     * Returns whether a user has rated all images associated with the exam.
+     * If the exam has no images this method returns true.
+     */
+    bool IsRatedBy( User* user );
+
   protected:
     Exam() {}
     ~Exam() {}

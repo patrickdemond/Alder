@@ -1,5 +1,5 @@
 <org.obiba.magma.views.View>
-  <name>Study</name>
+  <name>Exam</name>
   <from class="org.obiba.magma.views.JoinTable">
     <list>
       <table class="org.obiba.magma.support.ValueTableReference">

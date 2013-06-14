@@ -41,6 +41,16 @@ namespace Alder
     std::string GetName() { return "Interview"; }
 
     /**
+     * Updates the Interview table with all existing interviews in Opal
+     */
+    static void UpdateData();
+
+    /**
+     * Updates all data associated with the interview from Opal
+     */
+    void Update();
+
+    /**
      * Returns the next interview in UId/VisitDate order.
      */
     vtkSmartPointer<Interview> GetNext();
