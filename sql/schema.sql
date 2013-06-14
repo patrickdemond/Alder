@@ -32,7 +32,7 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Exam` (
   `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `UpdateTimestamp` TIMESTAMP NOT NULL ,
   `CreateTimestamp` TIMESTAMP NOT NULL ,
-  `Interview_Id` INT UNSIGNED NOT NULL ,
+  `InterviewId` INT UNSIGNED NOT NULL ,
   `Modality` ENUM('Dexa','Retinal','Ultrasound') NOT NULL ,
   `Type` VARCHAR(255) NOT NULL ,
   `Laterality` ENUM('right','left','none') NOT NULL ,
@@ -43,10 +43,10 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Exam` (
   PRIMARY KEY (`Id`) ,
   INDEX `dkLaterality` (`Laterality` ASC) ,
   INDEX `dkType` (`Type` ASC) ,
-  INDEX `fkInterviewId` (`Interview_Id` ASC) ,
-  INDEX `uqInterviewIdModalityTypeLaterality` (`Interview_Id` ASC, `Modality` ASC, `Type` ASC, `Laterality` ASC) ,
+  INDEX `fkInterviewId` (`InterviewId` ASC) ,
+  INDEX `uqInterviewIdModalityTypeLaterality` (`InterviewId` ASC, `Modality` ASC, `Type` ASC, `Laterality` ASC) ,
   CONSTRAINT `fkExamInterviewId`
-    FOREIGN KEY (`Interview_Id` )
+    FOREIGN KEY (`InterviewId` )
     REFERENCES `Alder`.`Interview` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
