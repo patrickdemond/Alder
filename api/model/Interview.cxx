@@ -219,7 +219,6 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void Interview::UpdateData()
   {
-    cout << "UpdateData" << endl;
     Application *app = Application::GetInstance();
     OpalService *opal = app->GetOpal();
 
@@ -237,15 +236,12 @@ namespace Alder
     std::vector< std::string > identifierList = opal->GetIdentifiers( "alder", "Interview" );
     double size = (double) identifierList.size();
 
-    cout << "starting" << endl;
     do
     {
       list = opal->GetRows( "alder", "Interview", index, limit );
-      cout << list.size() << endl;
 
       for( it = list.begin(); it != list.end(); ++it )
       {
-        cout << "."; cout.flush();
         std::string UId = it->first;
         map = it->second;
 
@@ -261,7 +257,6 @@ namespace Alder
           interview->Save();
         }
       }
-      cout << endl;
 
       // prepare the next block of start dates
       index += list.size();
