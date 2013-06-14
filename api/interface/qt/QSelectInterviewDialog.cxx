@@ -108,8 +108,22 @@ void QSelectInterviewDialog::slotAccepted()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QSelectInterviewDialog::slotSelectionChanged()
 {
+  vtkSmartPointer< Alder::Interview > interview;
   QList<QTableWidgetItem *> list = this->ui->interviewTableWidget->selectedItems();
-  this->ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( 0 != list.size() );
+  this->ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( !list.empty() );
+
+  if( !list.empty() )
+  {
+    // update the selected interview
+    std::map< std::string, std::string > map;
+    map["UId"] = list.at( 0 )->text().toStdString();
+    map["VisitDate"] = list.at( 1 )->text().toStdString();
+    interview = vtkSmartPointer< Alder::Interview >::New();
+    interview->Load( map );
+    interview->Update();
+  }
+
+  this->updateInterface();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

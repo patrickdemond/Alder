@@ -179,41 +179,123 @@ namespace Alder
     Application *app = Application::GetInstance();
     OpalService *opal = app->GetOpal();
 
-    bool found;
-    std::map< std::string, std::string > map;
-    std::vector< vtkSmartPointer< Exam > > examList;
-    std::vector< vtkSmartPointer< Exam > >::iterator examIt;
+    std::map< std::string, std::string > examData;
+    vtkSmartPointer<Exam> exam;
 
     // make sure all stages exist
 
-    // get the list of this interview's existing exams
-    this->GetList( &examList );
-
-    // get exam metadata from Opal for this interview
-    map = opal->GetRow( "alder", "Exam", this->Get( "UId" ).ToString() );
-
-    /*
-    // check for CarotidIntima exam
-    if( 0 == map["CarotidIntima.Stage"].compare( "Completed" ) )
+    // only update the exams if there are none in the database
+    if( 0 == this->GetCount( "Exam" ) )
     {
-      found = false;
-      // search to see if this exam already exists
-      for( examIt = ultrasoundExamList.begin(); examIt != ultrasoundExamList.end(); ++examIt )
-      {
-        if( 0 == examIt->Get( "Type" ).ToString().compare( "CarotidIntima" ) )
-        {
-          found = true;
-          break;
-        }
-      }
+      // get exam metadata from Opal for this interview
+      examData = opal->GetRow( "alder", "Exam", this->Get( "UId" ).ToString() );
 
-      if( !found )
-      {
-        vtkSmartPointer<Exam> exam = vtkSmartPointer<Exam>::New();
-        exam->Set( 
-      }
+      // CarotidIntima
+      exam = vtkSmartPointer<Exam>::New();
+      exam->Set( "InterviewId", this->Get( "Id" ) );
+      exam->Set( "Modality", "Ultrasound" );
+      exam->Set( "Type", "CarotidIntima" );
+      exam->Set( "Laterality", "left" );
+      exam->Set( "Stage", examData["CarotidIntimaStage"] );
+      exam->Set( "Interviewer", examData["CarotidIntimaStage"] );
+      exam->Set( "DatetimeAcquired", examData["CarotidIntimaDatetimeAcquired"] );
+
+      exam = vtkSmartPointer<Exam>::New();
+      exam->Set( "InterviewId", this->Get( "Id" ) );
+      exam->Set( "Modality", "Ultrasound" );
+      exam->Set( "Type", "CarotidIntima" );
+      exam->Set( "Laterality", "right" );
+      exam->Set( "Stage", examData["CarotidIntimaStage"] );
+      exam->Set( "Interviewer", examData["CarotidIntimaStage"] );
+      exam->Set( "DatetimeAcquired", examData["CarotidIntimaDatetimeAcquired"] );
+
+      // DualHipBoneDensity
+      exam = vtkSmartPointer<Exam>::New();
+      exam->Set( "InterviewId", this->Get( "Id" ) );
+      exam->Set( "Modality", "Dexa" );
+      exam->Set( "Type", "DualHipBoneDensity" );
+      exam->Set( "Laterality", "left" );
+      exam->Set( "Stage", examData["DualHipBoneDensityStage"] );
+      exam->Set( "Interviewer", examData["DualHipBoneDensityStage"] );
+      exam->Set( "DatetimeAcquired", examData["DualHipBoneDensityDatetimeAcquired"] );
+
+      exam = vtkSmartPointer<Exam>::New();
+      exam->Set( "InterviewId", this->Get( "Id" ) );
+      exam->Set( "Modality", "Dexa" );
+      exam->Set( "Type", "DualHipBoneDensity" );
+      exam->Set( "Laterality", "right" );
+      exam->Set( "Stage", examData["DualHipBoneDensityStage"] );
+      exam->Set( "Interviewer", examData["DualHipBoneDensityStage"] );
+      exam->Set( "DatetimeAcquired", examData["DualHipBoneDensityDatetimeAcquired"] );
+
+      // ForearmBoneDensity
+      exam = vtkSmartPointer<Exam>::New();
+      exam->Set( "InterviewId", this->Get( "Id" ) );
+      exam->Set( "Modality", "Dexa" );
+      exam->Set( "Type", "ForearmBoneDensity" );
+      exam->Set( "Laterality", "none" );
+      exam->Set( "Stage", examData["ForearmBoneDensityStage"] );
+      exam->Set( "Interviewer", examData["ForearmBoneDensityStage"] );
+      exam->Set( "DatetimeAcquired", examData["ForearmBoneDensityDatetimeAcquired"] );
+
+      // LateralBoneDensity
+      exam = vtkSmartPointer<Exam>::New();
+      exam->Set( "InterviewId", this->Get( "Id" ) );
+      exam->Set( "Modality", "Dexa" );
+      exam->Set( "Type", "LateralBoneDensity" );
+      exam->Set( "Laterality", "none" );
+      exam->Set( "Stage", examData["LateralBoneDensityStage"] );
+      exam->Set( "Interviewer", examData["LateralBoneDensityStage"] );
+      exam->Set( "DatetimeAcquired", examData["LateralBoneDensityDatetimeAcquired"] );
+
+      // Plaque
+      exam = vtkSmartPointer<Exam>::New();
+      exam->Set( "InterviewId", this->Get( "Id" ) );
+      exam->Set( "Modality", "Ultrasound" );
+      exam->Set( "Type", "Plaque" );
+      exam->Set( "Laterality", "left" );
+      exam->Set( "Stage", examData["PlaqueStage"] );
+      exam->Set( "Interviewer", examData["PlaqueStage"] );
+      exam->Set( "DatetimeAcquired", examData["PlaqueDatetimeAcquired"] );
+
+      exam = vtkSmartPointer<Exam>::New();
+      exam->Set( "InterviewId", this->Get( "Id" ) );
+      exam->Set( "Modality", "Ultrasound" );
+      exam->Set( "Type", "Plaque" );
+      exam->Set( "Laterality", "right" );
+      exam->Set( "Stage", examData["PlaqueStage"] );
+      exam->Set( "Interviewer", examData["PlaqueStage"] );
+      exam->Set( "DatetimeAcquired", examData["PlaqueDatetimeAcquired"] );
+
+      // RetinalScan
+      exam = vtkSmartPointer<Exam>::New();
+      exam->Set( "InterviewId", this->Get( "Id" ) );
+      exam->Set( "Modality", "Retinal" );
+      exam->Set( "Type", "RetinalScan" );
+      exam->Set( "Laterality", "left" );
+      exam->Set( "Stage", examData["RetinalScanStage"] );
+      exam->Set( "Interviewer", examData["RetinalScanStage"] );
+      exam->Set( "DatetimeAcquired", examData["RetinalScanDatetimeAcquired"] );
+
+      exam = vtkSmartPointer<Exam>::New();
+      exam->Set( "InterviewId", this->Get( "Id" ) );
+      exam->Set( "Modality", "Retinal" );
+      exam->Set( "Type", "RetinalScan" );
+      exam->Set( "Laterality", "right" );
+      exam->Set( "Stage", examData["RetinalScanStage"] );
+      exam->Set( "Interviewer", examData["RetinalScanStage"] );
+      exam->Set( "DatetimeAcquired", examData["RetinalScanDatetimeAcquired"] );
+
+      // WholeBodyBoneDensity
+      exam = vtkSmartPointer<Exam>::New();
+      exam->Set( "InterviewId", this->Get( "Id" ) );
+      exam->Set( "Modality", "Dexa" );
+      exam->Set( "Type", "WholeBodyBoneDensity" );
+      exam->Set( "Laterality", "none" );
+      exam->Set( "Stage", examData["WholeBodyBoneDensityStage"] );
+      exam->Set( "Interviewer", examData["WholeBodyBoneDensityStage"] );
+      exam->Set( "DatetimeAcquired", examData["WholeBodyBoneDensityDatetimeAcquired"] );
     }
-    */
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
