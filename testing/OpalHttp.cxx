@@ -108,6 +108,7 @@ int main( int argc, char** argv )
   if (curl)
   {
     struct curl_slist *headers = NULL;
+    headers = curl_slist_append( headers, "Accept: application/json" );
     headers = curl_slist_append( headers, credentials.c_str() );
 
     if( toFile ) fp = fopen( outfile.c_str(), "wb" );

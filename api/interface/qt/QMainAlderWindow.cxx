@@ -16,14 +16,13 @@
 #include "Image.h"
 #include "Interview.h"
 #include "Rating.h"
-#include "Study.h"
 #include "User.h"
 
 #include "QAboutDialog.h"
 #include "QLoginDialog.h"
 #include "QProgressDialog.h"
 #include "QSelectInterviewDialog.h"
-#include "QStudyNoteDialog.h"
+#include "QExamNoteDialog.h"
 #include "QUserListDialog.h"
 
 #include <QCloseEvent>
@@ -285,7 +284,6 @@ void QMainAlderWindow::slotUserManagement()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotUpdateDatabase()
 {
-/* TODO: implement once Opal is ready
   int attempt = 1;
 
   while( attempt < 4 )
@@ -316,7 +314,6 @@ void QMainAlderWindow::slotUpdateDatabase()
     }
     attempt++;
   }
-*/
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -405,9 +402,9 @@ void QMainAlderWindow::slotOpenNote()
   Alder::Image *image = app->GetActiveImage();
   if( !image ) throw std::runtime_error( "Open note button cliecked without an active image" );
 
-  QStudyNoteDialog dialog( this );
+  QExamNoteDialog dialog( this );
   dialog.setModal( true );
-  dialog.setWindowTitle( tr( "Study Note" ) );
+  dialog.setWindowTitle( tr( "Exam Note" ) );
   dialog.exec();
 }
 
@@ -430,22 +427,21 @@ void QMainAlderWindow::updateInformation()
   QString siteString = tr( "N/A" );
   QString dateString = tr( "N/A" );
 
-  // fill in the active study information
+  // fill in the active exam information
   Alder::Interview *interview = Alder::Application::GetInstance()->GetActiveInterview();
   if( interview )
   {
-    // get study from active image
+    // get exam from active image
     Alder::Image *image = Alder::Application::GetInstance()->GetActiveImage();
 
     if( image )
     {
       vtkSmartPointer< Alder::Exam > exam;
-      vtkSmartPointer< Alder::Study > study;
-      if( image->GetRecord( exam ) && exam->GetRecord( study ) )
+      if( image->GetRecord( exam ) )
       {
-        interviewerString = study->Get( "Interviewer" ).ToString().c_str();
-        siteString = study->Get( "Site" ).ToString().c_str();
-        dateString = study->Get( "DatetimeAcquired" ).ToString().c_str();
+        interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
+        siteString = exam->Get( "Site" ).ToString().c_str();
+        dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();
       }
     }
   }
@@ -484,79 +480,85 @@ void QMainAlderWindow::updateInterviewTreeWidget()
     root->setFlags( Qt::ItemIsEnabled );
     this->ui->interviewTreeWidget->addTopLevelItem( root );
 
-    // make each study a child of the root
-    std::vector< vtkSmartPointer< Alder::Study > > studyList;
-    std::vector< vtkSmartPointer< Alder::Study > >::iterator studyIt;
-    interview->GetList( &studyList );
-    for( studyIt = studyList.begin(); studyIt != studyList.end(); ++studyIt )
+    // make each modality type a child of the root
+    QTreeWidgetItem *dexaItem = new QTreeWidgetItem( root );
+    dexaItem->setText( 0, "Dexa" );
+    dexaItem->setExpanded( false );
+    dexaItem->setFlags( Qt::ItemIsEnabled );
+    QTreeWidgetItem *retinalItem = new QTreeWidgetItem( root );
+    retinalItem->setText( 0, "Retinal" );
+    retinalItem->setExpanded( false );
+    retinalItem->setFlags( Qt::ItemIsEnabled );
+    QTreeWidgetItem *ultrasoundItem = new QTreeWidgetItem( root );
+    ultrasoundItem->setText( 0, "Ultrasound" );
+    ultrasoundItem->setExpanded( false );
+    ultrasoundItem->setFlags( Qt::ItemIsEnabled );
+
+    std::vector< vtkSmartPointer< Alder::Exam > > examList;
+    std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
+    interview->GetList( &examList );
+    for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
     {
-      Alder::Study *study = studyIt->GetPointer();
-      name = tr( "Study: " );
-      name += study->Get( "Modality" ).ToString().c_str();
-      QTreeWidgetItem *studyItem = new QTreeWidgetItem( root );
-      this->treeModelMap[studyItem] = *studyIt;
-      studyItem->setText( 0, name );
-      studyItem->setExpanded( false );
-      studyItem->setFlags( Qt::ItemIsEnabled );
+      Alder::Exam *exam = examIt->GetPointer();
 
-      // make each exam a child of the study
-      std::vector< vtkSmartPointer< Alder::Exam > > examList;
-      std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
-      study->GetList( &examList );
-      for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
+      // figure out which parent to add this exam to based on modality
+      std::string modality = exam->Get( "Modality" ).ToString();
+      QTreeWidgetItem *parentItem;
+      if( 0 == modality.compare( "Dexa" ) ) parentItem = dexaItem;
+      else if( 0 == modality.compare( "Retinal" ) ) parentItem = retinalItem;
+      else if( 0 == modality.compare( "Ultrasound" ) ) parentItem = ultrasoundItem;
+      // TODO: handle unknown modality
+
+      name = tr( "Exam" ) + ": ";
+      std::string laterality = exam->Get( "Laterality" ).ToString();
+      if( "none" != laterality )
       {
-        Alder::Exam *exam = examIt->GetPointer();
-        name = tr( "Exam" ) + ": ";
-        std::string laterality = exam->Get( "Laterality" ).ToString();
-        if( "none" != laterality )
-        {
-          name += laterality.c_str();
-          name += " ";
-        }
-        name += exam->Get( "Type" ).ToString().c_str();
-        QTreeWidgetItem *examItem = new QTreeWidgetItem( studyItem );
-        this->treeModelMap[examItem] = *examIt;
-        examItem->setText( 0, name );
-        examItem->setExpanded( true );
-        examItem->setFlags( Qt::ItemIsEnabled );
+        name += laterality.c_str();
+        name += " ";
+      }
+      name += exam->Get( "Type" ).ToString().c_str();
+      QTreeWidgetItem *examItem = new QTreeWidgetItem( parentItem );
+      this->treeModelMap[examItem] = *examIt;
+      examItem->setText( 0, name );
+      examItem->setExpanded( true );
+      examItem->setFlags( Qt::ItemIsEnabled );
 
-        // add the images for this exam
-        std::vector< vtkSmartPointer< Alder::Image > > imageList;
-        std::vector< vtkSmartPointer< Alder::Image > >::iterator imageIt;
-        exam->GetList( &imageList );
-        for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
+      // add the images for this exam
+      std::vector< vtkSmartPointer< Alder::Image > > imageList;
+      std::vector< vtkSmartPointer< Alder::Image > >::iterator imageIt;
+      exam->GetList( &imageList );
+      for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
+      {
+        Alder::Image *image = imageIt->GetPointer();
+        
+        // don't show images with parents (that happens in the loop below instead)
+        if( !image->Get( "ParentImageId" ).IsValid() )
         {
-          Alder::Image *image = imageIt->GetPointer();
-          
-          // don't show images with parents (that happens in the loop below instead)
-          if( !image->Get( "ParentImageId" ).IsValid() )
+          name = tr( "Image #" );
+          name += image->Get( "Acquisition" ).ToString().c_str();
+          QTreeWidgetItem *imageItem = new QTreeWidgetItem( examItem );
+          this->treeModelMap[imageItem] = *imageIt;
+          imageItem->setText( 0, name );
+          imageItem->setExpanded( true );
+          imageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+          if( activeImage && activeImage->Get( "Id" ).ToInt() == image->Get( "Id" ).ToInt() )
+            selectedItem = imageItem;
+
+          // add child images for this image
+          std::vector< vtkSmartPointer< Alder::Image > > childImageList;
+          std::vector< vtkSmartPointer< Alder::Image > >::iterator childImageIt;
+          image->GetList( &childImageList, "ParentImageId" );
+          for( childImageIt = childImageList.begin(); childImageIt != childImageList.end(); ++childImageIt )
           {
+            Alder::Image *childImage = childImageIt->GetPointer();
             name = tr( "Image #" );
-            name += image->Get( "Acquisition" ).ToString().c_str();
-            QTreeWidgetItem *imageItem = new QTreeWidgetItem( examItem );
-            this->treeModelMap[imageItem] = *imageIt;
-            imageItem->setText( 0, name );
-            imageItem->setExpanded( true );
-            imageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-            if( activeImage && activeImage->Get( "Id" ).ToInt() == image->Get( "Id" ).ToInt() )
-              selectedItem = imageItem;
-
-            // add child images for this image
-            std::vector< vtkSmartPointer< Alder::Image > > childImageList;
-            std::vector< vtkSmartPointer< Alder::Image > >::iterator childImageIt;
-            image->GetList( &childImageList, "ParentImageId" );
-            for( childImageIt = childImageList.begin(); childImageIt != childImageList.end(); ++childImageIt )
-            {
-              Alder::Image *childImage = childImageIt->GetPointer();
-              name = tr( "Image #" );
-              name += childImage->Get( "Acquisition" ).ToString().c_str();
-              QTreeWidgetItem *childImageItem = new QTreeWidgetItem( imageItem );
-              this->treeModelMap[childImageItem] = *childImageIt;
-              childImageItem->setText( 0, name );
-              childImageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-              if( activeImage && activeImage->Get( "Id" ).ToInt() == childImage->Get( "Id" ).ToInt() )
-                selectedItem = childImageItem;
-            }
+            name += childImage->Get( "Acquisition" ).ToString().c_str();
+            QTreeWidgetItem *childImageItem = new QTreeWidgetItem( imageItem );
+            this->treeModelMap[childImageItem] = *childImageIt;
+            childImageItem->setText( 0, name );
+            childImageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+            if( activeImage && activeImage->Get( "Id" ).ToInt() == childImage->Get( "Id" ).ToInt() )
+              selectedItem = childImageItem;
           }
         }
       }

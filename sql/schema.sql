@@ -17,35 +17,9 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Interview` (
   `CreateTimestamp` TIMESTAMP NOT NULL ,
   `UId` VARCHAR(45) NOT NULL ,
   `VisitDate` DATE NOT NULL ,
+  `Site` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`Id`) ,
   UNIQUE INDEX `uqUIdVisitDate` (`UId` ASC, `VisitDate` ASC) )
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `Alder`.`Study`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `Alder`.`Study` ;
-
-CREATE  TABLE IF NOT EXISTS `Alder`.`Study` (
-  `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `UpdateTimestamp` TIMESTAMP NOT NULL ,
-  `CreateTimestamp` TIMESTAMP NOT NULL ,
-  `InterviewId` INT UNSIGNED NOT NULL ,
-  `Modality` ENUM('Dexa','Ultrasound','Retinal') NOT NULL ,
-  `Site` VARCHAR(45) NOT NULL ,
-  `Interviewer` VARCHAR(45) NOT NULL ,
-  `DatetimeAcquired` DATETIME NOT NULL ,
-  `Note` TEXT NULL DEFAULT NULL ,
-  PRIMARY KEY (`Id`) ,
-  INDEX `dkDatetimeAcquired` (`DatetimeAcquired` ASC) ,
-  INDEX `dkInterviewer` (`Interviewer` ASC) ,
-  INDEX `fkInterviewId` (`InterviewId` ASC) ,
-  CONSTRAINT `fkStudyInterviewId`
-    FOREIGN KEY (`InterviewId` )
-    REFERENCES `Alder`.`Interview` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
@@ -58,16 +32,22 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Exam` (
   `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `UpdateTimestamp` TIMESTAMP NOT NULL ,
   `CreateTimestamp` TIMESTAMP NOT NULL ,
-  `StudyId` INT UNSIGNED NOT NULL ,
-  `Laterality` ENUM('right','left','none') NOT NULL ,
+  `InterviewId` INT UNSIGNED NOT NULL ,
+  `Modality` ENUM('Dexa','Retinal','Ultrasound') NOT NULL ,
   `Type` VARCHAR(255) NOT NULL ,
+  `Laterality` ENUM('right','left','none') NOT NULL ,
+  `Stage` VARCHAR(45) NOT NULL ,
+  `Interviewer` VARCHAR(45) NOT NULL ,
+  `DatetimeAcquired` DATETIME NULL ,
+  `Note` TEXT NULL ,
   PRIMARY KEY (`Id`) ,
-  INDEX `fkExamStudyId` (`StudyId` ASC) ,
   INDEX `dkLaterality` (`Laterality` ASC) ,
   INDEX `dkType` (`Type` ASC) ,
-  CONSTRAINT `fkExamStudyId`
-    FOREIGN KEY (`StudyId` )
-    REFERENCES `Alder`.`Study` (`Id` )
+  INDEX `fkInterviewId` (`InterviewId` ASC) ,
+  INDEX `uqInterviewIdModalityTypeLaterality` (`InterviewId` ASC, `Modality` ASC, `Type` ASC, `Laterality` ASC) ,
+  CONSTRAINT `fkExamInterviewId`
+    FOREIGN KEY (`InterviewId` )
+    REFERENCES `Alder`.`Interview` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;

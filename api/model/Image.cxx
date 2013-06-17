@@ -14,7 +14,6 @@
 #include "Exam.h"
 #include "Interview.h"
 #include "Rating.h"
-#include "Study.h"
 #include "User.h"
 #include "Utilities.h"
 
@@ -32,24 +31,19 @@ namespace Alder
   {
     this->AssertPrimaryId();
 
-    // get the study and exam for this record
+    // get the exam for this record
     vtkSmartPointer< Exam > exam;
     if( !this->GetRecord( exam ) )
       throw std::runtime_error( "Image has no parent exam!" );
 
-    vtkSmartPointer< Study > study;
-    if( !exam->GetRecord( study ) )
-      throw std::runtime_error( "Exam has no parent study!" );
-
     vtkSmartPointer< Interview > interview;
-    if( !study->GetRecord( interview ) )
-      throw std::runtime_error( "Study has no parent interview!" );
+    if( !exam->GetRecord( interview ) )
+      throw std::runtime_error( "Exam has no parent interview!" );
 
     std::stringstream stream;
     // get the path of the file (we don't know file type yet)
     stream << Application::GetInstance()->GetConfig()->GetValue( "Path", "ImageData" )
            << "/" << interview->Get( "Id" ).ToString()
-           << "/" << study->Get( "Id" ).ToString()
            << "/" << exam->Get( "Id" ).ToString();
 
     return stream.str();

@@ -87,7 +87,7 @@
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="studyButtonLayout">
+         <layout class="QHBoxLayout" name="interviewButtonLayout">
           <item>
            <widget class="QPushButton" name="previousInterviewPushButton">
             <property name="text">
@@ -347,7 +347,7 @@
     <string>Open Interview</string>
    </property>
    <property name="statusTip">
-    <string>Open a study from the database</string>
+    <string>Open an interview from the database</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+I</string>
@@ -408,7 +408,7 @@
   </action>
   <action name="actionUpdateData">
    <property name="text">
-    <string>Update Study Database</string>
+    <string>Update Interview Database</string>
    </property>
   </action>
   <action name="actionUserManagement">

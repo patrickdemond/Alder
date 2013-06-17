@@ -103,7 +103,6 @@ SET( ALDER_SOURCE
   ${ALDER_MODEL_DIR}/ModelObject.cxx
   ${ALDER_MODEL_DIR}/OpalService.cxx
   ${ALDER_MODEL_DIR}/Rating.cxx
-  ${ALDER_MODEL_DIR}/Study.cxx
   ${ALDER_MODEL_DIR}/User.cxx
 
   ${ALDER_VTK_DIR}/vtkAnimationPlayer.cxx
@@ -125,7 +124,7 @@ SET( ALDER_SOURCE
   ${ALDER_QT_DIR}/QMedicalImageWidget.cxx
   ${ALDER_QT_DIR}/QProgressDialog.cxx
   ${ALDER_QT_DIR}/QSelectInterviewDialog.cxx
-  ${ALDER_QT_DIR}/QStudyNoteDialog.cxx
+  ${ALDER_QT_DIR}/QExamNoteDialog.cxx
   ${ALDER_QT_DIR}/QUserListDialog.cxx
 
   ${ALDER_QT_WIDGETS_DIR}/QAlderDoubleSlider.cxx
@@ -148,7 +147,7 @@ SET( ALDER_UIS
   ${ALDER_QT_DIR}/QMedicalImageWidget.ui
   ${ALDER_QT_DIR}/QProgressDialog.ui
   ${ALDER_QT_DIR}/QSelectInterviewDialog.ui
-  ${ALDER_QT_DIR}/QStudyNoteDialog.ui
+  ${ALDER_QT_DIR}/QExamNoteDialog.ui
   ${ALDER_QT_DIR}/QUserListDialog.ui
 
   ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.ui
@@ -162,7 +161,7 @@ SET( ALDER_HEADERS
   ${ALDER_QT_DIR}/QMedicalImageWidget.h
   ${ALDER_QT_DIR}/QProgressDialog.h
   ${ALDER_QT_DIR}/QSelectInterviewDialog.h
-  ${ALDER_QT_DIR}/QStudyNoteDialog.h
+  ${ALDER_QT_DIR}/QExamNoteDialog.h
   ${ALDER_QT_DIR}/QUserListDialog.h
 
   ${ALDER_QT_WIDGETS_DIR}/QAlderDoubleSlider.h

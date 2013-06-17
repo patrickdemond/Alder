@@ -1,21 +1,20 @@
 /*=========================================================================
 
   Program:  Alder (CLSA Medical Image Quality Assessment Tool)
-  Module:   QStudyNoteDialog.cxx
+  Module:   QExamNoteDialog.cxx
   Language: C++
 
   Author: Patrick Emond <emondpd@mcmaster.ca>
   Author: Dean Inglis <inglisd@mcmaster.ca>
 
 =========================================================================*/
-#include "QStudyNoteDialog.h"
-#include "ui_QStudyNoteDialog.h"
+#include "QExamNoteDialog.h"
+#include "ui_QExamNoteDialog.h"
 
 #include "Application.h"
 #include "Exam.h"
 #include "Image.h"
 #include "Interview.h"
-#include "Study.h"
 
 #include "vtkSmartPointer.h"
 #include "vtkVariant.h"
@@ -24,35 +23,34 @@
 #include <QPlainTextEdit>
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-QStudyNoteDialog::QStudyNoteDialog( QWidget* parent )
+QExamNoteDialog::QExamNoteDialog( QWidget* parent )
   : QDialog( parent )
 {
-  this->ui = new Ui_QStudyNoteDialog;
+  this->ui = new Ui_QExamNoteDialog;
   this->ui->setupUi( this );
 
   this->updateInterface();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-QStudyNoteDialog::~QStudyNoteDialog()
+QExamNoteDialog::~QExamNoteDialog()
 {
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QStudyNoteDialog::close()
+void QExamNoteDialog::close()
 {
-  // save whatever is in the text edit to the study before closing
+  // save whatever is in the text edit to the exam before closing
   Alder::Image *image = Alder::Application::GetInstance()->GetActiveImage();
 
   if( image )
   {
     vtkSmartPointer< Alder::Exam > exam;
-    vtkSmartPointer< Alder::Study > study;
 
-    if( image->GetRecord( exam ) && exam->GetRecord( study ) )
+    if( image->GetRecord( exam ) )
     {
-      study->Set( "Note", this->ui->plainTextEdit->toPlainText().toStdString() );
-      study->Save();
+      exam->Set( "Note", this->ui->plainTextEdit->toPlainText().toStdString() );
+      exam->Save();
     }
   }
 
@@ -60,20 +58,19 @@ void QStudyNoteDialog::close()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QStudyNoteDialog::updateInterface()
+void QExamNoteDialog::updateInterface()
 {
   Alder::Image *image = Alder::Application::GetInstance()->GetActiveImage();
 
   if( image )
   {
     vtkSmartPointer< Alder::Exam > exam;
-    vtkSmartPointer< Alder::Study > study;
     vtkSmartPointer< Alder::Interview > interview;
 
-    if( image->GetRecord( exam ) && exam->GetRecord( study ) && study->GetRecord( interview ) )
+    if( image->GetRecord( exam ) && exam->GetRecord( interview ) )
     {
       // set the title
-      QString title = study->Get( "Modality" ).ToString().c_str();
+      QString title = exam->Get( "Modality" ).ToString().c_str();
       title += " notes for ";
       title += interview->Get( "UId" ).ToString().c_str();
       title += " (";
@@ -82,7 +79,7 @@ void QStudyNoteDialog::updateInterface()
       this->ui->label->setText( title );
 
       // set the text
-      vtkVariant note = study->Get( "Note" );
+      vtkVariant note = exam->Get( "Note" );
       if( note.IsValid() ) this->ui->plainTextEdit->setPlainText( note.ToString().c_str() );
     }
   }

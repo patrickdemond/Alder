@@ -194,6 +194,12 @@ namespace Alder
      * Save() needs to be called.
      * If you wish to set the value to NULL then use the SetNull() method instead of Set()
      */
+    template <class T> void Set( std::map< std::string, T > map )
+    {
+      typename std::map< std::string, T >::iterator it;
+      for( it = map.begin(); it != map.end(); ++it )
+        this->SetVariant( it->first, vtkVariant( it->second ) );
+    }
     template <class T> void Set( std::string column, T value )
     { this->SetVariant( column, vtkVariant( value ) ); }
     void SetNull( std::string column )
