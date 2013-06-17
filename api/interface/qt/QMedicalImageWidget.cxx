@@ -25,24 +25,19 @@ QMedicalImageWidget::QMedicalImageWidget( QWidget* parent )
 {
   this->ui = new Ui_QMedicalImageWidget;
   this->ui->setupUi( this );
-  this->viewer = vtkMedicalImageViewer::New();
+  this->viewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
   this->viewer->SetRenderWindow( this->ui->vtkWidget->GetRenderWindow() );
   this->viewer->InterpolateOff();
   this->resetImage();
 
-  QObject::connect(
-    this->ui->scrollBar, SIGNAL( valueChanged( int ) ),
-    this, SLOT( slotSliceChanged( int ) ) );
+  this->ui->framePlayerWidget->setViewer(this->viewer);
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QMedicalImageWidget::~QMedicalImageWidget()
 {
-  if( NULL != this->viewer )
-  {
-    this->viewer->Delete();
-    this->viewer = NULL;
-  }
+  //TODO this may have to be place in the closeEvent of the parent UI object
+  this->ui->framePlayerWidget->setViewer(0);
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -66,28 +61,8 @@ void QMedicalImageWidget::loadImage( QString filename )
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMedicalImageWidget::slotSliceChanged( int slice )
-{
-  this->viewer->SetSlice( slice );
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMedicalImageWidget::updateInterface()
 {
-  // update the slider
-  int dims = this->viewer->GetImageDimensionality();
-  if( 3 > dims )
-  { // hide the slider, we don't need it
-    this->ui->scrollBar->setVisible( false );
-  }
-  else
-  { // show the slider and update its range
-    this->ui->scrollBar->setVisible( true );
-    
-    int min = this->viewer->GetSliceMin();
-    int max = this->viewer->GetSliceMax();
-    this->ui->scrollBar->setMinimum( min );
-    this->ui->scrollBar->setMaximum( max );
-    this->ui->scrollBar->setSliderPosition( static_cast<int>( 0.5 * ( min + max ) ) );
-  }
+  this->ui->framePlayerWidget->updateFromViewer();
 }
+

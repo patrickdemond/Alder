@@ -56,17 +56,22 @@
 #define __vtkMedicalImageViewer_h
 
 #include "vtkObject.h"
+#include "vtkSmartPointer.h"
 #include <vector>
 
-class vtkAlderCornerAnnotation;
+class vtkCustomCornerAnnotation;
 class vtkImageActor;
 class vtkImageCoordinateWidget;
 class vtkImageData;
 class vtkImageWindowLevel;
 class vtkInteractorStyleImage;
-class vtkRenderWindow;
 class vtkRenderer;
+class vtkRenderWindow;
 class vtkRenderWindowInteractor;
+
+class vtkAnimationScene;
+class vtkAnimationCue;
+class vtkFrameAnimationPlayer;
 
 class vtkMedicalImageViewer : public vtkObject 
 {
@@ -167,6 +172,13 @@ public:
   virtual int GetSliceMax();
 
   /**
+   * Get the number of slices. 
+   * @sa GetSliceMin(), GetSliceRange()
+   */
+  virtual int GetNumberOfSlices()
+    { return this->GetSliceMax() - this->GetSliceMin() + 1; }
+
+  /**
    * Return the minimum and maximum slice index values.
    * @param range int array to put the range of slices in.
    * @sa GetSliceMin(), GetSliceMax()
@@ -177,7 +189,7 @@ public:
   /**
    * Return the minimum and maximum slice index values.
    * @param min fill the minimum slice by reference
-   * @param max fill the minimum slice by reference
+   * @param max fill the maximum slice by reference
    * @sa GetSliceMin(), GetSliceMax()
    */
   virtual void GetSliceRange( int &min, int &max );
@@ -189,22 +201,22 @@ public:
    * @sa GetSliceMin(), GetSliceMax()
    */
   virtual int* GetSliceRange();
-  
+
   //@{
   /**
    * Set/Get VTK object member ivars.
    * Class member ivars are accessible for connecting to third party
    * GUI toolkits (e.g., Qt), or for custom configuration.
    */
-  vtkGetObjectMacro( RenderWindow, vtkRenderWindow );
-  vtkGetObjectMacro( Renderer, vtkRenderer );
-  vtkGetObjectMacro( ImageActor, vtkImageActor );
-  vtkGetObjectMacro( WindowLevel, vtkImageWindowLevel );
-  vtkGetObjectMacro( InteractorStyle, vtkInteractorStyleImage );
-  vtkGetObjectMacro( Annotation, vtkAlderCornerAnnotation );
   virtual void SetRenderWindow( vtkRenderWindow* );
   virtual void SetRenderer( vtkRenderer* );
   virtual void SetInteractor( vtkRenderWindowInteractor* );
+  virtual void SetInteractorStyle( vtkInteractorStyleImage* );
+  vtkGetObjectMacro( RenderWindow, vtkRenderWindow );
+  vtkGetObjectMacro( Renderer, vtkRenderer );
+  vtkGetObjectMacro( InteractorStyle, vtkInteractorStyleImage );
+  vtkSmartPointer<vtkImageActor> GetImageActor(){ return this->ImageActor; }
+  vtkSmartPointer<vtkCustomCornerAnnotation> GetAnnotation(){ return this->Annotation; }
   //@}
 
   //@{
@@ -267,48 +279,53 @@ public:
   void SetImageToSinusoid();
 
   /**
-   * Scroll once through slices.
+   * Scroll once through slices.  Internally, this class uses native VTK
+   * vtkAnimationCue, vtkAnimationScene classes and a custom vtkAnimationPlayer
+   * class to implement cineloop control.  If necessary, access to these
+   * classes could be exposed to assign callbacks to the events they fire:
+   * vtkAnimationCue: AnimationCueTickEvent, StartAnimationCueEvent, EndAnimationCueEvent
+   * vtkAnimationPlayer: StartEvent, EndEvent,  ProgressEvent
    * Scrolling starts at the current slice and proceeds to the last slice.
-   * At start, the state ivar is set to PLAY.  At each slice change the
-   * PlayEvent is invoked.  Stops either when the state ivar is set to STOP
-   * or when the last slice is reached at which point state is set to STOP.
+   * Stops either when the last slice is reached or if CineStop() is called.
+   * If looping is set on via CineLoop(true) the scrolling continues
+   * until CineStop() is called.
    */
   void CinePlay();
 
   /**
    * Scroll continuously through slices.
    * Scrolling starts at the first slice, proceeds to the last slice and
-   * then repeats.  State ivar is set to PLAY, invokes PlayEvent at each
-   * slice change, until the state is set to STOP.
+   * then repeats.
    */
-  void CineLoop();
+  void CineLoop(bool);
 
   /** Set the current slice to the first slice. */
   void CineRewind();
 
+  /** Set the current slice to the last slice. */
+  void CineForward();
+
+  /** Set the current slice to the previous slice. */
+  void CineStepBackward();
+
+  /** Set the current slice to the next slice. */
+  void CineStepForward();
+
   /**
    * Stop Scrolling through slices.
-   * State ivar is set to STOP and a StopEvent is invoked.
    */
   void CineStop();
 
-  /** State enum for control of slice scrolling. */
-  enum
-  {
-    PLAY,
-    STOP
-  };
-
-  //@{
-  /** Get event id tags for control of scrolling through 3D images. */
-  vtkGetMacro( PlayEvent, int );
-  vtkGetMacro( StopEvent, int );
-  //@}
+  /** 
+   * Set the rate in frames per second.  Sets the vtkAnimationScene's 
+   * FrameRate ivar.  Default 25.
+   */
+  void SetCineFrameRate( int );
 
   /**
    * Turn cursoring on or off.  Cursoring works in concert with
    * corner annotation.  If cursoring is off, the cursor widget
-   * is disabled but the vtkAlderCornerAnnotation object could still be
+   * is disabled but the vtkCustomCornerAnnotation object could still be
    * used to display other textual overlay content.  If annotation
    * is off, cursoring can still be active with its output directed
    * via callback mechanism to another GUI element.
@@ -357,14 +374,14 @@ protected:
 
   //@{
   /** VTK object ivars that constitute the visualization/interaction pipeline. */
-  vtkImageWindowLevel       *WindowLevel;
+  vtkSmartPointer<vtkImageWindowLevel> WindowLevel;
   vtkRenderWindow           *RenderWindow;
   vtkRenderer               *Renderer;
-  vtkImageActor             *ImageActor;
+  vtkSmartPointer<vtkImageActor> ImageActor;
   vtkRenderWindowInteractor *Interactor;
   vtkInteractorStyleImage   *InteractorStyle;
-  vtkImageCoordinateWidget  *CursorWidget;
-  vtkAlderCornerAnnotation       *Annotation;
+  vtkSmartPointer<vtkImageCoordinateWidget> CursorWidget;
+  vtkSmartPointer<vtkCustomCornerAnnotation> Annotation;
   //@}
 
   int Cursor;
@@ -373,10 +390,6 @@ protected:
 
   int Slice;        /**< Current slice index */
   int LastSlice[3]; /**< Keeps track of last slice when changing orientation */
-
-  int PlayEvent;    /**< VTK unique event id for the PlayEvent */
-  int StopEvent;    /**< VTK unique event id for the StopEvent */
-  int CineState;    /**< Current state of play or stop for cine methods */
 
   /** Maintain window level settings between image changes */
   int MaintainLastWindowLevel; 
@@ -409,6 +422,10 @@ protected:
   void InitializeCameraViews();
   /** Record the current camera parameters */
   void RecordCameraView();
+
+  vtkSmartPointer<vtkAnimationScene> AnimationScene;
+  vtkSmartPointer<vtkAnimationCue> AnimationCue;
+  vtkSmartPointer<vtkFrameAnimationPlayer> AnimationPlayer;
 
 private:
   vtkMedicalImageViewer(const vtkMedicalImageViewer&);  /** Not implemented. */

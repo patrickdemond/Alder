@@ -13,6 +13,7 @@
 #define __QMedicalImageWidget_h
 
 #include <QWidget>
+#include <vtkSmartPointer.h>
 
 class vtkMedicalImageViewer;
 class Ui_QMedicalImageWidget;
@@ -31,12 +32,11 @@ public:
   void loadImage( QString filename );
 
 public slots:
-  virtual void slotSliceChanged( int );
 
 protected:
   void updateInterface();
 
-  vtkMedicalImageViewer *viewer;
+  vtkSmartPointer<vtkMedicalImageViewer> viewer;
 
 protected slots:
 

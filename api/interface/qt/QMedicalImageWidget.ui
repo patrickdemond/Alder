@@ -18,14 +18,7 @@
     <widget class="QVTKWidget" name="vtkWidget"/>
    </item>
    <item>
-    <widget class="QScrollBar" name="scrollBar">
-     <property name="maximum">
-      <number>0</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
+    <widget class="QAlderFramePlayerWidget" name="framePlayerWidget" native="true"/>
    </item>
   </layout>
  </widget>
@@ -34,6 +27,12 @@
    <class>QVTKWidget</class>
    <extends>QWidget</extends>
    <header>QVTKWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QAlderFramePlayerWidget</class>
+   <extends>QWidget</extends>
+   <header>QAlderFramePlayerWidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
