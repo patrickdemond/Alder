@@ -1,5 +1,12 @@
 /*=========================================================================
 
+  Program:   Alder (CLSA Medical Image Quality Assessment Tool)
+  Module:    QAlderDoubleSlider.cxx
+  Language:  C++
+
+  Author: Patrick Emond <emondpd@mcmaster.ca>
+  Author: Dean Inglis <inglisd@mcmaster.ca>
+
   Library:   CTK
 
   Copyright (c) Kitware Inc.
@@ -30,7 +37,7 @@
 // STD includes
 #include <limits>
 
-//-----------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 class QAlderSlider: public QSlider
 {
 public:
@@ -38,12 +45,12 @@ public:
   using QSlider::initStyleOption;
 };
 
-//-----------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QAlderSlider::QAlderSlider(QWidget* parent): QSlider(parent)
 {
 }
 
-//-----------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 class QAlderDoubleSliderPrivate
 {
   Q_DECLARE_PUBLIC(QAlderDoubleSlider);
@@ -69,7 +76,7 @@ public:
   double      Value;
 };
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QAlderDoubleSliderPrivate::QAlderDoubleSliderPrivate(QAlderDoubleSlider& object)
   :q_ptr(&object)
 {
@@ -83,7 +90,7 @@ QAlderDoubleSliderPrivate::QAlderDoubleSliderPrivate(QAlderDoubleSlider& object)
   this->Value = 0.;
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSliderPrivate::init()
 {
   Q_Q(QAlderDoubleSlider);
@@ -111,7 +118,7 @@ void QAlderDoubleSliderPrivate::init()
   q->setAttribute(Qt::WA_WState_OwnSizePolicy, false);
 }
   
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 int QAlderDoubleSliderPrivate::toInt(double doubleValue)const
 {
   double tmp = doubleValue / this->SingleStep;
@@ -131,7 +138,7 @@ int QAlderDoubleSliderPrivate::toInt(double doubleValue)const
   return intValue;
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderDoubleSliderPrivate::fromInt(int intValue)const
 {
   double doubleValue = this->SingleStep * (this->Offset + intValue) ;
@@ -139,19 +146,19 @@ double QAlderDoubleSliderPrivate::fromInt(int intValue)const
   return doubleValue;
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderDoubleSliderPrivate::safeFromInt(int intValue)const
 {
   return qBound(this->Minimum, this->fromInt(intValue), this->Maximum);
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSliderPrivate::updateOffset(double value)
 {
   this->Offset = (value / this->SingleStep) - this->toInt(value);
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QAlderDoubleSlider::QAlderDoubleSlider(QWidget* _parent) : Superclass(_parent)
   , d_ptr(new QAlderDoubleSliderPrivate(*this))
 {
@@ -159,7 +166,7 @@ QAlderDoubleSlider::QAlderDoubleSlider(QWidget* _parent) : Superclass(_parent)
   d->init();
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QAlderDoubleSlider::QAlderDoubleSlider(Qt::Orientation _orientation, QWidget* _parent)
   : Superclass(_parent)
   , d_ptr(new QAlderDoubleSliderPrivate(*this))
@@ -169,26 +176,26 @@ QAlderDoubleSlider::QAlderDoubleSlider(Qt::Orientation _orientation, QWidget* _p
   this->setOrientation(_orientation);
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QAlderDoubleSlider::~QAlderDoubleSlider()
 {
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSlider::setMinimum(double min)
 {
   Q_D(QAlderDoubleSlider);
   this->setRange(min, qMax(min, d->Maximum));
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSlider::setMaximum(double max)
 {
   Q_D(QAlderDoubleSlider);
   this->setRange(qMin(d->Minimum, max), max);
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSlider::setRange(double min, double max)
 {
   Q_D(QAlderDoubleSlider);
@@ -212,42 +219,42 @@ void QAlderDoubleSlider::setRange(double min, double max)
   this->setValue(d->Value);
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderDoubleSlider::minimum()const
 {
   Q_D(const QAlderDoubleSlider);
   return d->Minimum;
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderDoubleSlider::maximum()const
 {
   Q_D(const QAlderDoubleSlider);
   return d->Maximum;
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderDoubleSlider::sliderPosition()const
 {
   Q_D(const QAlderDoubleSlider);
   return d->safeFromInt(d->Slider->sliderPosition());
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSlider::setSliderPosition(double newSliderPosition)
 {
   Q_D(QAlderDoubleSlider);
   d->Slider->setSliderPosition(d->toInt(newSliderPosition));
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderDoubleSlider::value()const
 {
   Q_D(const QAlderDoubleSlider);
   return d->Value;
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSlider::setValue(double newValue)
 {
   Q_D(QAlderDoubleSlider);
@@ -273,14 +280,14 @@ void QAlderDoubleSlider::setValue(double newValue)
     }
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderDoubleSlider::singleStep()const
 {
   Q_D(const QAlderDoubleSlider);
   return d->SingleStep;
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSlider::setSingleStep(double newStep)
 {
   Q_D(QAlderDoubleSlider);
@@ -295,14 +302,14 @@ void QAlderDoubleSlider::setSingleStep(double newStep)
   Q_ASSERT(qFuzzyCompare(d->Value,d->safeFromInt(d->Slider->value())));
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderDoubleSlider::pageStep()const
 {
   Q_D(const QAlderDoubleSlider);
   return d->PageStep;
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSlider::setPageStep(double newStep)
 {
   Q_D(QAlderDoubleSlider);
@@ -310,7 +317,7 @@ void QAlderDoubleSlider::setPageStep(double newStep)
   d->Slider->setPageStep(d->toInt(d->PageStep));
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderDoubleSlider::tickInterval()const
 {
   Q_D(const QAlderDoubleSlider);
@@ -318,42 +325,42 @@ double QAlderDoubleSlider::tickInterval()const
   return d->SingleStep * d->Slider->tickInterval();
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSlider::setTickInterval(double newTickInterval)
 {
   Q_D(QAlderDoubleSlider);
   d->Slider->setTickInterval(d->toInt(newTickInterval));
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 bool QAlderDoubleSlider::hasTracking()const
 {
   Q_D(const QAlderDoubleSlider);
   return d->Slider->hasTracking();
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSlider::setTracking(bool enable)
 {
   Q_D(QAlderDoubleSlider);
   d->Slider->setTracking(enable);
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSlider::triggerAction( QAbstractSlider::SliderAction action)
 {
   Q_D(QAlderDoubleSlider);
   d->Slider->triggerAction(action);
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 Qt::Orientation QAlderDoubleSlider::orientation()const
 {
   Q_D(const QAlderDoubleSlider);
   return d->Slider->orientation();
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSlider::setOrientation(Qt::Orientation newOrientation)
 {
   Q_D(QAlderDoubleSlider);
@@ -372,21 +379,21 @@ void QAlderDoubleSlider::setOrientation(Qt::Orientation newOrientation)
   d->Slider->setOrientation(newOrientation);
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QString QAlderDoubleSlider::handleToolTip()const
 {
   Q_D(const QAlderDoubleSlider);
   return d->HandleToolTip;
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSlider::setHandleToolTip(const QString& toolTip)
 {
   Q_D(QAlderDoubleSlider);
   d->HandleToolTip = toolTip;
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSlider::onValueChanged(int newValue)
 {
   Q_D(QAlderDoubleSlider);
@@ -404,14 +411,14 @@ void QAlderDoubleSlider::onValueChanged(int newValue)
   emit this->valueChanged(d->Value);
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSlider::onSliderMoved(int newPosition)
 {
   Q_D(const QAlderDoubleSlider);
   emit this->sliderMoved(d->safeFromInt(newPosition));
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDoubleSlider::onRangeChanged(int min, int max)
 {
   Q_D(const QAlderDoubleSlider);
@@ -421,7 +428,7 @@ void QAlderDoubleSlider::onRangeChanged(int min, int max)
     }
 }
 
-// --------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 bool QAlderDoubleSlider::eventFilter(QObject* watched, QEvent* event)
 {
   Q_D(QAlderDoubleSlider);
@@ -451,4 +458,3 @@ bool QAlderDoubleSlider::eventFilter(QObject* watched, QEvent* event)
     }
   return this->Superclass::eventFilter(watched, event);
 }
-

@@ -1,5 +1,11 @@
 /*==============================================================================
 
+  Module:    QAlderFramePlayerWidget.h
+  Program:   Alder (CLSA Medical Image Quality Assessment Tool)
+  Language:  C++
+  Author:    Patrick Emond <emondpd@mcmaster.ca>
+  Author:    Dean Inglis <inglisd@mcmaster.ca>
+
   Library: MSVTK
 
   Copyright (c) Kitware Inc.
@@ -31,7 +37,7 @@
 #include <vtkNew.h>
 #include <vtkSmartPointer.h>
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 class QAlderFramePlayerWidgetPrivate : public Ui_QAlderFramePlayerWidget
 {
   Q_DECLARE_PUBLIC(QAlderFramePlayerWidget);
@@ -75,10 +81,10 @@ public:
   virtual void updateUi(const PipelineInfoType&);               // Update the widget giving pipeline statut
 };
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 // QAlderFramePlayerWidgetPrivate methods
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QAlderFramePlayerWidgetPrivate::QAlderFramePlayerWidgetPrivate
 (QAlderFramePlayerWidget& object)
   : q_ptr(&object)
@@ -86,13 +92,13 @@ QAlderFramePlayerWidgetPrivate::QAlderFramePlayerWidgetPrivate
   this->maxFrameRate = 60;          // 60 FPS by default
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QAlderFramePlayerWidgetPrivate::~QAlderFramePlayerWidgetPrivate()
 {
   this->viewer = NULL;
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QAlderFramePlayerWidgetPrivate::PipelineInfoType::PipelineInfoType()
   : isConnected(false)
   , numberOfFrames(0)
@@ -102,7 +108,7 @@ QAlderFramePlayerWidgetPrivate::PipelineInfoType::PipelineInfoType()
   this->frameRange[1] = 0;
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidgetPrivate::PipelineInfoType::printSelf()const
 {
   std::cout << "---------------------------------------------------------------" << std::endl
@@ -114,7 +120,7 @@ void QAlderFramePlayerWidgetPrivate::PipelineInfoType::printSelf()const
 
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QAlderFramePlayerWidgetPrivate::PipelineInfoType
 QAlderFramePlayerWidgetPrivate::retrievePipelineInfo()
 {
@@ -135,7 +141,7 @@ QAlderFramePlayerWidgetPrivate::retrievePipelineInfo()
   return pipeInfo;
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderFramePlayerWidgetPrivate::PipelineInfoType::
 clampTimeInterval(double playbackSpeed, double maxFrameRate) const
 {
@@ -153,7 +159,7 @@ clampTimeInterval(double playbackSpeed, double maxFrameRate) const
   return  1000. / rate;
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderFramePlayerWidgetPrivate::PipelineInfoType::validateFrame(double frame) const
 {
   if (this->numberOfFrames == 0)
@@ -163,19 +169,19 @@ double QAlderFramePlayerWidgetPrivate::PipelineInfoType::validateFrame(double fr
   return frame;
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderFramePlayerWidgetPrivate::PipelineInfoType::previousFrame() const
 {
   return this->validateFrame(this->currentFrame-1);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderFramePlayerWidgetPrivate::PipelineInfoType::nextFrame() const
 {
   return this->validateFrame(this->currentFrame+1);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidgetPrivate::setupUi(QWidget* widget)
 {
   Q_Q(QAlderFramePlayerWidget);
@@ -202,14 +208,14 @@ void QAlderFramePlayerWidgetPrivate::setupUi(QWidget* widget)
   q->connect(this->timer, SIGNAL(timeout()), q, SLOT(onTick()));
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidgetPrivate::updateUi()
 {
   PipelineInfoType pipeInfo = this->retrievePipelineInfo();
   this->updateUi(pipeInfo);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidgetPrivate::updateUi(const PipelineInfoType& pipeInfo)
 {
   // Buttons
@@ -228,7 +234,7 @@ void QAlderFramePlayerWidgetPrivate::updateUi(const PipelineInfoType& pipeInfo)
   this->frameSlider->blockSignals(false);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidgetPrivate::requestData(const PipelineInfoType& pipeInfo,
                                               double frame)
 {
@@ -248,14 +254,14 @@ void QAlderFramePlayerWidgetPrivate::requestData(const PipelineInfoType& pipeInf
   emit q->currentFrameChanged(frame); // Emit the change
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidgetPrivate::processRequest(double frame)
 {
   PipelineInfoType pipeInfo = this->retrievePipelineInfo();
   this->processRequest(pipeInfo, frame);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidgetPrivate::processRequest(const PipelineInfoType& pipeInfo,
                                                  double frame)
 {
@@ -266,16 +272,16 @@ void QAlderFramePlayerWidgetPrivate::processRequest(const PipelineInfoType& pipe
   this->updateUi();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 bool QAlderFramePlayerWidgetPrivate::isConnected()
 {
   return this->viewer && this->viewer->GetInput();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 // QAlderFramePlayerWidget methods
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QAlderFramePlayerWidget::QAlderFramePlayerWidget(QWidget* parentWidget)
   : Superclass(parentWidget)
   , d_ptr(new QAlderFramePlayerWidgetPrivate(*this))
@@ -285,7 +291,7 @@ QAlderFramePlayerWidget::QAlderFramePlayerWidget(QWidget* parentWidget)
   d->updateUi();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QAlderFramePlayerWidget::~QAlderFramePlayerWidget()
 {
   Q_D(QAlderFramePlayerWidget);
@@ -293,7 +299,7 @@ QAlderFramePlayerWidget::~QAlderFramePlayerWidget()
   d->viewer = 0;
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setViewer(vtkMedicalImageViewer* viewer)
 {
   Q_D(QAlderFramePlayerWidget);
@@ -302,21 +308,21 @@ void QAlderFramePlayerWidget::setViewer(vtkMedicalImageViewer* viewer)
   d->updateUi();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 vtkMedicalImageViewer* QAlderFramePlayerWidget::viewer() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->viewer;
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::updateFromViewer()
 {
   Q_D(QAlderFramePlayerWidget);
   d->updateUi();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::goToFirstFrame()
 {
   Q_D(QAlderFramePlayerWidget);
@@ -328,7 +334,7 @@ void QAlderFramePlayerWidget::goToFirstFrame()
   d->processRequest(pipeInfo, pipeInfo.frameRange[0]);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::goToPreviousFrame()
 {
   Q_D(QAlderFramePlayerWidget);
@@ -340,7 +346,7 @@ void QAlderFramePlayerWidget::goToPreviousFrame()
   d->processRequest(pipeInfo, pipeInfo.previousFrame());
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::goToNextFrame()
 {
   Q_D(QAlderFramePlayerWidget);
@@ -352,7 +358,7 @@ void QAlderFramePlayerWidget::goToNextFrame()
   d->processRequest(pipeInfo, pipeInfo.nextFrame());
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::goToLastFrame()
 {
   Q_D(QAlderFramePlayerWidget);
@@ -364,7 +370,7 @@ void QAlderFramePlayerWidget::goToLastFrame()
   d->processRequest(pipeInfo, pipeInfo.frameRange[1]);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::play(bool playPause)
 {
   if (!playPause)
@@ -373,7 +379,7 @@ void QAlderFramePlayerWidget::play(bool playPause)
     this->play();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::play()
 {
   Q_D(QAlderFramePlayerWidget);
@@ -427,7 +433,7 @@ void QAlderFramePlayerWidget::play()
   emit this->playing(true);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::pause()
 {
   Q_D(QAlderFramePlayerWidget);
@@ -445,28 +451,28 @@ void QAlderFramePlayerWidget::pause()
   return;
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::stop()
 {
   this->pause();
   this->goToFirstFrame();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::playForward(bool play)
 {
   this->setDirection(QAbstractAnimation::Forward);
   this->play(play);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::playBackward(bool play)
 {
   this->setDirection(QAbstractAnimation::Backward);
   this->play(play);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::onTick()
 {
   Q_D(QAlderFramePlayerWidget);
@@ -516,14 +522,14 @@ void QAlderFramePlayerWidget::onTick()
   d->processRequest(pipeInfo, frameRequest);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setCurrentFrame(double frame)
 {
   Q_D(QAlderFramePlayerWidget);
   d->processRequest(frame);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setPlaySpeed(double speedFactor)
 {
   Q_D(QAlderFramePlayerWidget);
@@ -538,116 +544,116 @@ void QAlderFramePlayerWidget::setPlaySpeed(double speedFactor)
   d->timer->setInterval(timeInterval);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 // QAlderFramePlayerWidget methods -- Widgets Interface
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setFirstFrameIcon(const QIcon& ico)
 {
   Q_D(QAlderFramePlayerWidget);
   d->firstFrameButton->setIcon(ico);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setPreviousFrameIcon(const QIcon& ico)
 {
   Q_D(QAlderFramePlayerWidget);
   d->previousFrameButton->setIcon(ico);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setPlayIcon(const QIcon& ico)
 {
   Q_D(QAlderFramePlayerWidget);
   d->playButton->setIcon(ico);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setPlayReverseIcon(const QIcon& ico)
 {
   Q_D(QAlderFramePlayerWidget);
   d->playReverseButton->setIcon(ico);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setNextFrameIcon(const QIcon& ico)
 {
   Q_D(QAlderFramePlayerWidget);
   d->nextFrameButton->setIcon(ico);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setLastFrameIcon(const QIcon& ico)
 {
   Q_D(QAlderFramePlayerWidget);
   d->lastFrameButton->setIcon(ico);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setRepeatIcon(const QIcon& ico)
 {
   Q_D(QAlderFramePlayerWidget);
   d->repeatButton->setIcon(ico);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QIcon QAlderFramePlayerWidget::firstFrameIcon() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->firstFrameButton->icon();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QIcon QAlderFramePlayerWidget::previousFrameIcon() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->previousFrameButton->icon();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QIcon QAlderFramePlayerWidget::playIcon() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->playButton->icon();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QIcon QAlderFramePlayerWidget::playReverseIcon() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->playReverseButton->icon();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QIcon QAlderFramePlayerWidget::nextFrameIcon() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->nextFrameButton->icon();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QIcon QAlderFramePlayerWidget::lastFrameIcon() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->lastFrameButton->icon();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QIcon QAlderFramePlayerWidget::repeatIcon() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->repeatButton->icon();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setPlayReverseVisibility(bool visible)
 {
   Q_D(QAlderFramePlayerWidget);
   d->playReverseButton->setVisible(visible);
 }
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setBoundFramesVisibility(bool visible)
 {
   Q_D(QAlderFramePlayerWidget);
@@ -655,7 +661,7 @@ void QAlderFramePlayerWidget::setBoundFramesVisibility(bool visible)
   d->firstFrameButton->setVisible(visible);
   d->lastFrameButton->setVisible(visible);
 }
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setGoToVisibility(bool visible)
 {
   Q_D(QAlderFramePlayerWidget);
@@ -663,21 +669,21 @@ void QAlderFramePlayerWidget::setGoToVisibility(bool visible)
   d->previousFrameButton->setVisible(visible);
   d->nextFrameButton->setVisible(visible);
 }
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setFrameSpinBoxVisibility(bool visible)
 {
   Q_D(QAlderFramePlayerWidget);
   d->frameSlider->setSpinBoxVisible(visible);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 bool QAlderFramePlayerWidget::playReverseVisibility() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->playReverseButton->isVisibleTo(
     const_cast<QAlderFramePlayerWidget*>(this));
 }
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 bool QAlderFramePlayerWidget::boundFramesVisibility() const
 {
   Q_D(const QAlderFramePlayerWidget);
@@ -686,7 +692,7 @@ bool QAlderFramePlayerWidget::boundFramesVisibility() const
           d->lastFrameButton->isVisibleTo(
             const_cast<QAlderFramePlayerWidget*>(this)));
 }
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 bool QAlderFramePlayerWidget::goToVisibility() const
 {
   Q_D(const QAlderFramePlayerWidget);
@@ -695,7 +701,7 @@ bool QAlderFramePlayerWidget::goToVisibility() const
           d->nextFrameButton->isVisibleTo(
             const_cast<QAlderFramePlayerWidget*>(this)));
 }
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 bool QAlderFramePlayerWidget::frameSpinBoxVisibility() const
 {
   Q_D(const QAlderFramePlayerWidget);
@@ -703,20 +709,20 @@ bool QAlderFramePlayerWidget::frameSpinBoxVisibility() const
     const_cast<QAlderFramePlayerWidget*>(this));
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setSliderDecimals(int decimals)
 {
   Q_D(QAlderFramePlayerWidget);
   d->frameSlider->setDecimals(decimals);
 }
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setSliderPageStep(double pageStep)
 {
   Q_D(QAlderFramePlayerWidget);
   d->frameSlider->setPageStep(pageStep);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setSliderSingleStep(double singleStep)
 {
   Q_D(QAlderFramePlayerWidget);
@@ -728,27 +734,27 @@ void QAlderFramePlayerWidget::setSliderSingleStep(double singleStep)
   d->frameSlider->setSingleStep(singleStep);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 int QAlderFramePlayerWidget::sliderDecimals() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->frameSlider->decimals();
 }
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderFramePlayerWidget::sliderPageStep() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->frameSlider->pageStep();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderFramePlayerWidget::sliderSingleStep() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->frameSlider->singleStep();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setDirection(QAbstractAnimation::Direction direction)
 {
   Q_D(QAlderFramePlayerWidget);
@@ -759,28 +765,28 @@ void QAlderFramePlayerWidget::setDirection(QAbstractAnimation::Direction directi
   }
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QAbstractAnimation::Direction QAlderFramePlayerWidget::direction() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->direction;
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setRepeat(bool repeat)
 {
   Q_D(const QAlderFramePlayerWidget);
   d->repeatButton->setChecked(repeat);
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 bool QAlderFramePlayerWidget::repeat() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->repeatButton->isChecked();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setMaxFramerate(double frameRate)
 {
   Q_D(QAlderFramePlayerWidget);
@@ -789,21 +795,21 @@ void QAlderFramePlayerWidget::setMaxFramerate(double frameRate)
   d->maxFrameRate = frameRate;
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderFramePlayerWidget::maxFramerate() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->maxFrameRate;
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderFramePlayerWidget::currentFrame() const
 {
   Q_D(const QAlderFramePlayerWidget);
   return d->frameSlider->value();
 }
 
-//------------------------------------------------------------------------------
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderFramePlayerWidget::playSpeed() const
 {
   Q_D(const QAlderFramePlayerWidget);

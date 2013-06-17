@@ -1,5 +1,12 @@
 /*==============================================================================
 
+  Program:   Alder (CLSA Medical Image Quality Assessment Tool)
+  Module:    QAlderFramePlayerWidget.cxx
+  Language:  C++
+
+  Author: Patrick Emond <emondpd@mcmaster.ca>
+  Author: Dean Inglis <inglisd@mcmaster.ca>
+
   Library: MSVTK
 
   Copyright (c) Kitware Inc.
@@ -18,6 +25,22 @@
 
 ==============================================================================*/
 
+/** 
+ * @class QAlderDoubleSlider
+ *
+ * @author Patrick Emond <emondpd@mcmaster.ca>
+ * @author Dean Inglis <inglisd@mcmaster.ca>
+ *
+ * @brief Qt widget for playing cineloops.
+ *
+ * It encapsulates the VTK time animation control functionality and provides
+ * slots and signals to manage them in a Qt application. The widget connects
+ * itself to a *Viewer*, which controls display of an image.
+ *
+ * This class was adapted from the MSVTK library for playing cineloops.
+ *
+ * @see QAlderDoubleSlider, QAlderSliderWidget, vtkMedicalImageViewer
+ */
 #ifndef __QAlderFramePlayerWidget_h
 #define __QAlderFramePlayerWidget_h
 
@@ -30,78 +53,126 @@
 class vtkMedicalImageViewer;
 class QAlderFramePlayerWidgetPrivate;
 
-/// \brief A Qt slider for controlling time of filter pipelines.
-///
-/// It encapsulates the VTK time animation control functionality and provides
-/// slots and signals to manage them in a Qt application. The widget connects
-/// itself to a *Viewer*, which controls display of an image.
-
 class QAlderFramePlayerWidget : public QWidget
 {
   Q_OBJECT
-  /// This property holds the firstFrame button's icon.
-  /// \sa firstFrameIcon(), setFirstFrameIcon()
+
+  /** 
+   * This property holds the firstFrame button's icon.
+   * @see firstFrameIcon(), setFirstFrameIcon()
+   */
   Q_PROPERTY(QIcon firstFrameIcon READ firstFrameIcon WRITE setFirstFrameIcon)
-  /// This property holds the previousFrame button's icon.
-  /// \sa previousFrameIcon(), setPreviousFrameIcon()
+
+  /** 
+   * This property holds the previousFrame button's icon.
+   * @see previousFrameIcon(), setPreviousFrameIcon()
+   */
   Q_PROPERTY(QIcon previousFrameIcon READ previousFrameIcon WRITE setPreviousFrameIcon)
-  /// This property holds the play button's icon.
-  /// \sa playIcon(), setPlayIcon()
+
+  /** 
+   * This property holds the play button's icon.
+   * @see playIcon(), setPlayIcon()
+   */
   Q_PROPERTY(QIcon playIcon READ playIcon WRITE setPlayIcon)
-  /// This property holds the play reverse button's icon.
-  /// \sa playReverseIcon(), setPlayReverseIcon()
+
+  /** 
+   * This property holds the play reverse button's icon.
+   * @see playReverseIcon(), setPlayReverseIcon()
+   */
   Q_PROPERTY(QIcon playReverseIcon READ playReverseIcon WRITE setPlayReverseIcon)
-  /// This property holds the nextFrame button's icon.
-  /// \sa nextFrameIcon(), setNextFrameIcon()
+
+  /** 
+   * This property holds the nextFrame button's icon.
+   * @see nextFrameIcon(), setNextFrameIcon()
+   */
   Q_PROPERTY(QIcon nextFrameIcon READ nextFrameIcon WRITE setNextFrameIcon)
-  /// This property holds the lastFrame button's icon.
-  /// \sa lastFrameIcon(), setLastFrameIcon()
+
+  /** 
+   * This property holds the lastFrame button's icon.
+   * @see lastFrameIcon(), setLastFrameIcon()
+   */
   Q_PROPERTY(QIcon lastFrameIcon READ lastFrameIcon WRITE setLastFrameIcon)
-  /// This property holds the repeat button's icon.
-  /// \sa repeatIcon(), setRepeatIcon()
+
+  /** 
+   * This property holds the repeat button's icon.
+   * @see repeatIcon(), setRepeatIcon()
+   */
   Q_PROPERTY(QIcon repeatIcon READ repeatIcon WRITE setRepeatIcon)
 
-  /// Enable/Disable the visibility of play reverse button.
-  /// \sa playReverseVisibility(), setPlayReverseVisibility()
+  /**
+   * Enable/Disable the visibility of play reverse button.
+   * @see playReverseVisibility(), setPlayReverseVisibility()
+   */
   Q_PROPERTY(bool playReverseVisibility READ playReverseVisibility WRITE setPlayReverseVisibility)
-  /// Enable/Disable the visibility of the firstFrame and lastFrame buttons.
-  /// \sa boundFramesVisibility(), setBoundFramesVisibility()
+
+  /** 
+   * Enable/Disable the visibility of the firstFrame and lastFrame buttons.
+   * @see boundFramesVisibility(), setBoundFramesVisibility()
+   */
   Q_PROPERTY(bool boundFramesVisibility READ boundFramesVisibility WRITE setBoundFramesVisibility)
-  /// Enable/Disable the visibility of the seekBackward and seekForward buttons.
-  /// \sa goToVisibility(), setGoToVisibility()
+
+  /** 
+   * Enable/Disable the visibility of the seekBackward and seekForward buttons.
+   * @see goToVisibility(), setGoToVisibility()
+   */
   Q_PROPERTY(bool goToVisibility READ goToVisibility WRITE setGoToVisibility)
-  /// Enable/Disable the visibility of time spinBox
-  /// \sa frameSpinBoxVisibility(), setFrameSpinBoxVisibility()
+
+  /**
+   * Enable/Disable the visibility of time spinBox
+   * @see frameSpinBoxVisibility(), setFrameSpinBoxVisibility()
+   */
   Q_PROPERTY(bool frameSpinBoxVisibility READ frameSpinBoxVisibility WRITE setFrameSpinBoxVisibility)
 
-  /// This property holds the number of decimal digits for the frameSlider.
-  /// \sa sliderDecimals(), setSliderDecimals()
+  /**
+   * This property holds the number of decimal digits for the frameSlider.
+   * @see sliderDecimals(), setSliderDecimals()
+   */
   Q_PROPERTY(int sliderDecimals READ sliderDecimals WRITE setSliderDecimals)
-  /// This property holds the page step for the frameSlider.
-  /// \sa sliderPageStep(), setSliderPageStep()
+
+  /** 
+   * This property holds the page step for the frameSlider.
+   * @see sliderPageStep(), setSliderPageStep()
+   */
   Q_PROPERTY(double sliderPageStep READ sliderPageStep WRITE setSliderPageStep)
-  /// This property holds the single step for the frameSlider.
-  /// The automatic mode (by default) compute the step corresponding to one
-  /// frame. To get back to the automatic mode, set a negative value.
-  /// \sa sliderSingleStep(), setSliderSingleStep()
+
+  /**
+   * This property holds the single step for the frameSlider.
+   * The automatic mode (by default) compute the step corresponding to one
+   * frame. To get back to the automatic mode, set a negative value.
+   * @see sliderSingleStep(), setSliderSingleStep()
+   */
   Q_PROPERTY(double sliderSingleStep READ sliderSingleStep WRITE setSliderSingleStep)
 
-  /// This property holds the number of the higher frame per seconds rate the
-  /// the player will be willing to handle.
-  /// \sa maxFramerate(), setMaxFramerate()
+  /**
+   * This property holds the number of the higher frame per seconds rate the
+   * the player will be willing to handle.
+   * @see maxFramerate(), setMaxFramerate()
+   */
   Q_PROPERTY(double maxFramerate READ maxFramerate WRITE setMaxFramerate)
-  /// This property holds the direction on which the widget will do the
-  /// animation.
-  /// \sa direction(), setDirection()
+
+  /**
+   * This property holds the direction on which the widget will do the
+   * animation.
+   * @see direction(), setDirection()
+   */
   Q_PROPERTY(QAbstractAnimation::Direction direction READ direction WRITE setDirection NOTIFY directionChanged)
-  /// This property holds if the animation is repeated when we reach the end.
-  /// \sa repeat(), setRepeat()
+
+  /**
+   *This property holds if the animation is repeated when we reach the end.
+   * @see repeat(), setRepeat()
+   */
   Q_PROPERTY(bool repeat READ repeat WRITE setRepeat)
-  /// This property holds the speed factor of the animation.
-  /// \sa playSpeed(), setPlaySpeed()
+
+  /**
+   * This property holds the speed factor of the animation.
+   * @see playSpeed(), setPlaySpeed()
+   */
   Q_PROPERTY(double playSpeed READ playSpeed WRITE setPlaySpeed)
-  /// This property is an accessor to the widget's current time.
-  /// \sa currentTime(), setCurrentTime()
+
+  /**
+   * This property is an accessor to the widget's current frame.
+   * @see currentTime(), setCurrentTime()
+   */
   Q_PROPERTY(double currentFrame READ currentFrame WRITE setCurrentFrame NOTIFY currentFrameChanged)
 
 public:
@@ -109,138 +180,184 @@ public:
   QAlderFramePlayerWidget(QWidget* parent=0);
   virtual ~QAlderFramePlayerWidget();
 
-  /// Set the viewer to connect with.
+  //@{
+  /** Set/Get the viewer to connect with. */
   void setViewer(vtkMedicalImageViewer* viewer);
-  /// Return the viewer.
   vtkMedicalImageViewer* viewer() const;
+  //@}
 
-  /// Set the first frame icon.
-  /// \sa firstFrameIcon
+  //@{
+  /** Set/Get the first frame icon. */
   void setFirstFrameIcon(const QIcon&);
-  /// Return the first frame icon.
-  /// \sa firstFrameIcon
   QIcon firstFrameIcon() const;
-  /// Set the previous frame icon.
-  /// \sa previousFrameIcon
+  //@}
+
+  //@{
+  /** Set/Get the previous frame icon. */
   void setPreviousFrameIcon(const QIcon&);
-  /// Return the previous frame icon.
-  /// \sa previousFrameIcon
   QIcon previousFrameIcon() const;
-  /// Set the play icon.
-  /// \sa playIcon
+  //@}
+
+  /** Set/Get the play icon. */
   void setPlayIcon(const QIcon&);
-  /// Return the play icon.
-  /// \sa playIcon
   QIcon playIcon() const;
-  /// Set the reverse icon.
-  /// \sa playReverseIcon
+  //@}
+
+  //@{
+  /** Set/Get the reverse icon. */
   void setPlayReverseIcon(const QIcon&);
-  /// Return the play reverse icon
-  /// \sa playReverseIcon
   QIcon playReverseIcon() const;
-  /// Set the icon of the next frame button.
-  /// \sa nextFrameIcon
+  //@}
+
+  //@{
+  /** Set/Get the icon of the next frame button. */
   void setNextFrameIcon(const QIcon&);
-  /// Return the icon of the next frame button.
-  /// \sa nextFrameIcon
   QIcon nextFrameIcon() const;
-  /// Set the icon of the last frame button.
-  /// \sa lastFrameIcon
+  //@}
+
+  //@{
+  /** Set/Get the icon of the last frame button. */
   void setLastFrameIcon(const QIcon&);
-  /// Return the icon of the last frame button.
-  /// \sa lastFrameIcon
   QIcon lastFrameIcon() const;
-  /// Set the icon of the repeat button.
-  /// \sa repeatIcon
+  //@}
+
+  //@{
+  /** Set the icon of the repeat button. */
   void setRepeatIcon(const QIcon&);
-  /// Return the icon of the repeat button.
-  /// \sa repeatIcon
   QIcon repeatIcon() const;
+  //@}
 
-  /// \sa playReverseVisibility
+  //@{
+  /** Set/Get playReverseVisibility */
   void setPlayReverseVisibility(bool visible);
-  /// \sa playReverseVisibility
   bool playReverseVisibility() const;
-  /// \sa boundFramesVisibility
+  //@}
+
+  //@{
+  /** Set/Get boundFramesVisibility */
   void setBoundFramesVisibility(bool visible);
-  /// \sa boundFramesVisibility
   bool boundFramesVisibility() const;
-  /// \sa goToVisibility
+  //@}
+
+  //@{
+  /** Set/Get goToVisibility */
   void setGoToVisibility(bool visible);
-  /// \sa goToVisibility
   bool goToVisibility() const;
-  /// \sa frameSpinBoxVisibility
+  //@}
+
+  //@{
+  /** Set/Get frameSpinBoxVisibility */
   void setFrameSpinBoxVisibility(bool visible);
-  /// \sa frameSpinBoxVisibility
   bool frameSpinBoxVisibility() const;
+  //@}
 
-  /// \sa sliderDecimals
+  //@{
+  /** Set/Get sliderDecimals */
   void setSliderDecimals(int decimals);
-  /// \sa sliderDecimals
   int sliderDecimals() const;
-  /// \sa sliderPageStep
-  void setSliderPageStep(double pageStep);
-  /// \sa sliderPageStep
-  double sliderPageStep() const;
-  /// \sa sliderSingleStep
-  void setSliderSingleStep(double singleStep);
-  /// \sa sliderSingleStep
-  double sliderSingleStep() const;
+  //@}
 
-  /// Playback
-  /// \sa direction
+  //@{
+  /** Set/Get sliderPageStep */
+  void setSliderPageStep(double pageStep);
+  double sliderPageStep() const;
+  //@}
+
+  //@{
+  /** Set/Get sliderSingleStep */
+  void setSliderSingleStep(double singleStep);
+  double sliderSingleStep() const;
+  //@}
+
+  //@{
+  /** Set/Get playback direction */
   void setDirection(QAbstractAnimation::Direction playDirection);
-  /// \sa direction
   QAbstractAnimation::Direction direction() const;
-  /// \sa repeat
+  //@}
+
+  //@{
+  /** Set/Get repeat */
   void setRepeat(bool repeat);
-  /// \sa repeat
   bool repeat() const;
-  /// \sa maxFramerate
+  //@}
+
+  //@{
+  /** Set/Get maxFramerate in frames per second */
   void setMaxFramerate(double);
-  /// \sa maxFramerate
   double maxFramerate() const;
-  /// \sa currentFrame
+  //@}
+
+  /** Set currentFrame */
   double currentFrame() const;
-  /// \sa playSpeed
+
+  /** Set playSpeed in frames per second */
   double playSpeed() const;
 
 public slots:
-  /// \sa currentTime
+  /** Set currentFrame */
   virtual void setCurrentFrame(double frame);
-  /// \sa playSpeed
+
+  /** Set playSpeed */
   virtual void setPlaySpeed(double speedCoef);
-  /// Set the current time to the first frame.
-  /// \sa goToPreviousFrame(), goToNextFrame(), goToLastFrame()
+
+  /**
+   * Set the current frame to the first frame.
+   * @see goToPreviousFrame(), goToNextFrame(), goToLastFrame()
+   */
   virtual void goToFirstFrame();
-  /// Set the current time to the previous frame.
-  /// \sa goToFirstFrame(), goToNextFrame(), goToLastFrame()
+
+  /**
+   * Set the current frame to the previous frame.
+   * @see goToFirstFrame(), goToNextFrame(), goToLastFrame()
+   */
   virtual void goToPreviousFrame();
-  /// Set the current time to the next frame.
-  /// \sa goToFirstFrame(), goToPreviousFrame(), goToLastFrame()
+
+  /**
+   * Set the current frame to the next frame.
+   * @see goToFirstFrame(), goToPreviousFrame(), goToLastFrame()
+   */
   virtual void goToNextFrame();
-  /// Set the current time to the last frame.
-  /// \sa goToFirstFrame(), goToPreviousFrame(), goToNextFrame(), goToLastFrame()
+
+  /**
+   * Set the current frame to the last frame.
+   * @see goToFirstFrame(), goToPreviousFrame(), goToNextFrame(), goToLastFrame()
+   */
   virtual void goToLastFrame();
 
-  /// Automatically browse all the time steps from the pipeline in the
-  /// \a direction order.
-  /// \sa pause(), stop(), direction
+  /** 
+   * Automatically browse all the frames in the direction order.
+   * @see pause(), stop(), direction
+   */
   virtual void play();
-  /// Pause the browse of the time steps. To resume, call play().
-  /// \sa play(), pause()
+
+  /**
+   * Pause the browse of the frames. To resume, call play().
+   * @see play(), pause()
+   */
   virtual void pause();
-  /// Call play() on true, pause() on false.
-  /// \sa play(), pause()
+
+  /**
+   * Call play() on true, pause() on false.
+   * @see play(), pause()
+   */
   void play(bool playPause);
-  /// Browse the time steps in the forward order.
-  /// \sa playBackward(), play(), orientation
+
+  /**
+   * Browse the frames in forward order.
+   * @see playBackward(), play(), orientation
+   */
   void playForward(bool playPause);
-  /// Browse the time steps in the backward order.
-  /// \sa playForward(), play(), orientation
+
+  /**
+   * Browse the frames in backward order.
+   * @see playForward(), play(), orientation
+   */
   void playBackward(bool playPause);
-  /// Stop the browsing of the time steps and go back to the first frame.
-  /// \sa play(), pause()
+
+  /**
+   * Stop the browsing of the frames and go back to the first frame.
+   * @see play(), pause()
+   */
   void stop();
 
   virtual void updateFromViewer();
@@ -249,20 +366,22 @@ protected slots:
   virtual void onTick();
 
 signals:
-  /// Emitted when the frame has been changed
+  /** Emitted when the frame has been changed */
   void currentFrameChanged(double);
 
-  /// Emitted when the internal timer sends a timeout
+  /** Emitted when the internal timer sends a timeout */
   void onTimeout();
 
-  /// Emitted with playing(true) when play begins and
-  /// playing(false) when play ends.
+  /**
+   * Emitted with playing(true) when play begins and
+  * playing(false) when play ends.
+   */
   void playing(bool);
 
-  /// Emitted when the player loops the animation
+  /** Emitted when the player loops the animation */
   void loop();
 
-  /// Emitted when the playback direction is changed
+  /** Emitted when the playback direction is changed */
   void directionChanged(QAbstractAnimation::Direction);
 
 protected:
