@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Module:    vtkAnimationPlayer.h
-  Program:   Birch (CLSA Medical Image Quality Assessment Tool)
+  Program:   Alder (CLSA Medical Image Quality Assessment Tool)
   Language:  C++
   Copyright (c) Kitware, Inc.
   All rights reserved.
