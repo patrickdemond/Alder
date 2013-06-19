@@ -139,8 +139,6 @@ protected:
   void RewindReader();
 
   void ReadValue( std::string& value );
-  template<class T> void ReadValue( T& value );
-  template<class T> void ReadTuple( T array[], vtkIdType length );
 
   std::string FileName;
   xmlTextReader *Reader;
@@ -150,55 +148,5 @@ private:
   vtkXMLFileReader( const vtkXMLFileReader& );  /** Not implemented. */
   void operator=( const vtkXMLFileReader& );  /** Not implemented. */
 };
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-template<class T> void vtkXMLFileReader::ReadValue( T& value )
-{
-  /** list of expected elements
-  xmlChar *read = xmlTextReaderReadString( this->Reader );
-  if( NULL == read )
-  {
-    std::string error = "Failed to read ";
-    error += vtkVariant( value ).GetTypeAsString();
-    throw( std::runtime_error( error ) );
-  }
-  vtkVariant v = vtkVariant( ( char* ) read );
-  delete [] read;
-  bool valid = true;
-  value = v.ToNumeric( &valid, &value );
-
-  /** TODO: warn if attribute "type" doesn't match T's type */
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-template<class T> void vtkXMLFileReader::ReadTuple( T array[], vtkIdType length )
-{
-  std::string string;
-  this->ReadValue( string );
-
-  /** split string by spaces */
-  vtkIdType count = 0;
-  std::stringstream stream( string );
-  std::string word;
-  while( stream >> word )
-  {
-    /** check for overflow */
-    if( count >= length )
-    {
-      vtkWarningMacro( "More than " << length << " elements found in tuple." );
-      break;
-    }
-
-    bool valid = true;
-    *( array + count ) = vtkVariant( word ).ToNumeric( &valid, array );
-    count++;
-  }
-
-  /** warn if not enough values were found */
-  if( count < length )
-    vtkWarningMacro( "Expecting " << length << " elements in tuple, " << count << " found." );
-
-  /** TODO: warn if attribute "type" doesn't match T's type */
-}
 
 #endif
