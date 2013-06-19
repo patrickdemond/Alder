@@ -154,7 +154,7 @@ namespace Alder
     // make sure the database and user names are provided
     if( 0 == name.length() || 0 == user.length() )
     {
-      cerr << "ERROR: database name, user name and password must be included in "
+      cerr << "ERROR: database name and database user name must be included in "
            << "configuration file" << endl;
       return false;
     }
