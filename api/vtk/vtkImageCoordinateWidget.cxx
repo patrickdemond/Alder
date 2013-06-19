@@ -8,24 +8,24 @@
   Author: Dean Inglis <inglisd@mcmaster.ca>
 
 =========================================================================*/
-#include "vtkImageCoordinateWidget.h"
+#include <vtkImageCoordinateWidget.h>
 
-#include "vtkActor.h"
-#include "vtkAssemblyNode.h"
-#include "vtkAssemblyPath.h"
-#include "vtkCallbackCommand.h"
-#include "vtkCamera.h"
-#include "vtkCellArray.h"
-#include "vtkHomogeneousTransform.h"
-#include "vtkImageActor.h"
-#include "vtkImageData.h"
-#include "vtkMath.h"
-#include "vtkNew.h"
-#include "vtkObjectFactory.h"
-#include "vtkPointData.h"
-#include "vtkPropPicker.h"
-#include "vtkRenderWindowInteractor.h"
-#include "vtkRenderer.h"
+#include <vtkActor.h>
+#include <vtkAssemblyNode.h>
+#include <vtkAssemblyPath.h>
+#include <vtkCallbackCommand.h>
+#include <vtkCamera.h>
+#include <vtkCellArray.h>
+#include <vtkHomogeneousTransform.h>
+#include <vtkImageActor.h>
+#include <vtkImageData.h>
+#include <vtkMath.h>
+#include <vtkNew.h>
+#include <vtkObjectFactory.h>
+#include <vtkPointData.h>
+#include <vtkPropPicker.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
 
 vtkStandardNewMacro( vtkImageCoordinateWidget );
 vtkCxxSetObjectMacro( vtkImageCoordinateWidget, UserTransform, vtkHomogeneousTransform );
@@ -44,49 +44,30 @@ vtkImageCoordinateWidget::vtkImageCoordinateWidget()
   this->CurrentCursorPosition[1] = 0;
   this->CurrentCursorPosition[2] = 0;
   this->CurrentImageValue.empty();
-
-  this->PropCollection = vtkPropCollection::New();
-  this->ImageData = NULL;
-
-  this->Picker = vtkPropPicker::New();
-  this->Picker->PickFromListOn();
-
   this->MessageString = "NA";
 
-  this->UserTransform = NULL;
+  this->PropCollection = vtkSmartPointer<vtkPropCollection>::New();
+  this->ImageData = 0;
+  this->Picker = 0;
+  this->UserTransform = 0;
+
+  this->SetPicker( vtkSmartPointer<vtkPropPicker>::New() );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 vtkImageCoordinateWidget::~vtkImageCoordinateWidget()
 {
-  if( this->ImageData )
-  {
-    this->ImageData = NULL;
-  }
-
   this->RemoveAllProps();
-  if ( this->Picker )
-  {
-    this->Picker->Delete();
-    this->Picker = NULL;
-  }  
-  if ( this->PropCollection )
-  {
-    this->PropCollection->Delete();
-    this->PropCollection = NULL;
-  }
-  if ( this->UserTransform )
-  {
-    this->UserTransform->UnRegister( this );
-    this->UserTransform = NULL;
-  }
+  this->SetEnabled(0);
+  this->SetUserTransform(0);
+  this->SetInput(0);
+  this->SetPicker(0);
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void vtkImageCoordinateWidget::SetPicker( vtkAbstractPropPicker* picker )
 {
-  // we have to have a picker for the cursor to work
-  if( this->Picker != picker && picker != NULL )
+  if( this->Picker != picker )
   {
     // to avoid destructor recursion
     vtkAbstractPropPicker *temp = this->Picker;
@@ -110,22 +91,28 @@ void vtkImageCoordinateWidget::SetPicker( vtkAbstractPropPicker* picker )
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void vtkImageCoordinateWidget::AddViewProp( vtkProp *prop )
 {
-  this->PropCollection->AddItem( prop );
-  this->Picker->AddPickList( prop );
+  if( prop )
+  {
+    this->PropCollection->AddItem( prop );
+    if(this->Picker) this->Picker->AddPickList( prop );
+  } 
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void vtkImageCoordinateWidget::RemoveProp( vtkProp *prop )
 {
-  this->PropCollection->RemoveItem( prop );
-  this->Picker->DeletePickList( prop );
+  if( prop )
+  {
+    this->PropCollection->RemoveItem( prop );
+    if(this->Picker) this->Picker->DeletePickList( prop );
+  }  
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void vtkImageCoordinateWidget::RemoveAllProps()
 {
   this->PropCollection->RemoveAllItems();
-  this->Picker->InitializePickList();
+  if(this->Picker) this->Picker->InitializePickList();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -178,7 +165,8 @@ void vtkImageCoordinateWidget::SetInput( vtkDataSet* input )
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void vtkImageCoordinateWidget::SetEnabled( int enabling )
 {
-  if( !this->Interactor )
+  // we have to have a picker for the cursor to work
+  if( !this->Interactor || !this->Picker )
   {
     return;
   }
@@ -197,7 +185,7 @@ void vtkImageCoordinateWidget::SetEnabled( int enabling )
       this->SetCurrentRenderer( this->Interactor->FindPokedRenderer(
         this->Interactor->GetLastEventPosition()[0],
         this->Interactor->GetLastEventPosition()[1] ) );
-      if( this->CurrentRenderer == NULL )
+      if( this->CurrentRenderer == 0 )
       {
         return;
       }
@@ -210,12 +198,16 @@ void vtkImageCoordinateWidget::SetEnabled( int enabling )
 
     this->Interactor->AddObserver( vtkCommand::MouseMoveEvent,
       this->EventCallbackCommand, this->Priority );
+    this->Interactor->AddObserver( vtkCommand::EnterEvent,
+      this->EventCallbackCommand, this->Priority );
+    this->Interactor->AddObserver( vtkCommand::LeaveEvent,
+      this->EventCallbackCommand, this->Priority );
 
-    this->InvokeEvent( vtkCommand::EnableEvent, NULL );
+    this->InvokeEvent( vtkCommand::EnableEvent, 0 );
 
     this->EventCallbackCommand->SetAbortFlag( 1 );
     this->StartInteraction();
-    this->InvokeEvent( vtkCommand::StartInteractionEvent, NULL );
+    this->InvokeEvent( vtkCommand::StartInteractionEvent, 0 );
     this->Interactor->Render();
     this->State = vtkImageCoordinateWidget::Cursoring;
   }
@@ -232,7 +224,7 @@ void vtkImageCoordinateWidget::SetEnabled( int enabling )
 
     this->EventCallbackCommand->SetAbortFlag( 1 );
     this->EndInteraction();
-    this->InvokeEvent( vtkCommand::EndInteractionEvent, NULL );
+    this->InvokeEvent( vtkCommand::EndInteractionEvent, 0 );
     this->Interactor->Render();
 
     this->Enabled = 0;
@@ -240,8 +232,8 @@ void vtkImageCoordinateWidget::SetEnabled( int enabling )
     // don't listen for events any more
     this->Interactor->RemoveObserver( this->EventCallbackCommand );
 
-    this->InvokeEvent( vtkCommand::DisableEvent, NULL );
-    this->SetCurrentRenderer( NULL );
+    this->InvokeEvent( vtkCommand::DisableEvent, 0 );
+    this->SetCurrentRenderer( 0 );
   }
 
   this->Interactor->Render();
@@ -259,7 +251,19 @@ void vtkImageCoordinateWidget::ProcessEvents( vtkObject* vtkNotUsed( object ),
   if( event == vtkCommand::MouseMoveEvent )
   {
     self->OnMouseMove();
+    return;
   }
+  if( event == vtkCommand::EnterEvent )
+  {
+    self->State = vtkImageCoordinateWidget::Cursoring;
+  }
+  else if( event == vtkCommand::LeaveEvent )
+  {
+    self->State = vtkImageCoordinateWidget::Outside;
+    self->MessageString = "Off Image";
+  }
+  self->EventCallbackCommand->SetAbortFlag( 1 );
+  self->InvokeEvent( vtkCommand::InteractionEvent, 0 );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -268,13 +272,13 @@ void vtkImageCoordinateWidget::OnMouseMove()
   // See whether we're active
   //
   if( this->State == vtkImageCoordinateWidget::Outside ||
-       this->State == vtkImageCoordinateWidget::Start )
+      this->State == vtkImageCoordinateWidget::Start )
   {
     return;
   }
 
-  int X = this->Interactor->GetEventPosition()[0];
-  int Y = this->Interactor->GetEventPosition()[1];
+  int X, Y;
+  this->Interactor->GetLastEventPosition( X, Y );
 
   if( this->State == vtkImageCoordinateWidget::Cursoring )
   {
@@ -284,7 +288,7 @@ void vtkImageCoordinateWidget::OnMouseMove()
   // Interact, if desired
   //
   this->EventCallbackCommand->SetAbortFlag( 1 );
-  this->InvokeEvent( vtkCommand::InteractionEvent, NULL );
+  this->InvokeEvent( vtkCommand::InteractionEvent, 0 );
   this->Interactor->Render();
 }
 
@@ -424,6 +428,21 @@ int vtkImageCoordinateWidget::GetCursorData9(
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void vtkImageCoordinateWidget::UpdateMessageString()
+{
+  // See whether we're active
+  //
+  if( this->State == vtkImageCoordinateWidget::Outside ||
+      this->State == vtkImageCoordinateWidget::Start )
+  {
+    return;
+  }
+  int X, Y;
+  this->Interactor->GetLastEventPosition( X, Y );
+  this->UpdateCursor( X, Y );
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void vtkImageCoordinateWidget::UpdateCursor( int X, int Y )
 {
   this->MessageString = "Off Image";
@@ -450,7 +469,7 @@ void vtkImageCoordinateWidget::UpdateCursor( int X, int Y )
   this->Picker->Pick( X, Y, 0.0, this->CurrentRenderer );
   vtkAssemblyPath* path = this->Picker->GetPath();
 
-  vtkProp* pickedProp = NULL;
+  vtkProp* pickedProp = 0;
   if( path  )
   {
     // Deal with the possibility that we may be using a shared picker
@@ -560,7 +579,7 @@ void vtkImageCoordinateWidget::UpdateContinuousCursor( double *q )
   int subId;
   double pcoords[3], weights[8];
   vtkCell* cell = this->ImageData->FindAndGetCell(
-    q, NULL, -1, tol2, subId, pcoords, weights );
+    q, 0, -1, tol2, subId, pcoords, weights );
   if( cell )
   {
     int components;

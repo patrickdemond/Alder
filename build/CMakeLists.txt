@@ -48,15 +48,17 @@ IF( UNIX AND NOT APPLE )
   FIND_PACKAGE( ImageMagick COMPONENTS convert REQUIRED )
 ENDIF( UNIX AND NOT APPLE )
 
-SET( ALDER_ROOT_DIR ${PROJECT_SOURCE_DIR}/.. )
-SET( ALDER_AUX_DIR ${ALDER_ROOT_DIR}/aux )
-SET( ALDER_API_DIR ${ALDER_ROOT_DIR}/api )
-SET( ALDER_MODEL_DIR ${ALDER_API_DIR}/model )
-SET( ALDER_QT_DIR ${ALDER_API_DIR}/interface/qt )
-SET( ALDER_VTK_DIR ${ALDER_API_DIR}/vtk )
+SET( ALDER_ROOT_DIR    ${PROJECT_SOURCE_DIR}/.. )
+SET( ALDER_AUX_DIR     ${ALDER_ROOT_DIR}/aux )
+SET( ALDER_API_DIR     ${ALDER_ROOT_DIR}/api )
+SET( ALDER_MODEL_DIR   ${ALDER_API_DIR}/model )
+SET( ALDER_QT_DIR      ${ALDER_API_DIR}/interface/qt )
+SET( ALDER_QT_WIDGETS_DIR   ${ALDER_QT_DIR}/widgets )
+SET( ALDER_QT_RESOURCES_DIR ${ALDER_QT_WIDGETS_DIR}/resources )
+SET( ALDER_VTK_DIR     ${ALDER_API_DIR}/vtk )
 SET( ALDER_CONFIG_FILE ${PROJECT_BINARY_DIR}/config.xml )
-SET( ALDER_DOC_DIR ${ALDER_ROOT_DIR}/doc )
-SET( ALDER_DOXY_DIR ${PROJECT_BINARY_DIR}/doxygen )
+SET( ALDER_DOC_DIR     ${ALDER_ROOT_DIR}/doc )
+SET( ALDER_DOXY_DIR    ${PROJECT_BINARY_DIR}/doxygen )
 SET( ALDER_TESTING_DIR ${ALDER_ROOT_DIR}/testing )
 
 # Configure the utitlities header
@@ -77,6 +79,7 @@ ENDIF( NOT EXISTS ${ALDER_CONFIG_FILE} )
 SET( ALDER_INCLUDE_DIR
   ${ALDER_MODEL_DIR}
   ${ALDER_QT_DIR}
+  ${ALDER_QT_WIDGETS_DIR}
   ${ALDER_VTK_DIR}
 )
 
@@ -95,9 +98,11 @@ SET( ALDER_SOURCE
   ${ALDER_MODEL_DIR}/Rating.cxx
   ${ALDER_MODEL_DIR}/User.cxx
 
-  ${ALDER_VTK_DIR}/vtkAlderCornerAnnotation.cxx
+  ${ALDER_VTK_DIR}/vtkAnimationPlayer.cxx
   ${ALDER_VTK_DIR}/vtkAlderMySQLDatabase.cxx
   ${ALDER_VTK_DIR}/vtkAlderMySQLQuery.cxx
+  ${ALDER_VTK_DIR}/vtkCustomCornerAnnotation.cxx
+  ${ALDER_VTK_DIR}/vtkFrameAnimationPlayer.cxx
   ${ALDER_VTK_DIR}/vtkImageCoordinateWidget.cxx
   ${ALDER_VTK_DIR}/vtkImageDataReader.cxx
   ${ALDER_VTK_DIR}/vtkImageWindowLevel.cxx
@@ -114,12 +119,17 @@ SET( ALDER_SOURCE
   ${ALDER_QT_DIR}/QSelectInterviewDialog.cxx
   ${ALDER_QT_DIR}/QExamNoteDialog.cxx
   ${ALDER_QT_DIR}/QUserListDialog.cxx
+
+  ${ALDER_QT_WIDGETS_DIR}/QAlderDoubleSlider.cxx
+  ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.cxx
+  ${ALDER_QT_WIDGETS_DIR}/QAlderFramePlayerWidget.cxx
 )
 
 SET_SOURCE_FILES_PROPERTIES(
   ${ALDER_MODEL_DIR}/ActiveRecord.cxx
   ${ALDER_MODEL_DIR}/ModelObject.cxx
 
+  ${ALDER_VTK_DIR}/vtkAnimationPlayer.cxx
   ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
   ABSTRACT )
 
@@ -132,6 +142,9 @@ SET( ALDER_UIS
   ${ALDER_QT_DIR}/QSelectInterviewDialog.ui
   ${ALDER_QT_DIR}/QExamNoteDialog.ui
   ${ALDER_QT_DIR}/QUserListDialog.ui
+
+  ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.ui
+  ${ALDER_QT_WIDGETS_DIR}/QAlderFramePlayerWidget.ui
 )
 
 SET( ALDER_HEADERS
@@ -143,12 +156,23 @@ SET( ALDER_HEADERS
   ${ALDER_QT_DIR}/QSelectInterviewDialog.h
   ${ALDER_QT_DIR}/QExamNoteDialog.h
   ${ALDER_QT_DIR}/QUserListDialog.h
+
+  ${ALDER_QT_WIDGETS_DIR}/QAlderDoubleSlider.h
+  ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.h
+  ${ALDER_QT_WIDGETS_DIR}/QAlderFramePlayerWidget.h
+)
+
+SET( ALDER_QT_QRC
+  ${ALDER_QT_RESOURCES_DIR}/QAlderWidgets.qrc
 )
 
 # Wrap QT files
 QT4_WRAP_UI( UIHeaders ${ALDER_UIS} )
 QT4_WRAP_CPP( MOCSrcs ${ALDER_HEADERS} )
-ADD_DEFINITIONS( -DQT_GUI_LIBS -DQT_CORE_LIB -DQT3_SUPPORT )
+QT4_ADD_RESOURCES( QRCSrcs ${ALDER_QT_QRC} )
+
+ADD_DEFINITIONS( -DQT_GUI_LIBS -DQT_CORE_LIB )
+
 SET_SOURCE_FILES_PROPERTIES( ${ALDER_SOURCE} PROPERTIES OBJECT_DEPENDS "${UIHeaders}" )
 
 # Use the include path and library for Qt
@@ -165,7 +189,7 @@ INCLUDE_DIRECTORIES(
 )
 
 # Targets
-ADD_EXECUTABLE( alder ${ALDER_SOURCE} ${ALDER_UISrcs} ${MOCSrcs} )
+ADD_EXECUTABLE( alder ${ALDER_SOURCE} ${ALDER_UISrcs} ${MOCSrcs} ${QRCSrcs})
 
 TARGET_LINK_LIBRARIES( alder
   QVTK

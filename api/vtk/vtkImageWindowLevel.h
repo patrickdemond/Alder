@@ -29,7 +29,7 @@
 #ifndef __vtkImageWindowLevel_h
 #define __vtkImageWindowLevel_h
 
-#include "vtkImageMapToColors.h"
+#include <vtkImageMapToColors.h>
 
 class vtkImageWindowLevel : public vtkImageMapToColors
 {

@@ -44,6 +44,15 @@ MySQL (www.mysql.com)
 You will need to install mysql library files and configure your VTK build to use them (see
 below).
 
+CURL (curl.haxx.se/libcurl/)
+---------------------
+You will need to install curl library files and configure your VTK build to use them (see
+below).
+
+ImageMagick (www.imagemagick.org)
+--------------------
+ImageMagick must be installed.
+
 
 CMake (cmake.org)
 -----------------

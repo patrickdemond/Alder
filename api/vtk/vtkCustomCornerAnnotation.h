@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Module:    vtkAlderCornerAnnotation.h
+  Module:    vtkCustomCornerAnnotation.h
   Program:   Alder (CLSA Medical Image Quality Assessment Tool)
   Language:  C++
   Author:    Patrick Emond <emondpd@mcmaster.ca>
@@ -9,7 +9,7 @@
 =========================================================================*/
 
 /** 
- * @class vtkAlderCornerAnnotation
+ * @class vtkCustomCornerAnnotation
  *
  * @brief Text annotation in four corners
  *
@@ -28,28 +28,25 @@
  * @see vtkActor2D, vtkTextMapper
  */
 
-#ifndef __vtkAlderCornerAnnotation_h
-#define __vtkAlderCornerAnnotation_h
+#ifndef __vtkCustomCornerAnnotation_h
+#define __vtkCustomCornerAnnotation_h
 
-#include "vtkActor2D.h"
+#include <vtkActor2D.h>
+#include <vtkSmartPointer.h>
+#include <string>
 
 class vtkImageActor;
 class vtkImageWindowLevel;
 class vtkTextMapper;
 class vtkTextProperty;
 
-class vtkAlderCornerAnnotation : public vtkActor2D
+class vtkCustomCornerAnnotation : public vtkActor2D
 {
 public:
-  vtkTypeMacro(vtkAlderCornerAnnotation,vtkActor2D);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  static vtkCustomCornerAnnotation *New();
+  vtkTypeMacro( vtkCustomCornerAnnotation, vtkActor2D );
+  void PrintSelf( ostream& os, vtkIndent indent );
 
-  /**
-   * Instantiate object with a rectangle in normaled view coordinates
-   * of (0.2,0.85, 0.8, 0.95).
-   */
-  static vtkAlderCornerAnnotation *New();
-  
   //@{
   /**
    * Draw the scalar bar and annotation text to the screen.
@@ -68,8 +65,8 @@ public:
    * percentage of the vertical area allocated to this
    * scaled text actor. Defaults to 1.0
    */
-  vtkSetMacro(MaximumLineHeight,double);
-  vtkGetMacro(MaximumLineHeight,double);
+  vtkSetMacro( MaximumLineHeight, double );
+  vtkGetMacro( MaximumLineHeight, double );
   //@}
   
   //@{
@@ -77,10 +74,10 @@ public:
    * Set/Get the minimum/maximum size font that will be shown.
    * If the font drops below the minimum size it will not be rendered.
    */
-  vtkSetMacro(MinimumFontSize,int);
-  vtkGetMacro(MinimumFontSize,int);
-  vtkSetMacro(MaximumFontSize,int);
-  vtkGetMacro(MaximumFontSize,int);
+  vtkSetMacro( MinimumFontSize, int );
+  vtkGetMacro( MinimumFontSize, int );
+  vtkSetMacro( MaximumFontSize, int );
+  vtkGetMacro( MaximumFontSize, int );
   //@}
 
   //@{
@@ -104,14 +101,14 @@ public:
    * The parameter window could be used to determine which graphic
    * resources to release.
    */
-  virtual void ReleaseGraphicsResources(vtkWindow *);
+  virtual void ReleaseGraphicsResources(vtkWindow*);
 
   //@{
   /** Set/Get the text to be displayed for each corner */
-  void SetText(int i, const char *text);
+  void SetText(int i, const char*);
   const char* GetText(int i);
   void ClearAllTexts();
-  void CopyAllTextsFrom(vtkAlderCornerAnnotation *ca);
+  void CopyAllTextsFrom(vtkCustomCornerAnnotation*);
   //@}
 
   //@{
@@ -143,7 +140,7 @@ public:
   
   //@{
   /** Set/Get the text property of all corners. */
-  virtual void SetTextProperty(vtkTextProperty *p);
+  virtual void SetTextProperty(vtkTextProperty*);
   vtkGetObjectMacro(TextProperty,vtkTextProperty);
   //@}
 
@@ -157,8 +154,8 @@ public:
   //@}
   
 protected:
-  vtkAlderCornerAnnotation();
-  ~vtkAlderCornerAnnotation();
+  vtkCustomCornerAnnotation();
+  ~vtkCustomCornerAnnotation();
 
   double MaximumLineHeight;
 
@@ -170,13 +167,13 @@ protected:
   vtkImageActor *ImageActor;
   vtkImageActor *LastImageActor;
 
-  char *CornerText[4];
+  std::string CornerText[4];
   
   int FontSize;
-  vtkActor2D    *TextActor[4];
+  vtkSmartPointer<vtkActor2D> TextActor[4];
   vtkTimeStamp   BuildTime;
   int            LastSize[2];
-  vtkTextMapper *TextMapper[4];
+  vtkSmartPointer<vtkTextMapper> TextMapper[4];
 
   int MinimumFontSize;
   int MaximumFontSize;
@@ -188,7 +185,7 @@ protected:
   
   /** Search for replacable tokens and replace */
   virtual void TextReplace(
-    vtkImageActor *ia, vtkImageWindowLevel *wl);
+    vtkImageActor*, vtkImageWindowLevel*);
 
   /**
    * Set text actor positions given a viewport size and justification
@@ -197,8 +194,8 @@ protected:
   virtual void SetTextActorsJustification();
 
 private:
-  vtkAlderCornerAnnotation(const vtkAlderCornerAnnotation&);  /** Not implemented. */
-  void operator=(const vtkAlderCornerAnnotation&);   /** Not implemented. */
+  vtkCustomCornerAnnotation(const vtkCustomCornerAnnotation&);  /** Not implemented. */
+  void operator=(const vtkCustomCornerAnnotation&);   /** Not implemented. */
 };
 
 #endif
