@@ -81,9 +81,11 @@ namespace Alder
     if( toFile ) curl_easy_setopt( curl, CURLOPT_WRITEDATA, file );
     else curl_easy_setopt( curl, CURLOPT_WRITEDATA, &result );
 
-    curl_easy_setopt( curl, CURLOPT_URL, url.c_str() );
+    curl_easy_setopt( curl, CURLOPT_TIMEOUT, 5 );
+    curl_easy_setopt( curl, CURLOPT_SSLVERSION, 3 );
     curl_easy_setopt( curl, CURLOPT_SSL_VERIFYPEER, 0 );
     curl_easy_setopt( curl, CURLOPT_HTTPHEADER, headers );
+    curl_easy_setopt( curl, CURLOPT_URL, url.c_str() );
     res = curl_easy_perform( curl );
 
     // clean up
