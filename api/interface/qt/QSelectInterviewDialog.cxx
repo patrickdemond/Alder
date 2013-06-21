@@ -121,9 +121,8 @@ void QSelectInterviewDialog::slotSelectionChanged()
     interview = vtkSmartPointer< Alder::Interview >::New();
     interview->Load( map );
     interview->Update();
+    this->updateRow( list.at( 0 )->row(), interview );
   }
-
-  this->updateInterface();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -137,14 +136,93 @@ void QSelectInterviewDialog::slotHeaderClicked( int index )
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QSelectInterviewDialog::updateInterface()
+void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
 {
-  Alder::User *user = Alder::Application::GetInstance()->GetActiveUser();
-  this->ui->interviewTableWidget->setRowCount( 0 );
-  QTableWidgetItem *item;
   std::vector< vtkSmartPointer< Alder::Exam > > examList;
   std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
   Alder::Exam *exam;
+  Alder::User *user = Alder::Application::GetInstance()->GetActiveUser();
+  QString UId = QString( interview->Get( "UId" ).ToString().c_str() );
+  
+  // get the list of studies associated with this interview
+  bool dexaUpdated = false, retinalUpdated = false, ultrasoundUpdated = false;
+  int dexaCount = 0, retinalCount = 0, ultrasoundCount = 0;
+  int dexaRatedCount = 0, retinalRatedCount = 0, ultrasoundRatedCount = 0;
+  QString dexaString = "?", retinalString = "?", ultrasoundString = "?";
+  QString date = tr( "N/A" );
+  interview->GetList( &examList );
+
+  // count the number of exams of each modality and whether 
+  for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
+  {
+    exam = examIt->GetPointer();
+    std::string modality = exam->Get( "Modality" ).ToString();
+    std::string stage = exam->Get( "Stage" ).ToString();
+    
+    if( "Dexa" == modality )
+    {
+      dexaUpdated = true;
+      if( 0 == stage.compare( "Completed" ) ) dexaCount++;
+      if( exam->IsRatedBy( user ) ) dexaRatedCount++;
+    }
+    else if( "Retinal" == modality )
+    {
+      retinalUpdated = true;
+      if( 0 == stage.compare( "Completed" ) ) retinalCount++;
+      if( exam->IsRatedBy( user ) ) retinalRatedCount++;
+    }
+    else if( "Ultrasound" == modality )
+    {
+      ultrasoundUpdated = true;
+      if( 0 == stage.compare( "Completed" ) ) ultrasoundCount++;
+      if( exam->IsRatedBy( user ) ) ultrasoundRatedCount++;
+    }
+    // TODO: log if an unknown modality is found
+  }
+
+  // set the text, if updated
+  if( dexaUpdated )
+  {
+    dexaString = QString::number( dexaRatedCount );
+    dexaString += tr( " of " );
+    dexaString += QString::number( dexaCount );
+  }
+
+  if( retinalUpdated )
+  {
+    retinalString = QString::number( retinalRatedCount );
+    retinalString += tr( " of " );
+    retinalString += QString::number( retinalCount );
+  }
+
+  if( ultrasoundUpdated )
+  {
+    ultrasoundString = QString::number( ultrasoundRatedCount );
+    ultrasoundString += tr( " of " );
+    ultrasoundString += QString::number( ultrasoundCount );
+  }
+
+  if( this->searchText.isEmpty() || UId.contains( this->searchText, Qt::CaseInsensitive ) )
+  {
+    QTableWidgetItem *item;
+    item = this->ui->interviewTableWidget->item( row, 0 );
+    if( item ) item->setText( UId );
+    item = this->ui->interviewTableWidget->item( row, 1 );
+    if( item ) item->setText( QString( interview->Get( "VisitDate" ).ToString().c_str() ) );
+    item = this->ui->interviewTableWidget->item( row, 2 );
+    if( item ) item->setText( dexaString );
+    item = this->ui->interviewTableWidget->item( row, 3 );
+    if( item ) item->setText( retinalString );
+    item = this->ui->interviewTableWidget->item( row, 4 );
+    if( item ) item->setText( ultrasoundString );
+  }
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QSelectInterviewDialog::updateInterface()
+{
+  this->ui->interviewTableWidget->setRowCount( 0 );
+  QTableWidgetItem *item;
   
   std::vector< vtkSmartPointer< Alder::Interview > > interviewList;
   Alder::Interview::GetAll( &interviewList );
@@ -154,66 +232,6 @@ void QSelectInterviewDialog::updateInterface()
     Alder::Interview *interview = *it;
     QString UId = QString( interview->Get( "UId" ).ToString().c_str() );
     
-    // get the list of studies associated with this interview
-    bool dexaUpdated = false, retinalUpdated = false, ultrasoundUpdated = false;
-    int dexaCount = 0, retinalCount = 0, ultrasoundCount = 0;
-    int dexaRatedCount = 0, retinalRatedCount = 0, ultrasoundRatedCount = 0;
-    QString dexaString = "?", retinalString = "?", ultrasoundString = "?";
-    QString date = tr( "N/A" );
-    interview->GetList( &examList );
-
-    // count the number of exams of each modality and whether 
-    for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
-    {
-      exam = examIt->GetPointer();
-      std::string modality = exam->Get( "Modality" ).ToString();
-      std::string stage = exam->Get( "Stage" ).ToString();
-      
-      if( "Dexa" == modality )
-      {
-        dexaUpdated = true;
-        if( 0 == stage.compare( "Completed" ) ) dexaCount++;
-        if( exam->IsRatedBy( user ) ) dexaRatedCount++;
-      }
-      else if( "Retinal" == modality )
-      {
-        retinalUpdated = true;
-        if( 0 == stage.compare( "Completed" ) ) retinalCount++;
-        if( exam->IsRatedBy( user ) ) retinalRatedCount++;
-      }
-      else if( "Ultrasound" == modality )
-      {
-        ultrasoundUpdated = true;
-        if( 0 == stage.compare( "Completed" ) ) ultrasoundCount++;
-        if( exam->IsRatedBy( user ) ) ultrasoundRatedCount++;
-      }
-      // TODO: log if an unknown modality is found
-    }
-
-    // set the text, if updated
-    if( dexaUpdated )
-    {
-      dexaString = QString::number( dexaRatedCount );
-      dexaString += tr( " of " );
-      dexaString += QString::number( dexaCount );
-    }
-
-    if( retinalUpdated )
-    {
-      retinalString = QString::number( retinalRatedCount );
-      retinalString += tr( " of " );
-      retinalString += QString::number( retinalCount );
-    }
-
-    if( ultrasoundUpdated )
-    {
-      ultrasoundString = QString::number( ultrasoundRatedCount );
-      ultrasoundString += tr( " of " );
-      ultrasoundString += QString::number( ultrasoundCount );
-    }
-
-    // if rated display "rated", otherwise 
-
     if( this->searchText.isEmpty() || UId.contains( this->searchText, Qt::CaseInsensitive ) )
     {
       this->ui->interviewTableWidget->insertRow( 0 );
@@ -221,32 +239,29 @@ void QSelectInterviewDialog::updateInterface()
       // add UId to row
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      item->setText( UId );
       this->ui->interviewTableWidget->setItem( 0, 0, item );
 
       // add visit date to row
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      item->setText( QString( interview->Get( "VisitDate" ).ToString().c_str() ) );
       this->ui->interviewTableWidget->setItem( 0, 1, item );
 
       // add dexa interview to row
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      item->setText( dexaString );
       this->ui->interviewTableWidget->setItem( 0, 2, item );
 
       // add retinal interview to row
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      item->setText( retinalString );
       this->ui->interviewTableWidget->setItem( 0, 4, item );
 
       // add ultrasound interview to row
       item = new QTableWidgetItem;
       item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      item->setText( ultrasoundString );
       this->ui->interviewTableWidget->setItem( 0, 3, item );
+
+      this->updateRow( 0, interview );
     }
   }
 

@@ -14,6 +14,7 @@
 
 #include <QDialog>
 
+namespace Alder { class Interview; };
 class Ui_QSelectInterviewDialog;
 
 class QSelectInterviewDialog : public QDialog
@@ -33,6 +34,7 @@ public slots:
   virtual void slotHeaderClicked( int index );
 
 protected:
+  void updateRow( int, Alder::Interview* );
   void updateInterface();
   QString searchText;
   int sortColumn;
