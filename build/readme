@@ -11,7 +11,7 @@ Required Libraries
 ==================
 
 Alder uses the VTK library for visualization purposes and the Qt library for its user interface
-Furthermore it, along with VTK, is built using CMake.
+Furthermore it, along with VTK, is built using CMake.  Other 
 
 
 libxml2 (xmlsoft.org)
@@ -95,6 +95,19 @@ VTK uses CMake to set up the build environment the same way that Alder does:
 
 6. You are now ready to build the VTK libraries by typing "make".  This should take anywhere from
    a few minutes to an hour or more, depending on the system.
+
+
+GDCM (http://sourceforge.net/projects/gdcm/)
+--------------------------------------------
+You will need to build GDCM from the source code which can be downloaded from their website.
+VTK also uses CMake to set up the build environment.  The following option must be set in the
+CMakeCache.txt file:
+
+  GDCM_USE_VTK:BOOL=ON
+
+Make sure that the GDCM_BUILD_SHARED_LIBS parameter in GDCM's CMakeLists.txt file matches the
+BUILD_SHARED_LIBS parameter in VTK's CMakeLists.txt file, otherwise you may get linker errors
+when building Alder.
 
 
 Building Alder

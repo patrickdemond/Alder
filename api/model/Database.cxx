@@ -49,7 +49,7 @@ namespace Alder
     this->MySQLDatabase->SetHostName( host.c_str() );
     this->MySQLDatabase->SetServerPort( port );
     bool success = this->MySQLDatabase->Open( pass.c_str() );
-    this->ReadInformationSchema();
+    if( success ) this->ReadInformationSchema();
 
     return success;
   }

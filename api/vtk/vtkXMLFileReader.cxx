@@ -147,14 +147,12 @@ void vtkXMLFileReader::ReadValue( std::string& value )
 {
   // list of expected elements
   xmlChar *read = xmlTextReaderReadString( this->Reader );
-  if( NULL == read )
-  {
-    std::string error = "Failed to read ";
-    error += vtkVariant( value ).GetTypeAsString();
-    throw( std::runtime_error( error ) );
-  }
-  value = ( char* ) read;
-  delete [] read;
 
-  // TODO: warn if attribute "type" doesn't match "string"
+  value = "";
+
+  if( NULL != read )
+  {
+    value = ( char* ) read;
+    delete [] read;
+  }
 }
