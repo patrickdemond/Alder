@@ -23,7 +23,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Select which interview records to open.</string>
+      <string>Click the &quot;Search UId&quot; button below to populate interviews based on search criteria.</string>
      </property>
     </widget>
    </item>

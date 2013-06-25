@@ -95,6 +95,7 @@ SET( ALDER_SOURCE
   ${ALDER_MODEL_DIR}/Interview.cxx
   ${ALDER_MODEL_DIR}/ModelObject.cxx
   ${ALDER_MODEL_DIR}/OpalService.cxx
+  ${ALDER_MODEL_DIR}/QueryModifier.cxx
   ${ALDER_MODEL_DIR}/Rating.cxx
   ${ALDER_MODEL_DIR}/User.cxx
 

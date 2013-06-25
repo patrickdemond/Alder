@@ -30,6 +30,7 @@
 
 #include "Application.h"
 #include "Database.h"
+#include "QueryModifier.h"
 
 #include "vtkAlderMySQLQuery.h"
 #include "vtkSmartPointer.h"
@@ -92,13 +93,15 @@ namespace Alder
      * Provides a list of all records which exist in a table.
      * @param list vector An existing vector to put all records into.
      */
-    template< class T > static void GetAll( std::vector< vtkSmartPointer< T > > *list )
+    template< class T > static void GetAll(
+      std::vector< vtkSmartPointer< T > > *list, QueryModifier *modifier = NULL )
     { // we have to implement this here because of the template
       Application *app = Application::GetInstance();
       // get the class name of T, return error if not found
       std::string type = app->GetUnmangledClassName( typeid(T).name() );
       std::stringstream stream;
       stream << "SELECT Id FROM " << type;
+      if( NULL != modifier ) stream << " " << modifier->GetSql();
       vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
       query->SetQuery( stream.str().c_str() );

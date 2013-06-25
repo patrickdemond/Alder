@@ -15,6 +15,7 @@
 #include "Database.h"
 #include "Exam.h"
 #include "Interview.h"
+#include "QueryModifier.h"
 
 #include "vtkSmartPointer.h"
 
@@ -224,46 +225,56 @@ void QSelectInterviewDialog::updateInterface()
   this->ui->interviewTableWidget->setRowCount( 0 );
   QTableWidgetItem *item;
   
-  std::vector< vtkSmartPointer< Alder::Interview > > interviewList;
-  Alder::Interview::GetAll( &interviewList );
-  std::vector< vtkSmartPointer< Alder::Interview > >::iterator it;
-  for( it = interviewList.begin(); it != interviewList.end(); ++it )
-  { // for every interview, add a new row
-    Alder::Interview *interview = *it;
-    QString UId = QString( interview->Get( "UId" ).ToString().c_str() );
-    
-    if( this->searchText.isEmpty() || UId.contains( this->searchText, Qt::CaseInsensitive ) )
-    {
-      this->ui->interviewTableWidget->insertRow( 0 );
+  if( !this->searchText.isEmpty() )
+  {
+    // create a modifier using the search text
+    std::string where = this->searchText.toStdString();
+    where += "%";
+    vtkSmartPointer< Alder::QueryModifier > modifier = vtkSmartPointer< Alder::QueryModifier >::New();
+    modifier->Where( "UId", "LIKE", vtkVariant( where ) );
 
-      // add UId to row
-      item = new QTableWidgetItem;
-      item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      this->ui->interviewTableWidget->setItem( 0, 0, item );
+    // now get all the interviews given the search text
+    std::vector< vtkSmartPointer< Alder::Interview > > interviewList;
+    Alder::Interview::GetAll( &interviewList, modifier );
+    std::vector< vtkSmartPointer< Alder::Interview > >::iterator it;
+    for( it = interviewList.begin(); it != interviewList.end(); ++it )
+    { // for every interview, add a new row
+      Alder::Interview *interview = *it;
+      QString UId = QString( interview->Get( "UId" ).ToString().c_str() );
+      
+      if( this->searchText.isEmpty() || UId.contains( this->searchText, Qt::CaseInsensitive ) )
+      {
+        this->ui->interviewTableWidget->insertRow( 0 );
 
-      // add visit date to row
-      item = new QTableWidgetItem;
-      item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      this->ui->interviewTableWidget->setItem( 0, 1, item );
+        // add UId to row
+        item = new QTableWidgetItem;
+        item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+        this->ui->interviewTableWidget->setItem( 0, 0, item );
 
-      // add dexa interview to row
-      item = new QTableWidgetItem;
-      item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      this->ui->interviewTableWidget->setItem( 0, 2, item );
+        // add visit date to row
+        item = new QTableWidgetItem;
+        item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+        this->ui->interviewTableWidget->setItem( 0, 1, item );
 
-      // add retinal interview to row
-      item = new QTableWidgetItem;
-      item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      this->ui->interviewTableWidget->setItem( 0, 4, item );
+        // add dexa interview to row
+        item = new QTableWidgetItem;
+        item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+        this->ui->interviewTableWidget->setItem( 0, 2, item );
 
-      // add ultrasound interview to row
-      item = new QTableWidgetItem;
-      item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-      this->ui->interviewTableWidget->setItem( 0, 3, item );
+        // add retinal interview to row
+        item = new QTableWidgetItem;
+        item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+        this->ui->interviewTableWidget->setItem( 0, 4, item );
 
-      this->updateRow( 0, interview );
+        // add ultrasound interview to row
+        item = new QTableWidgetItem;
+        item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+        this->ui->interviewTableWidget->setItem( 0, 3, item );
+
+        this->updateRow( 0, interview );
+      }
     }
-  }
 
-  this->ui->interviewTableWidget->sortItems( this->sortColumn, this->sortOrder );
+    this->ui->interviewTableWidget->sortItems( this->sortColumn, this->sortOrder );
+  }
 }
