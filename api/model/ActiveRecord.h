@@ -104,6 +104,7 @@ namespace Alder
       if( NULL != modifier ) stream << " " << modifier->GetSql();
       vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
+      Utilities::log( "Querying Database: " + stream.str() );
       query->SetQuery( stream.str().c_str() );
       query->Execute();
 
@@ -134,6 +135,7 @@ namespace Alder
       vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
       vtkDebugSQLMacro( << stream.str() );
+      Utilities::log( "Querying Database: " + stream.str() );
       query->SetQuery( stream.str().c_str() );
       query->Execute();
 

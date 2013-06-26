@@ -174,7 +174,11 @@ namespace Alder
     std::string pass = this->Config->GetValue( "Opal", "Password" );
     std::string host = this->Config->GetValue( "Opal", "Host" );
     std::string port = this->Config->GetValue( "Opal", "Port" );
-    this->Opal->Setup( user, pass, host, vtkVariant( port ).ToInt() );
+    std::string timeout = this->Config->GetValue( "Opal", "Timeout" );
+    this->Opal->Setup( user, pass, host );
+    if( 0 < port.length() ) this->Opal->SetPort( vtkVariant( port ).ToInt() );
+    if( 0 < timeout.length() ) this->Opal->SetTimeout( vtkVariant( timeout ).ToInt() );
+    cout << this->Opal->GetTimeout() << endl;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

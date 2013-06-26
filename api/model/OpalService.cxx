@@ -33,15 +33,18 @@ namespace Alder
     this->Password = "";
     this->Host = "localhost";
     this->Port = 8843;
+    this->Timeout = 10;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void OpalService::Setup( std::string username, std::string password, std::string host, int port )
+  void OpalService::Setup(
+    std::string username, std::string password, std::string host, int port, int timeout )
   {
     this->Username = username;
     this->Password = password;
     this->Host = host;
     this->Port = port;
+    this->Timeout = timeout;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -63,7 +66,7 @@ namespace Alder
 
     urlStream << "https://" << this->Host << ":" << this->Port << "/ws" + servicePath;
     url = urlStream.str();
-    Utilities::log( url );
+    Utilities::log( "Querying Opal: " + url );
 
     curl = curl_easy_init();
     if( !curl ) 

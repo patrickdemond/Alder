@@ -55,7 +55,18 @@ namespace Alder
     /**
      * Defines connection parameters to use when communicating with the Opal server
      */
-    void Setup( std::string username, std::string password, std::string host, int port );
+    void Setup(
+      std::string username,
+      std::string password,
+      std::string host,
+      int port = 8843,
+      int timeout = 10 );
+
+    vtkGetMacro( Port, int );
+    vtkSetMacro( Port, int );
+
+    vtkGetMacro( Timeout, int );
+    vtkSetMacro( Timeout, int );
 
     /**
      * Returns a list of all identifiers in a particular data source and table
@@ -124,6 +135,7 @@ namespace Alder
     std::string Password;
     std::string Host;
     int Port;
+    int Timeout;
 
   private:
     OpalService( const OpalService& ); // Not implemented

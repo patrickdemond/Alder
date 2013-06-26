@@ -78,6 +78,7 @@ namespace Alder
              << it->first << " = " << query->EscapeString( it->second );
     
     vtkDebugSQLMacro( << stream.str() );
+    Utilities::log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
 
@@ -146,6 +147,7 @@ namespace Alder
     }
 
     vtkDebugSQLMacro( << stream.str() );
+    Utilities::log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
   }
@@ -160,6 +162,7 @@ namespace Alder
     stream << "DELETE FROM " << this->GetName() << " "
            << "WHERE Id = " << query->EscapeString( this->Get( "Id" ).ToString() );
     vtkDebugSQLMacro( << stream.str() );
+    Utilities::log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
   }
@@ -174,6 +177,7 @@ namespace Alder
     vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
     vtkDebugSQLMacro( << stream.str() );
+    Utilities::log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
     
