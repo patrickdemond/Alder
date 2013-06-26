@@ -178,7 +178,6 @@ namespace Alder
     this->Opal->Setup( user, pass, host );
     if( 0 < port.length() ) this->Opal->SetPort( vtkVariant( port ).ToInt() );
     if( 0 < timeout.length() ) this->Opal->SetTimeout( vtkVariant( timeout ).ToInt() );
-    cout << this->Opal->GetTimeout() << endl;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
