@@ -63,6 +63,7 @@ namespace Alder
 
     urlStream << "https://" << this->Host << ":" << this->Port << "/ws" + servicePath;
     url = urlStream.str();
+    Utilities::log( url );
 
     curl = curl_easy_init();
     if( !curl ) 

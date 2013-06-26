@@ -29,6 +29,7 @@
 #define ALDER_CONFIG_FILE "@ALDER_CONFIG_FILE@"
 
 #define ALDER_SALT_STRING "@ALDER_SALT_STRING@"
+#define ALDER_LOG_PATH "@ALDER_LOG_PATH@"
 
 //
 // This macro is used for sql debug statements in instance methods
@@ -58,6 +59,7 @@
 #include <algorithm>
 #include <base64.h>
 #include <cctype>
+#include <fstream>
 #include <json/reader.h>
 #include <sha.h>
 #include <sstream>
@@ -208,7 +210,14 @@ namespace Alder
       if( str.length() > 0 ) results.push_back( str );
       return results;
     }
-  };  
+
+    static void log( std::string str )
+    {
+      std::ofstream log( ALDER_LOG_PATH, std::ofstream::out | std::ofstream::app );
+      log << "[" << Utilities::getTime( "%y-%m-%d %T" ) << "] " << str << std::endl;
+      log.close();
+    }
+  };
 }
 
 #endif // __Utilities_h

@@ -12,9 +12,6 @@ SET( ALDER_ICON_SIZES 16x16 22x22 24x24 32x32 48x48 64x64 128x128 )
 # Look in the build directory for cmake modules
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/" )
 
-# Create a salt string which can be set at build time
-SET( ALDER_SALT_STRING "this is salt" CACHE STRING "This is salt for encrypting passwords")
-
 # We need VTK
 FIND_PACKAGE( VTK REQUIRED )
 INCLUDE( ${VTK_USE_FILE} )
@@ -60,6 +57,12 @@ SET( ALDER_CONFIG_FILE ${PROJECT_BINARY_DIR}/config.xml )
 SET( ALDER_DOC_DIR     ${ALDER_ROOT_DIR}/doc )
 SET( ALDER_DOXY_DIR    ${PROJECT_BINARY_DIR}/doxygen )
 SET( ALDER_TESTING_DIR ${ALDER_ROOT_DIR}/testing )
+
+# Create a salt string which can be set at build time
+SET( ALDER_SALT_STRING "this is salt" CACHE STRING "This is salt for encrypting passwords")
+
+# Define where the application log is
+SET( ALDER_LOG_PATH ${PROJECT_BINARY_DIR}/log CACHE STRING "The location of the application's log file")
 
 # Configure the utitlities header
 CONFIGURE_FILE( ${ALDER_API_DIR}/Utilities.h.in
