@@ -37,6 +37,7 @@ namespace Alder
       if( !image->IsRatedBy( user ) ) return false;
     }
 
-    return true;
+    // only return true if there was at least one image rated
+    return 0 < imageList.size();
   }
 }
