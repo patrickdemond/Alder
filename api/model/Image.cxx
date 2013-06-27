@@ -18,6 +18,7 @@
 #include "Utilities.h"
 
 #include "vtkDirectory.h"
+#include "vtkImageDataReader.h"
 #include "vtkObjectFactory.h"
 
 #include <stdexcept>
@@ -47,6 +48,55 @@ namespace Alder
            << "/" << exam->Get( "Id" ).ToString();
 
     return stream.str();
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::string Image::CreateFile( std::string suffix )
+  {
+    // first get the path and create it if it doesn't exist
+    std::string path = this->GetFilePath();
+    if( !Utilities::fileExists( path ) ) vtkDirectory::MakeDirectory( path.c_str() );
+
+    return path + "/" + this->Get( "Id" ).ToString() + suffix;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Image::ValidateFile()
+  {
+    bool valid;
+    std::string fileName = this->GetFileName();
+
+    // now check the file, if it is empty delete the image and the file
+    if( 0 == Utilities::getFileLength( fileName ) )
+    {
+      valid = false;
+    }
+    else // file exists
+    {
+      // if the file has a .gz extension, unzip it
+      if( 0 == fileName.substr( fileName.length() - 3, 3 ).compare( ".gz" ) )
+      {
+        std::string command = "gunzip ";
+        command += fileName;
+
+        // not a gz file, remove the .gz extension manually
+        if( 0 == Utilities::exec( command ).compare( "ERROR" ) )
+        {
+          std::string oldFileName = fileName;
+          fileName = fileName.substr( 0, fileName.length() - 3 );
+
+          rename( oldFileName.c_str(), fileName.c_str() );
+        }
+      }
+
+      // now see if we can read the file
+      valid = vtkImageDataReader::IsValidFileName( fileName.c_str() );
+    }
+
+    // if the file isn't valid, remove it from the disk
+    if( !valid ) remove( fileName.c_str() );
+
+    return valid;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

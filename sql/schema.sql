@@ -39,6 +39,7 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Exam` (
   `Stage` VARCHAR(45) NOT NULL ,
   `Interviewer` VARCHAR(45) NOT NULL ,
   `DatetimeAcquired` DATETIME NULL ,
+  `Downloaded` TINYINT(1) NOT NULL DEFAULT 0 ,
   `Note` TEXT NULL ,
   PRIMARY KEY (`Id`) ,
   INDEX `dkLaterality` (`Laterality` ASC) ,

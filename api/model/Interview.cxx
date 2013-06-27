@@ -174,7 +174,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Interview::Update()
+  void Interview::Update( bool images )
   {
     Application *app = Application::GetInstance();
     OpalService *opal = app->GetOpal();
@@ -306,6 +306,15 @@ namespace Alder
       exam->Set( "Interviewer", examData["WholeBodyBoneDensity.Interviewer"] );
       exam->Set( "DatetimeAcquired", examData["WholeBodyBoneDensity.DatetimeAcquired"] );
       exam->Save();
+    }
+
+    // update each exam as well, if required
+    if( images )
+    {
+      std::vector< vtkSmartPointer< Exam > > examList;
+      std::vector< vtkSmartPointer< Exam > >::iterator examIt;
+      this->GetList( &examList );
+      for( examIt = examList.begin(); examIt != examList.end(); ++examIt ) ( *examIt )->Update();
     }
   }
 

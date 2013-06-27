@@ -45,6 +45,21 @@ namespace Alder
     std::string GetFilePath();
 
     /**
+     * Create the path to the file name that this record represents (including path and provided suffix)
+     * and returns the result (with full path, file name and suffix)
+     * NOTE: this method does not depend on the file already existing, it simply uses
+     * the image's path and the provided extension to create an empty file.
+     */
+    std::string CreateFile( std::string suffix );
+
+    /**
+     * Once the file is written to the disk this method validates it.  It will unzip gzipped files
+     * and if the file is empty or unreadable it will delete the file.
+     * @return bool Whether the file is valid
+     */
+    bool ValidateFile();
+
+    /**
      * Get the file name that this record represents (including path)
      * NOTE: this method depends on the file already existing, if it doesn't already
      * exist it will throw an exception

@@ -160,6 +160,8 @@ void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
     std::string modality = exam->Get( "Modality" ).ToString();
     std::string stage = exam->Get( "Stage" ).ToString();
     
+    // NOTE: it is possible that an exam with state "Ready" has valid data, but we are leaving
+    // those exams out for now since we don't know for sure whether they are always valid
     if( "Dexa" == modality )
     {
       dexaUpdated = true;

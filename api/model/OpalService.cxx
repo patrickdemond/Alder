@@ -79,6 +79,13 @@ namespace Alder
     // if we are writing to a file, open it
     if( toFile ) file = fopen( fileName.c_str(), "wb" );
 
+    if( NULL == file )
+    {
+      std::stringstream stream;
+      stream << "Unable to open file \"" << fileName << "\" for writing." << endl;
+      throw std::runtime_error( stream.str().c_str() );
+    }
+
     if( toFile ) curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION, Utilities::writePointerToFile );
     else curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION, Utilities::writePointerToString );
 
@@ -95,6 +102,7 @@ namespace Alder
     // clean up
     curl_slist_free_all( headers );
     curl_easy_cleanup( curl );
+    if( toFile ) fclose( file );
 
     if( 0 != res )
     {
@@ -227,5 +235,42 @@ namespace Alder
     stream << "/datasource/" << dataSource << "/table/" << table
            << "/valueSet/" << identifier << "/variable/" << variable;
     return this->Read( stream.str() ).get( "value", "" ).asString();
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::vector< std::string > OpalService::GetValues(
+    std::string dataSource, std::string table, std::string identifier, std::string variable )
+  {
+    std::vector< std::string > retValues;
+    std::stringstream stream;
+    stream << "/datasource/" << dataSource << "/table/" << table
+           << "/valueSet/" << identifier << "/variable/" << variable;
+
+    // loop through the values array and get all the values
+    Json::Value values = this->Read( stream.str() ).get( "values", "" );
+
+    for( int i = 0; i < values.size(); ++i )
+      retValues.push_back( values[i].get( "value", "" ).asString() );
+
+    return retValues;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void OpalService::SaveFile(
+    std::string fileName,
+    std::string dataSource,
+    std::string table,
+    std::string identifier,
+    std::string variable,
+    int position )
+  {
+    std::stringstream stream;
+    stream << "/datasource/" << dataSource << "/table/" << table
+           << "/valueSet/" << identifier << "/variable/" << variable;
+
+    // add on the position
+    if( 0 <= position ) stream << "/value?pos=" << position;
+
+    this->Read( stream.str(), fileName );
   }
 }

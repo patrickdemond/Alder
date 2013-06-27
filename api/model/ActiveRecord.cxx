@@ -150,6 +150,19 @@ namespace Alder
     Utilities::log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
+
+    // if the record's Id isn't set, get it based on the auto-increment property of the Id column
+    if( !this->Get( "Id" ).IsValid() || 0 == this->Get( "Id" ).ToInt() )
+    {
+      stream.str( "" );
+      stream << "SELECT Max( Id ) FROM " << this->GetName();
+      query->SetQuery( stream.str().c_str() );
+      query->Execute();
+
+      // only has one row
+      query->NextRow();
+      this->Set( "Id", query->DataValue( 0 ) );
+    }
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

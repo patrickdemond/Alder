@@ -121,6 +121,11 @@ void QMainAlderWindow::slotOpenInterview()
     dialog.setWindowTitle( tr( "Select Interview" ) );
     dialog.exec();
 
+    // update the interview's exams
+    Alder::Application *app = Alder::Application::GetInstance();
+    Alder::Interview *activeInterview = app->GetActiveInterview();
+    if( activeInterview ) activeInterview->Update( true );
+
     // active interview may have changed so update the interface
     this->updateInterface();
   }

@@ -10,7 +10,10 @@
 =========================================================================*/
 #include "Exam.h"
 
+#include "Application.h"
 #include "Image.h"
+#include "Interview.h"
+#include "OpalService.h"
 #include "Utilities.h"
 
 #include "vtkObjectFactory.h"
@@ -18,6 +21,95 @@
 namespace Alder
 {
   vtkStandardNewMacro( Exam );
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Exam::Update()
+  {
+    Application *app = Application::GetInstance();
+    OpalService *opal = app->GetOpal();
+    std::vector< std::string > sideList;
+    std::vector< std::string >::iterator sideListIt;
+    vtkSmartPointer< Interview > interview;
+
+    // start by getting the UId
+    this->GetRecord( interview );
+    std::string UId = interview->Get( "UId" ).ToString();
+
+    // only update the images if the stage is complete and they have never been downloaded
+    // NOTE: it is possible that an exam with state "Ready" has valid data, but we are leaving
+    // those exams out for now since we don't know for sure whether they are always valid
+    if( 0 == this->Get( "Stage" ).ToString().compare( "Completed" ) &&
+        0 == this->Get( "Downloaded" ).ToInt() )
+    {
+      // determine which Opal table to fetch from based on exam modality
+      std::string type = this->Get( "Type" ).ToString();
+      std::string laterality = this->Get( "Laterality" ).ToString();
+
+      if( 0 == type.compare( "CarotidIntima" ) )
+      {
+        // see if the laterality exists
+        sideList = opal->GetValues( "clsa-dcs-images", "CarotidIntima", UId, "Measure.SIDE" );
+        
+        bool found = false;
+        int sideIndex = 0;
+        for( sideListIt = sideList.begin(); sideListIt != sideList.end(); ++sideListIt )
+        {
+          if( 0 == Utilities::toLower( *sideListIt ).compare( laterality ) )
+          {
+            found = true;
+            break;
+          }
+          sideIndex++;
+        }
+
+        // only get the image if its laterality is found
+        if( found )
+        {
+          // write cineloops 1, 2 and 3
+          for( int i = 1; i <= 3; i++ )
+          {
+            std::string variable = "Measure.CINELOOP_";
+            variable += vtkVariant( i ).ToString();
+
+            // add a new entry in the image table
+            vtkSmartPointer< Image > image = vtkSmartPointer< Image >::New();
+            image->Set( "ExamId", this->Get( "Id" ) );
+            image->Set( "Acquisition", i );
+            image->Save();
+
+            // now write the file and validate it
+            std::string fileName = image->CreateFile( ".dcm.gz" );
+            opal->SaveFile( fileName, "clsa-dcs-images", "CarotidIntima", UId, variable, sideIndex );
+            if( !image->ValidateFile() ) image->Remove();
+          }
+
+          // TODO: STILL_IMAGE and SR files still need to be downloaded
+        }
+      }
+      else if( 0 == type.compare( "DualHipBoneDensity" ) )
+      {
+      }
+      else if( 0 == type.compare( "ForearmBoneDensity" ) )
+      {
+      }
+      else if( 0 == type.compare( "LateralBoneDensity" ) )
+      {
+      }
+      else if( 0 == type.compare( "Plaque" ) )
+      {
+      }
+      else if( 0 == type.compare( "RetinalScan" ) )
+      {
+      }
+      else if( 0 == type.compare( "WholeBodyBoneDensity" ) )
+      {
+      }
+
+      // now set that we have downloaded the images
+      this->Set( "Downloaded", 1 );
+      this->Save();
+    }
+  }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool Exam::IsRatedBy( User* user )
