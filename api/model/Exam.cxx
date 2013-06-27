@@ -71,6 +71,10 @@ namespace Alder
             std::string variable = "Measure.CINELOOP_";
             variable += vtkVariant( i ).ToString();
 
+            std::stringstream log;
+            log << "Adding " << variable << " to database for UId \"" << UId << "\"";
+            Utilities::log( log.str() );
+
             // add a new entry in the image table
             vtkSmartPointer< Image > image = vtkSmartPointer< Image >::New();
             image->Set( "ExamId", this->Get( "Id" ) );
@@ -80,7 +84,13 @@ namespace Alder
             // now write the file and validate it
             std::string fileName = image->CreateFile( ".dcm.gz" );
             opal->SaveFile( fileName, "clsa-dcs-images", "CarotidIntima", UId, variable, sideIndex );
-            if( !image->ValidateFile() ) image->Remove();
+            if( !image->ValidateFile() )
+            {
+              log.str( "" );
+              log << "Removing " << variable << " from database (invalid)";
+              Utilities::log( log.str() );
+              image->Remove();
+            }
           }
 
           // TODO: STILL_IMAGE and SR files still need to be downloaded
@@ -100,6 +110,47 @@ namespace Alder
       }
       else if( 0 == type.compare( "RetinalScan" ) )
       {
+        // see if the laterality exists
+        sideList = opal->GetValues( "clsa-dcs-images", "RetinalScan", UId, "Measure.SIDE" );
+        
+        bool found = false;
+        int sideIndex = 0;
+        for( sideListIt = sideList.begin(); sideListIt != sideList.end(); ++sideListIt )
+        {
+          if( 0 == Utilities::toLower( *sideListIt ).compare( laterality ) )
+          {
+            found = true;
+            break;
+          }
+          sideIndex++;
+        }
+
+        // only get the image if its laterality is found
+        if( found )
+        {
+          std::string variable = "Measure.EYE";
+
+          std::stringstream log;
+          log << "Adding " << variable << " to database for UId \"" << UId << "\"";
+          Utilities::log( log.str() );
+
+          // add a new entry in the image table
+          vtkSmartPointer< Image > image = vtkSmartPointer< Image >::New();
+          image->Set( "ExamId", this->Get( "Id" ) );
+          image->Set( "Acquisition", 1 );
+          image->Save();
+
+          // now write the file and validate it
+          std::string fileName = image->CreateFile( ".jpg" );
+          opal->SaveFile( fileName, "clsa-dcs-images", "RetinalScan", UId, variable, sideIndex );
+          if( !image->ValidateFile() )
+          {
+            log.str( "" );
+            log << "Removing " << variable << " from database (invalid)";
+            Utilities::log( log.str() );
+            image->Remove();
+          }
+        }
       }
       else if( 0 == type.compare( "WholeBodyBoneDensity" ) )
       {

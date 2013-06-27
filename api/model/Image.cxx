@@ -76,17 +76,15 @@ namespace Alder
       // if the file has a .gz extension, unzip it
       if( 0 == fileName.substr( fileName.length() - 3, 3 ).compare( ".gz" ) )
       {
+        std::string zipFileName = fileName;
+        fileName = fileName.substr( 0, fileName.length() - 3 );
+
         std::string command = "gunzip ";
-        command += fileName;
+        command += zipFileName;
 
         // not a gz file, remove the .gz extension manually
         if( 0 == Utilities::exec( command ).compare( "ERROR" ) )
-        {
-          std::string oldFileName = fileName;
-          fileName = fileName.substr( 0, fileName.length() - 3 );
-
-          rename( oldFileName.c_str(), fileName.c_str() );
-        }
+          rename( zipFileName.c_str(), fileName.c_str() );
       }
 
       // now see if we can read the file
@@ -119,11 +117,11 @@ namespace Alder
     std::string id = this->Get( "Id" ).ToString();
     for( vtkIdType index = 0; index < directory->GetNumberOfFiles(); index++ )
     {
-      std::string filename = directory->GetFile( index );
-      if( filename.substr( 0, id.length() ) == id )
+      std::string fileName = directory->GetFile( index );
+      if( fileName.substr( 0, id.length() ) == id )
       {
         std::stringstream name;
-        name << path << "/" << filename;
+        name << path << "/" << fileName;
         return name.str();
       }
     }

@@ -445,7 +445,7 @@ void QMainAlderWindow::updateInformation()
       if( image->GetRecord( exam ) )
       {
         interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
-        siteString = exam->Get( "Site" ).ToString().c_str();
+        siteString = interview->Get( "Site" ).ToString().c_str();
         dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();
       }
     }
