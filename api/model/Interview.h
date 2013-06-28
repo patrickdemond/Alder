@@ -47,8 +47,9 @@ namespace Alder
 
     /**
      * Updates all data associated with the interview from Opal
+     * @param images bool Whether to also download all of the interview's images
      */
-    void Update();
+    void Update( bool images = false );
 
     /**
      * Returns the next interview in UId/VisitDate order.

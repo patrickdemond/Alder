@@ -29,6 +29,7 @@
 #define ALDER_CONFIG_FILE "@ALDER_CONFIG_FILE@"
 
 #define ALDER_SALT_STRING "@ALDER_SALT_STRING@"
+#define ALDER_LOG_PATH "@ALDER_LOG_PATH@"
 
 //
 // This macro is used for sql debug statements in instance methods
@@ -58,9 +59,11 @@
 #include <algorithm>
 #include <base64.h>
 #include <cctype>
+#include <fstream>
 #include <json/reader.h>
 #include <sha.h>
 #include <sstream>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
@@ -112,9 +115,9 @@ namespace Alder
       return size * count;
     }
 
-    inline static std::string exec( const char* command )
+    inline static std::string exec( std::string command )
     {
-      FILE* pipe = popen( command, "r" );
+      FILE* pipe = popen( command.c_str(), "r" );
       if( !pipe ) return "ERROR";
       char buffer[128];
       std::string result = "";
@@ -149,7 +152,7 @@ namespace Alder
     inline static bool fileExists( std::string filename )
     {
       if( filename.empty() ) return false;
-      return access( filename.c_str(), R_OK )  == 0;
+      return access( filename.c_str(), R_OK ) == 0;
     }
 
     inline static std::string getFileExtension( std::string filename )
@@ -181,6 +184,12 @@ namespace Alder
         return "";
       }
     }
+
+    inline static unsigned long getFileLength( std::string filename )
+    {
+      struct stat fs;
+      return 0 != stat( filename.c_str(), &fs ) ? 0 : static_cast<unsigned long>( fs.st_size );
+    }
     
     inline static std::string getFilenameName( std::string filename )
     {
@@ -208,7 +217,14 @@ namespace Alder
       if( str.length() > 0 ) results.push_back( str );
       return results;
     }
-  };  
+
+    static void log( std::string str )
+    {
+      std::ofstream log( ALDER_LOG_PATH, std::ofstream::out | std::ofstream::app );
+      log << "[" << Utilities::getTime( "%y-%m-%d %T" ) << "] " << str << std::endl;
+      log.close();
+    }
+  };
 }
 
 #endif // __Utilities_h

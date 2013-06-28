@@ -11,6 +11,7 @@
     <Password></Password>
     <Host>localhost</Host>
     <Port>8843</Port>
+    <Timeout>10</Timeout>
   </Opal>
   <Path>
     <ImageData></ImageData>

@@ -174,7 +174,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Interview::Update()
+  void Interview::Update( bool images )
   {
     Application *app = Application::GetInstance();
     OpalService *opal = app->GetOpal();
@@ -196,18 +196,20 @@ namespace Alder
       exam->Set( "Modality", "Ultrasound" );
       exam->Set( "Type", "CarotidIntima" );
       exam->Set( "Laterality", "left" );
-      exam->Set( "Stage", examData["CarotidIntimaStage"] );
-      exam->Set( "Interviewer", examData["CarotidIntimaStage"] );
-      exam->Set( "DatetimeAcquired", examData["CarotidIntimaDatetimeAcquired"] );
+      exam->Set( "Stage", examData["CarotidIntima.Stage"] );
+      exam->Set( "Interviewer", examData["CarotidIntima.Interviewer"] );
+      exam->Set( "DatetimeAcquired", examData["CarotidIntima.DatetimeAcquired"] );
+      exam->Save();
 
       exam = vtkSmartPointer<Exam>::New();
       exam->Set( "InterviewId", this->Get( "Id" ) );
       exam->Set( "Modality", "Ultrasound" );
       exam->Set( "Type", "CarotidIntima" );
       exam->Set( "Laterality", "right" );
-      exam->Set( "Stage", examData["CarotidIntimaStage"] );
-      exam->Set( "Interviewer", examData["CarotidIntimaStage"] );
-      exam->Set( "DatetimeAcquired", examData["CarotidIntimaDatetimeAcquired"] );
+      exam->Set( "Stage", examData["CarotidIntima.Stage"] );
+      exam->Set( "Interviewer", examData["CarotidIntima.Interviewer"] );
+      exam->Set( "DatetimeAcquired", examData["CarotidIntima.DatetimeAcquired"] );
+      exam->Save();
 
       // DualHipBoneDensity
       exam = vtkSmartPointer<Exam>::New();
@@ -215,18 +217,20 @@ namespace Alder
       exam->Set( "Modality", "Dexa" );
       exam->Set( "Type", "DualHipBoneDensity" );
       exam->Set( "Laterality", "left" );
-      exam->Set( "Stage", examData["DualHipBoneDensityStage"] );
-      exam->Set( "Interviewer", examData["DualHipBoneDensityStage"] );
-      exam->Set( "DatetimeAcquired", examData["DualHipBoneDensityDatetimeAcquired"] );
+      exam->Set( "Stage", examData["DualHipBoneDensity.Stage"] );
+      exam->Set( "Interviewer", examData["DualHipBoneDensity.Interviewer"] );
+      exam->Set( "DatetimeAcquired", examData["DualHipBoneDensity.DatetimeAcquired"] );
+      exam->Save();
 
       exam = vtkSmartPointer<Exam>::New();
       exam->Set( "InterviewId", this->Get( "Id" ) );
       exam->Set( "Modality", "Dexa" );
       exam->Set( "Type", "DualHipBoneDensity" );
       exam->Set( "Laterality", "right" );
-      exam->Set( "Stage", examData["DualHipBoneDensityStage"] );
-      exam->Set( "Interviewer", examData["DualHipBoneDensityStage"] );
-      exam->Set( "DatetimeAcquired", examData["DualHipBoneDensityDatetimeAcquired"] );
+      exam->Set( "Stage", examData["DualHipBoneDensity.Stage"] );
+      exam->Set( "Interviewer", examData["DualHipBoneDensity.Interviewer"] );
+      exam->Set( "DatetimeAcquired", examData["DualHipBoneDensity.DatetimeAcquired"] );
+      exam->Save();
 
       // ForearmBoneDensity
       exam = vtkSmartPointer<Exam>::New();
@@ -234,9 +238,10 @@ namespace Alder
       exam->Set( "Modality", "Dexa" );
       exam->Set( "Type", "ForearmBoneDensity" );
       exam->Set( "Laterality", "none" );
-      exam->Set( "Stage", examData["ForearmBoneDensityStage"] );
-      exam->Set( "Interviewer", examData["ForearmBoneDensityStage"] );
-      exam->Set( "DatetimeAcquired", examData["ForearmBoneDensityDatetimeAcquired"] );
+      exam->Set( "Stage", examData["ForearmBoneDensity.Stage"] );
+      exam->Set( "Interviewer", examData["ForearmBoneDensity.Interviewer"] );
+      exam->Set( "DatetimeAcquired", examData["ForearmBoneDensity.DatetimeAcquired"] );
+      exam->Save();
 
       // LateralBoneDensity
       exam = vtkSmartPointer<Exam>::New();
@@ -244,9 +249,10 @@ namespace Alder
       exam->Set( "Modality", "Dexa" );
       exam->Set( "Type", "LateralBoneDensity" );
       exam->Set( "Laterality", "none" );
-      exam->Set( "Stage", examData["LateralBoneDensityStage"] );
-      exam->Set( "Interviewer", examData["LateralBoneDensityStage"] );
-      exam->Set( "DatetimeAcquired", examData["LateralBoneDensityDatetimeAcquired"] );
+      exam->Set( "Stage", examData["LateralBoneDensity.Stage"] );
+      exam->Set( "Interviewer", examData["LateralBoneDensity.Interviewer"] );
+      exam->Set( "DatetimeAcquired", examData["LateralBoneDensity.DatetimeAcquired"] );
+      exam->Save();
 
       // Plaque
       exam = vtkSmartPointer<Exam>::New();
@@ -254,18 +260,20 @@ namespace Alder
       exam->Set( "Modality", "Ultrasound" );
       exam->Set( "Type", "Plaque" );
       exam->Set( "Laterality", "left" );
-      exam->Set( "Stage", examData["PlaqueStage"] );
-      exam->Set( "Interviewer", examData["PlaqueStage"] );
-      exam->Set( "DatetimeAcquired", examData["PlaqueDatetimeAcquired"] );
+      exam->Set( "Stage", examData["Plaque.Stage"] );
+      exam->Set( "Interviewer", examData["Plaque.Interviewer"] );
+      exam->Set( "DatetimeAcquired", examData["Plaque.DatetimeAcquired"] );
+      exam->Save();
 
       exam = vtkSmartPointer<Exam>::New();
       exam->Set( "InterviewId", this->Get( "Id" ) );
       exam->Set( "Modality", "Ultrasound" );
       exam->Set( "Type", "Plaque" );
       exam->Set( "Laterality", "right" );
-      exam->Set( "Stage", examData["PlaqueStage"] );
-      exam->Set( "Interviewer", examData["PlaqueStage"] );
-      exam->Set( "DatetimeAcquired", examData["PlaqueDatetimeAcquired"] );
+      exam->Set( "Stage", examData["Plaque.Stage"] );
+      exam->Set( "Interviewer", examData["Plaque.Interviewer"] );
+      exam->Set( "DatetimeAcquired", examData["Plaque.DatetimeAcquired"] );
+      exam->Save();
 
       // RetinalScan
       exam = vtkSmartPointer<Exam>::New();
@@ -273,18 +281,20 @@ namespace Alder
       exam->Set( "Modality", "Retinal" );
       exam->Set( "Type", "RetinalScan" );
       exam->Set( "Laterality", "left" );
-      exam->Set( "Stage", examData["RetinalScanStage"] );
-      exam->Set( "Interviewer", examData["RetinalScanStage"] );
-      exam->Set( "DatetimeAcquired", examData["RetinalScanDatetimeAcquired"] );
+      exam->Set( "Stage", examData["RetinalScan.Stage"] );
+      exam->Set( "Interviewer", examData["RetinalScan.Interviewer"] );
+      exam->Set( "DatetimeAcquired", examData["RetinalScan.DatetimeAcquired"] );
+      exam->Save();
 
       exam = vtkSmartPointer<Exam>::New();
       exam->Set( "InterviewId", this->Get( "Id" ) );
       exam->Set( "Modality", "Retinal" );
       exam->Set( "Type", "RetinalScan" );
       exam->Set( "Laterality", "right" );
-      exam->Set( "Stage", examData["RetinalScanStage"] );
-      exam->Set( "Interviewer", examData["RetinalScanStage"] );
-      exam->Set( "DatetimeAcquired", examData["RetinalScanDatetimeAcquired"] );
+      exam->Set( "Stage", examData["RetinalScan.Stage"] );
+      exam->Set( "Interviewer", examData["RetinalScan.Interviewer"] );
+      exam->Set( "DatetimeAcquired", examData["RetinalScan.DatetimeAcquired"] );
+      exam->Save();
 
       // WholeBodyBoneDensity
       exam = vtkSmartPointer<Exam>::New();
@@ -292,9 +302,19 @@ namespace Alder
       exam->Set( "Modality", "Dexa" );
       exam->Set( "Type", "WholeBodyBoneDensity" );
       exam->Set( "Laterality", "none" );
-      exam->Set( "Stage", examData["WholeBodyBoneDensityStage"] );
-      exam->Set( "Interviewer", examData["WholeBodyBoneDensityStage"] );
-      exam->Set( "DatetimeAcquired", examData["WholeBodyBoneDensityDatetimeAcquired"] );
+      exam->Set( "Stage", examData["WholeBodyBoneDensity.Stage"] );
+      exam->Set( "Interviewer", examData["WholeBodyBoneDensity.Interviewer"] );
+      exam->Set( "DatetimeAcquired", examData["WholeBodyBoneDensity.DatetimeAcquired"] );
+      exam->Save();
+    }
+
+    // update each exam as well, if required
+    if( images )
+    {
+      std::vector< vtkSmartPointer< Exam > > examList;
+      std::vector< vtkSmartPointer< Exam > >::iterator examIt;
+      this->GetList( &examList );
+      for( examIt = examList.begin(); examIt != examList.end(); ++examIt ) ( *examIt )->Update();
     }
   }
 

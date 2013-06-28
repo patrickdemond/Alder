@@ -121,6 +121,11 @@ void QMainAlderWindow::slotOpenInterview()
     dialog.setWindowTitle( tr( "Select Interview" ) );
     dialog.exec();
 
+    // update the interview's exams
+    Alder::Application *app = Alder::Application::GetInstance();
+    Alder::Interview *activeInterview = app->GetActiveInterview();
+    if( activeInterview ) activeInterview->Update( true );
+
     // active interview may have changed so update the interface
     this->updateInterface();
   }
@@ -440,7 +445,7 @@ void QMainAlderWindow::updateInformation()
       if( image->GetRecord( exam ) )
       {
         interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
-        siteString = exam->Get( "Site" ).ToString().c_str();
+        siteString = interview->Get( "Site" ).ToString().c_str();
         dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();
       }
     }

@@ -18,6 +18,7 @@
 #include "Utilities.h"
 
 #include "vtkDirectory.h"
+#include "vtkImageDataReader.h"
 #include "vtkObjectFactory.h"
 
 #include <stdexcept>
@@ -50,6 +51,53 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::string Image::CreateFile( std::string suffix )
+  {
+    // first get the path and create it if it doesn't exist
+    std::string path = this->GetFilePath();
+    if( !Utilities::fileExists( path ) ) vtkDirectory::MakeDirectory( path.c_str() );
+
+    return path + "/" + this->Get( "Id" ).ToString() + suffix;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Image::ValidateFile()
+  {
+    bool valid;
+    std::string fileName = this->GetFileName();
+
+    // now check the file, if it is empty delete the image and the file
+    if( 0 == Utilities::getFileLength( fileName ) )
+    {
+      valid = false;
+    }
+    else // file exists
+    {
+      // if the file has a .gz extension, unzip it
+      if( 0 == fileName.substr( fileName.length() - 3, 3 ).compare( ".gz" ) )
+      {
+        std::string zipFileName = fileName;
+        fileName = fileName.substr( 0, fileName.length() - 3 );
+
+        std::string command = "gunzip ";
+        command += zipFileName;
+
+        // not a gz file, remove the .gz extension manually
+        if( 0 == Utilities::exec( command ).compare( "ERROR" ) )
+          rename( zipFileName.c_str(), fileName.c_str() );
+      }
+
+      // now see if we can read the file
+      valid = vtkImageDataReader::IsValidFileName( fileName.c_str() );
+    }
+
+    // if the file isn't valid, remove it from the disk
+    if( !valid ) remove( fileName.c_str() );
+
+    return valid;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   std::string Image::GetFileName()
   {
     // make sure the path exists
@@ -69,11 +117,11 @@ namespace Alder
     std::string id = this->Get( "Id" ).ToString();
     for( vtkIdType index = 0; index < directory->GetNumberOfFiles(); index++ )
     {
-      std::string filename = directory->GetFile( index );
-      if( filename.substr( 0, id.length() ) == id )
+      std::string fileName = directory->GetFile( index );
+      if( fileName.substr( 0, id.length() ) == id )
       {
         std::stringstream name;
-        name << path << "/" << filename;
+        name << path << "/" << fileName;
         return name.str();
       }
     }

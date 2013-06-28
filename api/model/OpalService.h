@@ -55,7 +55,18 @@ namespace Alder
     /**
      * Defines connection parameters to use when communicating with the Opal server
      */
-    void Setup( std::string username, std::string password, std::string host, int port );
+    void Setup(
+      std::string username,
+      std::string password,
+      std::string host,
+      int port = 8843,
+      int timeout = 10 );
+
+    vtkGetMacro( Port, int );
+    vtkSetMacro( Port, int );
+
+    vtkGetMacro( Timeout, int );
+    vtkSetMacro( Timeout, int );
 
     /**
      * Returns a list of all identifiers in a particular data source and table
@@ -106,6 +117,33 @@ namespace Alder
     std::string GetValue(
       std::string dataSource, std::string table, std::string identifier, std::string variable );
 
+    /**
+     * Returns an array variable for a given identifier
+     * @param dataSource string
+     * @param table string
+     * @param identifier string
+     * @param variable string
+     */
+    std::vector< std::string > GetValues(
+      std::string dataSource, std::string table, std::string identifier, std::string variable );
+
+    /**
+     * Returns a particular variable for a given identifier
+     * @param dataSource string
+     * @param fileName string
+     * @param table string
+     * @param identifier string
+     * @param variable string
+     * @param integer position
+     */
+    void SaveFile(
+      std::string fileName,
+      std::string dataSource,
+      std::string table,
+      std::string identifier,
+      std::string variable,
+      int position = -1 );
+
   protected:
     OpalService();
     ~OpalService() {}
@@ -124,6 +162,7 @@ namespace Alder
     std::string Password;
     std::string Host;
     int Port;
+    int Timeout;
 
   private:
     OpalService( const OpalService& ); // Not implemented
