@@ -77,13 +77,17 @@ namespace Alder
     headers = curl_slist_append( headers, credentials.c_str() );
 
     // if we are writing to a file, open it
-    if( toFile ) file = fopen( fileName.c_str(), "wb" );
-
-    if( NULL == file )
+    if( toFile ) 
     {
-      std::stringstream stream;
-      stream << "Unable to open file \"" << fileName << "\" for writing." << endl;
-      throw std::runtime_error( stream.str().c_str() );
+      file = fopen( fileName.c_str(), "wb" );
+
+      if( NULL == file )
+      {
+        std::stringstream stream;
+        cout << servicePath << endl; 
+        stream << "Unable to open file \"" << fileName << "\" for writing." << endl;
+        throw std::runtime_error( stream.str().c_str() );
+      }
     }
 
     if( toFile ) curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION, Utilities::writePointerToFile );
