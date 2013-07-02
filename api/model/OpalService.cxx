@@ -92,7 +92,7 @@ namespace Alder
     if( toFile ) curl_easy_setopt( curl, CURLOPT_WRITEDATA, file );
     else curl_easy_setopt( curl, CURLOPT_WRITEDATA, &result );
 
-    curl_easy_setopt( curl, CURLOPT_TIMEOUT, 5 );
+    curl_easy_setopt( curl, CURLOPT_TIMEOUT, this->Timeout );
     curl_easy_setopt( curl, CURLOPT_SSLVERSION, 3 );
     curl_easy_setopt( curl, CURLOPT_SSL_VERIFYPEER, 0 );
     curl_easy_setopt( curl, CURLOPT_HTTPHEADER, headers );
@@ -107,7 +107,8 @@ namespace Alder
     if( 0 != res )
     {
       std::stringstream stream;
-      stream << "Received cURL error " << res << " when attempting to contact Opal";
+      stream << "Received cURL error " << res << " when attempting to contact Opal: ";
+      stream << curl_easy_strerror( res );
       throw std::runtime_error( stream.str().c_str() );
     }
 
