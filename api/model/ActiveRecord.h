@@ -90,6 +90,11 @@ namespace Alder
     virtual void Remove();
     
     /**
+     * Get the id of the last inserted record.
+     */
+    int GetLastInsertId();
+    
+    /**
      * Provides a list of all records which exist in a table.
      * @param list vector An existing vector to put all records into.
      */

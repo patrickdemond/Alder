@@ -77,13 +77,17 @@ namespace Alder
     headers = curl_slist_append( headers, credentials.c_str() );
 
     // if we are writing to a file, open it
-    if( toFile ) file = fopen( fileName.c_str(), "wb" );
-
-    if( NULL == file )
+    if( toFile ) 
     {
-      std::stringstream stream;
-      stream << "Unable to open file \"" << fileName << "\" for writing." << endl;
-      throw std::runtime_error( stream.str().c_str() );
+      file = fopen( fileName.c_str(), "wb" );
+
+      if( NULL == file )
+      {
+        std::stringstream stream;
+        cout << servicePath << endl; 
+        stream << "Unable to open file \"" << fileName << "\" for writing." << endl;
+        throw std::runtime_error( stream.str().c_str() );
+      }
     }
 
     if( toFile ) curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION, Utilities::writePointerToFile );
@@ -92,7 +96,7 @@ namespace Alder
     if( toFile ) curl_easy_setopt( curl, CURLOPT_WRITEDATA, file );
     else curl_easy_setopt( curl, CURLOPT_WRITEDATA, &result );
 
-    curl_easy_setopt( curl, CURLOPT_TIMEOUT, 5 );
+    curl_easy_setopt( curl, CURLOPT_TIMEOUT, this->Timeout );
     curl_easy_setopt( curl, CURLOPT_SSLVERSION, 3 );
     curl_easy_setopt( curl, CURLOPT_SSL_VERIFYPEER, 0 );
     curl_easy_setopt( curl, CURLOPT_HTTPHEADER, headers );
@@ -107,7 +111,8 @@ namespace Alder
     if( 0 != res )
     {
       std::stringstream stream;
-      stream << "Received cURL error " << res << " when attempting to contact Opal";
+      stream << "Received cURL error " << res << " when attempting to contact Opal: ";
+      stream << curl_easy_strerror( res );
       throw std::runtime_error( stream.str().c_str() );
     }
 
