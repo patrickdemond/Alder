@@ -154,15 +154,25 @@ namespace Alder
     // if the record's Id isn't set, get it based on the auto-increment property of the Id column
     if( !this->Get( "Id" ).IsValid() || 0 == this->Get( "Id" ).ToInt() )
     {
-      stream.str( "" );
+      this->Set( "Id", this->GetLastInsertId() );
+    }
+  }
+  
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  int ActiveRecord::GetLastInsertId()
+  {
+      Application *app = Application::GetInstance();
+      std::stringstream stream;
       stream << "SELECT Max( Id ) FROM " << this->GetName();
+      vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
+          
+      Utilities::log( "Getting last insert id for table: " + this->GetName() );
       query->SetQuery( stream.str().c_str() );
       query->Execute();
 
       // only has one row
       query->NextRow();
-      this->Set( "Id", query->DataValue( 0 ) );
-    }
+      return query->DataValue( 0 ).ToInt();
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

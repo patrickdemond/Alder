@@ -41,7 +41,7 @@ namespace Alder
     std::string GetName() { return "Exam"; }
 
     /**
-     * Updates all data associated with the interview from Opal
+     * Updates all data associated with the interview from Opal.
      */
     void Update();
 
@@ -50,6 +50,14 @@ namespace Alder
      * If the exam has no images this method returns true.
      */
     bool IsRatedBy( User* user );
+
+    /**
+     * Retrieves an image from Opal.
+     * @throws exception 
+     */
+    bool RetrieveImage( std::string type, std::string variable, std::string UId,
+                        std::map<std::string, vtkVariant> settings,
+                        std::string suffix, std::string sideVariable = "" );
 
   protected:
     Exam() {}
