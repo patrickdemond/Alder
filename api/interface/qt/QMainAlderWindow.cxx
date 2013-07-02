@@ -124,7 +124,17 @@ void QMainAlderWindow::slotOpenInterview()
     // update the interview's exams
     Alder::Application *app = Alder::Application::GetInstance();
     Alder::Interview *activeInterview = app->GetActiveInterview();
-    if( activeInterview ) activeInterview->Update( true );
+    if( activeInterview )
+    {
+      // create a progress dialog to observe the progress of the update
+      QProgressDialog dialog( this );
+      dialog.setModal( true );
+      dialog.setWindowTitle( tr( "Downloading Exam Images" ) );
+      dialog.setMessage( tr( "Please wait while the interview's images are downloaded." ) );
+      dialog.open();
+      activeInterview->Update( true );
+      dialog.accept();
+    }
 
     // active interview may have changed so update the interface
     this->updateInterface();
