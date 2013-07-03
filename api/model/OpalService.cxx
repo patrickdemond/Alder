@@ -271,10 +271,10 @@ namespace Alder
   {
     std::stringstream stream;
     stream << "/datasource/" << dataSource << "/table/" << table
-           << "/valueSet/" << identifier << "/variable/" << variable;
+           << "/valueSet/" << identifier << "/variable/" << variable << "/value";
 
     // add on the position
-    if( 0 <= position ) stream << "/value?pos=" << position;
+    if( 0 <= position ) stream << "?pos=" << position;
 
     this->Read( stream.str(), fileName );
   }
