@@ -18,6 +18,10 @@
 #include "Rating.h"
 #include "User.h"
 
+#include "vtkMedicalImageViewer.h"
+#include "vtkRenderer.h"
+#include "vtkRenderWindow.h"
+
 #include "QAboutDialog.h"
 #include "QLoginDialog.h"
 #include "QProgressDialog.h"
@@ -93,6 +97,20 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this->ui->notePushButton, SIGNAL( clicked() ),
     this, SLOT( slotOpenNote() ) );
 
+
+  this->Viewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
+  vtkRenderWindow* renwin = this->ui->medicalImageWidget->GetRenderWindow();
+  vtkRenderer* renderer = this->Viewer->GetRenderer();
+  renderer->GradientBackgroundOn();
+  renderer->SetBackground( 0, 0, 0 );
+  renderer->SetBackground2( 0, 0, 1 );
+  this->Viewer->SetRenderWindow( renwin  );  
+  this->Viewer->InterpolateOff();
+  
+  this->ui->framePlayerWidget->setViewer(this->Viewer);
+  this->setCorner( Qt::BottomLeftCorner, Qt::BottomDockWidgetArea );
+  this->setCorner( Qt::BottomRightCorner, Qt::RightDockWidgetArea );
+
   this->readSettings();
   this->updateInterface();
 };
@@ -100,11 +118,13 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QMainAlderWindow::~QMainAlderWindow()
 {
+  this->ui->framePlayerWidget->play(false);
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::closeEvent( QCloseEvent *event )
 {
+  this->ui->framePlayerWidget->setViewer(0);
   this->writeSettings();
   event->accept();
 }
@@ -593,12 +613,13 @@ void QMainAlderWindow::updateMedicalImageWidget()
 
   if( image )
   {
-    this->ui->medicalImageWidget->loadImage( QString( image->GetFileName().c_str() ) );
+    this->Viewer->Load( image->GetFileName().c_str() );
   }
   else
   {
-    this->ui->medicalImageWidget->resetImage();
+    this->Viewer->SetImageToSinusoid();
   }
+  this->ui->framePlayerWidget->updateFromViewer();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -657,6 +678,7 @@ void QMainAlderWindow::updateInterface()
   this->ui->notePushButton->setEnabled( image );
   this->ui->interviewTreeWidget->setEnabled( interview );
   this->ui->medicalImageWidget->setEnabled( loggedIn );
+  this->ui->framePlayerWidget->setEnabled( loggedIn );
 
   this->updateInterviewTreeWidget();
   this->updateInformation();
