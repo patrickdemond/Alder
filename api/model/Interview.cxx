@@ -311,10 +311,21 @@ namespace Alder
     // update each exam as well, if required
     if( images )
     {
+      double index = 0;
+      double progress = 0.0;
+      app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
+
       std::vector< vtkSmartPointer< Exam > > examList;
       std::vector< vtkSmartPointer< Exam > >::iterator examIt;
       this->GetList( &examList );
-      for( examIt = examList.begin(); examIt != examList.end(); ++examIt ) ( *examIt )->Update();
+      for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
+      {
+        ( *examIt )->Update();
+
+        index++;
+        progress = index / examList.size();
+        app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
+      }
     }
   }
 
@@ -333,7 +344,7 @@ namespace Alder
     std::map< std::string, std::map< std::string, std::string > >::iterator it;
     bool done = false;
     int limit = 100;
-    int index = 0;
+    double index = 0;
 
     std::vector< std::string > identifierList = opal->GetIdentifiers( "alder", "Interview" );
     double size = (double) identifierList.size();
