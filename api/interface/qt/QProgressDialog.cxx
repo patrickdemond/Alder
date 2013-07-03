@@ -28,6 +28,7 @@ QProgressDialog::QProgressDialog( QWidget* parent )
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QProgressDialog::~QProgressDialog()
 {
+  Alder::Application::GetInstance()->RemoveObserver( this->observer );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
