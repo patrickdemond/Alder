@@ -11,9 +11,11 @@
 
 #include "OpalService.h"
 
+#include "Application.h"
 #include "Configuration.h"
 #include "Utilities.h"
 
+#include "vtkCommand.h"
 #include "vtkObjectFactory.h"
 
 #include <sstream>
@@ -24,6 +26,31 @@
 
 namespace Alder
 {
+  // initialize the configureEventSent static ivar
+  bool OpalService::configureEventSent = false;
+
+  // this function is used by curl to send progress signals
+  int OpalService::curlProgressCallback(
+    void *notUsed, double downTotal, double downNow, double upTotal, double upNow )
+  {
+    Application *app = Application::GetInstance();
+
+    // send the configure event if it hasn't been sent yet
+    if( !OpalService::configureEventSent )
+    {
+      // send a pair, the first argument is that this is the local progress, the second to set the mode
+      std::pair<bool, bool> showProgress = std::pair<bool, bool>( false, 0 < downTotal );
+      app->InvokeEvent( vtkCommand::ConfigureEvent, static_cast<void *>( &showProgress ) );
+      OpalService::configureEventSent = true;
+    }
+
+    // if the downTotal is 0 then we can't send a progress event
+    std::pair<bool, double> progress =
+      std::pair<bool, double>( false, 0 == downTotal ? 0.0 : downNow / downTotal );
+    app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
+    return 0;
+  }
+
   vtkStandardNewMacro( OpalService );
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -59,6 +86,7 @@ namespace Alder
     CURLcode res;
     Json::Value root;
     Json::Reader reader;
+    Application *app = Application::GetInstance();
 
     // encode the credentials
     Utilities::base64String( this->Username + ":" + this->Password, credentials );
@@ -100,8 +128,17 @@ namespace Alder
     curl_easy_setopt( curl, CURLOPT_SSLVERSION, 3 );
     curl_easy_setopt( curl, CURLOPT_SSL_VERIFYPEER, 0 );
     curl_easy_setopt( curl, CURLOPT_HTTPHEADER, headers );
+    curl_easy_setopt( curl, CURLOPT_NOPROGRESS, 0L );
+    curl_easy_setopt( curl, CURLOPT_PROGRESSFUNCTION, OpalService::curlProgressCallback );
     curl_easy_setopt( curl, CURLOPT_URL, url.c_str() );
+
+    // make sure that the configure event is marked as not being sent
+    // (this is used by the curlProgressCallback to know whether to send this one-time event)
+    bool global = false;
+    OpalService::configureEventSent = false;
+    app->InvokeEvent( vtkCommand::StartEvent, static_cast<void *>( &global ) );
     res = curl_easy_perform( curl );
+    app->InvokeEvent( vtkCommand::EndEvent, static_cast<void *>( &global ) );
 
     // clean up
     curl_slist_free_all( headers );
