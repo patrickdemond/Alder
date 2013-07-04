@@ -167,6 +167,9 @@ namespace Alder
   private:
     OpalService( const OpalService& ); // Not implemented
     void operator=( const OpalService& ); // Not implemented
+
+    static int curlProgressCallback( void*, double, double, double, double );
+    static bool configureEventSent;
   };
 }
 

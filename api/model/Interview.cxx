@@ -312,20 +312,22 @@ namespace Alder
     if( images )
     {
       double index = 0;
-      double progress = 0.0;
-      app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
+      bool global = true;
+      std::pair<bool, double> progress = std::pair<bool, double>( global, 0.0 );
+
+      app->InvokeEvent( vtkCommand::StartEvent, static_cast<void *>( &global ) );
 
       std::vector< vtkSmartPointer< Exam > > examList;
       std::vector< vtkSmartPointer< Exam > >::iterator examIt;
       this->GetList( &examList );
-      for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
+      for( examIt = examList.begin(); examIt != examList.end(); ++examIt, ++index )
       {
-        ( *examIt )->Update();
-
-        index++;
-        progress = index / examList.size();
+        progress.second = index / examList.size();
         app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
+        ( *examIt )->Update(); // invokes progress events
       }
+
+      app->InvokeEvent( vtkCommand::EndEvent, static_cast<void *>( &global ) );
     }
   }
 
@@ -335,23 +337,26 @@ namespace Alder
     Application *app = Application::GetInstance();
     OpalService *opal = app->GetOpal();
 
-    double progress = 0.0;
-    app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
-
     // get a list of all interview start dates
     std::map< std::string, std::map< std::string, std::string > > list;
     std::map< std::string, std::string > map, key;
     std::map< std::string, std::map< std::string, std::string > >::iterator it;
     bool done = false;
+    bool global = true;
+    std::pair<bool, double> progress = std::pair<bool, double>( global, 0.0 );
     int limit = 100;
     double index = 0;
 
     std::vector< std::string > identifierList = opal->GetIdentifiers( "alder", "Interview" );
     double size = (double) identifierList.size();
 
+    app->InvokeEvent( vtkCommand::StartEvent, static_cast<void *>( &global ) );
+
     do
     {
-      list = opal->GetRows( "alder", "Interview", index, limit );
+      progress.second = index / size;
+      app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
+      list = opal->GetRows( "alder", "Interview", index, limit ); // invokes progress events
 
       for( it = list.begin(); it != list.end(); ++it )
       {
@@ -373,8 +378,8 @@ namespace Alder
 
       // prepare the next block of start dates
       index += list.size();
-      progress = index / size;
-      app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
     } while ( !list.empty() );
+
+    app->InvokeEvent( vtkCommand::EndEvent, static_cast<void *>( &global ) );
   }
 }
