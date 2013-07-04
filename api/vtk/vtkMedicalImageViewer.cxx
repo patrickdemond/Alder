@@ -244,8 +244,12 @@ bool vtkMedicalImageViewer::Load( std::string fileName )
   {
     vtkNew< vtkImageDataReader > reader;
     reader->SetFileName( fileName.c_str() );
-    this->SetInput( reader->GetOutput() );
-    success = true;
+    vtkImageData* image = reader->GetOutput();
+    if( image )
+    {
+      this->SetInput( image );
+      success = true;
+    }  
   }
 
   return success;

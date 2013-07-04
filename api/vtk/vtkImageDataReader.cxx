@@ -238,7 +238,10 @@ bool vtkImageDataReader::IsValidFileName( const char* fileName )
   if( std::string::npos != Alder::Utilities::toLower(
         GDCMImageReader->GetFileExtensions() ).find( fileExtension ) )
   { // DICOM
-    knownFileType = true;
+    if( GDCMImageReader->CanReadFile( fileName ) )
+    {
+      knownFileType = true;
+    }  
   }
   else if( std::string::npos != Alder::Utilities::toLower(
     BMPReader->GetFileExtensions() ).find( fileExtension ) )
@@ -351,9 +354,9 @@ vtkImageData* vtkImageDataReader::GetOutputAsNewInstance()
 vtkImageData* vtkImageDataReader::GetOutput()
 {
   std::string fileNameOnly;
-  vtkXMLImageDataReader* XMLReader;
-  vtkGDCMImageReader* gdcmReader;
-  vtkImageReader2* imageReader;
+  vtkXMLImageDataReader* XMLReader = NULL;
+  vtkGDCMImageReader* gdcmReader = NULL;
+  vtkImageReader2* imageReader = NULL;
   vtkImageData* image = NULL;
 
   // if the file name or reader are null simply return null
@@ -447,6 +450,17 @@ vtkImageData* vtkImageDataReader::GetOutput()
       // get a reference to the (updated) output image
       imageReader->Update();
       image = imageReader->GetOutput();
+    }
+  }
+
+  // if we did get an image, check that it has valid extents:
+  // GetNumberOfCells is zero for invalid vtkImageData Extents
+  if( image )
+  {
+    vtkIdType nCells = image->GetNumberOfCells();
+    if( nCells == 0 )
+    {    
+      return NULL;
     }
   }
 

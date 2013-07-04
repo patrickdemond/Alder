@@ -20,6 +20,7 @@
 
 namespace Alder { class ActiveRecord; };
 class Ui_QMainAlderWindow;
+class vtkMedicalImageViewer;
 class QTreeWidgetItem;
 
 class QMainAlderWindow : public QMainWindow
@@ -67,6 +68,8 @@ protected slots:
 private:
   // Designer form
   Ui_QMainAlderWindow *ui;
+
+  vtkSmartPointer<vtkMedicalImageViewer> Viewer;
 };
 
 #endif
