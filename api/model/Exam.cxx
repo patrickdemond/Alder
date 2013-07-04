@@ -16,7 +16,11 @@
 #include "OpalService.h"
 #include "Utilities.h"
 
+#include "vtkNew.h"
 #include "vtkObjectFactory.h"
+
+#include "gdcmImageReader.h"
+#include "gdcmDirectoryHelper.h"
 
 namespace Alder
 {
@@ -50,40 +54,86 @@ namespace Alder
         // for now, assume that the parent image id for the still image
         // associated with one of the 3 possible cineloops is the first valid one
         // 
-        bool hasValidParent = false;
-        int validParentId = 0;
-        int maxAcquisition = 0;
+        bool hasParent = false;
         std::string suffix = ".dcm.gz";
         std::string sideVariable = "Measure.SIDE";
+        int acquisition = 0;
 
-        for( int acquisition = 1; acquisition <= 3; acquisition++ )
+        for( int i = 1; i <= 3; i++ )
         {
           std::string variable = "Measure.CINELOOP_";
-          variable += vtkVariant( acquisition ).ToString();
-          settings[ "Acquisition" ] = vtkVariant(acquisition);
+          variable += vtkVariant( i ).ToString();
+          settings[ "Acquisition" ] = vtkVariant( i );
 
           result = this->RetrieveImage( type, variable, UId, settings,
                                         suffix, sideVariable );
-
           if( result )
           {
-            hasValidParent = true;
+            hasParent = true;
+            acquisition = i;
           }
-          maxAcquisition = acquisition;
         }
 
-        // TODO: STILL_IMAGE and SR files still need to be downloaded
+        //TODO: SR files still need to be downloaded and processed
 
-        if( hasValidParent )
-        {
-          std::string variable = "Measure.STILL_IMAGE";
-          // need an Image instance to get the last cineloop's Id 
-          vtkSmartPointer< Image > image = vtkSmartPointer< Image >::New(); 
-          maxAcquisition++;
-          settings[ "Acquisition" ] = vtkVariant(maxAcquisition);
-          settings[ "ParentImageId" ] = vtkVariant( image->GetLastInsertId() );
-          result = this->RetrieveImage( type, variable, UId, settings,
+        acquisition++;
+        settings[ "Acquisition" ] = vtkVariant( acquisition );
+        std::string variable = "Measure.STILL_IMAGE";
+        result = this->RetrieveImage( type, variable, UId, settings,
                                         suffix, sideVariable );
+
+        if( hasParent && result )
+        {
+          // get the list of cIMT images in this exam
+
+          std::vector< vtkSmartPointer< Alder::Image > > imageList;
+          std::vector< vtkSmartPointer< Alder::Image > >::iterator imageIt;
+          this->GetList( &imageList );
+          if( imageList.empty() )
+          {             
+            throw std::runtime_error( "Failed list load during cIMT parenting" );         
+          }
+
+          // map the AcquisitionDateTimes from the dicom file headers to the images
+
+          std::map< int, std::string > acqDateTimes;
+          for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
+          {
+            Alder::Image *image = imageIt->GetPointer();
+              
+            gdcm::ImageReader reader;
+            reader.SetFileName( image->GetFileName().c_str() );
+            reader.Read();
+            const gdcm::File &file = reader.GetFile();
+            const gdcm::DataSet &ds = file.GetDataSet();
+
+            acqDateTimes[ image->Get( "Id" ).ToInt() ] =  
+              gdcm::DirectoryHelper::GetStringValueFromTag( gdcm::Tag(0x0008,0x002a), ds );
+          }
+
+          // find which cineloop has a matching datetime to the still and set the still's
+          // ParentImageId
+
+          vtkNew< Alder::Image > still;
+          int stillId = still->GetLastInsertId();
+          std::string stillAcqDateTime =  acqDateTimes[ stillId ];
+
+          std::map< int, std::string >::iterator mapIt;
+          int parentId = -1;
+          for( mapIt = acqDateTimes.begin(); mapIt != acqDateTimes.end(); mapIt++ )
+          {
+            if( 0 == stillAcqDateTime.compare( mapIt->second ) ) 
+            {
+              parentId = mapIt->first;
+              break;
+            }  
+          }
+          if( parentId != -1 )
+          {
+            still->Load( "Id", vtkVariant( stillId ).ToString() );
+            still->Set( "ParentImageId", parentId );
+            still->Save();
+          }
         }
       }
       else if( 0 == type.compare( "DualHipBoneDensity" ) )
@@ -186,7 +236,7 @@ namespace Alder
     Utilities::log( log.str() );
 
     // add a new entry in the image table
-    vtkSmartPointer< Image > image = vtkSmartPointer< Image >::New();
+    vtkNew< Alder::Image > image;
     std::map< std::string, vtkVariant >::iterator it = settings.begin();
     for( it = settings.begin(); it != settings.end(); it++ )
     { 

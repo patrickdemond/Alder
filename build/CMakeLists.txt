@@ -199,6 +199,8 @@ TARGET_LINK_LIBRARIES( alder
   vtkIO
   vtkCommon
   vtkgdcm
+  gdcmDSED
+  gdcmMSFF
   ${QT_LIBRARIES}
   ${LIBXML2_LIBRARIES}
   ${CURL_LIBRARY}
