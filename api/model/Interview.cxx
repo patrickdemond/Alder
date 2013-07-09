@@ -318,7 +318,7 @@ namespace Alder
       // we are going to be downloading file type data here, so 
       // we tell opal service on the first curl callback to NOT check if the data 
       // has a substantial return size, and force that we monitor all file downloads using curl progress
-      opal->SetProgressChecking(false);
+      OpalService::SetProgressChecking( false );
 
       app->InvokeEvent( vtkCommand::StartEvent, static_cast<void *>( &global ) );
 
@@ -358,7 +358,7 @@ namespace Alder
     // we are going to be downloading non file type data here, so 
     // we tell opal service on the first curl callback to check if the data 
     // has a substantial return size that we can monitor using curl progress
-    opal->SetProgressChecking();
+    OpalService::SetProgressChecking( true );
 
     app->InvokeEvent( vtkCommand::StartEvent, static_cast<void *>( &global ) );
 
