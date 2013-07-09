@@ -314,6 +314,11 @@ namespace Alder
       double index = 0;
       bool global = true;
       std::pair<bool, double> progress = std::pair<bool, double>( global, 0.0 );
+      
+      // we are going to be downloading file type data here, so 
+      // we tell opal service on the first curl callback to NOT check if the data 
+      // has a substantial return size, and force that we monitor all file downloads using curl progress
+      opal->SetProgressChecking(false);
 
       app->InvokeEvent( vtkCommand::StartEvent, static_cast<void *>( &global ) );
 
@@ -349,6 +354,11 @@ namespace Alder
 
     std::vector< std::string > identifierList = opal->GetIdentifiers( "alder", "Interview" );
     double size = (double) identifierList.size();
+
+    // we are going to be downloading non file type data here, so 
+    // we tell opal service on the first curl callback to check if the data 
+    // has a substantial return size that we can monitor using curl progress
+    opal->SetProgressChecking();
 
     app->InvokeEvent( vtkCommand::StartEvent, static_cast<void *>( &global ) );
 
