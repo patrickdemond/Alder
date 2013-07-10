@@ -55,7 +55,7 @@ void QProgressDialog::Command::Execute(
       // which progress bar?
       std::pair<bool, bool> showProgress = *( static_cast< std::pair<bool, bool>* >( callData ) );
       progressBar = showProgress.first ? this->ui->globalProgressBar : this->ui->localProgressBar;
-      progressBar->setRange( 0, showProgress.second ? 100 : 0 );
+      progressBar->setRange( 0, showProgress.second ? 0 : 100 );
     }
     else if( vtkCommand::StartEvent == eventId )
     { // set the progress to 0

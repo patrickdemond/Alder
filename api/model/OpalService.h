@@ -76,7 +76,7 @@ namespace Alder
      * to be downloaded is non-zero.  For file type data, this should be called
      * with false, since we expect (image) files to have significant size.
      */
-    void SetProgressChecking( bool check = true )
+    static void SetProgressChecking( bool check = true )
     {
       OpalService::configureEventSent = false;
       OpalService::progressCheck = check;
