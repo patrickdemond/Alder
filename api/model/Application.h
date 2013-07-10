@@ -127,6 +127,9 @@ namespace Alder
      * @throws runtime_error
      */
     std::string GetUnmangledClassName( std::string mangledName );
+
+    vtkSetMacro( AbortFlag, bool );
+    vtkGetMacro( AbortFlag, bool );
     
   protected:
     Application();
@@ -141,6 +144,7 @@ namespace Alder
     User *ActiveUser;
     Interview *ActiveInterview;
     Image *ActiveImage;
+    bool AbortFlag;
     
   private:
     Application( const Application& );  // Not implemented.

@@ -22,12 +22,18 @@ QProgressDialog::QProgressDialog( QWidget* parent )
   this->ui = new Ui_QProgressDialog;
   this->ui->setupUi( this );
   
+  QObject::connect(
+    this->ui->buttonBox, SIGNAL( rejected() ),
+    this, SLOT( slotCancel() ) );
+
   this->observer = vtkSmartPointer< Command >::New();
   this->observer->ui = this->ui;
-  Alder::Application::GetInstance()->AddObserver( vtkCommand::ConfigureEvent, this->observer );
-  Alder::Application::GetInstance()->AddObserver( vtkCommand::StartEvent, this->observer );
-  Alder::Application::GetInstance()->AddObserver( vtkCommand::ProgressEvent, this->observer );
-  Alder::Application::GetInstance()->AddObserver( vtkCommand::EndEvent, this->observer );
+
+  Alder::Application *app = Alder::Application::GetInstance();
+  app->AddObserver( vtkCommand::ConfigureEvent, this->observer );
+  app->AddObserver( vtkCommand::StartEvent, this->observer );
+  app->AddObserver( vtkCommand::ProgressEvent, this->observer );
+  app->AddObserver( vtkCommand::EndEvent, this->observer );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -40,6 +46,12 @@ QProgressDialog::~QProgressDialog()
 void QProgressDialog::setMessage( QString message )
 {
   this->ui->label->setText( message );
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QProgressDialog::slotCancel()
+{
+  Alder::Application::GetInstance()->SetAbortFlag( true );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
