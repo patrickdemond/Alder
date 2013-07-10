@@ -28,25 +28,29 @@ namespace Alder
 {
   // initialize the configureEventSent static ivar
   bool OpalService::configureEventSent = false;
+  bool OpalService::progressCheck = true;
 
   // this function is used by curl to send progress signals
   int OpalService::curlProgressCallback(
     void *notUsed, double downTotal, double downNow, double upTotal, double upNow )
   {
     Application *app = Application::GetInstance();
-
+    bool global = false;
     // send the configure event if it hasn't been sent yet
-    if( !OpalService::configureEventSent )
+    if( !OpalService::configureEventSent  )
     {
       // send a pair, the first argument is that this is the local progress, the second to set the mode
-      std::pair<bool, bool> showProgress = std::pair<bool, bool>( false, 0 < downTotal );
-      app->InvokeEvent( vtkCommand::ConfigureEvent, static_cast<void *>( &showProgress ) );
+      bool showBusy = OpalService::progressCheck ? (0.0 == downTotal) : false;
+      std::pair<bool, bool> configureProgress = std::pair<bool, bool>( global, showBusy );
+      app->InvokeEvent( vtkCommand::ConfigureEvent, static_cast<void *>( &configureProgress ) );
       OpalService::configureEventSent = true;
+      return 0;
     }
 
     // if the downTotal is 0 then we can't send a progress event
     std::pair<bool, double> progress =
-      std::pair<bool, double>( false, 0 == downTotal ? 0.0 : downNow / downTotal );
+      std::pair<bool, double>( global, ( 0.0 == downTotal ? downTotal : downNow / downTotal ) );
+     
     app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
     return 0;
   }
@@ -132,12 +136,16 @@ namespace Alder
     curl_easy_setopt( curl, CURLOPT_PROGRESSFUNCTION, OpalService::curlProgressCallback );
     curl_easy_setopt( curl, CURLOPT_URL, url.c_str() );
 
-    // make sure that the configure event is marked as not being sent
-    // (this is used by the curlProgressCallback to know whether to send this one-time event)
+    // we are using the local progress bar for curl progress, not the global one
     bool global = false;
-    OpalService::configureEventSent = false;
+
+    // invoke the start event using the local progress bar
     app->InvokeEvent( vtkCommand::StartEvent, static_cast<void *>( &global ) );
+     
+    // if set, the configure event will be performed during the first callback within curl progress
     res = curl_easy_perform( curl );
+
+    // invoke the end event using the local progress bar
     app->InvokeEvent( vtkCommand::EndEvent, static_cast<void *>( &global ) );
 
     // clean up

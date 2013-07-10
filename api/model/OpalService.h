@@ -67,6 +67,20 @@ namespace Alder
 
     vtkGetMacro( Timeout, int );
     vtkSetMacro( Timeout, int );
+  
+    /**
+     * Call before invoking the application StartEvent for progress monitoring.
+     * If check is true, then the first curl progress callback will set 
+     * whether the fine level (local) progress should be a regular progress
+     * meter or a busy meter, based on whether the expected size of the data 
+     * to be downloaded is non-zero.  For file type data, this should be called
+     * with false, since we expect (image) files to have significant size.
+     */
+    static void SetProgressChecking( bool check = true )
+    {
+      OpalService::configureEventSent = false;
+      OpalService::progressCheck = check;
+    };
 
     /**
      * Returns a list of all identifiers in a particular data source and table
@@ -170,6 +184,7 @@ namespace Alder
 
     static int curlProgressCallback( void*, double, double, double, double );
     static bool configureEventSent;
+    static bool progressCheck;
   };
 }
 
