@@ -43,6 +43,7 @@ public:
   void setMessage( QString message );
   
 public slots:
+  virtual void slotCancel();
 
 protected:
   vtkSmartPointer< Command > observer;

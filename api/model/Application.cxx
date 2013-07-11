@@ -32,6 +32,7 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   Application::Application()
   {
+    this->AbortFlag = false;
     this->Config = Configuration::New();
     this->DB = Database::New();
     this->Opal = OpalService::New();

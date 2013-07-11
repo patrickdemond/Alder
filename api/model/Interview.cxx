@@ -329,10 +329,12 @@ namespace Alder
       {
         progress.second = index / examList.size();
         app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
+        if( app->GetAbortFlag() ) break;
         ( *examIt )->Update(); // invokes progress events
       }
 
-      app->InvokeEvent( vtkCommand::EndEvent, static_cast<void *>( &global ) );
+      if( app->GetAbortFlag() ) app->SetAbortFlag( false );
+      else app->InvokeEvent( vtkCommand::EndEvent, static_cast<void *>( &global ) );
     }
   }
 
@@ -366,6 +368,7 @@ namespace Alder
     {
       progress.second = index / size;
       app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
+      if( app->GetAbortFlag() ) break;
       list = opal->GetRows( "alder", "Interview", index, limit ); // invokes progress events
 
       for( it = list.begin(); it != list.end(); ++it )
@@ -390,6 +393,7 @@ namespace Alder
       index += list.size();
     } while ( !list.empty() );
 
-    app->InvokeEvent( vtkCommand::EndEvent, static_cast<void *>( &global ) );
+    if( app->GetAbortFlag() ) app->SetAbortFlag( false );
+    else app->InvokeEvent( vtkCommand::EndEvent, static_cast<void *>( &global ) );
   }
 }
