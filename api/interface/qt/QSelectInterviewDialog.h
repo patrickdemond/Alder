@@ -14,6 +14,9 @@
 
 #include <QDialog>
 
+#include <map>
+#include <string>
+
 namespace Alder { class Interview; };
 class Ui_QSelectInterviewDialog;
 
@@ -39,6 +42,7 @@ protected:
   QString searchText;
   int sortColumn;
   Qt::SortOrder sortOrder;
+  std::map< std::string, int > columnIndex;
 
 protected slots:
 
