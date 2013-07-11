@@ -172,37 +172,54 @@ void QMainAlderWindow::slotPreviousInterview()
   vtkSmartPointer< Alder::Interview > interview;
   if( user && activeInterview )
   {
-    // check if unrated checkbox is pressed, keep searching for an unrated interview
-    if( this->ui->unratedCheckBox->isChecked() )
-    {
-      int currentInterviewId = activeInterview->Get( "Id" ).ToInt();
+    bool unratedChecked = this->ui->unratedCheckBox->isChecked();
+    bool loadedChecked = this->ui->loadedCheckBox->isChecked();
+    int currentInterviewId = activeInterview->Get( "Id" ).ToInt();
+    interview = activeInterview->GetPrevious();
 
-      // keep getting the previous interview until we find one that has images which are not rated
-      interview = activeInterview->GetPrevious();
-      while( interview->Get( "Id" ).ToInt() != currentInterviewId )
+    // keep getting the previous interview until we find one that matches our constraints
+    while( interview->Get( "Id" ).ToInt() != currentInterviewId )
+    {
+      // test to see if images have been downloaded (if necessary)
+      bool loaded = true;
+      if( loadedChecked )
       {
-        if( 0 < interview->GetImageCount() && !interview->IsRatedBy( user ) )
+        Alder::Exam *exam;
+        std::vector< vtkSmartPointer< Alder::Exam > > examList;
+        std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
+        interview->GetList( &examList );
+        for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
         {
-          found = true;
-          break;
+          exam = *examIt;
+
+          if( !( 0 == exam->Get( "Stage" ).ToString().compare( "Completed" ) &&
+                 0 < exam->Get( "Downloaded" ).ToInt() ) )
+          {
+            loaded = false;
+            break;
+          }
         }
-        interview = interview->GetPrevious();
       }
 
-      // warn user if no unrated studies left
-      if( interview->Get( "Id" ).ToInt() == currentInterviewId )
+      if( ( !unratedChecked || ( 0 < interview->GetImageCount() && !interview->IsRatedBy( user ) ) ) &&
+          ( !loadedChecked || ( 0 < interview->GetImageCount() && loaded ) ) )
       {
-        QMessageBox errorMessage( this );
-        errorMessage.setWindowModality( Qt::WindowModal );
-        errorMessage.setIcon( QMessageBox::Warning );
-        errorMessage.setText( tr( "There are no remaining unrated studies available at this time." ) );
-        errorMessage.exec();
+        found = true;
+        break;
       }
+
+      // we haven't found the interview we want, go to the previous one
+      interview = interview->GetPrevious();
     }
-    else
+
+    // warn user if no valid studies left
+    if( interview->Get( "Id" ).ToInt() == currentInterviewId )
     {
-      interview = activeInterview->GetPrevious();
-      found = true;
+      QMessageBox errorMessage( this );
+      errorMessage.setWindowModality( Qt::WindowModal );
+      errorMessage.setIcon( QMessageBox::Warning );
+      errorMessage.setText( tr( "There are no remaining studies available which meet your criteria." ) );
+      errorMessage.exec();
     }
   }
 
@@ -223,37 +240,54 @@ void QMainAlderWindow::slotNextInterview()
   vtkSmartPointer< Alder::Interview > interview;
   if( user && activeInterview )
   {
-    // check if unrated checkbox is pressed, keep searching for an unrated interview
-    if( this->ui->unratedCheckBox->isChecked() )
-    {
-      int currentInterviewId = activeInterview->Get( "Id" ).ToInt();
+    bool unratedChecked = this->ui->unratedCheckBox->isChecked();
+    bool loadedChecked = this->ui->loadedCheckBox->isChecked();
+    int currentInterviewId = activeInterview->Get( "Id" ).ToInt();
+    interview = activeInterview->GetNext();
 
-      // keep getting the previous interview until we find one that has images which are not rated
-      interview = activeInterview->GetNext();
-      while( interview->Get( "Id" ).ToInt() != currentInterviewId )
+    // keep getting the next interview until we find one that matches our constraints
+    while( interview->Get( "Id" ).ToInt() != currentInterviewId )
+    {
+      // test to see if images have been downloaded (if necessary)
+      bool loaded = true;
+      if( loadedChecked )
       {
-        if( 0 < interview->GetImageCount() && !interview->IsRatedBy( user ) )
+        Alder::Exam *exam;
+        std::vector< vtkSmartPointer< Alder::Exam > > examList;
+        std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
+        interview->GetList( &examList );
+        for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
         {
-          found = true;
-          break;
+          exam = *examIt;
+
+          if( !( 0 == exam->Get( "Stage" ).ToString().compare( "Completed" ) &&
+                 0 < exam->Get( "Downloaded" ).ToInt() ) )
+          {
+            loaded = false;
+            break;
+          }
         }
-        interview = interview->GetNext();
       }
 
-      // warn user if no unrated studies left
-      if( interview->Get( "Id" ).ToInt() == currentInterviewId )
+      if( ( !unratedChecked || ( 0 < interview->GetImageCount() && !interview->IsRatedBy( user ) ) ) &&
+          ( !loadedChecked || ( 0 < interview->GetImageCount() && loaded ) ) )
       {
-        QMessageBox errorMessage( this );
-        errorMessage.setWindowModality( Qt::WindowModal );
-        errorMessage.setIcon( QMessageBox::Warning );
-        errorMessage.setText( tr( "There are no remaining unrated studies available at this time." ) );
-        errorMessage.exec();
+        found = true;
+        break;
       }
+
+      // we haven't found the interview we want, go to the next one
+      interview = interview->GetNext();
     }
-    else
+
+    // warn user if no valid studies left
+    if( interview->Get( "Id" ).ToInt() == currentInterviewId )
     {
-      interview = activeInterview->GetNext();
-      found = true;
+      QMessageBox errorMessage( this );
+      errorMessage.setWindowModality( Qt::WindowModal );
+      errorMessage.setIcon( QMessageBox::Warning );
+      errorMessage.setText( tr( "There are no remaining studies available which meet your criteria." ) );
+      errorMessage.exec();
     }
   }
 

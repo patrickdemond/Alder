@@ -209,14 +209,16 @@ void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
   {
     QTableWidgetItem *item;
     item = this->ui->interviewTableWidget->item( row, 0 );
-    if( item ) item->setText( UId );
+    if( item ) item->setText( interview->Get( "Site" ).ToString().c_str() );
     item = this->ui->interviewTableWidget->item( row, 1 );
-    if( item ) item->setText( QString( interview->Get( "VisitDate" ).ToString().c_str() ) );
+    if( item ) item->setText( UId );
     item = this->ui->interviewTableWidget->item( row, 2 );
-    if( item ) item->setText( dexaString );
+    if( item ) item->setText( QString( interview->Get( "VisitDate" ).ToString().c_str() ) );
     item = this->ui->interviewTableWidget->item( row, 3 );
-    if( item ) item->setText( retinalString );
+    if( item ) item->setText( dexaString );
     item = this->ui->interviewTableWidget->item( row, 4 );
+    if( item ) item->setText( retinalString );
+    item = this->ui->interviewTableWidget->item( row, 5 );
     if( item ) item->setText( ultrasoundString );
   }
 }
@@ -248,20 +250,25 @@ void QSelectInterviewDialog::updateInterface()
       {
         this->ui->interviewTableWidget->insertRow( 0 );
 
-        // add UId to row
+        // add site to row
         item = new QTableWidgetItem;
         item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
         this->ui->interviewTableWidget->setItem( 0, 0, item );
 
-        // add visit date to row
+        // add UId to row
         item = new QTableWidgetItem;
         item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
         this->ui->interviewTableWidget->setItem( 0, 1, item );
 
-        // add dexa interview to row
+        // add visit date to row
         item = new QTableWidgetItem;
         item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
         this->ui->interviewTableWidget->setItem( 0, 2, item );
+
+        // add dexa interview to row
+        item = new QTableWidgetItem;
+        item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+        this->ui->interviewTableWidget->setItem( 0, 3, item );
 
         // add retinal interview to row
         item = new QTableWidgetItem;
@@ -271,7 +278,7 @@ void QSelectInterviewDialog::updateInterface()
         // add ultrasound interview to row
         item = new QTableWidgetItem;
         item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-        this->ui->interviewTableWidget->setItem( 0, 3, item );
+        this->ui->interviewTableWidget->setItem( 0, 5, item );
 
         this->updateRow( 0, interview );
       }
