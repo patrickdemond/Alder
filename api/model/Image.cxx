@@ -19,6 +19,7 @@
 
 #include "vtkDirectory.h"
 #include "vtkImageDataReader.h"
+#include "vtkNew.h"
 #include "vtkObjectFactory.h"
 
 #include <stdexcept>
@@ -104,7 +105,7 @@ namespace Alder
     std::string path = this->GetFilePath();
 
     // now look for image files in that directory
-    vtkSmartPointer< vtkDirectory > directory = vtkSmartPointer< vtkDirectory >::New();
+    vtkNew< vtkDirectory > directory;
     
     if( !directory->Open( path.c_str() ) )
     {
@@ -143,7 +144,7 @@ namespace Alder
     std::map< std::string, std::string > map;
     map["UserId"] = user->Get( "Id" ).ToString();
     map["ImageId"] = this->Get( "Id" ).ToString();
-    vtkSmartPointer< Alder::Rating > rating = vtkSmartPointer< Alder::Rating >::New();
+    vtkNew< Alder::Rating > rating;
     if( !rating->Load( map ) ) return false;
 
     // we have found a rating, make sure it is not null
