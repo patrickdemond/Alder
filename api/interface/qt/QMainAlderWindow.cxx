@@ -174,11 +174,11 @@ void QMainAlderWindow::slotPreviousInterview()
   {
     bool unratedChecked = this->ui->unratedCheckBox->isChecked();
     bool loadedChecked = this->ui->loadedCheckBox->isChecked();
-    int currentInterviewId = activeInterview->Get( "Id" ).ToInt();
+    int lastInterviewId = activeInterview->Get( "Id" ).ToInt();
     interview = activeInterview->GetPrevious();
 
     // keep getting the previous interview until we find one that matches our constraints
-    while( interview->Get( "Id" ).ToInt() != currentInterviewId )
+    while( interview->Get( "Id" ).ToInt() != lastInterviewId )
     {
       // test to see if images have been downloaded (if necessary)
       bool loaded = true;
@@ -188,6 +188,7 @@ void QMainAlderWindow::slotPreviousInterview()
         std::vector< vtkSmartPointer< Alder::Exam > > examList;
         std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
         interview->GetList( &examList );
+        loaded = !examList.empty();
         for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
         {
           exam = *examIt;
@@ -209,11 +210,12 @@ void QMainAlderWindow::slotPreviousInterview()
       }
 
       // we haven't found the interview we want, go to the previous one
+      lastInterviewId = interview->Get( "Id" ).ToInt();
       interview = interview->GetPrevious();
     }
 
     // warn user if no valid studies left
-    if( interview->Get( "Id" ).ToInt() == currentInterviewId )
+    if( interview->Get( "Id" ).ToInt() == lastInterviewId )
     {
       QMessageBox errorMessage( this );
       errorMessage.setWindowModality( Qt::WindowModal );
@@ -225,6 +227,7 @@ void QMainAlderWindow::slotPreviousInterview()
 
   if( found )
   {
+    interview->Update( true );
     app->SetActiveInterview( interview );
     this->updateInterface();
   }
@@ -242,11 +245,11 @@ void QMainAlderWindow::slotNextInterview()
   {
     bool unratedChecked = this->ui->unratedCheckBox->isChecked();
     bool loadedChecked = this->ui->loadedCheckBox->isChecked();
-    int currentInterviewId = activeInterview->Get( "Id" ).ToInt();
+    int lastInterviewId = activeInterview->Get( "Id" ).ToInt();
     interview = activeInterview->GetNext();
 
     // keep getting the next interview until we find one that matches our constraints
-    while( interview->Get( "Id" ).ToInt() != currentInterviewId )
+    while( interview->Get( "Id" ).ToInt() != lastInterviewId )
     {
       // test to see if images have been downloaded (if necessary)
       bool loaded = true;
@@ -256,6 +259,7 @@ void QMainAlderWindow::slotNextInterview()
         std::vector< vtkSmartPointer< Alder::Exam > > examList;
         std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
         interview->GetList( &examList );
+        loaded = !examList.empty();
         for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
         {
           exam = *examIt;
@@ -277,11 +281,12 @@ void QMainAlderWindow::slotNextInterview()
       }
 
       // we haven't found the interview we want, go to the next one
+      lastInterviewId = interview->Get( "Id" ).ToInt();
       interview = interview->GetNext();
     }
 
     // warn user if no valid studies left
-    if( interview->Get( "Id" ).ToInt() == currentInterviewId )
+    if( interview->Get( "Id" ).ToInt() == lastInterviewId )
     {
       QMessageBox errorMessage( this );
       errorMessage.setWindowModality( Qt::WindowModal );
@@ -293,6 +298,7 @@ void QMainAlderWindow::slotNextInterview()
 
   if( found )
   {
+    interview->Update( true );
     app->SetActiveInterview( interview );
     this->updateInterface();
   }
