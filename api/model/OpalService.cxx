@@ -35,24 +35,29 @@ namespace Alder
     void *notUsed, double downTotal, double downNow, double upTotal, double upNow )
   {
     Application *app = Application::GetInstance();
-    bool global = false;
-    // send the configure event if it hasn't been sent yet
-    if( !OpalService::configureEventSent  )
+
+    if( !app->GetAbortFlag() )
     {
-      // send a pair, the first argument is that this is the local progress, the second to set the mode
-      bool progressBusy = OpalService::curlProgressChecking ? (0.0 == downTotal) : false;
-      std::pair<bool, bool> configureProgress = std::pair<bool, bool>( global, progressBusy );
-      app->InvokeEvent( vtkCommand::ConfigureEvent, static_cast<void *>( &configureProgress ) );
-      OpalService::configureEventSent = true;
-      return 0;
+      bool global = false;
+      // send the configure event if it hasn't been sent yet
+      if( !OpalService::configureEventSent  )
+      {
+        // send a pair, the first argument is that this is the local progress, the second to set the mode
+        bool progressBusy = OpalService::curlProgressChecking ? (0.0 == downTotal) : false;
+        std::pair<bool, bool> configureProgress = std::pair<bool, bool>( global, progressBusy );
+        app->InvokeEvent( vtkCommand::ConfigureEvent, static_cast<void *>( &configureProgress ) );
+        OpalService::configureEventSent = true;
+        return 0;
+      }
+
+      // if the downTotal is 0 then we can't send a progress event
+      std::pair<bool, double> progress =
+        std::pair<bool, double>( global, ( 0.0 == downTotal ? downTotal : downNow / downTotal ) );
+       
+      app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
     }
 
-    // if the downTotal is 0 then we can't send a progress event
-    std::pair<bool, double> progress =
-      std::pair<bool, double>( global, ( 0.0 == downTotal ? downTotal : downNow / downTotal ) );
-     
-    app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
-    return 0;
+    return app->GetAbortFlag() ? 1 : 0;
   }
 
   vtkStandardNewMacro( OpalService );
@@ -155,10 +160,14 @@ namespace Alder
 
     if( 0 != res )
     {
-      std::stringstream stream;
-      stream << "Received cURL error " << res << " when attempting to contact Opal: ";
-      stream << curl_easy_strerror( res );
-      throw std::runtime_error( stream.str().c_str() );
+      // don't display abort errors (code 42) when the user initiated the abort
+      if( !( CURLE_ABORTED_BY_CALLBACK == res && app->GetAbortFlag() ) )
+      {
+        std::stringstream stream;
+        stream << "Received cURL error " << res << " when attempting to contact Opal: ";
+        stream << curl_easy_strerror( res );
+        throw std::runtime_error( stream.str().c_str() );
+      }
     }
 
     if( !toFile )
