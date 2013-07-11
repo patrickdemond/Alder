@@ -19,6 +19,7 @@
 #include "User.h"
 
 #include "vtkMedicalImageViewer.h"
+#include "vtkNew.h"
 #include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 
@@ -301,7 +302,7 @@ void QMainAlderWindow::slotUserManagement()
     // do nothing if the user hit the cancel button
     if( text.isEmpty() ) break;
 
-    vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
+    vtkNew< Alder::User > user;
     user->Load( "Name", "administrator" );
     if( user->IsPassword( text.toStdString().c_str() ) )
     {
@@ -333,7 +334,7 @@ void QMainAlderWindow::slotUpdateDatabase()
     // do nothing if the user hit the cancel button
     if( text.isEmpty() ) break;
 
-    vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
+    vtkNew< Alder::User > user;
     user->Load( "name", "administrator" );
     if( user->IsPassword( text.toStdString().c_str() ) )
     {
@@ -414,7 +415,7 @@ void QMainAlderWindow::slotRatingSliderChanged( int value )
   std::map< std::string, std::string > map;
   map["UserId"] = user->Get( "Id" ).ToString();
   map["ImageId"] = image->Get( "Id" ).ToString();
-  vtkSmartPointer< Alder::Rating > rating = vtkSmartPointer< Alder::Rating >::New();
+  vtkNew< Alder::Rating > rating;
   if( !rating->Load( map ) )
   { // no record exists, set the user and image ids
     rating->Set( "UserId", user->Get( "Id" ).ToInt() );
@@ -640,8 +641,7 @@ void QMainAlderWindow::updateRating()
     std::map< std::string, std::string > map;
     map["UserId"] = user->Get( "Id" ).ToString();
     map["ImageId"] = image->Get( "Id" ).ToString();
-    vtkSmartPointer< Alder::Rating > rating = vtkSmartPointer< Alder::Rating >::New();
-    
+    vtkNew< Alder::Rating > rating;
     if( rating->Load( map ) )
     {
       vtkVariant v = rating->Get( "Rating" );

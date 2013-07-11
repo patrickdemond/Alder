@@ -17,6 +17,7 @@
 #include "Utilities.h"
 
 #include "vtkCommand.h"
+#include "vtkNew.h"
 #include "vtkObjectFactory.h"
 #include "vtkSmartPointer.h"
 
@@ -380,7 +381,7 @@ namespace Alder
         key["UId"] = UId;
         key["VisitDate"] = map["VisitDate"].substr( 0, 10 );
 
-        vtkSmartPointer< Interview > interview = vtkSmartPointer< Interview >::New();
+        vtkNew< Interview > interview;
         if( !interview->Load( key ) )
         { // only write to the database if the data is missing
           interview->Set( "UId", UId );
