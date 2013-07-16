@@ -47,17 +47,17 @@ namespace Alder
     }
     else if ( loaded && !unrated )
     {
-      sql  = "SELECT Id FROM ( ";
-      sql += "  SELECT UId, Exam.Downloaded, COUNT(*) ";
+      sql  = "SELECT Id, UId FROM ( ";
+      sql += "  SELECT Interview.Id, UId, Exam.Downloaded, COUNT(*) ";
       sql += "  FROM Interview ";
       sql += "  JOIN Exam ON Interview.Id = Exam.InterviewId ";
       sql += "  WHERE Stage = 'Completed' ";
       sql += "  GROUP BY UId, Downloaded ";
       sql += ") AS temp1 ";
       sql += "WHERE Downloaded = 1 ";
-      sql += "AND UId NOT IN ( ";
-      sql += "  SELECT UId FROM ( ";
-      sql += "    SELECT UId, Exam.Downloaded, COUNT(*) ";
+      sql += "AND Id NOT IN ( ";
+      sql += "  SELECT Id FROM ( ";
+      sql += "    SELECT Interview.Id, Exam.Downloaded, COUNT(*) ";
       sql += "    FROM Interview ";
       sql += "    JOIN Exam ON Interview.Id = Exam.InterviewId ";
       sql += "    WHERE Stage = 'Completed' ";
@@ -76,11 +76,16 @@ namespace Alder
     sql += "ORDER BY UId ";
     if( !forward ) sql += "DESC ";
 
-    vtkDebugSQLMacro( << sql );
     Utilities::log( "Querying Database: " + sql );
     vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
     query->SetQuery( sql.c_str() );
     query->Execute();
+
+    if( query->HasError() )
+    {
+      Utilities::log( query->GetLastErrorText() );
+      throw std::runtime_error( "There was an error while trying to query the database." );
+    }
 
     vtkVariant neighbourId;
 
@@ -122,6 +127,12 @@ namespace Alder
     vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
     query->SetQuery( "SELECT UId, VisitDate FROM Interview ORDER BY UId, VisitDate" );
     query->Execute();
+
+    if( query->HasError() )
+    {
+      Utilities::log( query->GetLastErrorText() );
+      throw std::runtime_error( "There was an error while trying to query the database." );
+    }
 
     std::vector< std::pair< std::string, std::string > > list;
     while( query->NextRow() )
@@ -185,7 +196,7 @@ namespace Alder
     for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
     {
       Exam *exam = *(examIt);
-      if( 0 == exam->Get( "Downloaded" ).ToInt() ) return false;
+      if( !exam->HasImageData() ) return false;
     }
 
     return true;
@@ -353,7 +364,7 @@ namespace Alder
         progressConfig.second = index / examList.size();
         app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progressConfig ) );
         if( app->GetAbortFlag() ) break;
-        ( *examIt )->Update(); // invokes progress events
+        ( *examIt )->UpdateImageData(); // invokes progress events
       }
 
       if( app->GetAbortFlag() ) app->SetAbortFlag( false );

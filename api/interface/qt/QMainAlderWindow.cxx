@@ -145,7 +145,7 @@ void QMainAlderWindow::slotOpenInterview()
     // update the interview's exams
     Alder::Application *app = Alder::Application::GetInstance();
     Alder::Interview *activeInterview = app->GetActiveInterview();
-    if( activeInterview )
+    if( activeInterview && !activeInterview->HasImageData() )
     {
       // create a progress dialog to observe the progress of the update
       QProgressDialog dialog( this );

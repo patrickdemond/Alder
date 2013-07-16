@@ -46,6 +46,12 @@ namespace Alder
     static void UpdateInterviewData();
 
     /**
+     * Returns whether this interview's exam and image data has been downloaded
+     */
+    bool HasExamData();
+    bool HasImageData();
+
+    /**
      * Updates all exam and image data associated with the interview from Opal
      * Note: exam data must be downloaded before image data
      */
@@ -79,12 +85,6 @@ namespace Alder
      * If the interview has no images this method returns true.
      */
     bool IsRatedBy( User* user );
-
-    /**
-     * Returns whether this interview's exam and image data has been downloaded
-     */
-    bool HasExamData();
-    bool HasImageData();
 
   protected:
     Interview() {}

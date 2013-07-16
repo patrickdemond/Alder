@@ -70,6 +70,12 @@ namespace Alder
            << "ORDER BY table_name, ordinal_position";
     query->SetQuery( stream.str().c_str() );
     query->Execute();
+
+    if( query->HasError() )
+    {
+      Utilities::log( query->GetLastErrorText() );
+      throw std::runtime_error( "There was an error while trying to query the database." );
+    }
     
     std::string tableName = "";
     std::map< std::string,std::map< std::string, vtkVariant > > tableMap;

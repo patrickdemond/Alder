@@ -113,6 +113,12 @@ namespace Alder
       query->SetQuery( stream.str().c_str() );
       query->Execute();
 
+      if( query->HasError() )
+      {
+        Utilities::log( query->GetLastErrorText() );
+        throw std::runtime_error( "There was an error while trying to query the database." );
+      }
+
       while( query->NextRow() )
       {
         // create a new instance of the child class
@@ -139,10 +145,15 @@ namespace Alder
              << "WHERE " << column << " = " << this->Get( "Id" ).ToString();
       vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
-      vtkDebugSQLMacro( << stream.str() );
       Utilities::log( "Querying Database: " + stream.str() );
       query->SetQuery( stream.str().c_str() );
       query->Execute();
+
+      if( query->HasError() )
+      {
+        Utilities::log( query->GetLastErrorText() );
+        throw std::runtime_error( "There was an error while trying to query the database." );
+      }
 
       while( query->NextRow() )
       {
@@ -215,15 +226,6 @@ namespace Alder
     void SetNull( std::string column )
     { this->SetVariant( column, vtkVariant() ); }
 
-    //@{
-    /** 
-     * Defines whether or not to print all SQL statements to cout
-     */
-    vtkGetMacro( DebugSQL, bool );
-    vtkSetMacro( DebugSQL, bool );
-    vtkBooleanMacro( DebugSQL, bool );
-    //@}
-
     /**
      * Must be extended by every child class.
      * Its value is always the name of the class (identical case)
@@ -257,7 +259,6 @@ namespace Alder
     virtual void SetVariant( std::string column, vtkVariant value );
 
     std::map<std::string,vtkVariant> ColumnValues;
-    bool DebugSQL;
     bool Initialized;
 
   private:
