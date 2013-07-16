@@ -76,10 +76,10 @@ namespace Alder
      * to be downloaded is non-zero.  For file type data, this should be called
      * with false, since we expect (image) files to have significant size.
      */
-    static void SetProgressChecking( bool check = true )
+    static void SetCurlProgressChecking( bool check = true )
     {
       OpalService::configureEventSent = false;
-      OpalService::progressCheck = check;
+      OpalService::curlProgressChecking = check;
     };
 
     /**
@@ -184,7 +184,7 @@ namespace Alder
 
     static int curlProgressCallback( void*, double, double, double, double );
     static bool configureEventSent;
-    static bool progressCheck;
+    static bool curlProgressChecking;
   };
 }
 

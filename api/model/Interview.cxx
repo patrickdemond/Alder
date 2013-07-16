@@ -337,21 +337,21 @@ namespace Alder
     {
       double index = 0;
       bool global = true;
-      std::pair<bool, double> progress = std::pair<bool, double>( global, 0.0 );
+      std::pair<bool, double> progressConfig = std::pair<bool, double>( global, 0.0 );
       std::vector< vtkSmartPointer< Exam > >::iterator examIt;
       Application *app = Application::GetInstance();
 
       // we are going to be downloading file type data here, so 
       // we tell opal service on the first curl callback to NOT check if the data 
       // has a substantial return size, and force that we monitor all file downloads using curl progress
-      OpalService::SetProgressChecking( false );
+      OpalService::SetCurlProgressChecking( false );
 
       app->InvokeEvent( vtkCommand::StartEvent, static_cast<void *>( &global ) );
 
       for( examIt = examList.begin(); examIt != examList.end(); ++examIt, ++index )
       {
-        progress.second = index / examList.size();
-        app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
+        progressConfig.second = index / examList.size();
+        app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progressConfig ) );
         if( app->GetAbortFlag() ) break;
         ( *examIt )->Update(); // invokes progress events
       }
@@ -373,7 +373,7 @@ namespace Alder
     std::map< std::string, std::map< std::string, std::string > >::iterator it;
     bool done = false;
     bool global = true;
-    std::pair<bool, double> progress = std::pair<bool, double>( global, 0.0 );
+    std::pair<bool, double> progressConfig = std::pair<bool, double>( global, 0.0 );
     int limit = 100;
     double index = 0;
 
@@ -383,14 +383,14 @@ namespace Alder
     // we are going to be downloading non file type data here, so 
     // we tell opal service on the first curl callback to check if the data 
     // has a substantial return size that we can monitor using curl progress
-    OpalService::SetProgressChecking( true );
+    OpalService::SetCurlProgressChecking( true );
 
     app->InvokeEvent( vtkCommand::StartEvent, static_cast<void *>( &global ) );
 
     do
     {
-      progress.second = index / size;
-      app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progress ) );
+      progressConfig.second = index / size;
+      app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progressConfig ) );
       if( app->GetAbortFlag() ) break;
       list = opal->GetRows( "alder", "Interview", index, limit ); // invokes progress events
 

@@ -28,7 +28,7 @@ namespace Alder
 {
   // initialize the configureEventSent static ivar
   bool OpalService::configureEventSent = false;
-  bool OpalService::progressCheck = true;
+  bool OpalService::curlProgressChecking = true;
 
   // this function is used by curl to send progress signals
   int OpalService::curlProgressCallback(
@@ -43,8 +43,8 @@ namespace Alder
       if( !OpalService::configureEventSent  )
       {
         // send a pair, the first argument is that this is the local progress, the second to set the mode
-        bool showBusy = OpalService::progressCheck ? (0.0 == downTotal) : false;
-        std::pair<bool, bool> configureProgress = std::pair<bool, bool>( global, showBusy );
+        bool progressBusy = OpalService::curlProgressChecking ? (0.0 == downTotal) : false;
+        std::pair<bool, bool> configureProgress = std::pair<bool, bool>( global, progressBusy );
         app->InvokeEvent( vtkCommand::ConfigureEvent, static_cast<void *>( &configureProgress ) );
         OpalService::configureEventSent = true;
         return 0;

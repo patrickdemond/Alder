@@ -64,10 +64,10 @@ void QProgressDialog::Command::Execute(
 
     if( vtkCommand::ConfigureEvent == eventId )
     { // configure the progress bar
-      // which progress bar?
-      std::pair<bool, bool> showProgress = *( static_cast< std::pair<bool, bool>* >( callData ) );
-      progressBar = showProgress.first ? this->ui->globalProgressBar : this->ui->localProgressBar;
-      progressBar->setRange( 0, showProgress.second ? 0 : 100 );
+      // pair contains two bools: < which progress bar?, show as busy? >
+      std::pair<bool, bool> progressConfig = *( static_cast< std::pair<bool, bool>* >( callData ) );
+      progressBar = progressConfig.first ? this->ui->globalProgressBar : this->ui->localProgressBar;
+      progressBar->setRange( 0, progressConfig.second ? 0 : 100 );
     }
     else if( vtkCommand::StartEvent == eventId )
     { // set the progress to 0
@@ -78,12 +78,12 @@ void QProgressDialog::Command::Execute(
     }
     else if( vtkCommand::ProgressEvent == eventId )
     { // set the progress to the call data
-      // which progress bar?
-      std::pair<bool, double> progress = *( static_cast< std::pair<bool, double>* >( callData ) );
-      progressBar = progress.first ? this->ui->globalProgressBar : this->ui->localProgressBar;
+      // pair contains bool and double; < which progress bar?, progress value >
+      std::pair<bool, double> progressConfig = *( static_cast< std::pair<bool, double>* >( callData ) );
+      progressBar = progressConfig.first ? this->ui->globalProgressBar : this->ui->localProgressBar;
       if( 0 < progressBar->maximum() )
       {
-        int percent = static_cast<int>( 100 * progress.second );
+        int percent = static_cast<int>( 100 * progressConfig.second );
         progressBar->setValue( percent );
       }
     }
@@ -92,6 +92,7 @@ void QProgressDialog::Command::Execute(
       // which progress bar?
       bool global = *( static_cast< bool* >( callData ) );
       progressBar = global ? this->ui->globalProgressBar : this->ui->localProgressBar;
+      progressBar->setValue( 100 );
     }
 
     QApplication::processEvents();

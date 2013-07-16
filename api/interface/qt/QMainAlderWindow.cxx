@@ -171,7 +171,6 @@ void QMainAlderWindow::slotPreviousInterview()
   vtkSmartPointer< Alder::Interview > interview;
   if( user && activeInterview )
   {
-
     interview = activeInterview->GetPrevious(
       this->ui->loadedCheckBox->isChecked(),
       this->ui->unratedCheckBox->isChecked() );
@@ -216,7 +215,6 @@ void QMainAlderWindow::slotNextInterview()
   vtkSmartPointer< Alder::Interview > interview;
   if( user && activeInterview )
   {
-
     interview = activeInterview->GetNext(
       this->ui->loadedCheckBox->isChecked(),
       this->ui->unratedCheckBox->isChecked() );
