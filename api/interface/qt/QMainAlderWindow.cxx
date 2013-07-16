@@ -153,7 +153,7 @@ void QMainAlderWindow::slotOpenInterview()
       dialog.setWindowTitle( tr( "Downloading Exam Images" ) );
       dialog.setMessage( tr( "Please wait while the interview's images are downloaded." ) );
       dialog.open();
-      activeInterview->Update( true );
+      activeInterview->UpdateImageData();
       dialog.accept();
     }
 
@@ -165,55 +165,20 @@ void QMainAlderWindow::slotOpenInterview()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotPreviousInterview()
 {
-  bool found = false;
   Alder::Application *app = Alder::Application::GetInstance();
   Alder::User *user = app->GetActiveUser();
   Alder::Interview *activeInterview = app->GetActiveInterview();
   vtkSmartPointer< Alder::Interview > interview;
   if( user && activeInterview )
   {
-    bool unratedChecked = this->ui->unratedCheckBox->isChecked();
-    bool loadedChecked = this->ui->loadedCheckBox->isChecked();
-    int currentInterviewId = activeInterview->Get( "Id" ).ToInt();
-    interview = activeInterview->GetPrevious();
 
-    // keep getting the previous interview until we find one that matches our constraints
-    while( interview->Get( "Id" ).ToInt() != currentInterviewId )
-    {
-      // test to see if images have been downloaded (if necessary)
-      bool loaded = true;
-      if( loadedChecked )
-      {
-        Alder::Exam *exam;
-        std::vector< vtkSmartPointer< Alder::Exam > > examList;
-        std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
-        interview->GetList( &examList );
-        for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
-        {
-          exam = *examIt;
+    interview = activeInterview->GetPrevious(
+      this->ui->loadedCheckBox->isChecked(),
+      this->ui->unratedCheckBox->isChecked() );
 
-          if( !( 0 == exam->Get( "Stage" ).ToString().compare( "Completed" ) &&
-                 0 < exam->Get( "Downloaded" ).ToInt() ) )
-          {
-            loaded = false;
-            break;
-          }
-        }
-      }
-
-      if( ( !unratedChecked || ( 0 < interview->GetImageCount() && !interview->IsRatedBy( user ) ) ) &&
-          ( !loadedChecked || ( 0 < interview->GetImageCount() && loaded ) ) )
-      {
-        found = true;
-        break;
-      }
-
-      // we haven't found the interview we want, go to the previous one
-      interview = interview->GetPrevious();
-    }
-
-    // warn user if no valid studies left
-    if( interview->Get( "Id" ).ToInt() == currentInterviewId )
+    // warn user if the neighbouring interview is an empty record (ie: no neighbour found)
+    vtkVariant vId = interview->Get( "Id" );
+    if( !vId.IsValid() || 0 == vId.ToInt() )
     {
       QMessageBox errorMessage( this );
       errorMessage.setWindowModality( Qt::WindowModal );
@@ -221,67 +186,44 @@ void QMainAlderWindow::slotPreviousInterview()
       errorMessage.setText( tr( "There are no remaining studies available which meet your criteria." ) );
       errorMessage.exec();
     }
-  }
+    else
+    {
+      if( !interview->HasExamData() || !interview->HasImageData() )
+      {
+        // create a progress dialog to observe the progress of the update
+        QProgressDialog dialog( this );
+        dialog.setModal( true );
+        dialog.setWindowTitle( tr( "Downloading Exam Images" ) );
+        dialog.setMessage( tr( "Please wait while the interview's images are downloaded." ) );
+        dialog.open();
+        interview->UpdateExamData();
+        interview->UpdateImageData();
+        dialog.accept();
+      }
 
-  if( found )
-  {
-    app->SetActiveInterview( interview );
-    this->updateInterface();
+      app->SetActiveInterview( interview );
+      this->updateInterface();
+    }
   }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotNextInterview()
 {
-  bool found = false;
   Alder::Application *app = Alder::Application::GetInstance();
   Alder::User *user = app->GetActiveUser();
   Alder::Interview *activeInterview = app->GetActiveInterview();
   vtkSmartPointer< Alder::Interview > interview;
   if( user && activeInterview )
   {
-    bool unratedChecked = this->ui->unratedCheckBox->isChecked();
-    bool loadedChecked = this->ui->loadedCheckBox->isChecked();
-    int currentInterviewId = activeInterview->Get( "Id" ).ToInt();
-    interview = activeInterview->GetNext();
 
-    // keep getting the next interview until we find one that matches our constraints
-    while( interview->Get( "Id" ).ToInt() != currentInterviewId )
-    {
-      // test to see if images have been downloaded (if necessary)
-      bool loaded = true;
-      if( loadedChecked )
-      {
-        Alder::Exam *exam;
-        std::vector< vtkSmartPointer< Alder::Exam > > examList;
-        std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
-        interview->GetList( &examList );
-        for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
-        {
-          exam = *examIt;
+    interview = activeInterview->GetNext(
+      this->ui->loadedCheckBox->isChecked(),
+      this->ui->unratedCheckBox->isChecked() );
 
-          if( !( 0 == exam->Get( "Stage" ).ToString().compare( "Completed" ) &&
-                 0 < exam->Get( "Downloaded" ).ToInt() ) )
-          {
-            loaded = false;
-            break;
-          }
-        }
-      }
-
-      if( ( !unratedChecked || ( 0 < interview->GetImageCount() && !interview->IsRatedBy( user ) ) ) &&
-          ( !loadedChecked || ( 0 < interview->GetImageCount() && loaded ) ) )
-      {
-        found = true;
-        break;
-      }
-
-      // we haven't found the interview we want, go to the next one
-      interview = interview->GetNext();
-    }
-
-    // warn user if no valid studies left
-    if( interview->Get( "Id" ).ToInt() == currentInterviewId )
+    // warn user if the neighbouring interview is an empty record (ie: no neighbour found)
+    vtkVariant vId = interview->Get( "Id" );
+    if( !vId.IsValid() || 0 == vId.ToInt() )
     {
       QMessageBox errorMessage( this );
       errorMessage.setWindowModality( Qt::WindowModal );
@@ -289,12 +231,24 @@ void QMainAlderWindow::slotNextInterview()
       errorMessage.setText( tr( "There are no remaining studies available which meet your criteria." ) );
       errorMessage.exec();
     }
-  }
+    else
+    {
+      if( !interview->HasExamData() || !interview->HasImageData() )
+      {
+        // create a progress dialog to observe the progress of the update
+        QProgressDialog dialog( this );
+        dialog.setModal( true );
+        dialog.setWindowTitle( tr( "Downloading Exam Images" ) );
+        dialog.setMessage( tr( "Please wait while the interview's images are downloaded." ) );
+        dialog.open();
+        interview->UpdateExamData();
+        interview->UpdateImageData();
+        dialog.accept();
+      }
 
-  if( found )
-  {
-    app->SetActiveInterview( interview );
-    this->updateInterface();
+      app->SetActiveInterview( interview );
+      this->updateInterface();
+    }
   }
 }
 
@@ -378,7 +332,7 @@ void QMainAlderWindow::slotUpdateDatabase()
       dialog.setWindowTitle( tr( "Updating Database" ) );
       dialog.setMessage( tr( "Please wait while the database is updated." ) );
       dialog.open();
-      Alder::Interview::UpdateData();
+      Alder::Interview::UpdateInterviewData();
       dialog.accept();
       break;
     }

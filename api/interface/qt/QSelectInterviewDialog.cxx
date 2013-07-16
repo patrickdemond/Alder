@@ -123,14 +123,17 @@ void QSelectInterviewDialog::slotSelectionChanged()
 
   if( !list.empty() )
   {
-    // update the selected interview
-    std::map< std::string, std::string > map;
-    map["UId"] = list.at( this->columnIndex["UId"] )->text().toStdString();
-    map["VisitDate"] = list.at( this->columnIndex["VisitDate"] )->text().toStdString();
-    interview = vtkSmartPointer< Alder::Interview >::New();
-    interview->Load( map );
-    interview->Update();
-    this->updateRow( list.at( 0 )->row(), interview );
+    // update the selected interview if necessary
+    if( !interview->HasExamData() )
+    {
+      std::map< std::string, std::string > map;
+      map["UId"] = list.at( this->columnIndex["UId"] )->text().toStdString();
+      map["VisitDate"] = list.at( this->columnIndex["VisitDate"] )->text().toStdString();
+      interview = vtkSmartPointer< Alder::Interview >::New();
+      interview->Load( map );
+      interview->UpdateExamData();
+      this->updateRow( list.at( 0 )->row(), interview );
+    }
   }
 }
 
