@@ -33,6 +33,7 @@ namespace Alder
   {
     this->AssertPrimaryId();
 
+    Application *app = Application::GetInstance();
     std::string sql = "";
 
     // use a special query to quickly get the next interview
@@ -42,17 +43,39 @@ namespace Alder
     }
     else if( !loaded && unrated )
     {
-      // TODO: implement
-      sql = "SELECT Id FROM Interview ";
+      sql  = "SELECT Id, UId FROM ( ";
+      sql += "  SELECT Interview.Id, UId, Rating.Rating IS NOT NULL AS Rated ";
+      sql += "  FROM Interview ";
+      sql += "  JOIN Exam ON Interview.Id = Exam.InterviewId ";
+      sql += "  JOIN Image ON Exam.Id = Image.ExamId ";
+      sql += "  JOIN Rating ON Image.Id = Rating.ImageId ";
+      sql += "  AND Rating.UserId = ";
+      sql +=    app->GetActiveUser()->Get( "Id" ).ToString();
+      sql += "  GROUP BY Interview.Id, Rating.Rating IS NOT NULL ";
+      sql += ") AS temp1 ";
+      sql += "WHERE Rated = true ";
+      sql += "AND Id NOT IN ( ";
+      sql += "  SELECT Id FROM ( ";
+      sql += "    SELECT Interview.Id, Rating.Rating IS NOT NULL AS Rated ";
+      sql += "    FROM Interview ";
+      sql += "    JOIN Exam ON Interview.Id = Exam.InterviewId ";
+      sql += "    JOIN Image ON Exam.Id = Image.ExamId ";
+      sql += "    LEFT JOIN Rating ON Image.Id = Rating.ImageId ";
+      sql += "    AND Rating.UserId = ";
+      sql +=      app->GetActiveUser()->Get( "Id" ).ToString();
+      sql += "    GROUP BY Interview.Id, Rating.Rating IS NOT NULL ";
+      sql += "  ) AS temp2 ";
+      sql += "  WHERE Rated = false ";
+      sql += ") ";
     }
     else if ( loaded && !unrated )
     {
       sql  = "SELECT Id, UId FROM ( ";
-      sql += "  SELECT Interview.Id, UId, Exam.Downloaded, COUNT(*) ";
+      sql += "  SELECT Interview.Id, UId, Exam.Downloaded ";
       sql += "  FROM Interview ";
       sql += "  JOIN Exam ON Interview.Id = Exam.InterviewId ";
       sql += "  WHERE Stage = 'Completed' ";
-      sql += "  GROUP BY UId, Downloaded ";
+      sql += "  GROUP BY Interview.Id, Downloaded ";
       sql += ") AS temp1 ";
       sql += "WHERE Downloaded = 1 ";
       sql += "AND Id NOT IN ( ";
@@ -61,7 +84,7 @@ namespace Alder
       sql += "    FROM Interview ";
       sql += "    JOIN Exam ON Interview.Id = Exam.InterviewId ";
       sql += "    WHERE Stage = 'Completed' ";
-      sql += "    GROUP BY UId, Downloaded ";
+      sql += "    GROUP BY Interview.Id, Downloaded ";
       sql += "  ) AS temp2 ";
       sql += "  WHERE Downloaded = 0 ";
       sql += ") ";
