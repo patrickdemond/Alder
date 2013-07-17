@@ -23,7 +23,7 @@
 #include <vtkImageDataReader.h>
 #include <vtkImageSinusoidSource.h>
 #include <vtkImageWindowLevel.h>
-#include <vtkInteractorStyleImage.h>
+#include <vtkCustomInteractorStyleImage.h>
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
 #include <vtkPointData.h>
@@ -33,7 +33,7 @@
 #include <vtkSmartPointer.h>
 
 vtkStandardNewMacro( vtkMedicalImageViewer );
-vtkCxxSetObjectMacro(vtkMedicalImageViewer, InteractorStyle, vtkInteractorStyleImage);
+vtkCxxSetObjectMacro(vtkMedicalImageViewer, InteractorStyle, vtkCustomInteractorStyleImage);
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 class vtkWindowLevelCallback : public vtkCommand
@@ -358,7 +358,7 @@ void vtkMedicalImageViewer::InstallPipeline()
     // create an interactor style if we don't already have one
     if( !this->InteractorStyle )
       {
-      this->SetInteractorStyle( vtkSmartPointer<vtkInteractorStyleImage>::New() );
+      this->SetInteractorStyle( vtkSmartPointer<vtkCustomInteractorStyleImage>::New() );
       }
 
     this->InteractorStyle->AutoAdjustCameraClippingRangeOn();     

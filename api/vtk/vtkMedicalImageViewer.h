@@ -21,7 +21,7 @@
  * vtkRenderWindow, vtkRenderer, vtkImageActor and 
  * vtkImageWindowLevel into a single easy to use
  * class.  This class also creates an image interactor style
- * (vtkInteractorStyleImage) that allows zooming and panning of images, and
+ * (vtkCustomInteractorStyleImage) that allows zooming and panning of images, and
  * supports interactive window/level operations on the image. Note that
  * vtkMedicalImageViewer is simply a wrapper around these classes.
  *
@@ -64,7 +64,7 @@ class vtkImageActor;
 class vtkImageCoordinateWidget;
 class vtkImageData;
 class vtkImageWindowLevel;
-class vtkInteractorStyleImage;
+class vtkCustomInteractorStyleImage;
 class vtkRenderer;
 class vtkRenderWindow;
 class vtkRenderWindowInteractor;
@@ -211,10 +211,10 @@ public:
   virtual void SetRenderWindow( vtkRenderWindow* );
   virtual void SetRenderer( vtkRenderer* );
   virtual void SetInteractor( vtkRenderWindowInteractor* );
-  virtual void SetInteractorStyle( vtkInteractorStyleImage* );
+  virtual void SetInteractorStyle( vtkCustomInteractorStyleImage* );
   vtkGetObjectMacro( RenderWindow, vtkRenderWindow );
   vtkGetObjectMacro( Renderer, vtkRenderer );
-  vtkGetObjectMacro( InteractorStyle, vtkInteractorStyleImage );
+  vtkGetObjectMacro( InteractorStyle, vtkCustomInteractorStyleImage );
   vtkSmartPointer<vtkImageActor> GetImageActor(){ return this->ImageActor; }
   vtkSmartPointer<vtkCustomCornerAnnotation> GetAnnotation(){ return this->Annotation; }
   //@}
@@ -379,7 +379,7 @@ protected:
   vtkRenderer               *Renderer;
   vtkSmartPointer<vtkImageActor> ImageActor;
   vtkRenderWindowInteractor *Interactor;
-  vtkInteractorStyleImage   *InteractorStyle;
+  vtkCustomInteractorStyleImage   *InteractorStyle;
   vtkSmartPointer<vtkImageCoordinateWidget> CursorWidget;
   vtkSmartPointer<vtkCustomCornerAnnotation> Annotation;
   //@}

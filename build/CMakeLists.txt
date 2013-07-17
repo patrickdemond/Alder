@@ -106,6 +106,7 @@ SET( ALDER_SOURCE
   ${ALDER_VTK_DIR}/vtkAlderMySQLDatabase.cxx
   ${ALDER_VTK_DIR}/vtkAlderMySQLQuery.cxx
   ${ALDER_VTK_DIR}/vtkCustomCornerAnnotation.cxx
+  ${ALDER_VTK_DIR}/vtkCustomInteractorStyleImage.cxx
   ${ALDER_VTK_DIR}/vtkFrameAnimationPlayer.cxx
   ${ALDER_VTK_DIR}/vtkImageCoordinateWidget.cxx
   ${ALDER_VTK_DIR}/vtkImageDataReader.cxx
