@@ -34,74 +34,105 @@ namespace Alder
     this->AssertPrimaryId();
 
     Application *app = Application::GetInstance();
-    std::string sql = "";
+    std::string userId = app->GetActiveUser()->Get( "Id" ).ToString();
+    std::stringstream stream;
 
     // use a special query to quickly get the next interview
     if( !loaded && !unrated )
     {
-      sql = "SELECT Id FROM Interview ";
+      stream << "SELECT Id FROM Interview ";
     }
     else if( !loaded && unrated )
     {
-      sql  = "SELECT Id, UId FROM ( ";
-      sql += "  SELECT Interview.Id, UId, Rating.Rating IS NOT NULL AS Rated ";
-      sql += "  FROM Interview ";
-      sql += "  JOIN Exam ON Interview.Id = Exam.InterviewId ";
-      sql += "  JOIN Image ON Exam.Id = Image.ExamId ";
-      sql += "  JOIN Rating ON Image.Id = Rating.ImageId ";
-      sql += "  AND Rating.UserId = ";
-      sql +=    app->GetActiveUser()->Get( "Id" ).ToString();
-      sql += "  GROUP BY Interview.Id, Rating.Rating IS NOT NULL ";
-      sql += ") AS temp1 ";
-      sql += "WHERE Rated = true ";
-      sql += "AND Id NOT IN ( ";
-      sql += "  SELECT Id FROM ( ";
-      sql += "    SELECT Interview.Id, Rating.Rating IS NOT NULL AS Rated ";
-      sql += "    FROM Interview ";
-      sql += "    JOIN Exam ON Interview.Id = Exam.InterviewId ";
-      sql += "    JOIN Image ON Exam.Id = Image.ExamId ";
-      sql += "    LEFT JOIN Rating ON Image.Id = Rating.ImageId ";
-      sql += "    AND Rating.UserId = ";
-      sql +=      app->GetActiveUser()->Get( "Id" ).ToString();
-      sql += "    GROUP BY Interview.Id, Rating.Rating IS NOT NULL ";
-      sql += "  ) AS temp2 ";
-      sql += "  WHERE Rated = false ";
-      sql += ") ";
+      stream << "SELECT Id, UId FROM ( "
+             << "  SELECT Interview.Id, UId, Rating.Rating IS NOT NULL AS Rated "
+             << "  FROM Interview "
+             << "  JOIN Exam ON Interview.Id = Exam.InterviewId "
+             << "  JOIN Image ON Exam.Id = Image.ExamId "
+             << "  JOIN Rating ON Image.Id = Rating.ImageId "
+             << "  AND Rating.UserId = " << userId
+             << "  GROUP BY Interview.Id, Rating.Rating IS NOT NULL "
+             << ") AS temp1 "
+             << "WHERE Rated = true "
+             << "AND Id NOT IN ( "
+             << "  SELECT Id FROM ( "
+             << "    SELECT Interview.Id, Rating.Rating IS NOT NULL AS Rated "
+             << "    FROM Interview "
+             << "    JOIN Exam ON Interview.Id = Exam.InterviewId "
+             << "    JOIN Image ON Exam.Id = Image.ExamId "
+             << "    LEFT JOIN Rating ON Image.Id = Rating.ImageId "
+             << "    AND Rating.UserId = " << userId
+             << "    GROUP BY Interview.Id, Rating.Rating IS NOT NULL "
+             << "  ) AS temp2 "
+             << "  WHERE Rated = false "
+             << ") ";
     }
     else if ( loaded && !unrated )
     {
-      sql  = "SELECT Id, UId FROM ( ";
-      sql += "  SELECT Interview.Id, UId, Exam.Downloaded ";
-      sql += "  FROM Interview ";
-      sql += "  JOIN Exam ON Interview.Id = Exam.InterviewId ";
-      sql += "  WHERE Stage = 'Completed' ";
-      sql += "  GROUP BY Interview.Id, Downloaded ";
-      sql += ") AS temp1 ";
-      sql += "WHERE Downloaded = 1 ";
-      sql += "AND Id NOT IN ( ";
-      sql += "  SELECT Id FROM ( ";
-      sql += "    SELECT Interview.Id, Exam.Downloaded, COUNT(*) ";
-      sql += "    FROM Interview ";
-      sql += "    JOIN Exam ON Interview.Id = Exam.InterviewId ";
-      sql += "    WHERE Stage = 'Completed' ";
-      sql += "    GROUP BY Interview.Id, Downloaded ";
-      sql += "  ) AS temp2 ";
-      sql += "  WHERE Downloaded = 0 ";
-      sql += ") ";
+      stream << "SELECT Id, UId FROM ( "
+             << "  SELECT Interview.Id, UId, Exam.Downloaded "
+             << "  FROM Interview "
+             << "  JOIN Exam ON Interview.Id = Exam.InterviewId "
+             << "  WHERE Stage = 'Completed' "
+             << "  GROUP BY Interview.Id, Downloaded "
+             << ") AS temp1 "
+             << "WHERE Downloaded = true "
+             << "AND Id NOT IN ( "
+             << "  SELECT Id FROM ( "
+             << "    SELECT Interview.Id, Exam.Downloaded "
+             << "    FROM Interview "
+             << "    JOIN Exam ON Interview.Id = Exam.InterviewId "
+             << "    WHERE Stage = 'Completed' "
+             << "    GROUP BY Interview.Id, Downloaded "
+             << "  ) AS temp2 "
+             << "  WHERE Downloaded = false "
+             << ") ";
     }
     else // loaded && unrated
     {
-      // TODO: implement
-      sql = "SELECT Id FROM Interview ";
+      stream << "SELECT Id, UId FROM ( "
+             << "  SELECT Interview.Id, UId, Rating.Rating IS NOT NULL AS Rated, Exam.Downloaded "
+             << "  FROM Interview "
+             << "  JOIN Exam ON Interview.Id = Exam.InterviewId "
+             << "  JOIN Image ON Exam.Id = Image.ExamId "
+             << "  JOIN Rating ON Image.Id = Rating.ImageId "
+             << "  AND Rating.UserId = " << userId
+             << "  WHERE Stage = 'Completed' "
+             << "  GROUP BY Interview.Id, Rating.Rating IS NOT NULL, Downloaded "
+             << ") AS temp1 "
+             << "WHERE Rated = true "
+             << "AND Downloaded = true "
+             << "AND Id NOT IN ( "
+             << "  SELECT Id FROM ( "
+             << "    SELECT Interview.Id, Rating.Rating IS NOT NULL AS Rated "
+             << "    FROM Interview "
+             << "    JOIN Exam ON Interview.Id = Exam.InterviewId "
+             << "    JOIN Image ON Exam.Id = Image.ExamId "
+             << "    LEFT JOIN Rating ON Image.Id = Rating.ImageId "
+             << "    AND Rating.UserId = " << userId
+             << "    GROUP BY Interview.Id, Rating.Rating IS NOT NULL "
+             << "  ) AS temp2 "
+             << "  WHERE Rated = false "
+             << ") "
+             << "AND Id NOT IN ( "
+             << "  SELECT Id FROM ( "
+             << "    SELECT Interview.Id, Exam.Downloaded "
+             << "    FROM Interview "
+             << "    JOIN Exam ON Interview.Id = Exam.InterviewId "
+             << "    WHERE Stage = 'Completed' "
+             << "    GROUP BY Interview.Id, Downloaded "
+             << "  ) AS temp2 "
+             << "  WHERE Downloaded = false "
+             << ") ";
     }
 
     // order the query by UId (descending if not forward)
-    sql += "ORDER BY UId ";
-    if( !forward ) sql += "DESC ";
+    stream << "ORDER BY UId ";
+    if( !forward ) stream << "DESC ";
 
-    Utilities::log( "Querying Database: " + sql );
+    Utilities::log( "Querying Database: " + stream.str() );
     vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
-    query->SetQuery( sql.c_str() );
+    query->SetQuery( stream.str().c_str() );
     query->Execute();
 
     if( query->HasError() )
@@ -375,8 +406,8 @@ namespace Alder
       std::vector< vtkSmartPointer< Exam > >::iterator examIt;
       Application *app = Application::GetInstance();
 
-      // we are going to be downloading file type data here, so 
-      // we tell opal service on the first curl callback to NOT check if the data 
+      // we are going to be downloading file type data here, so
+      // we tell opal service on the first curl callback to NOT check if the data
       // has a substantial return size, and force that we monitor all file downloads using curl progress
       OpalService::SetCurlProgressChecking( false );
 
@@ -414,8 +445,8 @@ namespace Alder
     std::vector< std::string > identifierList = opal->GetIdentifiers( "alder", "Interview" );
     double size = (double) identifierList.size();
 
-    // we are going to be downloading non file type data here, so 
-    // we tell opal service on the first curl callback to check if the data 
+    // we are going to be downloading non file type data here, so
+    // we tell opal service on the first curl callback to check if the data
     // has a substantial return size that we can monitor using curl progress
     OpalService::SetCurlProgressChecking( true );
 
