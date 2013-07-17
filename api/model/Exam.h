@@ -41,9 +41,14 @@ namespace Alder
     std::string GetName() { return "Exam"; }
 
     /**
-     * Updates all data associated with the interview from Opal.
+     * Returns whether this exam's image data has been downloaded
      */
-    void Update();
+    bool HasImageData();
+
+    /**
+     * Updates all image data associated with the exam from Opal
+     */
+    void UpdateImageData();
 
     /**
      * Returns whether a user has rated all images associated with the exam.

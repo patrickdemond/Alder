@@ -121,7 +121,6 @@ namespace Alder
       if( NULL == file )
       {
         std::stringstream stream;
-        cout << servicePath << endl; 
         stream << "Unable to open file \"" << fileName << "\" for writing." << endl;
         throw std::runtime_error( stream.str().c_str() );
       }

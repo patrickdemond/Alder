@@ -27,7 +27,18 @@ namespace Alder
   vtkStandardNewMacro( Exam );
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Exam::Update()
+  bool Exam::HasImageData()
+  {
+    // An exam has all images if it is marked as downloaded or if the stage is note complete.
+    // Alder does not download images from incomplete exams.
+    // NOTE: it is possible that an exam with state "Ready" has valid data, but we are leaving
+    // those exams out for now since we don't know for sure whether they are always valid
+    return 0 != this->Get( "Downloaded" ).ToInt() ||
+           0 != this->Get( "Stage" ).ToString().compare( "Completed" );
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Exam::UpdateImageData()
   {
     vtkSmartPointer< Interview > interview;
 
@@ -36,11 +47,7 @@ namespace Alder
     std::string UId = interview->Get( "UId" ).ToString();
     bool result = false;
 
-    // only update the images if the stage is complete and they have never been downloaded
-    // NOTE: it is possible that an exam with state "Ready" has valid data, but we are leaving
-    // those exams out for now since we don't know for sure whether they are always valid
-    if( 0 == this->Get( "Stage" ).ToString().compare( "Completed" ) &&
-        0 == this->Get( "Downloaded" ).ToInt() )
+    if( !this->HasImageData() )
     {
       // determine which Opal table to fetch from based on exam modality
       std::string type = this->Get( "Type" ).ToString();
@@ -53,7 +60,6 @@ namespace Alder
         // write cineloops 1, 2 and 3
         // for now, assume that the parent image id for the still image
         // associated with one of the 3 possible cineloops is the first valid one
-        // 
         bool hasParent = false;
         std::string suffix = ".dcm.gz";
         std::string sideVariable = "Measure.SIDE";
@@ -80,7 +86,7 @@ namespace Alder
         settings[ "Acquisition" ] = vtkVariant( acquisition );
         std::string variable = "Measure.STILL_IMAGE";
         result = this->RetrieveImage( type, variable, UId, settings,
-                                        suffix, sideVariable );
+                                      suffix, sideVariable );
 
         if( hasParent && result )
         {
@@ -89,10 +95,7 @@ namespace Alder
           std::vector< vtkSmartPointer< Alder::Image > > imageList;
           std::vector< vtkSmartPointer< Alder::Image > >::iterator imageIt;
           this->GetList( &imageList );
-          if( imageList.empty() )
-          {             
-            throw std::runtime_error( "Failed list load during cIMT parenting" );         
-          }
+          if( imageList.empty() ) throw std::runtime_error( "Failed list load during cIMT parenting" );
 
           // map the AcquisitionDateTimes from the dicom file headers to the images
 
@@ -100,14 +103,14 @@ namespace Alder
           for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
           {
             Alder::Image *image = imageIt->GetPointer();
-              
+
             gdcm::ImageReader reader;
             reader.SetFileName( image->GetFileName().c_str() );
             reader.Read();
             const gdcm::File &file = reader.GetFile();
             const gdcm::DataSet &ds = file.GetDataSet();
 
-            acqDateTimes[ image->Get( "Id" ).ToInt() ] =  
+            acqDateTimes[ image->Get( "Id" ).ToInt() ] =
               gdcm::DirectoryHelper::GetStringValueFromTag( gdcm::Tag(0x0008,0x002a), ds );
           }
 
@@ -122,11 +125,11 @@ namespace Alder
           int parentId = -1;
           for( mapIt = acqDateTimes.begin(); mapIt != acqDateTimes.end(); mapIt++ )
           {
-            if( 0 == stillAcqDateTime.compare( mapIt->second ) ) 
+            if( 0 == stillAcqDateTime.compare( mapIt->second ) )
             {
               parentId = mapIt->first;
               break;
-            }  
+            }
           }
           if( parentId != -1 )
           {
@@ -150,7 +153,7 @@ namespace Alder
         std::string sideVariable = "OUTPUT_FA_SIDE";
         std::string suffix = ".dcm";
         result = this->RetrieveImage( type, variable, UId, settings,
-                                          suffix, sideVariable );
+                                      suffix, sideVariable );
       }
       else if( 0 == type.compare( "LateralBoneDensity" ) )
       {
@@ -183,16 +186,13 @@ namespace Alder
         if( result )
         {
           variable = "RES_WB_DICOM_2";
-          settings[ "Acquisition" ] = vtkVariant( 2 ); 
+          settings[ "Acquisition" ] = vtkVariant( 2 );
           result = this->RetrieveImage( type, variable, UId, settings, suffix );
         }
       }
 
       // now set that we have downloaded all the images
-      if( result )
-      {
-        this->Set( "Downloaded", 1 );
-      }
+      this->Set( "Downloaded", 1 );
       this->Save();
     }
   }
@@ -204,14 +204,14 @@ namespace Alder
   {
     Application *app = Application::GetInstance();
     OpalService *opal = app->GetOpal();
-    bool repeatable = sideVariable.length() > 0; 
+    bool repeatable = sideVariable.length() > 0;
     bool result = true;
-    int sideIndex = 0; 
-     
+    int sideIndex = 0;
+
     if( repeatable )
     {
       std::vector< std::string > sideList;
-      std::vector< std::string >::iterator sideListIt;     
+      std::vector< std::string >::iterator sideListIt;
       sideList = opal->GetValues( "clsa-dcs-images", type, UId, sideVariable );
       bool found = false;
       std::string laterality = this->Get( "Laterality" ).ToString();
@@ -225,10 +225,9 @@ namespace Alder
         }
         sideIndex++;
       }
-      if( !found )
-      {
-        throw std::runtime_error( "Failed to find image laterality" );         
-      } 
+
+      //if( !found ) throw std::runtime_error( "Failed to find image laterality" );
+      if( !found ) return false;
     }
 
     std::stringstream log;
@@ -238,22 +237,12 @@ namespace Alder
     // add a new entry in the image table
     vtkNew< Alder::Image > image;
     std::map< std::string, vtkVariant >::iterator it = settings.begin();
-    for( it = settings.begin(); it != settings.end(); it++ )
-    { 
-      image->Set( it->first,  it->second );
-    }
+    for( it = settings.begin(); it != settings.end(); it++ ) image->Set( it->first,  it->second );
     image->Save();
 
     // now write the file and validate it
     std::string fileName = image->CreateFile( suffix );
-    if( repeatable )
-    {
-      opal->SaveFile( fileName, "clsa-dcs-images", type, UId, variable, sideIndex );
-    }
-    else 
-    {
-      opal->SaveFile( fileName, "clsa-dcs-images", type, UId, variable );
-    }
+    opal->SaveFile( fileName, "clsa-dcs-images", type, UId, variable, repeatable ? sideIndex : -1 );
 
     if( !image->ValidateFile() )
     {
@@ -263,9 +252,9 @@ namespace Alder
       image->Remove();
       result = false;
     }
-    return result;   
+    return result;
   }
-  
+
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool Exam::IsRatedBy( User* user )
   {

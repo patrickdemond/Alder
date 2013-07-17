@@ -29,96 +29,118 @@ namespace Alder
   vtkStandardNewMacro( Interview );
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  vtkSmartPointer<Interview> Interview::GetNext()
+  vtkSmartPointer<Interview> Interview::GetNeighbour( bool forward, bool loaded, bool unrated )
   {
-    std::string currentUId = this->Get( "UId" ).ToString();
-    std::string currentVisitDate = this->Get( "VisitDate" ).ToString();
-    std::vector< std::pair< std::string, std::string > > list = Interview::GetUIdVisitDateList();
-    std::vector< std::pair< std::string, std::string > >::reverse_iterator pair;
+    this->AssertPrimaryId();
 
-    // the list should never be empty (since we are already an instance of interview)
-    if( list.empty() )
-      throw std::runtime_error( "Interview list is empty while trying to get next interview." );
-    
-    // find this record's UId in the list, return the next one
-    for( pair = list.rbegin(); pair != list.rend(); pair++ )
+    Application *app = Application::GetInstance();
+    std::string sql = "";
+
+    // use a special query to quickly get the next interview
+    if( !loaded && !unrated )
     {
-      if( currentUId == pair->first && currentVisitDate == pair->second )
-      {
-        if( list.rbegin() == pair )
-        { // first UId matches, get the last pair
-          pair = list.rbegin();
-        }
-        else
-        { // move the iterator to the previous address
-          pair--;
-        }
-        break;
-      }
+      sql = "SELECT Id FROM Interview ";
+    }
+    else if( !loaded && unrated )
+    {
+      sql  = "SELECT Id, UId FROM ( ";
+      sql += "  SELECT Interview.Id, UId, Rating.Rating IS NOT NULL AS Rated ";
+      sql += "  FROM Interview ";
+      sql += "  JOIN Exam ON Interview.Id = Exam.InterviewId ";
+      sql += "  JOIN Image ON Exam.Id = Image.ExamId ";
+      sql += "  JOIN Rating ON Image.Id = Rating.ImageId ";
+      sql += "  AND Rating.UserId = ";
+      sql +=    app->GetActiveUser()->Get( "Id" ).ToString();
+      sql += "  GROUP BY Interview.Id, Rating.Rating IS NOT NULL ";
+      sql += ") AS temp1 ";
+      sql += "WHERE Rated = true ";
+      sql += "AND Id NOT IN ( ";
+      sql += "  SELECT Id FROM ( ";
+      sql += "    SELECT Interview.Id, Rating.Rating IS NOT NULL AS Rated ";
+      sql += "    FROM Interview ";
+      sql += "    JOIN Exam ON Interview.Id = Exam.InterviewId ";
+      sql += "    JOIN Image ON Exam.Id = Image.ExamId ";
+      sql += "    LEFT JOIN Rating ON Image.Id = Rating.ImageId ";
+      sql += "    AND Rating.UserId = ";
+      sql +=      app->GetActiveUser()->Get( "Id" ).ToString();
+      sql += "    GROUP BY Interview.Id, Rating.Rating IS NOT NULL ";
+      sql += "  ) AS temp2 ";
+      sql += "  WHERE Rated = false ";
+      sql += ") ";
+    }
+    else if ( loaded && !unrated )
+    {
+      sql  = "SELECT Id, UId FROM ( ";
+      sql += "  SELECT Interview.Id, UId, Exam.Downloaded ";
+      sql += "  FROM Interview ";
+      sql += "  JOIN Exam ON Interview.Id = Exam.InterviewId ";
+      sql += "  WHERE Stage = 'Completed' ";
+      sql += "  GROUP BY Interview.Id, Downloaded ";
+      sql += ") AS temp1 ";
+      sql += "WHERE Downloaded = 1 ";
+      sql += "AND Id NOT IN ( ";
+      sql += "  SELECT Id FROM ( ";
+      sql += "    SELECT Interview.Id, Exam.Downloaded, COUNT(*) ";
+      sql += "    FROM Interview ";
+      sql += "    JOIN Exam ON Interview.Id = Exam.InterviewId ";
+      sql += "    WHERE Stage = 'Completed' ";
+      sql += "    GROUP BY Interview.Id, Downloaded ";
+      sql += "  ) AS temp2 ";
+      sql += "  WHERE Downloaded = 0 ";
+      sql += ") ";
+    }
+    else // loaded && unrated
+    {
+      // TODO: implement
+      sql = "SELECT Id FROM Interview ";
     }
 
-    if( list.rend() == pair )
-      throw std::runtime_error( "Interview list does not include current UId/VisitDate pair." );
+    // order the query by UId (descending if not forward)
+    sql += "ORDER BY UId ";
+    if( !forward ) sql += "DESC ";
 
-    std::map< std::string, std::string > map;
-    map["UId"] = pair->first;
-    map["VisitDate"] = pair->second;
-    vtkSmartPointer<Interview> interview = vtkSmartPointer<Interview>::New();
-    interview->Load( map );
-    return interview;
-  }
+    Utilities::log( "Querying Database: " + sql );
+    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+    query->SetQuery( sql.c_str() );
+    query->Execute();
 
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Interview::Next()
-  {
-    this->Load( "Id", this->GetNext()->Get( "Id" ).ToString() );
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  vtkSmartPointer<Interview> Interview::GetPrevious()
-  {
-    std::string currentUId = this->Get( "UId" ).ToString();
-    std::string currentVisitDate = this->Get( "VisitDate" ).ToString();
-    std::vector< std::pair< std::string, std::string > > list = Interview::GetUIdVisitDateList();
-    std::vector< std::pair< std::string, std::string > >::iterator pair;
-
-    // the list should never be empty (since we are already an instance of interview)
-    if( list.empty() )
-      throw std::runtime_error( "Interview list is empty while trying to get next interview." );
-    
-    // find this record's UId in the list, return the next one
-    std::string UId;
-    for( pair = list.begin(); pair != list.end(); pair++ )
+    if( query->HasError() )
     {
-      if( currentUId == pair->first && currentVisitDate == pair->second )
-      {
-        if( list.begin() == pair )
-        { // first UId matches, get the last UId
-          pair = list.end();
-        }
-        else
-        { // move the iterator to the previous address, get its value
-          pair--;
-        }
-        break;
-      }
+      Utilities::log( query->GetLastErrorText() );
+      throw std::runtime_error( "There was an error while trying to query the database." );
     }
 
-    if( list.end() == pair )
-      throw std::runtime_error( "Interview list does not include current UId/VisitDate pair." );
+    vtkVariant neighbourId;
 
-    std::map< std::string, std::string > map;
-    map["UId"] = pair->first;
-    map["VisitDate"] = pair->second;
+    // store the first record in case we need to loop over
+    if( query->NextRow() )
+    {
+      bool found = false;
+      vtkVariant currentId = this->Get( "Id" );
+
+      // if the current id is last in the following loop then we need the first id
+      neighbourId = query->DataValue( 0 );
+
+      do // keep looping until we find the current Id
+      {
+        vtkVariant id = query->DataValue( 0 );
+        if( found )
+        {
+          neighbourId = id;
+          break;
+        }
+
+        if( currentId == id ) found = true;
+      }
+      while( query->NextRow() );
+
+      // we should always find the current interview id
+      if( !found ) throw std::runtime_error( "Cannot find current Interview in database." );
+    }
+
     vtkSmartPointer<Interview> interview = vtkSmartPointer<Interview>::New();
-    interview->Load( map );
+    if( neighbourId.IsValid() ) interview->Load( "Id", neighbourId.ToString() );
     return interview;
-  }
-
-  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Interview::Previous()
-  {
-    this->Load( "Id", this->GetPrevious()->Get( "Id" ).ToString() );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -128,6 +150,12 @@ namespace Alder
     vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
     query->SetQuery( "SELECT UId, VisitDate FROM Interview ORDER BY UId, VisitDate" );
     query->Execute();
+
+    if( query->HasError() )
+    {
+      Utilities::log( query->GetLastErrorText() );
+      throw std::runtime_error( "There was an error while trying to query the database." );
+    }
 
     std::vector< std::pair< std::string, std::string > > list;
     while( query->NextRow() )
@@ -175,7 +203,30 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Interview::Update( bool images )
+  bool Interview::HasExamData()
+  {
+    return 0 < this->GetCount( "Exam" );
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Interview::HasImageData()
+  {
+    this->AssertPrimaryId();
+
+    std::vector< vtkSmartPointer< Exam > > examList;
+    std::vector< vtkSmartPointer< Exam > >::iterator examIt;
+    this->GetList( &examList );
+    for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
+    {
+      Exam *exam = *(examIt);
+      if( !exam->HasImageData() ) return false;
+    }
+
+    return true;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Interview::UpdateExamData()
   {
     Application *app = Application::GetInstance();
     OpalService *opal = app->GetOpal();
@@ -186,7 +237,7 @@ namespace Alder
     // make sure all stages exist
 
     // only update the exams if there are none in the database
-    if( 0 == this->GetCount( "Exam" ) )
+    if( !this->HasExamData() )
     {
       // get exam metadata from Opal for this interview
       examData = opal->GetRow( "alder", "Exam", this->Get( "UId" ).ToString() );
@@ -308,14 +359,22 @@ namespace Alder
       exam->Set( "DatetimeAcquired", examData["WholeBodyBoneDensity.DatetimeAcquired"] );
       exam->Save();
     }
+  }
 
-    // update each exam as well, if required
-    if( images )
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Interview::UpdateImageData()
+  {
+    std::vector< vtkSmartPointer< Exam > > examList;
+    this->GetList( &examList );
+
+    if( !examList.empty() )
     {
       double index = 0;
       bool global = true;
       std::pair<bool, double> progressConfig = std::pair<bool, double>( global, 0.0 );
-      
+      std::vector< vtkSmartPointer< Exam > >::iterator examIt;
+      Application *app = Application::GetInstance();
+
       // we are going to be downloading file type data here, so 
       // we tell opal service on the first curl callback to NOT check if the data 
       // has a substantial return size, and force that we monitor all file downloads using curl progress
@@ -323,15 +382,12 @@ namespace Alder
 
       app->InvokeEvent( vtkCommand::StartEvent, static_cast<void *>( &global ) );
 
-      std::vector< vtkSmartPointer< Exam > > examList;
-      std::vector< vtkSmartPointer< Exam > >::iterator examIt;
-      this->GetList( &examList );
       for( examIt = examList.begin(); examIt != examList.end(); ++examIt, ++index )
       {
         progressConfig.second = index / examList.size();
         app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progressConfig ) );
         if( app->GetAbortFlag() ) break;
-        ( *examIt )->Update(); // invokes progress events
+        ( *examIt )->UpdateImageData(); // invokes progress events
       }
 
       if( app->GetAbortFlag() ) app->SetAbortFlag( false );
@@ -340,7 +396,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Interview::UpdateData()
+  void Interview::UpdateInterviewData()
   {
     Application *app = Application::GetInstance();
     OpalService *opal = app->GetOpal();

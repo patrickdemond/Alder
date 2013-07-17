@@ -25,7 +25,6 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   ActiveRecord::ActiveRecord()
   {
-    this->DebugSQL = false;
     this->Initialized = false;
   }
 
@@ -77,10 +76,15 @@ namespace Alder
       stream << ( map.begin() == it ? " WHERE " : " AND " )
              << it->first << " = " << query->EscapeString( it->second );
     
-    vtkDebugSQLMacro( << stream.str() );
     Utilities::log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
+
+    if( query->HasError() )
+    {
+      Utilities::log( query->GetLastErrorText() );
+      throw std::runtime_error( "There was an error while trying to query the database." );
+    }
 
     bool first = true;
     while( query->NextRow() )
@@ -146,10 +150,15 @@ namespace Alder
              << " WHERE Id = " << query->EscapeString( this->Get( "Id" ).ToString() );
     }
 
-    vtkDebugSQLMacro( << stream.str() );
     Utilities::log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
+
+    if( query->HasError() )
+    {
+      Utilities::log( query->GetLastErrorText() );
+      throw std::runtime_error( "There was an error while trying to query the database." );
+    }
 
     // if the record's Id isn't set, get it based on the auto-increment property of the Id column
     if( !this->Get( "Id" ).IsValid() || 0 == this->Get( "Id" ).ToInt() )
@@ -170,6 +179,12 @@ namespace Alder
       query->SetQuery( stream.str().c_str() );
       query->Execute();
 
+      if( query->HasError() )
+      {
+        Utilities::log( query->GetLastErrorText() );
+        throw std::runtime_error( "There was an error while trying to query the database." );
+      }
+
       // only has one row
       query->NextRow();
       return query->DataValue( 0 ).ToInt();
@@ -184,10 +199,15 @@ namespace Alder
     std::stringstream stream;
     stream << "DELETE FROM " << this->GetName() << " "
            << "WHERE Id = " << query->EscapeString( this->Get( "Id" ).ToString() );
-    vtkDebugSQLMacro( << stream.str() );
     Utilities::log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
+
+    if( query->HasError() )
+    {
+      Utilities::log( query->GetLastErrorText() );
+      throw std::runtime_error( "There was an error while trying to query the database." );
+    }
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -199,10 +219,15 @@ namespace Alder
            << "WHERE " << this->GetName() << "Id = " << this->Get( "Id" ).ToString();
     vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
-    vtkDebugSQLMacro( << stream.str() );
     Utilities::log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
+
+    if( query->HasError() )
+    {
+      Utilities::log( query->GetLastErrorText() );
+      throw std::runtime_error( "There was an error while trying to query the database." );
+    }
     
     // only has one row
     query->NextRow();

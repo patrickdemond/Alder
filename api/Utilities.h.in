@@ -31,31 +31,6 @@
 #define ALDER_SALT_STRING "@ALDER_SALT_STRING@"
 #define ALDER_LOG_PATH "@ALDER_LOG_PATH@"
 
-//
-// This macro is used for sql debug statements in instance methods
-// vtkDebugSQLMacro(<< "SQL statement");
-//
-#define vtkDebugSQLMacro(x) \
-   vtkDebugSQLWithObjectMacro(this,x)
-
-#ifdef NDEBUG
-# define vtkDebugSQLWithObjectMacro(self, x)
-#else
-# define vtkDebugSQLWithObjectMacro(self, x)                                  \
-  {                                                                           \
-  if (self->GetDebugSQL() && vtkObject::GetGlobalWarningDisplay())            \
-    {                                                                         \
-    vtkOStreamWrapper::EndlType endl;                                         \
-    vtkOStreamWrapper::UseEndl(endl);                                         \
-    vtkOStrStreamWrapper vtkmsg;                                              \
-    vtkmsg << "SQL: In " __FILE__ ", line " << __LINE__ << "\n"               \
-           << self->GetClassName() << " (" << self << "): " x  << "\n\n";     \
-    vtkOutputWindowDisplayDebugText(vtkmsg.str());                            \
-    vtkmsg.rdbuf()->freeze(0);                                                \
-    }                                                                         \
-  }
-#endif
-
 #include <algorithm>
 #include <base64.h>
 #include <cctype>
