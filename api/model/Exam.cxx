@@ -52,8 +52,8 @@ namespace Alder
       // determine which Opal table to fetch from based on exam modality
       std::string type = this->Get( "Type" ).ToString();
       std::map< std::string, vtkVariant > settings;
-      settings[ "ExamId" ] = this->Get("Id");
-      settings[ "Acquisition" ] = vtkVariant( 1 );
+      settings[ "ExamId" ] = this->Get( "Id" );
+      settings[ "Acquisition" ] = 1;
 
       if( 0 == type.compare( "CarotidIntima" ) )
       {
@@ -69,7 +69,7 @@ namespace Alder
         {
           std::string variable = "Measure.CINELOOP_";
           variable += vtkVariant( i ).ToString();
-          settings[ "Acquisition" ] = vtkVariant( i );
+          settings[ "Acquisition" ] = i;
 
           result = this->RetrieveImage( type, variable, UId, settings,
                                         suffix, sideVariable );
@@ -83,7 +83,7 @@ namespace Alder
         //TODO: SR files still need to be downloaded and processed
 
         acquisition++;
-        settings[ "Acquisition" ] = vtkVariant( acquisition );
+        settings[ "Acquisition" ] = acquisition;
         std::string variable = "Measure.STILL_IMAGE";
         result = this->RetrieveImage( type, variable, UId, settings,
                                       suffix, sideVariable );
@@ -121,22 +121,34 @@ namespace Alder
           int stillId = still->GetLastInsertId();
           std::string stillAcqDateTime =  acqDateTimes[ stillId ];
 
+          // in case of no matching datetime associate the still with
+          // the group of cineloops
+
           std::map< int, std::string >::iterator mapIt;
           int parentId = -1;
           for( mapIt = acqDateTimes.begin(); mapIt != acqDateTimes.end(); mapIt++ )
           {
-            if( 0 == stillAcqDateTime.compare( mapIt->second ) )
+          
+            if( mapIt->first == stillId ) continue;
+            
+            if( 0 == stillAcqDateTime.compare( mapIt->second ) ) 
             {
               parentId = mapIt->first;
               break;
             }
+            else
+            {
+              // use the last inserted cineloop Id in case of no match
+              parentId = mapIt->first > parentId ? mapIt->first : parentId;
+            }
           }
-          if( parentId != -1 )
-          {
-            still->Load( "Id", vtkVariant( stillId ).ToString() );
-            still->Set( "ParentImageId", parentId );
-            still->Save();
-          }
+
+          if( parentId == -1 )
+            throw std::runtime_error( "Failed to parent cIMT still" );
+          
+          still->Load( "Id", vtkVariant( stillId ).ToString() );
+          still->Set( "ParentImageId", parentId );
+          still->Save();
         }
       }
       else if( 0 == type.compare( "DualHipBoneDensity" ) )
@@ -186,7 +198,7 @@ namespace Alder
         if( result )
         {
           variable = "RES_WB_DICOM_2";
-          settings[ "Acquisition" ] = vtkVariant( 2 );
+          settings[ "Acquisition" ] = 2;
           result = this->RetrieveImage( type, variable, UId, settings, suffix );
         }
       }
