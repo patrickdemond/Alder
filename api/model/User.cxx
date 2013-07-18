@@ -26,6 +26,12 @@ namespace Alder
       Utilities::hashString( value.ToString(), hashedPassword );
       value = vtkVariant( hashedPassword );
     }
+    else if( 0 == column.compare( "Name" ) && 0 == value.ToString().length() )
+    { // don't allow empty user names
+      std::stringstream error;
+      error << "Tried to set column \"" << this->GetName() << "." << column << "\" which doesn't exist";
+      throw std::runtime_error( error.str() );
+    }
 
     this->Superclass::SetVariant( column, value );
   }

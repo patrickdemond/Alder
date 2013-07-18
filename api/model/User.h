@@ -48,7 +48,7 @@ namespace Alder
     User() {}
     ~User() {}
 
-    void SetVariant( std::string column, vtkVariant value );
+    virtual void SetVariant( std::string column, vtkVariant value );
 
   private:
     User( const User& ); // Not implemented
