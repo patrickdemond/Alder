@@ -244,21 +244,18 @@ void QUserListDialog::updateInterface()
     // add rate dexa to row
     item = new QTableWidgetItem;
     item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
-    item->setData( Qt::EditRole, 0 < user->Get( "RateDexa" ).ToInt() ? "1" : "0" );
     item->setCheckState( 0 < user->Get( "RateDexa" ).ToInt() ? Qt::Checked : Qt::Unchecked );
     this->ui->userTableWidget->setItem( 0, this->columnIndex["RateDexa"], item );
 
     // add rate retinal to row
     item = new QTableWidgetItem;
     item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
-    item->setData( Qt::EditRole, 0 < user->Get( "RateRetinal" ).ToInt() ? "1" : "0" );
     item->setCheckState( 0 < user->Get( "RateRetinal" ).ToInt() ? Qt::Checked : Qt::Unchecked );
     this->ui->userTableWidget->setItem( 0, this->columnIndex["RateRetinal"], item );
 
     // add rate ultrasound to row
     item = new QTableWidgetItem;
     item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
-    item->setData( Qt::EditRole, 0 < user->Get( "RateUltrasound" ).ToInt() ? "1" : "0" );
     item->setCheckState( 0 < user->Get( "RateUltrasound" ).ToInt() ? Qt::Checked : Qt::Unchecked );
     this->ui->userTableWidget->setItem( 0, this->columnIndex["RateUltrasound"], item );
 
