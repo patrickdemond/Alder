@@ -227,7 +227,7 @@ namespace Alder
       sideList = opal->GetValues( "clsa-dcs-images", type, UId, sideVariable );
       bool found = false;
       std::string laterality = this->Get( "Laterality" ).ToString();
-      //TODO: handle the case whereine the side is an empty string
+
       for( sideListIt = sideList.begin(); sideListIt != sideList.end(); ++sideListIt )
       {
         if( 0 == Utilities::toLower( *sideListIt ).compare( laterality ) )
@@ -238,7 +238,6 @@ namespace Alder
         sideIndex++;
       }
 
-      //if( !found ) throw std::runtime_error( "Failed to find image laterality" );
       if( !found ) return false;
     }
 
