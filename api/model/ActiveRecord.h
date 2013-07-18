@@ -52,6 +52,7 @@ namespace Alder
   {
   public:
     vtkTypeMacro( ActiveRecord, ModelObject );
+    void PrintSelf( ostream& os, vtkIndent indent );
 
     /**
      * Returns whether this record has a particular column
