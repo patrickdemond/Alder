@@ -3,8 +3,8 @@
   Module:    QAlderSliderWidget.h
   Program:   Alder (CLSA Medical Image Quality Assessment Tool)
   Language:  C++
-  Author:    Patrick Emond <emondpd@mcmaster.ca>
-  Author:    Dean Inglis <inglisd@mcmaster.ca>
+  Author:    Patrick Emond <emondpd AT mcmaster DOT ca>
+  Author:    Dean Inglis <inglisd AT mcmaster DOT ca>
 
   Library:   CTK
 
@@ -27,8 +27,8 @@
 /** 
  * @class QAlderSliderWidget
  *
- * @author Patrick Emond <emondpd@mcmaster.ca>
- * @author Dean Inglis <inglisd@mcmaster.ca>
+ * @author Patrick Emond <emondpd AT mcmaster DOT ca>
+ * @author Dean Inglis <inglisd AT mcmaster DOT ca>
  *
  * @brief A wrapper around a QAlderDoubleSlider and a QDoubleSpinBox.
  *

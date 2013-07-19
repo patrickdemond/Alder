@@ -4,8 +4,8 @@
   Module:   ActiveRecord.h
   Language: C++
 
-  Author: Patrick Emond <emondpd@mcmaster.ca>
-  Author: Dean Inglis <inglisd@mcmaster.ca>
+  Author: Patrick Emond <emondpd AT mcmaster DOT ca>
+  Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
 
@@ -13,8 +13,8 @@
  * @class ActiveRecord
  * @namespace Alder
  * 
- * @author Patrick Emond <emondpd@mcmaster.ca>
- * @author Dean Inglis <inglisd@mcmaster.ca>
+ * @author Patrick Emond <emondpd AT mcmaster DOT ca>
+ * @author Dean Inglis <inglisd AT mcmaster DOT ca>
  * 
  * @brief Abstract base class for all active record classes
  * 
