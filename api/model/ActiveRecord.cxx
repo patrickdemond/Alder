@@ -263,4 +263,19 @@ namespace Alder
     std::map< std::string, vtkVariant >::iterator pair = this->ColumnValues.find( column );
     pair->second = value;
   }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void ActiveRecord::PrintSelf( ostream& os, vtkIndent indent )
+  {
+    this->Superclass::PrintSelf( os, indent );
+
+    os << indent << "Initialized: " << ( this->Initialized ? "Yes" : "No" ) << endl;
+    os << indent << "Column Values:" << endl;
+    std::map< std::string, vtkVariant >::iterator it;
+    for( it = this->ColumnValues.begin(); it != this->ColumnValues.end(); ++it )
+    {
+      os << indent.GetNextIndent() << it->first << ": " << it->second
+         << ( it->second.IsValid() ? it->second.ToString() : "NULL" ) << endl;
+    }
+  }
 }

@@ -32,9 +32,25 @@
 QUserListDialog::QUserListDialog( QWidget* parent )
   : QDialog( parent )
 {
+  // define the column indeces
+  this->columnIndex["Name"] = 0;
+  this->columnIndex["RateDexa"] = 1;
+  this->columnIndex["RateRetinal"] = 2;
+  this->columnIndex["RateUltrasound"] = 3;
+  this->columnIndex["LastLogin"] = 4;
+
   this->ui = new Ui_QUserListDialog;
   this->ui->setupUi( this );
-  this->ui->userTableWidget->horizontalHeader()->setResizeMode( QHeaderView::Stretch );
+  this->ui->userTableWidget->horizontalHeader()->setResizeMode(
+    this->columnIndex["Name"], QHeaderView::Stretch );
+  this->ui->userTableWidget->horizontalHeader()->setResizeMode(
+    this->columnIndex["RateDexa"], QHeaderView::ResizeToContents );
+  this->ui->userTableWidget->horizontalHeader()->setResizeMode(
+    this->columnIndex["RateRetinal"], QHeaderView::ResizeToContents );
+  this->ui->userTableWidget->horizontalHeader()->setResizeMode(
+    this->columnIndex["RateUltrasound"], QHeaderView::ResizeToContents );
+  this->ui->userTableWidget->horizontalHeader()->setResizeMode(
+    this->columnIndex["LastLogin"], QHeaderView::Stretch );
   this->ui->userTableWidget->horizontalHeader()->setClickable( true );
   this->ui->userTableWidget->verticalHeader()->setVisible( false );
   this->ui->userTableWidget->setSelectionBehavior( QAbstractItemView::SelectRows );
@@ -61,7 +77,10 @@ QUserListDialog::QUserListDialog( QWidget* parent )
   QObject::connect(
     this->ui->userTableWidget->horizontalHeader(), SIGNAL( sectionClicked( int ) ),
     this, SLOT( slotHeaderClicked( int ) ) );
-  
+  QObject::connect(
+    this->ui->userTableWidget, SIGNAL( itemChanged( QTableWidgetItem* ) ),
+    this, SLOT( slotItemChanged( QTableWidgetItem* ) ) );
+
   this->updateInterface();
 }
 
@@ -74,19 +93,31 @@ QUserListDialog::~QUserListDialog()
 void QUserListDialog::slotAdd()
 {
   // get the new user's name
-  QString text = QInputDialog::getText(
+  std::string name = QInputDialog::getText(
     this,
     QObject::tr( "Create User" ),
     QObject::tr( "New user's name:" ),
-    QLineEdit::Normal );
-  
-  if( !text.isEmpty() )
+    QLineEdit::Normal ).toStdString();
+
+  if( 0 < name.length() )
   {
+    // make sure the user name doesn't already exist
     vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
-    user->Set( "Name", text.toStdString() );
-    user->ResetPassword();
-    user->Save();
-    this->updateInterface();
+    if( user->Load( "Name", name ) )
+    {
+      std::stringstream stream;
+      stream << "Unable to create new user \"" << name << "\", name already in use.";
+      QErrorMessage *dialog = new QErrorMessage( this );
+      dialog->setModal( true );
+      dialog->showMessage( tr( stream.str().c_str() ) );
+    }
+    else
+    {
+      user->Set( "Name", name );
+      user->ResetPassword();
+      user->Save();
+      this->updateInterface();
+    }
   }
 }
 
@@ -99,7 +130,7 @@ void QUserListDialog::slotRemove()
   for( int i = 0; i < list.size(); ++i )
   {
     item = list.at( i );
-    if( 0 == item->column() )
+    if( this->columnIndex["Name"] == item->column() )
     {
       vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
       user->Load( "Name", item->text().toStdString() );
@@ -119,7 +150,7 @@ void QUserListDialog::slotResetPassword()
   for( int i = 0; i < list.size(); ++i )
   {
     item = list.at( i );
-    if( 0 == item->column() )
+    if( this->columnIndex["Name"] == item->column() )
     {
       vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
       user->Load( "Name", item->text().toStdString() );
@@ -145,7 +176,7 @@ void QUserListDialog::slotSelectionChanged()
   // do not allow resetting the password to the admin account
   if( 0 != list.size() )
   {
-    QTableWidgetItem *item = list.at( 0 );
+    QTableWidgetItem *item = list.at( this->columnIndex["Name"] );
     if( 0 == item->column() && "administrator" == item->text() )
       this->ui->resetPasswordPushButton->setEnabled( false );
   }
@@ -154,19 +185,48 @@ void QUserListDialog::slotSelectionChanged()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QUserListDialog::slotHeaderClicked( int index )
 {
-  // reverse order if already sorted
-  if( this->sortColumn == index )
-    this->sortOrder = Qt::AscendingOrder == this->sortOrder ? Qt::DescendingOrder : Qt::AscendingOrder;
-  this->sortColumn = index;
-  this->updateInterface();
+  // NOTE: currently the columns with checkboxes cannot be sorted.  In order to do this we would need
+  // to either override QSortFilterProxyModel::lessThan() or QAbstractTableModel::sort()
+  // For now we'll just ignore requests to sort by these columns
+  if( this->columnIndex["RateDexa"] != index &&
+      this->columnIndex["RateRetinal"] != index &&
+      this->columnIndex["RateUltrasound"] != index )
+  {
+    // reverse order if already sorted
+    if( this->sortColumn == index )
+      this->sortOrder = Qt::AscendingOrder == this->sortOrder ? Qt::DescendingOrder : Qt::AscendingOrder;
+    this->sortColumn = index;
+    this->ui->userTableWidget->sortItems( this->sortColumn, this->sortOrder );
+  }
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QUserListDialog::slotItemChanged( QTableWidgetItem *item )
+{
+  // get the user
+  vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
+  user->Load( "Name",
+    this->ui->userTableWidget->item( item->row(), this->columnIndex["Name"] )->text().toStdString() );
+
+  // update the user's rate settings
+  if( this->columnIndex["RateDexa"] == item->column() )
+    user->Set( "RateDexa", Qt::Checked == item->checkState() ? 1 : 0 );
+  else if( this->columnIndex["RateRetinal"] == item->column() )
+    user->Set( "RateRetinal", Qt::Checked == item->checkState() ? 1 : 0 );
+  else if( this->columnIndex["RateUltrasound"] == item->column() )
+    user->Set( "RateUltrasound", Qt::Checked == item->checkState() ? 1 : 0 );
+
+  user->Save();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QUserListDialog::updateInterface()
 {
+  this->ui->userTableWidget->blockSignals( true );
+
   this->ui->userTableWidget->setRowCount( 0 );
   QTableWidgetItem *item;
-  
+
   std::vector< vtkSmartPointer< Alder::User > > userList;
   Alder::User::GetAll( &userList );
   std::vector< vtkSmartPointer< Alder::User > >::iterator it;
@@ -179,14 +239,34 @@ void QUserListDialog::updateInterface()
     item = new QTableWidgetItem;
     item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
     item->setText( QString( user->Get( "Name" ).ToString().c_str() ) );
-    this->ui->userTableWidget->setItem( 0, 0, item );
+    this->ui->userTableWidget->setItem( 0, this->columnIndex["Name"], item );
 
-  // add last login to row
+    // add rate dexa to row
+    item = new QTableWidgetItem;
+    item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
+    item->setCheckState( 0 < user->Get( "RateDexa" ).ToInt() ? Qt::Checked : Qt::Unchecked );
+    this->ui->userTableWidget->setItem( 0, this->columnIndex["RateDexa"], item );
+
+    // add rate retinal to row
+    item = new QTableWidgetItem;
+    item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
+    item->setCheckState( 0 < user->Get( "RateRetinal" ).ToInt() ? Qt::Checked : Qt::Unchecked );
+    this->ui->userTableWidget->setItem( 0, this->columnIndex["RateRetinal"], item );
+
+    // add rate ultrasound to row
+    item = new QTableWidgetItem;
+    item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
+    item->setCheckState( 0 < user->Get( "RateUltrasound" ).ToInt() ? Qt::Checked : Qt::Unchecked );
+    this->ui->userTableWidget->setItem( 0, this->columnIndex["RateUltrasound"], item );
+
+    // add last login to row
     item = new QTableWidgetItem;
     item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
     item->setText( QString( user->Get( "LastLogin" ).ToString().c_str() ) );
-    this->ui->userTableWidget->setItem( 0, 1, item );
+    this->ui->userTableWidget->setItem( 0, this->columnIndex["LastLogin"], item );
   }
 
   this->ui->userTableWidget->sortItems( this->sortColumn, this->sortOrder );
+
+  this->ui->userTableWidget->blockSignals( false );
 }

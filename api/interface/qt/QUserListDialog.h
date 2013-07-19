@@ -14,6 +14,9 @@
 
 #include <QDialog>
 
+#include <map>
+
+class QTableWidgetItem;
 class Ui_QUserListDialog;
 
 class QUserListDialog : public QDialog
@@ -33,11 +36,13 @@ public slots:
   virtual void slotClose();
   virtual void slotSelectionChanged();
   virtual void slotHeaderClicked( int index );
+  virtual void slotItemChanged( QTableWidgetItem* );
 
 protected:
   void updateInterface();
   int sortColumn;
   Qt::SortOrder sortOrder;
+  std::map< std::string, int > columnIndex;
 
 protected slots:
 
