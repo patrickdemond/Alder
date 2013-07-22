@@ -22,6 +22,9 @@
 #include "vtkNew.h"
 #include "vtkObjectFactory.h"
 
+#include "gdcmImageReader.h"
+#include "gdcmDirectoryHelper.h"
+
 #include <stdexcept>
 
 namespace Alder
@@ -149,5 +152,37 @@ namespace Alder
 
     // we have found a rating, make sure it is not null
     return rating->Get( "Rating" ).IsValid();
+  }
+  
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::string Image::GetDICOMAcquisitionDateTime()
+  {
+    this->AssertPrimaryId();
+
+    gdcm::ImageReader reader;
+    reader.SetFileName( this->GetFileName().c_str() );
+    reader.Read();
+    const gdcm::File &file = reader.GetFile();
+    const gdcm::DataSet &ds = file.GetDataSet();
+
+    return std::string( 
+      gdcm::DirectoryHelper::GetStringValueFromTag( gdcm::Tag(0x0008,0x002a), ds ) );
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::vector<int> Image::GetDICOMDimensions()
+  {
+    this->AssertPrimaryId();
+
+    gdcm::ImageReader reader;
+    reader.SetFileName( this->GetFileName().c_str() );
+    reader.Read();
+    gdcm::Image &image = reader.GetImage();
+    
+    std::vector<int> dims;
+    for( int i = 0; i < 3; ++i )
+      dims.push_back( image.GetDimension(i) );
+    
+    return dims;  
   }
 }

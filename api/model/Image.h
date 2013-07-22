@@ -71,6 +71,16 @@ namespace Alder
      */
     bool IsRatedBy( User* user );
 
+    /**
+     * Get the acquisition date time.  Works only for dicom images.
+     */
+    std::string GetDICOMAcquisitionDateTime();
+
+    /**
+     * Get the number of rows, columns and frames.  Works only for dicom images.
+     */
+    std::vector<int> GetDICOMDimensions();
+
   protected:
     Image() {}
     ~Image() {}

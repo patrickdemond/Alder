@@ -19,9 +19,6 @@
 #include "vtkNew.h"
 #include "vtkObjectFactory.h"
 
-#include "gdcmImageReader.h"
-#include "gdcmDirectoryHelper.h"
-
 namespace Alder
 {
   vtkStandardNewMacro( Exam );
@@ -29,7 +26,7 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool Exam::HasImageData()
   {
-    // An exam has all images if it is marked as downloaded or if the stage is note complete.
+    // An exam has all images if it is marked as downloaded or if the stage is not complete.
     // Alder does not download images from incomplete exams.
     // NOTE: it is possible that an exam with state "Ready" has valid data, but we are leaving
     // those exams out for now since we don't know for sure whether they are always valid
@@ -65,7 +62,7 @@ namespace Alder
         std::string sideVariable = "Measure.SIDE";
         int acquisition = 0;
 
-        for( int i = 1; i <= 3; i++ )
+        for( int i = 1; i <= 3; ++i )
         {
           std::string variable = "Measure.CINELOOP_";
           variable += vtkVariant( i ).ToString();
@@ -103,15 +100,7 @@ namespace Alder
           for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
           {
             Alder::Image *image = imageIt->GetPointer();
-
-            gdcm::ImageReader reader;
-            reader.SetFileName( image->GetFileName().c_str() );
-            reader.Read();
-            const gdcm::File &file = reader.GetFile();
-            const gdcm::DataSet &ds = file.GetDataSet();
-
-            acqDateTimes[ image->Get( "Id" ).ToInt() ] =
-              gdcm::DirectoryHelper::GetStringValueFromTag( gdcm::Tag(0x0008,0x002a), ds );
+            acqDateTimes[ image->Get( "Id" ).ToInt() ] = image->GetDICOMAcquisitionDateTime();
           }
 
           // find which cineloop has a matching datetime to the still and set the still's
