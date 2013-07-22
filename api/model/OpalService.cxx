@@ -84,7 +84,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  Json::Value OpalService::Read( std::string servicePath, std::string fileName )
+  Json::Value OpalService::Read( std::string servicePath, std::string fileName, bool progress )
   {
     bool toFile = 0 < fileName.length();
     FILE *file;
@@ -124,21 +124,24 @@ namespace Alder
         stream << "Unable to open file \"" << fileName << "\" for writing." << endl;
         throw std::runtime_error( stream.str().c_str() );
       }
+      curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION, Utilities::writePointerToFile );
+      curl_easy_setopt( curl, CURLOPT_WRITEDATA, file );
+    }
+    else
+    {
+      curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION, Utilities::writePointerToString );
+      curl_easy_setopt( curl, CURLOPT_WRITEDATA, &result );
     }
 
-    if( toFile ) curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION, Utilities::writePointerToFile );
-    else curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION, Utilities::writePointerToString );
-
-    if( toFile ) curl_easy_setopt( curl, CURLOPT_WRITEDATA, file );
-    else curl_easy_setopt( curl, CURLOPT_WRITEDATA, &result );
-
-    curl_easy_setopt( curl, CURLOPT_TIMEOUT, this->Timeout );
     curl_easy_setopt( curl, CURLOPT_SSLVERSION, 3 );
     curl_easy_setopt( curl, CURLOPT_SSL_VERIFYPEER, 0 );
     curl_easy_setopt( curl, CURLOPT_HTTPHEADER, headers );
-    curl_easy_setopt( curl, CURLOPT_NOPROGRESS, 0L );
-    curl_easy_setopt( curl, CURLOPT_PROGRESSFUNCTION, OpalService::curlProgressCallback );
     curl_easy_setopt( curl, CURLOPT_URL, url.c_str() );
+    if( progress )
+    {
+      curl_easy_setopt( curl, CURLOPT_NOPROGRESS, 0L );
+      curl_easy_setopt( curl, CURLOPT_PROGRESSFUNCTION, OpalService::curlProgressCallback );
+    }  
 
     // we are using the local progress bar for curl progress, not the global one
     bool global = false;
@@ -241,7 +244,7 @@ namespace Alder
 
     stream << "/datasource/" << dataSource << "/table/" << table
            << "/valueSet/" << identifier;
-    Json::Value root = this->Read( stream.str() );
+    Json::Value root = this->Read( stream.str(), "", false );
     
     identifier = root["valueSets"][0].get( "identifier", "" ).asString();
 
@@ -292,7 +295,7 @@ namespace Alder
     std::stringstream stream;
     stream << "/datasource/" << dataSource << "/table/" << table
            << "/valueSet/" << identifier << "/variable/" << variable;
-    return this->Read( stream.str() ).get( "value", "" ).asString();
+    return this->Read( stream.str(), "", false ).get( "value", "" ).asString();
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

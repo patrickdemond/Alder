@@ -601,7 +601,7 @@ void QMainAlderWindow::updateInterviewTreeWidget()
               examType.compare( "Plaque" ) == 0 )
           {
             std::vector<int> dims = image->GetDICOMDimensions();
-            if ( dims.size() > 2 )
+            if ( dims.size() > 2 && dims[2] > 1 )
               imageItem->setIcon(0, QIcon(":/icons/movie-icon" ) );             
           }
            
@@ -700,6 +700,7 @@ void QMainAlderWindow::updateInterface()
   // set all widget enable states
   this->ui->actionOpenInterview->setEnabled( loggedIn );
   this->ui->unratedCheckBox->setEnabled( interview );
+  this->ui->loadedCheckBox->setEnabled( interview );
   this->ui->actionPreviousInterview->setEnabled( interview );
   this->ui->actionNextInterview->setEnabled( interview );
   this->ui->previousInterviewPushButton->setEnabled( interview );

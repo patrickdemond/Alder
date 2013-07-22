@@ -167,11 +167,13 @@ namespace Alder
      * empty then writes the response to the given filename (returning an empty json value).
      * @param servicePath string
      * @param fileName string
+     * @param doProgress bool
      * @throws runtime_error
      */
-    virtual Json::Value Read( std::string servicePath, std::string fileName = "" );
+    virtual Json::Value Read( std::string servicePath, std::string fileName = "",
+                              bool progress = true );
 
-    std::map< std::string,std::map< std::string,std::map< std::string, std::string > > > Columns;
+    std::map< std::string, std::map< std::string, std::map< std::string, std::string > > > Columns;
     std::string Username;
     std::string Password;
     std::string Host;
@@ -179,8 +181,8 @@ namespace Alder
     int Timeout;
 
   private:
-    OpalService( const OpalService& ); // Not implemented
-    void operator=( const OpalService& ); // Not implemented
+    OpalService( const OpalService& ); /** Not implemented. */
+    void operator=( const OpalService& ); /** Not implemented. */
 
     static int curlProgressCallback( void*, double, double, double, double );
     static bool configureEventSent;
