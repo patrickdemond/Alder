@@ -59,10 +59,13 @@ SET( ALDER_DOXY_DIR    ${PROJECT_BINARY_DIR}/doxygen )
 SET( ALDER_TESTING_DIR ${ALDER_ROOT_DIR}/testing )
 
 # Create a salt string which can be set at build time
-SET( ALDER_SALT_STRING "this is salt" CACHE STRING "This is salt for encrypting passwords")
+SET( ALDER_SALT_STRING "this is salt" CACHE STRING "This is salt for encrypting passwords" )
 
 # Define where the application log is
-SET( ALDER_LOG_PATH ${PROJECT_BINARY_DIR}/log CACHE STRING "The location of the application's log file")
+SET( ALDER_LOG_PATH ${PROJECT_BINARY_DIR}/log CACHE FILEPATH "The location of the application's log file" )
+
+# Define stack depth to display on thrown exceptions
+SET( ALDER_STACK_DEPTH "10" CACHE STRING "The stack depth to display on thrown exceptions" )
 
 # Configure the utitlities header
 CONFIGURE_FILE( ${ALDER_API_DIR}/Utilities.h.in
