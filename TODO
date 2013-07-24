@@ -1,1 +1,5 @@
+A list of things which need to be done (in no particular order)
+---------------------------------------------------------------
 
+- put a movable slider between the tree and note widget so that their sizes can be changed by the user
+- add an image atlas (ie: a way for a user to view expert ratings)
