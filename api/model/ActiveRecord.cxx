@@ -113,7 +113,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void ActiveRecord::Save()
+  void ActiveRecord::Save( bool replace )
   {
     vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
     std::map< std::string, vtkVariant >::iterator it;
@@ -139,7 +139,7 @@ namespace Alder
       // add a new record
       std::string s = stream.str();
       stream.str( "" );
-      stream << "INSERT INTO " << this->GetName() << " SET " << s;
+      stream << ( replace ? "REPLACE" : "INSERT" ) << " INTO " << this->GetName() << " SET " << s;
     }
     else
     {

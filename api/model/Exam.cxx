@@ -108,7 +108,7 @@ namespace Alder
 
           vtkNew< Alder::Image > still;
           int stillId = still->GetLastInsertId();
-          std::string stillAcqDateTime =  acqDateTimes[ stillId ];
+          std::string stillAcqDateTime = acqDateTimes[ stillId ];
 
           // in case of no matching datetime associate the still with
           // the group of cineloops
@@ -199,7 +199,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  bool Exam::RetrieveImage( std::string type, std::string variable,  std::string UId,
+  bool Exam::RetrieveImage( std::string type, std::string variable, std::string UId,
                             std::map<std::string, vtkVariant> settings,
                             std::string suffix, std::string sideVariable )
   {
@@ -234,11 +234,11 @@ namespace Alder
     log << "Adding " << variable << " to database for UId \"" << UId << "\"";
     Utilities::log( log.str() );
 
-    // add a new entry in the image table
+    // add a new entry in the image table (or replace it)
     vtkNew< Alder::Image > image;
     std::map< std::string, vtkVariant >::iterator it = settings.begin();
-    for( it = settings.begin(); it != settings.end(); it++ ) image->Set( it->first,  it->second );
-    image->Save();
+    for( it = settings.begin(); it != settings.end(); it++ ) image->Set( it->first, it->second );
+    image->Save( true );
 
     // now write the file and validate it
     std::string fileName = image->CreateFile( suffix );
