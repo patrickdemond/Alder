@@ -4,8 +4,8 @@
   Module:   Image.h
   Language: C++
 
-  Author: Patrick Emond <emondpd@mcmaster.ca>
-  Author: Dean Inglis <inglisd@mcmaster.ca>
+  Author: Patrick Emond <emondpd AT mcmaster DOT ca>
+  Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
 
@@ -13,8 +13,8 @@
  * @class Image
  * @namespace Alder
  * 
- * @author Patrick Emond <emondpd@mcmaster.ca>
- * @author Dean Inglis <inglisd@mcmaster.ca>
+ * @author Patrick Emond <emondpd AT mcmaster DOT ca>
+ * @author Dean Inglis <inglisd AT mcmaster DOT ca>
  * 
  * @brief An active record for the Image table
  */
@@ -70,6 +70,16 @@ namespace Alder
      * Get whether a particular user has rated this image
      */
     bool IsRatedBy( User* user );
+
+    /**
+     * Get the acquisition date time.  Works only for dicom images.
+     */
+    std::string GetDICOMAcquisitionDateTime();
+
+    /**
+     * Get the number of rows, columns and frames.  Works only for dicom images.
+     */
+    std::vector<int> GetDICOMDimensions();
 
   protected:
     Image() {}

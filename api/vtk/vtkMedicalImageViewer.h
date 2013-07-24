@@ -3,16 +3,16 @@
   Module:    vtkMedicalImageViewer.h
   Program:   Alder (CLSA Medical Image Quality Assessment Tool)
   Language:  C++
-  Author:    Patrick Emond <emondpd@mcmaster.ca>
-  Author:    Dean Inglis <inglisd@mcmaster.ca>
+  Author:    Patrick Emond <emondpd AT mcmaster DOT ca>
+  Author:    Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
 
 /** 
  * @class vtkMedicalImageViewer
  *
- * @author Patrick Emond <emondpd@mcmaster.ca>
- * @author Dean Inglis <inglisd@mcmaster.ca>
+ * @author Patrick Emond <emondpd AT mcmaster DOT ca>
+ * @author Dean Inglis <inglisd AT mcmaster DOT ca>
  *
  * @brief Display a 2D image.
  *

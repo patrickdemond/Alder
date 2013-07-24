@@ -4,8 +4,8 @@
   Module:   QMainAlderWindow.cxx
   Language: C++
 
-  Author: Patrick Emond <emondpd@mcmaster.ca>
-  Author: Dean Inglis <inglisd@mcmaster.ca>
+  Author: Patrick Emond <emondpd AT mcmaster DOT ca>
+  Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
 #include "QMainAlderWindow.h"
@@ -562,10 +562,14 @@ void QMainAlderWindow::updateInterviewTreeWidget()
         name += laterality.c_str();
         name += " ";
       }
-      name += exam->Get( "Type" ).ToString().c_str();
+
+      std::string examType = exam->Get( "Type" ).ToString();
+      name += examType.c_str();
+
       QTreeWidgetItem *examItem = new QTreeWidgetItem( parentItem );
       this->treeModelMap[examItem] = *examIt;
       examItem->setText( 0, name );
+      examItem->setIcon(0, QIcon(":/icons/eye-visible-icon" ) );
       examItem->setExpanded( true );
       examItem->setFlags( Qt::ItemIsEnabled );
 
@@ -573,6 +577,13 @@ void QMainAlderWindow::updateInterviewTreeWidget()
       std::vector< vtkSmartPointer< Alder::Image > > imageList;
       std::vector< vtkSmartPointer< Alder::Image > >::iterator imageIt;
       exam->GetList( &imageList );
+
+      // if the exam has no images, display the status of the exam
+      if( imageList.empty() )
+      {
+        examItem->setIcon(0, QIcon(":/icons/x-icon" ) );        
+      }
+
       for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
       {
         Alder::Image *image = imageIt->GetPointer();
@@ -585,6 +596,15 @@ void QMainAlderWindow::updateInterviewTreeWidget()
           QTreeWidgetItem *imageItem = new QTreeWidgetItem( examItem );
           this->treeModelMap[imageItem] = *imageIt;
           imageItem->setText( 0, name );
+
+          if( examType.compare( "CarotidIntima" ) == 0 ||
+              examType.compare( "Plaque" ) == 0 )
+          {
+            std::vector<int> dims = image->GetDICOMDimensions();
+            if ( dims.size() > 2 && dims[2] > 1 )
+              imageItem->setIcon(0, QIcon(":/icons/movie-icon" ) );             
+          }
+           
           imageItem->setExpanded( true );
           imageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
           if( activeImage && activeImage->Get( "Id" ).ToInt() == image->Get( "Id" ).ToInt() )
@@ -680,6 +700,7 @@ void QMainAlderWindow::updateInterface()
   // set all widget enable states
   this->ui->actionOpenInterview->setEnabled( loggedIn );
   this->ui->unratedCheckBox->setEnabled( interview );
+  this->ui->loadedCheckBox->setEnabled( interview );
   this->ui->actionPreviousInterview->setEnabled( interview );
   this->ui->actionNextInterview->setEnabled( interview );
   this->ui->previousInterviewPushButton->setEnabled( interview );
