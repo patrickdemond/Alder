@@ -32,13 +32,24 @@
       <property name="text">
        <string>Name</string>
       </property>
+      <property name="textAlignment">
+       <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Expert</string>
+      </property>
+      <property name="textAlignment">
+       <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+      </property>
      </column>
      <column>
       <property name="text">
        <string>Dexa</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeft|AlignVCenter</set>
+       <set>AlignHCenter|AlignVCenter|AlignCenter</set>
       </property>
      </column>
      <column>
@@ -46,7 +57,7 @@
        <string>Retinal</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeft|AlignVCenter</set>
+       <set>AlignHCenter|AlignVCenter|AlignCenter</set>
       </property>
      </column>
      <column>
@@ -54,12 +65,15 @@
        <string>US</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeft|AlignVCenter</set>
+       <set>AlignHCenter|AlignVCenter|AlignCenter</set>
       </property>
      </column>
      <column>
       <property name="text">
        <string>Last Login</string>
+      </property>
+      <property name="textAlignment">
+       <set>AlignHCenter|AlignVCenter|AlignCenter</set>
       </property>
      </column>
     </widget>

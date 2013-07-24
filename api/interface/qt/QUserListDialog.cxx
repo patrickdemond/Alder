@@ -34,15 +34,18 @@ QUserListDialog::QUserListDialog( QWidget* parent )
 {
   // define the column indeces
   this->columnIndex["Name"] = 0;
-  this->columnIndex["RateDexa"] = 1;
-  this->columnIndex["RateRetinal"] = 2;
-  this->columnIndex["RateUltrasound"] = 3;
-  this->columnIndex["LastLogin"] = 4;
+  this->columnIndex["Expert"] = 1;
+  this->columnIndex["RateDexa"] = 2;
+  this->columnIndex["RateRetinal"] = 3;
+  this->columnIndex["RateUltrasound"] = 4;
+  this->columnIndex["LastLogin"] = 5;
 
   this->ui = new Ui_QUserListDialog;
   this->ui->setupUi( this );
   this->ui->userTableWidget->horizontalHeader()->setResizeMode(
     this->columnIndex["Name"], QHeaderView::Stretch );
+  this->ui->userTableWidget->horizontalHeader()->setResizeMode(
+    this->columnIndex["Expert"], QHeaderView::ResizeToContents );
   this->ui->userTableWidget->horizontalHeader()->setResizeMode(
     this->columnIndex["RateDexa"], QHeaderView::ResizeToContents );
   this->ui->userTableWidget->horizontalHeader()->setResizeMode(
@@ -188,9 +191,8 @@ void QUserListDialog::slotHeaderClicked( int index )
   // NOTE: currently the columns with checkboxes cannot be sorted.  In order to do this we would need
   // to either override QSortFilterProxyModel::lessThan() or QAbstractTableModel::sort()
   // For now we'll just ignore requests to sort by these columns
-  if( this->columnIndex["RateDexa"] != index &&
-      this->columnIndex["RateRetinal"] != index &&
-      this->columnIndex["RateUltrasound"] != index )
+  if( this->columnIndex["Name"] == index ||
+      this->columnIndex["LastLogin"] == index )
   {
     // reverse order if already sorted
     if( this->sortColumn == index )
@@ -209,6 +211,8 @@ void QUserListDialog::slotItemChanged( QTableWidgetItem *item )
     this->ui->userTableWidget->item( item->row(), this->columnIndex["Name"] )->text().toStdString() );
 
   // update the user's rate settings
+  if( this->columnIndex["Expert"] == item->column() )
+    user->Set( "Expert", Qt::Checked == item->checkState() ? 1 : 0 );
   if( this->columnIndex["RateDexa"] == item->column() )
     user->Set( "RateDexa", Qt::Checked == item->checkState() ? 1 : 0 );
   else if( this->columnIndex["RateRetinal"] == item->column() )
@@ -240,6 +244,12 @@ void QUserListDialog::updateInterface()
     item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
     item->setText( QString( user->Get( "Name" ).ToString().c_str() ) );
     this->ui->userTableWidget->setItem( 0, this->columnIndex["Name"], item );
+
+    // add rate dexa to row
+    item = new QTableWidgetItem;
+    item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
+    item->setCheckState( 0 < user->Get( "Expert" ).ToInt() ? Qt::Checked : Qt::Unchecked );
+    this->ui->userTableWidget->setItem( 0, this->columnIndex["Expert"], item );
 
     // add rate dexa to row
     item = new QTableWidgetItem;
