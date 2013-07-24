@@ -124,7 +124,6 @@ SET( ALDER_SOURCE
   ${ALDER_QT_DIR}/QMainAlderWindow.cxx
   ${ALDER_QT_DIR}/QProgressDialog.cxx
   ${ALDER_QT_DIR}/QSelectInterviewDialog.cxx
-  ${ALDER_QT_DIR}/QExamNoteDialog.cxx
   ${ALDER_QT_DIR}/QUserListDialog.cxx
 
   ${ALDER_QT_WIDGETS_DIR}/QAlderDoubleSlider.cxx
@@ -146,7 +145,6 @@ SET( ALDER_UIS
   ${ALDER_QT_DIR}/QMainAlderWindow.ui
   ${ALDER_QT_DIR}/QProgressDialog.ui
   ${ALDER_QT_DIR}/QSelectInterviewDialog.ui
-  ${ALDER_QT_DIR}/QExamNoteDialog.ui
   ${ALDER_QT_DIR}/QUserListDialog.ui
 
   ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.ui
@@ -159,7 +157,6 @@ SET( ALDER_HEADERS
   ${ALDER_QT_DIR}/QMainAlderWindow.h
   ${ALDER_QT_DIR}/QProgressDialog.h
   ${ALDER_QT_DIR}/QSelectInterviewDialog.h
-  ${ALDER_QT_DIR}/QExamNoteDialog.h
   ${ALDER_QT_DIR}/QUserListDialog.h
 
   ${ALDER_QT_WIDGETS_DIR}/QAlderDoubleSlider.h

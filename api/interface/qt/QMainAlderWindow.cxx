@@ -27,7 +27,6 @@
 #include "QLoginDialog.h"
 #include "QProgressDialog.h"
 #include "QSelectInterviewDialog.h"
-#include "QExamNoteDialog.h"
 #include "QUserListDialog.h"
 
 #include <QCloseEvent>
