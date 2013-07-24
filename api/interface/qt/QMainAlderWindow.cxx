@@ -95,9 +95,8 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this->ui->ratingSlider, SIGNAL( valueChanged( int ) ),
     this, SLOT( slotRatingSliderChanged( int ) ) );
   QObject::connect(
-    this->ui->notePushButton, SIGNAL( clicked() ),
-    this, SLOT( slotOpenNote() ) );
-
+    this->ui->examNoteTextEdit, SIGNAL( textChanged() ),
+    this, SLOT( slotExamNoteChanged() ) );
 
   this->Viewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
   vtkRenderWindow* renwin = this->ui->medicalImageWidget->GetRenderWindow();
@@ -391,7 +390,7 @@ void QMainAlderWindow::slotRatingSliderChanged( int value )
 {
   Alder::Application *app = Alder::Application::GetInstance();
 
-  // make sure we have an active image
+  // make sure we have an active user and image
   Alder::User *user = app->GetActiveUser();
   if( !user ) throw std::runtime_error( "Rating slider modified without an active user" );
   Alder::Image *image = app->GetActiveImage();
@@ -416,18 +415,22 @@ void QMainAlderWindow::slotRatingSliderChanged( int value )
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotOpenNote()
+void QMainAlderWindow::slotExamNoteChanged()
 {
+  vtkSmartPointer< Alder::Exam > exam;
   Alder::Application *app = Alder::Application::GetInstance();
 
-  // make sure we have an active image
-  Alder::Image *image = app->GetActiveImage();
-  if( !image ) throw std::runtime_error( "Open note button cliecked without an active image" );
-
-  QExamNoteDialog dialog( this );
-  dialog.setModal( true );
-  dialog.setWindowTitle( tr( "Exam Note" ) );
-  dialog.exec();
+  // make sure we have an active user and image, and the image has an exam
+  Alder::User *user = app->GetActiveUser();
+  if( user )
+  {
+    Alder::Image *image = app->GetActiveImage();
+    if( image && image->GetRecord( exam ) )
+    {
+      exam->Set( "Note", this->ui->examNoteTextEdit->toPlainText().toStdString() );
+      exam->Save();
+    }
+  }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -445,6 +448,7 @@ void QMainAlderWindow::writeSettings()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::updateInformation()
 {
+  QString noteString = "";
   QString interviewerString = tr( "N/A" );
   QString siteString = tr( "N/A" );
   QString dateString = tr( "N/A" );
@@ -461,6 +465,7 @@ void QMainAlderWindow::updateInformation()
       vtkSmartPointer< Alder::Exam > exam;
       if( image->GetRecord( exam ) )
       {
+        noteString = exam->Get( "Note" ).ToString().c_str();
         interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
         siteString = interview->Get( "Site" ).ToString().c_str();
         dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();
@@ -468,6 +473,7 @@ void QMainAlderWindow::updateInformation()
     }
   }
 
+  this->ui->examNoteTextEdit->setPlainText( noteString );
   this->ui->interviewerValueLabel->setText( interviewerString );
   this->ui->siteValueLabel->setText( siteString );
   this->ui->dateValueLabel->setText( dateString );
@@ -706,7 +712,7 @@ void QMainAlderWindow::updateInterface()
   this->ui->previousInterviewPushButton->setEnabled( interview );
   this->ui->nextInterviewPushButton->setEnabled( interview );
   this->ui->ratingSlider->setEnabled( image );
-  this->ui->notePushButton->setEnabled( image );
+  this->ui->examNoteTextEdit->setEnabled( image );
   this->ui->interviewTreeWidget->setEnabled( interview );
   this->ui->medicalImageWidget->setEnabled( loggedIn );
   this->ui->framePlayerWidget->setEnabled( loggedIn );
