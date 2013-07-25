@@ -112,6 +112,13 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
 
   this->readSettings();
   this->updateInterface();
+
+  // give a bit more room to the tree
+  double total = this->ui->interviewTreeWidget->height() + this->ui->examNoteTextEdit->height();
+  QList<int> sizeList;
+  sizeList.append( floor( 2 * total / 3 ) );
+  sizeList.append( total - sizeList[0] );
+  this->ui->splitter->setSizes( sizeList );
 };
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
