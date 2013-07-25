@@ -43,6 +43,7 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
 {
   Alder::Application *app = Alder::Application::GetInstance();
   QMenu *menu;
+  this->atlasVisible = false;
   
   this->ui = new Ui_QMainAlderWindow;
   this->ui->setupUi( this );
@@ -55,11 +56,8 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this->ui->actionOpenInterview, SIGNAL( triggered() ),
     this, SLOT( slotOpenInterview() ) );
   QObject::connect(
-    this->ui->actionPreviousInterview, SIGNAL( triggered() ),
-    this, SLOT( slotPreviousInterview() ) );
-  QObject::connect(
-    this->ui->actionNextInterview, SIGNAL( triggered() ),
-    this, SLOT( slotNextInterview() ) );
+    this->ui->actionShowAtlas, SIGNAL( triggered() ),
+    this, SLOT( slotShowAtlas() ) );
   QObject::connect(
     this->ui->actionLogin, SIGNAL( triggered() ),
     this, SLOT( slotLogin() ) );
@@ -82,31 +80,40 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this, SLOT( slotManual() ) );
 
   QObject::connect(
-    this->ui->previousInterviewPushButton, SIGNAL( clicked() ),
+    this->ui->interviewPreviousPushButton, SIGNAL( clicked() ),
     this, SLOT( slotPreviousInterview() ) );
   QObject::connect(
-    this->ui->nextInterviewPushButton, SIGNAL( clicked() ),
+    this->ui->interviewNextPushButton, SIGNAL( clicked() ),
     this, SLOT( slotNextInterview() ) );
   QObject::connect(
     this->ui->interviewTreeWidget, SIGNAL( itemSelectionChanged() ),
     this, SLOT( slotTreeSelectionChanged() ) );
   QObject::connect(
-    this->ui->ratingSlider, SIGNAL( valueChanged( int ) ),
+    this->ui->interviewRatingSlider, SIGNAL( valueChanged( int ) ),
     this, SLOT( slotRatingSliderChanged( int ) ) );
   QObject::connect(
-    this->ui->examNoteTextEdit, SIGNAL( textChanged() ),
+    this->ui->interviewNoteTextEdit, SIGNAL( textChanged() ),
     this, SLOT( slotExamNoteChanged() ) );
 
-  this->Viewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
-  vtkRenderWindow* renwin = this->ui->medicalImageWidget->GetRenderWindow();
-  vtkRenderer* renderer = this->Viewer->GetRenderer();
-  renderer->GradientBackgroundOn();
-  renderer->SetBackground( 0, 0, 0 );
-  renderer->SetBackground2( 0, 0, 1 );
-  this->Viewer->SetRenderWindow( renwin  );  
-  this->Viewer->InterpolateOff();
+  this->InterviewViewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
+  vtkRenderWindow* interviewRenwin = this->ui->interviewImageWidget->GetRenderWindow();
+  vtkRenderer* interviewRenderer = this->InterviewViewer->GetRenderer();
+  interviewRenderer->GradientBackgroundOn();
+  interviewRenderer->SetBackground( 0, 0, 0 );
+  interviewRenderer->SetBackground2( 0, 0, 1 );
+  this->InterviewViewer->SetRenderWindow( interviewRenwin );
+  this->InterviewViewer->InterpolateOff();
   
-  this->ui->framePlayerWidget->setViewer(this->Viewer);
+  this->AtlasViewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
+  vtkRenderWindow* atlasRenwin = this->ui->atlasImageWidget->GetRenderWindow();
+  vtkRenderer* atlasRenderer = this->AtlasViewer->GetRenderer();
+  atlasRenderer->GradientBackgroundOn();
+  atlasRenderer->SetBackground( 0, 0, 0 );
+  atlasRenderer->SetBackground2( 0, 0, 1 );
+  this->AtlasViewer->SetRenderWindow( atlasRenwin );
+  this->AtlasViewer->InterpolateOff();
+  
+  this->ui->framePlayerWidget->setViewer( this->InterviewViewer );
   this->setCorner( Qt::BottomLeftCorner, Qt::BottomDockWidgetArea );
   this->setCorner( Qt::BottomRightCorner, Qt::RightDockWidgetArea );
 
@@ -114,11 +121,11 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   this->updateInterface();
 
   // give a bit more room to the tree
-  double total = this->ui->interviewTreeWidget->height() + this->ui->examNoteTextEdit->height();
+  double total = this->ui->interviewTreeWidget->height() + this->ui->interviewNoteTextEdit->height();
   QList<int> sizeList;
   sizeList.append( floor( 2 * total / 3 ) );
   sizeList.append( total - sizeList[0] );
-  this->ui->splitter->setSizes( sizeList );
+  this->ui->interviewTextSplitter->setSizes( sizeList );
 };
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -130,7 +137,7 @@ QMainAlderWindow::~QMainAlderWindow()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::closeEvent( QCloseEvent *event )
 {
-  this->ui->framePlayerWidget->setViewer(0);
+  this->ui->framePlayerWidget->setViewer( 0 );
   this->writeSettings();
   event->accept();
 }
@@ -177,8 +184,8 @@ void QMainAlderWindow::slotPreviousInterview()
   if( user && activeInterview )
   {
     interview = activeInterview->GetPrevious(
-      this->ui->loadedCheckBox->isChecked(),
-      this->ui->unratedCheckBox->isChecked() );
+      this->ui->interviewLoadedCheckBox->isChecked(),
+      this->ui->interviewUnratedCheckBox->isChecked() );
 
     // warn user if the neighbouring interview is an empty record (ie: no neighbour found)
     vtkVariant vId = interview->Get( "Id" );
@@ -221,8 +228,8 @@ void QMainAlderWindow::slotNextInterview()
   if( user && activeInterview )
   {
     interview = activeInterview->GetNext(
-      this->ui->loadedCheckBox->isChecked(),
-      this->ui->unratedCheckBox->isChecked() );
+      this->ui->interviewLoadedCheckBox->isChecked(),
+      this->ui->interviewUnratedCheckBox->isChecked() );
 
     // warn user if the neighbouring interview is an empty record (ie: no neighbour found)
     vtkVariant vId = interview->Get( "Id" );
@@ -273,6 +280,13 @@ void QMainAlderWindow::slotLogin()
   }
 
   // active user may have changed so update the interface
+  this->updateInterface();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotShowAtlas()
+{
+  this->atlasVisible = !this->atlasVisible;
   this->updateInterface();
 }
 
@@ -417,7 +431,7 @@ void QMainAlderWindow::slotRatingSliderChanged( int value )
   else rating->Set( "Rating", value );
 
   rating->Save();
-  this->updateRating();
+  this->updateInterviewRating();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -433,7 +447,7 @@ void QMainAlderWindow::slotExamNoteChanged()
     Alder::Image *image = app->GetActiveImage();
     if( image && image->GetRecord( exam ) )
     {
-      exam->Set( "Note", this->ui->examNoteTextEdit->toPlainText().toStdString() );
+      exam->Set( "Note", this->ui->interviewNoteTextEdit->toPlainText().toStdString() );
       exam->Save();
     }
   }
@@ -452,7 +466,7 @@ void QMainAlderWindow::writeSettings()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::updateInformation()
+void QMainAlderWindow::updateInterviewInformation()
 {
   QString noteString = "";
   QString interviewerString = tr( "N/A" );
@@ -479,10 +493,10 @@ void QMainAlderWindow::updateInformation()
     }
   }
 
-  this->ui->examNoteTextEdit->setPlainText( noteString );
-  this->ui->interviewerValueLabel->setText( interviewerString );
-  this->ui->siteValueLabel->setText( siteString );
-  this->ui->dateValueLabel->setText( dateString );
+  this->ui->interviewNoteTextEdit->setPlainText( noteString );
+  this->ui->interviewInterviewerValueLabel->setText( interviewerString );
+  this->ui->interviewSiteValueLabel->setText( siteString );
+  this->ui->interviewDateValueLabel->setText( dateString );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -650,26 +664,27 @@ void QMainAlderWindow::updateInterviewTreeWidget()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::updateMedicalImageWidget()
+void QMainAlderWindow::updateInterviewImageWidget()
 {
   Alder::Image *image = Alder::Application::GetInstance()->GetActiveImage();
 
-  if( image )
-  {
-    this->Viewer->Load( image->GetFileName().c_str() );
-  }
-  else
-  {
-    this->Viewer->SetImageToSinusoid();
-  }
+  if( image ) this->InterviewViewer->Load( image->GetFileName().c_str() );
+  else this->InterviewViewer->SetImageToSinusoid();
+
   this->ui->framePlayerWidget->updateFromViewer();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::updateRating()
+void QMainAlderWindow::updateAtlasImageWidget()
+{
+  this->AtlasViewer->SetImageToSinusoid();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::updateInterviewRating()
 {
   // stop the rating slider's signals until we are done
-  bool oldSignalState = this->ui->ratingSlider->blockSignals( true );
+  bool oldSignalState = this->ui->interviewRatingSlider->blockSignals( true );
 
   int ratingValue = 0;
   Alder::Application *app = Alder::Application::GetInstance();
@@ -691,11 +706,11 @@ void QMainAlderWindow::updateRating()
     }
   }
 
-  this->ui->ratingSlider->setValue( ratingValue );
-  this->ui->ratingValueLabel->setText( 0 == ratingValue ? tr( "N/A" ) : QString::number( ratingValue ) );
+  this->ui->interviewRatingSlider->setValue( ratingValue );
+  this->ui->interviewRatingValueLabel->setText( 0 == ratingValue ? tr( "N/A" ) : QString::number( ratingValue ) );
 
   // re-enable the rating slider's signals
-  this->ui->ratingSlider->blockSignals( oldSignalState );
+  this->ui->interviewRatingSlider->blockSignals( oldSignalState );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -706,25 +721,59 @@ void QMainAlderWindow::updateInterface()
   Alder::Image *image = app->GetActiveImage();
   bool loggedIn = NULL != app->GetActiveUser();
 
-  // login button (login/logout)
+  // dynamic menu action names
   this->ui->actionLogin->setText( tr( loggedIn ? "Logout" : "Login" ) );
+  this->ui->actionShowAtlas->setText( tr( this->atlasVisible ? "Hide Atlas" : "Show Atlas" ) );
+
+  // display or hide the image atlas widgets
+  this->ui->imageWidgetSplitter->setChildrenCollapsible( !this->atlasVisible );
+  this->ui->atlasDockWidget->setVisible( this->atlasVisible );
+  this->ui->interviewDockWidget->setVisible( !this->atlasVisible );
+
+  if( this->atlasVisible )
+  {
+    this->updateAtlasImageWidget();
+
+    // make sure the atlas image widget is showing
+    QList<int> sizeList = this->ui->imageWidgetSplitter->sizes();
+    if( 0 == sizeList[0] )
+    {
+      sizeList[0] = floor( sizeList[1] / 2 );
+      sizeList[1] = sizeList[0];
+      this->ui->imageWidgetSplitter->setSizes( sizeList );
+    }
+  }
+  else
+  {
+    // make sure the atlas image widget is not showing
+    QList<int> sizeList = this->ui->imageWidgetSplitter->sizes();
+    if( 0 != sizeList[0] )
+    {
+      sizeList[1] += sizeList[0];
+      sizeList[0] = 0;
+      this->ui->imageWidgetSplitter->setSizes( sizeList );
+    }
+  }
 
   // set all widget enable states
   this->ui->actionOpenInterview->setEnabled( loggedIn );
-  this->ui->unratedCheckBox->setEnabled( interview );
-  this->ui->loadedCheckBox->setEnabled( interview );
-  this->ui->actionPreviousInterview->setEnabled( interview );
-  this->ui->actionNextInterview->setEnabled( interview );
-  this->ui->previousInterviewPushButton->setEnabled( interview );
-  this->ui->nextInterviewPushButton->setEnabled( interview );
-  this->ui->ratingSlider->setEnabled( image );
-  this->ui->examNoteTextEdit->setEnabled( image );
+  this->ui->actionShowAtlas->setEnabled( loggedIn );
+  this->ui->interviewUnratedCheckBox->setEnabled( interview );
+  this->ui->interviewLoadedCheckBox->setEnabled( interview );
+  this->ui->interviewPreviousPushButton->setEnabled( interview );
+  this->ui->interviewNextPushButton->setEnabled( interview );
+  this->ui->interviewRatingSlider->setEnabled( image );
+  this->ui->interviewNoteTextEdit->setEnabled( image );
   this->ui->interviewTreeWidget->setEnabled( interview );
-  this->ui->medicalImageWidget->setEnabled( loggedIn );
+
   this->ui->framePlayerWidget->setEnabled( loggedIn );
 
+  this->ui->imageWidgetSplitter->setEnabled( this->atlasVisible );
+  this->ui->interviewImageWidget->setEnabled( loggedIn );
+  this->ui->atlasImageWidget->setEnabled( loggedIn );
+
   this->updateInterviewTreeWidget();
-  this->updateInformation();
-  this->updateMedicalImageWidget();
-  this->updateRating();
+  this->updateInterviewInformation();
+  this->updateInterviewImageWidget();
+  this->updateInterviewRating();
 }

@@ -35,11 +35,13 @@ public:
 public slots:
   // action event functions
   virtual void slotOpenInterview();
-  virtual void slotPreviousInterview();
-  virtual void slotNextInterview();
+  virtual void slotShowAtlas();
   virtual void slotLogin();
   virtual void slotUserManagement();
   virtual void slotUpdateDatabase();
+
+  virtual void slotPreviousInterview();
+  virtual void slotNextInterview();
   virtual void slotTreeSelectionChanged();
   virtual void slotRatingSliderChanged( int );
   virtual void slotExamNoteChanged();
@@ -55,10 +57,13 @@ protected:
   // read/write application GUI settings
   virtual void readSettings();
   virtual void writeSettings();
-  virtual void updateInformation();
+  
+  virtual void updateInterviewInformation();
   virtual void updateInterviewTreeWidget();
-  virtual void updateMedicalImageWidget();
-  virtual void updateRating();
+  virtual void updateInterviewImageWidget();
+  virtual void updateInterviewRating();
+  virtual void updateAtlasImageWidget();
+
   virtual void updateInterface();
 
   std::map< QTreeWidgetItem*, vtkSmartPointer<Alder::ActiveRecord> > treeModelMap;
@@ -69,7 +74,9 @@ private:
   // Designer form
   Ui_QMainAlderWindow *ui;
 
-  vtkSmartPointer<vtkMedicalImageViewer> Viewer;
+  vtkSmartPointer<vtkMedicalImageViewer> InterviewViewer;
+  vtkSmartPointer<vtkMedicalImageViewer> AtlasViewer;
+  bool atlasVisible;
 };
 
 #endif
