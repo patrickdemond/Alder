@@ -42,7 +42,7 @@ public slots:
   virtual void slotUpdateDatabase();
   virtual void slotTreeSelectionChanged();
   virtual void slotRatingSliderChanged( int );
-  virtual void slotOpenNote();
+  virtual void slotExamNoteChanged();
 
   // help event functions
   virtual void slotAbout();

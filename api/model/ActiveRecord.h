@@ -81,8 +81,9 @@ namespace Alder
     /**
      * Saves the record's current values to the database.  If the record was not loaded
      * then a new record will be inserted into the database.
+     * @param replace bool Whether to replace an existing record
      */
-    virtual void Save();
+    virtual void Save( bool replace = false );
 
     /**
      * Removes the current record from the database.
