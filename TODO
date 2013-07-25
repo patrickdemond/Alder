@@ -1,5 +1,6 @@
 A list of things which need to be done (in no particular order)
 ---------------------------------------------------------------
 
+- add Modality table, convert Exam.Modality to Exam.ModalityId
 - add an image atlas (ie: a way for a user to view expert ratings)
 - improve Measure.SIDE processing (left,left is left,right and right,right is right,left, etc)
