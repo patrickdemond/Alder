@@ -43,8 +43,12 @@ public slots:
   virtual void slotPreviousInterview();
   virtual void slotNextInterview();
   virtual void slotTreeSelectionChanged();
-  virtual void slotRatingSliderChanged( int );
-  virtual void slotExamNoteChanged();
+  virtual void slotInterviewRatingChanged( int );
+  virtual void slotInterviewNoteChanged();
+
+  virtual void slotAtlasRatingChanged( int );
+  virtual void slotPreviousAtlasImage();
+  virtual void slotNextAtlasImage();
 
   // help event functions
   virtual void slotAbout();
@@ -62,6 +66,7 @@ protected:
   virtual void updateInterviewTreeWidget();
   virtual void updateInterviewImageWidget();
   virtual void updateInterviewRating();
+  virtual void updateAtlasInformation();
   virtual void updateAtlasImageWidget();
 
   virtual void updateInterface();

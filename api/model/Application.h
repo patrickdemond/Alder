@@ -82,6 +82,7 @@ namespace Alder
     vtkGetObjectMacro( ActiveUser, User );
     vtkGetObjectMacro( ActiveInterview, Interview );
     vtkGetObjectMacro( ActiveImage, Image );
+    vtkGetObjectMacro( ActiveAtlasImage, Image );
 
     /**
      * When setting the active user the active interview will be set to the interview stored in the user's
@@ -99,6 +100,11 @@ namespace Alder
      * Sets the active image
      */
     virtual void SetActiveImage( Image* );
+    
+    /**
+     * Sets the active atlas image
+     */
+    virtual void SetActiveAtlasImage( Image* );
     
     /**
      * Creates a new instance of a model object given its class name
@@ -144,6 +150,7 @@ namespace Alder
     User *ActiveUser;
     Interview *ActiveInterview;
     Image *ActiveImage;
+    Image *ActiveAtlasImage;
     bool AbortFlag;
     
   private:
