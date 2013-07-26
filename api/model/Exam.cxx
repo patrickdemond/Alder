@@ -214,6 +214,36 @@ namespace Alder
       std::vector< std::string > sideList;
       std::vector< std::string >::iterator sideListIt;
       sideList = opal->GetValues( "clsa-dcs-images", type, UId, sideVariable );
+     
+      int numSides = sideList.empty() ? 0 : sideList.size();
+      
+      if( numSides > 1 )
+      {
+        // sort into right, left 
+        std::sort( sideList.begin(), sideList.end(), std::greater< std::string >());
+      
+        // enforce unique strings
+        sideList.erase( std::unique( sideList.begin(), sideList.end() ), sideList.end() );
+
+        // remove empty strings
+        sideList.erase( 
+          std::remove_if( sideList.begin(), sideList.end(), mem_fun_ref(&std::string::empty) ),
+          sideList.end() );
+
+        // if reduced to one side only, add the opposing side
+        if( sideList.size() == 1 )
+        {
+          if( 0 == Utilities::toLower( sideList[0] ).compare( "right" ) )
+          {
+            sideList.push_back( "left" );
+          }
+          else if( 0 == Utilities::toLower( sideList[0] ).compare( "left" ) )
+          {
+            sideList.insert( sideList.begin(), "right" );
+          }
+        }
+      }  
+
       bool found = false;
       std::string laterality = this->Get( "Laterality" ).ToString();
 
