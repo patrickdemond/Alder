@@ -95,6 +95,12 @@ namespace Alder
       this->ActiveImage->Delete();
       this->ActiveImage = NULL;
     }
+
+    if( NULL != this->ActiveAtlasImage )
+    {
+      this->ActiveAtlasImage->Delete();
+      this->ActiveAtlasImage = NULL;
+    }
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -187,6 +193,7 @@ namespace Alder
     this->SetActiveUser( NULL );
     this->SetActiveInterview( NULL );
     this->SetActiveImage( NULL );
+    this->SetActiveAtlasImage( NULL );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -219,6 +226,7 @@ namespace Alder
       {
         this->ActiveInterview->Register( this );
         this->SetActiveImage( NULL );
+        this->SetActiveAtlasImage( NULL );
       }
 
       // if there is an active user, save the active interview
@@ -234,4 +242,7 @@ namespace Alder
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   vtkCxxSetObjectMacro( Application, ActiveImage, Image );
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  vtkCxxSetObjectMacro( Application, ActiveAtlasImage, Image );
 }

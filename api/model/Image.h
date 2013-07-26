@@ -81,6 +81,20 @@ namespace Alder
      */
     std::vector<int> GetDICOMDimensions();
 
+    /**
+     * Returns the neighbouring interview in UId/VisitDate order.
+     */
+    vtkSmartPointer<Image> GetNeighbourAtlasImage( bool forward );
+    vtkSmartPointer<Image> GetNextAtlasImage()
+    { return this->GetNeighbourAtlasImage( true ); }
+    vtkSmartPointer<Image> GetPreviousAtlasImage()
+    { return this->GetNeighbourAtlasImage( false ); }
+
+    /**
+     * Returns an atlas image for a specified type and rating
+     */
+    static vtkSmartPointer<Image> GetAtlasImage( std::string type, int rating );
+
   protected:
     Image() {}
     ~Image() {}

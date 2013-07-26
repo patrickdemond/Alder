@@ -185,4 +185,25 @@ namespace Alder
     
     return dims;  
   }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  vtkSmartPointer<Image> Image::GetNeighbourAtlasImage( bool forward )
+  {
+    this->AssertPrimaryId();
+    vtkSmartPointer<Image> image = vtkSmartPointer<Image>::New();
+
+    // TODO: get neighbouring image which matches the requested exam type and image rating (from an expert user)
+
+    return image;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  vtkSmartPointer<Image> Image::GetAtlasImage( std::string type, int rating )
+  {
+    vtkSmartPointer<Image> image = vtkSmartPointer<Image>::New();
+
+    // TODO: get any image which matches the requested exam type and image rating (from an expert user)
+
+    return image;
+  }
 }
