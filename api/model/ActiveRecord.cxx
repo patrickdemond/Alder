@@ -170,24 +170,24 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   int ActiveRecord::GetLastInsertId()
   {
-      Application *app = Application::GetInstance();
-      std::stringstream stream;
-      stream << "SELECT Max( Id ) FROM " << this->GetName();
-      vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
-          
-      Utilities::log( "Getting last insert id for table: " + this->GetName() );
-      query->SetQuery( stream.str().c_str() );
-      query->Execute();
+    Application *app = Application::GetInstance();
+    std::stringstream stream;
+    stream << "SELECT Max( Id ) FROM " << this->GetName();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
+        
+    Utilities::log( "Getting last insert id for table: " + this->GetName() );
+    query->SetQuery( stream.str().c_str() );
+    query->Execute();
 
-      if( query->HasError() )
-      {
-        Utilities::log( query->GetLastErrorText() );
-        throw std::runtime_error( "There was an error while trying to query the database." );
-      }
+    if( query->HasError() )
+    {
+      Utilities::log( query->GetLastErrorText() );
+      throw std::runtime_error( "There was an error while trying to query the database." );
+    }
 
-      // only has one row
-      query->NextRow();
-      return query->DataValue( 0 ).ToInt();
+    // only has one row
+    query->NextRow();
+    return query->DataValue( 0 ).ToInt();
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -277,5 +277,26 @@ namespace Alder
       os << indent.GetNextIndent() << it->first << ": " << it->second
          << ( it->second.IsValid() ? it->second.ToString() : "NULL" ) << endl;
     }
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  int ActiveRecord::GetRelationship( std::string table, std::string override )
+  {
+    Database *db = Application::GetInstance()->GetDB();
+
+    // if no override is provided, figure out necessary table/column names
+    std::string joiningTable = override.empty() ? this->GetName() + "Has" + table : override;
+    std::string column = override.empty() ? this->GetName() + "Id" : override;
+
+    if( db->TableExists( joiningTable ) )
+    {
+      return ActiveRecord::ManyToMany;
+    }
+    else if( db->ColumnExists( table, column ) )
+    {
+      return ActiveRecord::OneToMany;
+    }
+    
+    return ActiveRecord::None;
   }
 }

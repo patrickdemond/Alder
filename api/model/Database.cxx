@@ -130,6 +130,31 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Database::TableExists( std::string table ) const
+  {
+    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::const_iterator
+      tablePair = this->Columns.find( table );
+    return this->Columns.end() != tablePair;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Database::ColumnExists( std::string table, std::string column ) const
+  {
+    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::const_iterator
+      tablePair = this->Columns.find( table );
+    if( this->Columns.end() == tablePair )
+    {
+      std::stringstream error;
+      error << "Tried to get whether a column exists from table \"" << table << "\" which doesn't exist";
+      throw std::runtime_error( error.str() );
+    }
+
+    std::map< std::string,std::map< std::string, vtkVariant > >::const_iterator
+      columnPair = tablePair->second.find( column );
+    return tablePair->second.end() != columnPair;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   vtkVariant Database::GetColumnDefault( std::string table, std::string column )
   {
     std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::iterator

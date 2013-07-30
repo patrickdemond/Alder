@@ -82,6 +82,16 @@ namespace Alder
     std::vector<std::string> GetColumnNames( std::string table );
 
     /**
+     * Returns whether a table.column exists
+     */
+    bool TableExists( std::string table ) const;
+
+    /**
+     * Returns whether a table.column exists
+     */
+    bool ColumnExists( std::string table, std::string column ) const;
+
+    /**
      * Returns the default value for a table's column
      * @param table string
      * @param column string

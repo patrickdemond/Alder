@@ -13,6 +13,7 @@
 
 #include "Application.h"
 #include "Database.h"
+#include "Modality.h"
 #include "User.h"
 
 #include "vtkSmartPointer.h"
@@ -32,28 +33,41 @@
 QUserListDialog::QUserListDialog( QWidget* parent )
   : QDialog( parent )
 {
-  // define the column indeces
-  this->columnIndex["Name"] = 0;
-  this->columnIndex["Expert"] = 1;
-  this->columnIndex["RateDexa"] = 2;
-  this->columnIndex["RateRetinal"] = 3;
-  this->columnIndex["RateUltrasound"] = 4;
-  this->columnIndex["LastLogin"] = 5;
-
+  int index = 0;
   this->ui = new Ui_QUserListDialog;
   this->ui->setupUi( this );
+  QStringList labels;
+
+  labels << "Name";
+  this->columnIndex["Name"] = index++;
   this->ui->userTableWidget->horizontalHeader()->setResizeMode(
     this->columnIndex["Name"], QHeaderView::Stretch );
-  this->ui->userTableWidget->horizontalHeader()->setResizeMode(
-    this->columnIndex["Expert"], QHeaderView::ResizeToContents );
-  this->ui->userTableWidget->horizontalHeader()->setResizeMode(
-    this->columnIndex["RateDexa"], QHeaderView::ResizeToContents );
-  this->ui->userTableWidget->horizontalHeader()->setResizeMode(
-    this->columnIndex["RateRetinal"], QHeaderView::ResizeToContents );
-  this->ui->userTableWidget->horizontalHeader()->setResizeMode(
-    this->columnIndex["RateUltrasound"], QHeaderView::ResizeToContents );
+
+  labels << "Last Login";
+  this->columnIndex["LastLogin"] = index++;
   this->ui->userTableWidget->horizontalHeader()->setResizeMode(
     this->columnIndex["LastLogin"], QHeaderView::Stretch );
+  
+  labels << "Expert";
+  this->columnIndex["Expert"] = index++;
+  this->ui->userTableWidget->horizontalHeader()->setResizeMode(
+    this->columnIndex["Expert"], QHeaderView::ResizeToContents );
+
+  // list all modalities (to see if user rates them)
+  std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
+  std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityListIt;
+  Alder::Modality::GetAll( &modalityList );
+
+  this->ui->userTableWidget->setColumnCount( index + modalityList.size() );
+  for( modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
+  {
+    std::string name = (*modalityListIt)->Get( "Name" ).ToString();
+    labels << name.c_str();
+    this->ui->userTableWidget->horizontalHeader()->setResizeMode( index, QHeaderView::ResizeToContents );
+    this->columnIndex[name] = index++;
+  }
+
+  this->ui->userTableWidget->setHorizontalHeaderLabels( labels );
   this->ui->userTableWidget->horizontalHeader()->setClickable( true );
   this->ui->userTableWidget->verticalHeader()->setVisible( false );
   this->ui->userTableWidget->setSelectionBehavior( QAbstractItemView::SelectRows );
@@ -210,15 +224,25 @@ void QUserListDialog::slotItemChanged( QTableWidgetItem *item )
   user->Load( "Name",
     this->ui->userTableWidget->item( item->row(), this->columnIndex["Name"] )->text().toStdString() );
 
-  // update the user's rate settings
+  // update the user's settings
   if( this->columnIndex["Expert"] == item->column() )
     user->Set( "Expert", Qt::Checked == item->checkState() ? 1 : 0 );
-  if( this->columnIndex["RateDexa"] == item->column() )
-    user->Set( "RateDexa", Qt::Checked == item->checkState() ? 1 : 0 );
-  else if( this->columnIndex["RateRetinal"] == item->column() )
-    user->Set( "RateRetinal", Qt::Checked == item->checkState() ? 1 : 0 );
-  else if( this->columnIndex["RateUltrasound"] == item->column() )
-    user->Set( "RateUltrasound", Qt::Checked == item->checkState() ? 1 : 0 );
+  else
+  {
+    std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
+    std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityListIt;
+    Alder::Modality::GetAll( &modalityList );
+    for( modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
+    {
+      std::string name = (*modalityListIt)->Get( "Name" ).ToString();
+      if( this->columnIndex[name] == item->column() )
+      {
+        if( Qt::Checked == item->checkState() ) user->AddRecord( *modalityListIt );
+        else user->RemoveRecord( *modalityListIt );
+        break;
+      }
+    }
+  }
 
   user->Save();
 }
@@ -245,35 +269,30 @@ void QUserListDialog::updateInterface()
     item->setText( QString( user->Get( "Name" ).ToString().c_str() ) );
     this->ui->userTableWidget->setItem( 0, this->columnIndex["Name"], item );
 
-    // add rate dexa to row
-    item = new QTableWidgetItem;
-    item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
-    item->setCheckState( 0 < user->Get( "Expert" ).ToInt() ? Qt::Checked : Qt::Unchecked );
-    this->ui->userTableWidget->setItem( 0, this->columnIndex["Expert"], item );
-
-    // add rate dexa to row
-    item = new QTableWidgetItem;
-    item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
-    item->setCheckState( 0 < user->Get( "RateDexa" ).ToInt() ? Qt::Checked : Qt::Unchecked );
-    this->ui->userTableWidget->setItem( 0, this->columnIndex["RateDexa"], item );
-
-    // add rate retinal to row
-    item = new QTableWidgetItem;
-    item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
-    item->setCheckState( 0 < user->Get( "RateRetinal" ).ToInt() ? Qt::Checked : Qt::Unchecked );
-    this->ui->userTableWidget->setItem( 0, this->columnIndex["RateRetinal"], item );
-
-    // add rate ultrasound to row
-    item = new QTableWidgetItem;
-    item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
-    item->setCheckState( 0 < user->Get( "RateUltrasound" ).ToInt() ? Qt::Checked : Qt::Unchecked );
-    this->ui->userTableWidget->setItem( 0, this->columnIndex["RateUltrasound"], item );
-
     // add last login to row
     item = new QTableWidgetItem;
     item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
     item->setText( QString( user->Get( "LastLogin" ).ToString().c_str() ) );
     this->ui->userTableWidget->setItem( 0, this->columnIndex["LastLogin"], item );
+
+    // add the expert row
+    item = new QTableWidgetItem;
+    item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
+    item->setCheckState( 0 < user->Get( "Expert" ).ToInt() ? Qt::Checked : Qt::Unchecked );
+    this->ui->userTableWidget->setItem( 0, this->columnIndex["Expert"], item );
+
+    // add all modalities (one per column)
+    std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
+    std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityListIt;
+    Alder::Modality::GetAll( &modalityList );
+    for( modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
+    {
+      std::string name = (*modalityListIt)->Get( "Name" ).ToString();
+      item = new QTableWidgetItem;
+      item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
+      item->setCheckState( 0 < user->Has( *modalityListIt ) ? Qt::Checked : Qt::Unchecked );
+      this->ui->userTableWidget->setItem( 0, this->columnIndex[name], item );
+    }
   }
 
   this->ui->userTableWidget->sortItems( this->sortColumn, this->sortOrder );

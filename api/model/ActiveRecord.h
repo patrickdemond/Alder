@@ -131,26 +131,45 @@ namespace Alder
     }
 
     /**
-     * Provides a list of all records which are related to this record by foreign key.
+     * Provides a list of all records which are related to this record by foreign key or
+     * has a joining N-to-N relationship with another table.
      * @param list vector An existing vector to put all records into.
+     * @throws runtime_error
      */
-    template< class T > void GetList( std::vector< vtkSmartPointer< T > > *list, std::string column = "" )
+    template< class T > void GetList( std::vector< vtkSmartPointer< T > > *list, std::string override = "" )
     {
-      // if no column name was provided, use the default (table name followed by Id)
-      if( column.empty() ) column = this->GetName() + "Id";
-
       Application *app = Application::GetInstance();
-      // get the class name of T, return error if not found
+      Database *db = app->GetDB();
+      std::stringstream sql;
       std::string type = app->GetUnmangledClassName( typeid(T).name() );
-      std::stringstream stream;
-      stream << "SELECT Id FROM " << type << " "
-             << "WHERE " << column << " = " << this->Get( "Id" ).ToString();
-      vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
+      vtkSmartPointer<vtkAlderMySQLQuery> query = db->GetQuery();
 
-      Utilities::log( "Querying Database: " + stream.str() );
-      query->SetQuery( stream.str().c_str() );
+      // if no override is provided, figure out necessary table/column names
+      std::string joiningTable = override.empty() ? this->GetName() + "Has" + type : override;
+      std::string column = override.empty() ? this->GetName() + "Id" : override;
+
+      int relationship = this->GetRelationship( type, override );
+      if( ActiveRecord::ManyToMany == relationship )
+      {
+        sql << "SELECT " << type << "Id FROM " << joiningTable << " "
+            << "WHERE " << this->GetName() << "Id = " << this->Get( "Id" ).ToString();
+      }
+      else if( ActiveRecord::OneToMany == relationship )
+      {
+        sql << "SELECT Id FROM " << type << " "
+            << "WHERE " << column << " = " << this->Get( "Id" ).ToString();
+      }
+      else // no relationship (we don't support one-to-one relationships)
+      {
+        std::stringstream stream;
+        stream << "Cannot determine relationship between " << this->GetName() << " and " << type;
+        throw std::runtime_error( stream.str() );
+      }
+
+      // execute the query, check for errors, put results in the list
+      Utilities::log( "Querying Database: " + sql.str() );
+      query->SetQuery( sql.str().c_str() );
       query->Execute();
-
       if( query->HasError() )
       {
         Utilities::log( query->GetLastErrorText() );
@@ -166,7 +185,111 @@ namespace Alder
         list->push_back( record );
       }
     }
+
+    /**
+     * Returns whether a record has a relationship with another record.  This can either be
+     * due to a joining table (N-to-N relationship) or a foreign key column (1-to-N relationship)
+     * @throws runtime_error
+     */
+    template <class T> bool Has( vtkSmartPointer< T > &record, std::string override = "" )
+    {
+      Application *app = Application::GetInstance();
+      Database *db = app->GetDB();
+      std::stringstream sql;
+      std::string type = app->GetUnmangledClassName( typeid(T).name() );
+      vtkSmartPointer<vtkAlderMySQLQuery> query = db->GetQuery();
+
+      // if no override is provided, figure out necessary table/column names
+      std::string joiningTable = override.empty() ? this->GetName() + "Has" + type : override;
+      std::string column = override.empty() ? this->GetName() + "Id" : override;
+
+      int relationship = this->GetRelationship( type, override );
+      if( ActiveRecord::ManyToMany == relationship )
+      {
+        sql << "SELECT COUNT(*) FROM " << joiningTable << " "
+            << "WHERE " << this->GetName() << "Id = " << this->Get( "Id" ).ToString() << " "
+            << "AND " << type << "Id = " << record->Get( "Id" ).ToString();
+      }
+      else if( ActiveRecord::OneToMany == relationship )
+      {
+        sql << "SELECT COUNT(*) FROM " << type << " "
+            << "WHERE " << column << " = " << this->Get( "Id" ).ToString();
+      }
+      else // no relationship (we don't support one-to-one relationships)
+      {
+        std::stringstream stream;
+        stream << "Cannot determine relationship between " << this->GetName() << " and " << type;
+        throw std::runtime_error( stream.str() );
+      }
+
+      // execute the query, check for errors, put results in the list
+      Utilities::log( "Querying Database: " + sql.str() );
+      query->SetQuery( sql.str().c_str() );
+      query->Execute();
+      if( query->HasError() )
+      {
+        Utilities::log( query->GetLastErrorText() );
+        throw std::runtime_error( "There was an error while trying to query the database." );
+      }
+
+      query->NextRow();
+      return 0 < query->DataValue( 0 ).ToInt();
+    }
     
+    /**
+     * This method should only be used by records which have a many to many relationship
+     * with another record type.  It adds another record to this one.
+     * @throws runtime_error
+     */
+    template <class T> void AddRecord( vtkSmartPointer< T > &record )
+    {
+      Application *app = Application::GetInstance();
+      Database *db = app->GetDB();
+      std::stringstream sql;
+      std::string type = app->GetUnmangledClassName( typeid(T).name() );
+      vtkSmartPointer<vtkAlderMySQLQuery> query = db->GetQuery();
+
+      // first make sure we have the correct relationship with the given record
+      if( ActiveRecord::ManyToMany != this->GetRelationship( type ) )
+        throw std::runtime_error( "Cannot add record without many-to-many relationship." );
+
+      sql << "REPLACE INTO " << this->GetName() << "Has" << type << " ("
+          << this->GetName() << "Id, " << type << "Id) "
+          << "VALUES (" << this->Get( "Id" ).ToInt() << ", " << record->Get( "Id" ).ToInt() << ")";
+
+      // execute the query, check for errors, put results in the list
+      Utilities::log( "Querying Database: " + sql.str() );
+      query->SetQuery( sql.str().c_str() );
+      query->Execute();
+    }
+    
+    /**
+     * This method should only be used by records which have a many to many relationship
+     * with another record type.  It adds another record to this one.
+     * @throws runtime_error
+     */
+    template <class T> void RemoveRecord( vtkSmartPointer< T > &record )
+    {
+      Application *app = Application::GetInstance();
+      Database *db = app->GetDB();
+      std::stringstream sql;
+      std::string type = app->GetUnmangledClassName( typeid(T).name() );
+      vtkSmartPointer<vtkAlderMySQLQuery> query = db->GetQuery();
+
+      // first make sure we have the correct relationship with the given record
+      if( ActiveRecord::ManyToMany != this->GetRelationship( type ) )
+        throw std::runtime_error( "Cannot add record without many-to-many relationship." );
+
+      sql << "DELETE FROM " << this->GetName() << "Has" << type << " "
+          << "WHERE " << this->GetName() << "Id = " << this->Get( "Id" ).ToInt() << " "
+          << "AND " << type << "Id = " << record->Get( "Id" ).ToInt();
+
+      // execute the query, check for errors, put results in the list
+      Utilities::log( "Querying Database: " + sql.str() );
+      query->SetQuery( sql.str().c_str() );
+      query->Execute();
+    }
+
     /**
      * Returns the number of records which are related to this record by foreign key.
      * @param std::string recordType The associated table name.
@@ -259,6 +382,19 @@ namespace Alder
      * @throws runtime_error
      */
     virtual void SetVariant( std::string column, vtkVariant value );
+
+    enum RelationshipType
+    {
+      None = 0,
+      OneToOne,
+      OneToMany,
+      ManyToMany
+    };
+
+    /**
+     * Determines the relationship between this record and another
+     */
+    int GetRelationship( std::string table, std::string override = "" );
 
     std::map<std::string,vtkVariant> ColumnValues;
     bool Initialized;

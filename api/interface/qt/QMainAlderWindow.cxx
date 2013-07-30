@@ -601,7 +601,9 @@ void QMainAlderWindow::updateInterviewTreeWidget()
     Alder::Application *app = Alder::Application::GetInstance();
     Alder::User *user = app->GetActiveUser();
     Alder::Image *activeImage = app->GetActiveImage();
-    QTreeWidgetItem *selectedItem = NULL, *dexaItem = NULL, *retinalItem = NULL, *ultrasoundItem = NULL;
+    QTreeWidgetItem *selectedItem = NULL, *item = NULL;
+    std::map< std::string, QTreeWidgetItem* > modalityLookup;
+    std::map< std::string, QTreeWidgetItem* >::iterator modalityLookupIt;
 
     // make root the interview's UID and date
     QString name = tr( "Interview: " );
@@ -616,30 +618,20 @@ void QMainAlderWindow::updateInterviewTreeWidget()
     this->ui->interviewTreeWidget->addTopLevelItem( root );
 
     // make each modality type a child of the root
-    if( 0 < user->Get( "RateDexa" ).ToInt() )
+    std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
+    std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityIt;
+    user->GetList( &modalityList );
+    for( modalityIt = modalityList.begin(); modalityIt != modalityList.end(); ++modalityIt )
     {
-      dexaItem = new QTreeWidgetItem( root );
-      dexaItem->setText( 0, "Dexa" );
-      dexaItem->setExpanded( false );
-      dexaItem->setFlags( Qt::ItemIsEnabled );
+      Alder::Modality *modality = modalityIt->GetPointer();
+      std::string name = modality->Get( "Name" ).ToString();
+      item = new QTreeWidgetItem( root );
+      item->setText( 0, name.c_str() );
+      item->setExpanded( false );
+      item->setFlags( Qt::ItemIsEnabled );
+      modalityLookup[name] = item;
     }
     
-    if( 0 < user->Get( "RateRetinal" ).ToInt() )
-    {
-      retinalItem = new QTreeWidgetItem( root );
-      retinalItem->setText( 0, "Retinal" );
-      retinalItem->setExpanded( false );
-      retinalItem->setFlags( Qt::ItemIsEnabled );
-    }
-    
-    if( 0 < user->Get( "RateUltrasound" ).ToInt() )
-    {
-      ultrasoundItem = new QTreeWidgetItem( root );
-      ultrasoundItem->setText( 0, "Ultrasound" );
-      ultrasoundItem->setExpanded( false );
-      ultrasoundItem->setFlags( Qt::ItemIsEnabled );
-    }
-
     std::vector< vtkSmartPointer< Alder::Exam > > examList;
     std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
     interview->GetList( &examList );
@@ -650,23 +642,9 @@ void QMainAlderWindow::updateInterviewTreeWidget()
       // figure out which parent to add this exam to based on modality
       vtkSmartPointer< Alder::Modality > modality;
       exam->GetRecord( modality );
-      std::string modalityName = modality->Get( "Name" ).ToString();
-      QTreeWidgetItem *parentItem;
-      if( 0 == modalityName.compare( "Dexa" ) )
-      {
-        if( 0 == user->Get( "RateDexa" ).ToInt() ) continue;
-        parentItem = dexaItem;
-      }
-      else if( 0 == modalityName.compare( "Retinal" ) )
-      {
-        if( 0 == user->Get( "RateRetinal" ).ToInt() ) continue;
-        parentItem = retinalItem;
-      }
-      else if( 0 == modalityName.compare( "Ultrasound" ) )
-      {
-        if( 0 == user->Get( "RateUltrasound" ).ToInt() ) continue;
-        parentItem = ultrasoundItem;
-      }
+      modalityLookupIt = modalityLookup.find( modality->Get( "Name" ).ToString() );
+      if( modalityLookup.end() == modalityLookupIt ) continue;
+      QTreeWidgetItem *parentItem = modalityLookupIt->second;
 
       name = tr( "Exam" ) + ": ";
       std::string laterality = exam->Get( "Laterality" ).ToString();
