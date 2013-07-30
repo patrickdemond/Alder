@@ -12,6 +12,7 @@
 
 #include "Application.h"
 #include "Exam.h"
+#include "Modality.h"
 #include "OpalService.h"
 #include "User.h"
 #include "Utilities.h"
@@ -310,13 +311,21 @@ namespace Alder
     // only update the exams if there are none in the database
     if( !this->HasExamData() )
     {
+      // get the records for all modalities
+      vtkNew<Modality> dexaModality;
+      dexaModality->Load( "Name", "Dexa" );
+      vtkNew<Modality> retinalModality;
+      retinalModality->Load( "Name", "Retinal" );
+      vtkNew<Modality> ultrasoundModality;
+      ultrasoundModality->Load( "Name", "Ultrasound" );
+
       // get exam metadata from Opal for this interview
       examData = opal->GetRow( "alder", "Exam", this->Get( "UId" ).ToString() );
 
       // CarotidIntima
       exam = vtkSmartPointer<Exam>::New();
       exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "Modality", "Ultrasound" );
+      exam->Set( "ModalityId", ultrasoundModality->Get( "Id" ) );
       exam->Set( "Type", "CarotidIntima" );
       exam->Set( "Laterality", "left" );
       exam->Set( "Stage", examData["CarotidIntima.Stage"] );
@@ -326,7 +335,7 @@ namespace Alder
 
       exam = vtkSmartPointer<Exam>::New();
       exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "Modality", "Ultrasound" );
+      exam->Set( "ModalityId", ultrasoundModality->Get( "Id" ) );
       exam->Set( "Type", "CarotidIntima" );
       exam->Set( "Laterality", "right" );
       exam->Set( "Stage", examData["CarotidIntima.Stage"] );
@@ -337,7 +346,7 @@ namespace Alder
       // DualHipBoneDensity
       exam = vtkSmartPointer<Exam>::New();
       exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "Modality", "Dexa" );
+      exam->Set( "ModalityId", dexaModality->Get( "Id" ) );
       exam->Set( "Type", "DualHipBoneDensity" );
       exam->Set( "Laterality", "left" );
       exam->Set( "Stage", examData["DualHipBoneDensity.Stage"] );
@@ -347,7 +356,7 @@ namespace Alder
 
       exam = vtkSmartPointer<Exam>::New();
       exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "Modality", "Dexa" );
+      exam->Set( "ModalityId", dexaModality->Get( "Id" ) );
       exam->Set( "Type", "DualHipBoneDensity" );
       exam->Set( "Laterality", "right" );
       exam->Set( "Stage", examData["DualHipBoneDensity.Stage"] );
@@ -358,7 +367,7 @@ namespace Alder
       // ForearmBoneDensity
       exam = vtkSmartPointer<Exam>::New();
       exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "Modality", "Dexa" );
+      exam->Set( "ModalityId", dexaModality->Get( "Id" ) );
       exam->Set( "Type", "ForearmBoneDensity" );
       exam->Set( "Laterality", "none" );
       exam->Set( "Stage", examData["ForearmBoneDensity.Stage"] );
@@ -369,7 +378,7 @@ namespace Alder
       // LateralBoneDensity
       exam = vtkSmartPointer<Exam>::New();
       exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "Modality", "Dexa" );
+      exam->Set( "ModalityId", dexaModality->Get( "Id" ) );
       exam->Set( "Type", "LateralBoneDensity" );
       exam->Set( "Laterality", "none" );
       exam->Set( "Stage", examData["LateralBoneDensity.Stage"] );
@@ -380,7 +389,7 @@ namespace Alder
       // Plaque
       exam = vtkSmartPointer<Exam>::New();
       exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "Modality", "Ultrasound" );
+      exam->Set( "ModalityId", ultrasoundModality->Get( "Id" ) );
       exam->Set( "Type", "Plaque" );
       exam->Set( "Laterality", "left" );
       exam->Set( "Stage", examData["Plaque.Stage"] );
@@ -390,7 +399,7 @@ namespace Alder
 
       exam = vtkSmartPointer<Exam>::New();
       exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "Modality", "Ultrasound" );
+      exam->Set( "ModalityId", ultrasoundModality->Get( "Id" ) );
       exam->Set( "Type", "Plaque" );
       exam->Set( "Laterality", "right" );
       exam->Set( "Stage", examData["Plaque.Stage"] );
@@ -401,7 +410,7 @@ namespace Alder
       // RetinalScan
       exam = vtkSmartPointer<Exam>::New();
       exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "Modality", "Retinal" );
+      exam->Set( "ModalityId", retinalModality->Get( "Id" ) );
       exam->Set( "Type", "RetinalScan" );
       exam->Set( "Laterality", "left" );
       exam->Set( "Stage", examData["RetinalScan.Stage"] );
@@ -411,7 +420,7 @@ namespace Alder
 
       exam = vtkSmartPointer<Exam>::New();
       exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "Modality", "Retinal" );
+      exam->Set( "ModalityId", retinalModality->Get( "Id" ) );
       exam->Set( "Type", "RetinalScan" );
       exam->Set( "Laterality", "right" );
       exam->Set( "Stage", examData["RetinalScan.Stage"] );
@@ -422,7 +431,7 @@ namespace Alder
       // WholeBodyBoneDensity
       exam = vtkSmartPointer<Exam>::New();
       exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "Modality", "Dexa" );
+      exam->Set( "ModalityId", dexaModality->Get( "Id" ) );
       exam->Set( "Type", "WholeBodyBoneDensity" );
       exam->Set( "Laterality", "none" );
       exam->Set( "Stage", examData["WholeBodyBoneDensity.Stage"] );

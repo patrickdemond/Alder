@@ -15,6 +15,7 @@
 #include "Database.h"
 #include "Exam.h"
 #include "Interview.h"
+#include "Modality.h"
 #include "QueryModifier.h"
 
 #include "vtkSmartPointer.h"
@@ -164,30 +165,37 @@ void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
   for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
   {
     exam = examIt->GetPointer();
-    std::string modality = exam->Get( "Modality" ).ToString();
+    vtkSmartPointer< Alder::Modality > modality;
+    exam->GetRecord( modality );
+    std::string modalityName = exam->Get( "Modality" ).ToString();
     std::string stage = exam->Get( "Stage" ).ToString();
     
     // NOTE: it is possible that an exam with state "Ready" has valid data, but we are leaving
     // those exams out for now since we don't know for sure whether they are always valid
-    if( "Dexa" == modality )
+    if( "Dexa" == modalityName )
     {
       dexaUpdated = true;
       if( 0 == stage.compare( "Completed" ) ) dexaCount++;
       if( exam->IsRatedBy( user ) ) dexaRatedCount++;
     }
-    else if( "Retinal" == modality )
+    else if( "Retinal" == modalityName )
     {
       retinalUpdated = true;
       if( 0 == stage.compare( "Completed" ) ) retinalCount++;
       if( exam->IsRatedBy( user ) ) retinalRatedCount++;
     }
-    else if( "Ultrasound" == modality )
+    else if( "Ultrasound" == modalityName )
     {
       ultrasoundUpdated = true;
       if( 0 == stage.compare( "Completed" ) ) ultrasoundCount++;
       if( exam->IsRatedBy( user ) ) ultrasoundRatedCount++;
     }
-    // TODO: log if an unknown modality is found
+    else
+    {
+      std::stringstream stream;
+      stream << "Interface does not support modality named \"" << modalityName << "\"";
+      throw std::runtime_error( stream.str() );
+    }
   }
 
   // set the text, if updated

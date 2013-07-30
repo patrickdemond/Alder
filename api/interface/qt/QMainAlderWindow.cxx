@@ -15,6 +15,7 @@
 #include "Exam.h"
 #include "Image.h"
 #include "Interview.h"
+#include "Modality.h"
 #include "Rating.h"
 #include "User.h"
 
@@ -647,19 +648,21 @@ void QMainAlderWindow::updateInterviewTreeWidget()
       Alder::Exam *exam = examIt->GetPointer();
 
       // figure out which parent to add this exam to based on modality
-      std::string modality = exam->Get( "Modality" ).ToString();
+      vtkSmartPointer< Alder::Modality > modality;
+      exam->GetRecord( modality );
+      std::string modalityName = modality->Get( "Name" ).ToString();
       QTreeWidgetItem *parentItem;
-      if( 0 == modality.compare( "Dexa" ) )
+      if( 0 == modalityName.compare( "Dexa" ) )
       {
         if( 0 == user->Get( "RateDexa" ).ToInt() ) continue;
         parentItem = dexaItem;
       }
-      else if( 0 == modality.compare( "Retinal" ) )
+      else if( 0 == modalityName.compare( "Retinal" ) )
       {
         if( 0 == user->Get( "RateRetinal" ).ToInt() ) continue;
         parentItem = retinalItem;
       }
-      else if( 0 == modality.compare( "Ultrasound" ) )
+      else if( 0 == modalityName.compare( "Ultrasound" ) )
       {
         if( 0 == user->Get( "RateUltrasound" ).ToInt() ) continue;
         parentItem = ultrasoundItem;
@@ -805,6 +808,23 @@ void QMainAlderWindow::updateAtlasInformation()
   if( this->atlasVisible )
   {
     // get exam from active atlas image
+    Alder::Image *atlasImage = Alder::Application::GetInstance()->GetActiveAtlasImage();
+
+    if( atlasImage )
+    {
+      vtkSmartPointer< Alder::Exam > atlasExam;
+      if( atlasImage->GetRecord( atlasExam ) )
+      {
+        vtkSmartPointer< Alder::Interview > interview;
+        if( atlasExam->GetRecord( interview ) ) uidString = interview->Get( "UId" ).ToString().c_str();
+        noteString = atlasExam->Get( "Note" ).ToString().c_str();
+        interviewerString = atlasExam->Get( "Interviewer" ).ToString().c_str();
+        siteString = interview->Get( "Site" ).ToString().c_str();
+        dateString = atlasExam->Get( "DatetimeAcquired" ).ToString().c_str();
+      }
+    }
+
+    // get the modality help text based on the current image's exam's modality
     Alder::Image *image = Alder::Application::GetInstance()->GetActiveAtlasImage();
 
     if( image )
@@ -812,16 +832,12 @@ void QMainAlderWindow::updateAtlasInformation()
       vtkSmartPointer< Alder::Exam > exam;
       if( image->GetRecord( exam ) )
       {
-        vtkSmartPointer< Alder::Interview > interview;
-        if( exam->GetRecord( interview ) ) uidString = interview->Get( "UId" ).ToString().c_str();
-        noteString = exam->Get( "Note" ).ToString().c_str();
-        interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
-        siteString = interview->Get( "Site" ).ToString().c_str();
-        dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();
+        vtkSmartPointer< Alder::Modality > modality;
+        exam->GetRecord( modality );
+        helpString = modality->Get( "Help" ).ToString();
       }
     }
-
-    // TODO: get help string from Modality table (once it exists)
+    
   }
 
   this->ui->atlasHelpTextEdit->setPlainText( helpString );
