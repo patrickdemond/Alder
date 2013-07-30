@@ -38,7 +38,7 @@ namespace Alder
   public:
     static Interview *New();
     vtkTypeMacro( Interview, ActiveRecord );
-    std::string GetName() { return "Interview"; }
+    std::string GetName() const { return "Interview"; }
 
     /**
      * Updates the Interview table with all existing interviews in Opal

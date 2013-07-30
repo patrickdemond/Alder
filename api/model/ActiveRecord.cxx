@@ -280,7 +280,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  int ActiveRecord::GetRelationship( std::string table, std::string override )
+  int ActiveRecord::GetRelationship( std::string table, std::string override ) const
   {
     Database *db = Application::GetInstance()->GetDB();
 

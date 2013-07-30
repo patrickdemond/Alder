@@ -191,6 +191,9 @@ INCLUDE_DIRECTORIES(
   ${CURL_INCLUDE_DIR}
 )
 
+# We're using cbegin and cend so we need c++11
+SET( CMAKE_CXX_FLAGS "-std=c++0x -Wno-deprecated " )
+
 # Targets
 ADD_EXECUTABLE( alder ${ALDER_SOURCE} ${ALDER_UISrcs} ${MOCSrcs} ${QRCSrcs})
 

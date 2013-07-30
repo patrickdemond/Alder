@@ -355,7 +355,7 @@ namespace Alder
      * Must be extended by every child class.
      * Its value is always the name of the class (identical case)
      */
-    virtual std::string GetName() = 0;
+    virtual std::string GetName() const = 0;
 
   protected:
     ActiveRecord();
@@ -370,9 +370,13 @@ namespace Alder
      * Runs a check to make sure the record exists in the database
      * @throws runtime_error
      */
-    inline void AssertPrimaryId()
+    inline void AssertPrimaryId() const
     {
-      vtkVariant id = this->Get( "Id" );
+      std::map< std::string, vtkVariant >::const_iterator pair = this->ColumnValues.find( "Id" );
+      if( this->ColumnValues.end() == pair )
+        throw std::runtime_error( "Assert failed: primary id column name is not Id" );
+
+      vtkVariant id = pair->second;
       if( !id.IsValid() || 0 == id.ToInt() )
         throw std::runtime_error( "Assert failed: primary id for record is not set" );
     }
@@ -394,7 +398,7 @@ namespace Alder
     /**
      * Determines the relationship between this record and another
      */
-    int GetRelationship( std::string table, std::string override = "" );
+    int GetRelationship( std::string table, std::string override = "" ) const;
 
     std::map<std::string,vtkVariant> ColumnValues;
     bool Initialized;

@@ -42,7 +42,7 @@ namespace Alder
     virtual void ResetPassword();
     virtual bool IsPassword( std::string );
     static std::string GetDefaultPassword() { return "password"; }
-    std::string GetName() { return "User"; }
+    std::string GetName() const { return "User"; }
 
   protected:
     User() {}

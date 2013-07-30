@@ -133,9 +133,9 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string Application::GetUnmangledClassName( std::string mangledName )
+  std::string Application::GetUnmangledClassName( std::string mangledName ) const
   {
-    std::map< std::string, std::string >::iterator it;
+    std::map< std::string, std::string >::const_iterator it;
     for( it = this->ClassNameRegistry.begin(); it != this->ClassNameRegistry.end(); ++it )
       if( it->second == mangledName ) return it->first;
     
