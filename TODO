@@ -2,7 +2,6 @@ A list of things which need to be done (in no particular order)
 ---------------------------------------------------------------
 
 - add an image atlas (ie: a way for a user to view expert ratings)
-- improve Measure.SIDE processing (left,left is left,right and right,right is right,left, etc)
 - replace all string .compare() with ==
 - open interview interface should be more generic with respect to modality types
 - replace User.Rate* columns with UserRateModality table (and update Interview::GetNeighbour
