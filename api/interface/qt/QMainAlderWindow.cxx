@@ -113,7 +113,8 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   interviewRenderer->SetBackground2( 0, 0, 1 );
   this->InterviewViewer->SetRenderWindow( interviewRenwin );
   this->InterviewViewer->InterpolateOff();
-  
+  this->InterviewViewer->SetImageToSinusoid();
+    
   this->AtlasViewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
   vtkRenderWindow* atlasRenwin = this->ui->atlasImageWidget->GetRenderWindow();
   vtkRenderer* atlasRenderer = this->AtlasViewer->GetRenderer();
@@ -122,6 +123,7 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   atlasRenderer->SetBackground2( 0, 0, 1 );
   this->AtlasViewer->SetRenderWindow( atlasRenwin );
   this->AtlasViewer->InterpolateOff();
+  this->AtlasViewer->SetImageToSinusoid();
   
   this->ui->framePlayerWidget->setViewer( this->InterviewViewer );
   this->setCorner( Qt::BottomLeftCorner, Qt::BottomDockWidgetArea );
