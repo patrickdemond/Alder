@@ -688,8 +688,7 @@ void QMainAlderWindow::updateInterviewTreeWidget()
           this->treeModelMap[imageItem] = *imageIt;
           imageItem->setText( 0, name );
 
-          if( examType.compare( "CarotidIntima" ) == 0 ||
-              examType.compare( "Plaque" ) == 0 )
+          if( "CarotidIntima" == examType || "Plaque" == examType )
           {
             std::vector<int> dims = image->GetDICOMDimensions();
             if ( dims.size() > 2 && dims[2] > 1 )

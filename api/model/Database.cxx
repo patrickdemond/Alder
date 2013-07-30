@@ -82,7 +82,7 @@ namespace Alder
     while( query->NextRow() )
     {
       // if we are starting a new table save the old one and start over
-      if( 0 != tableName.compare( query->DataValue( 0 ).ToString() ) )
+      if( query->DataValue( 0 ).ToString() != tableName )
       {
         if( 0 != tableName.length() ) this->Columns.insert(
           std::pair< std::string, std::map< std::string,std::map< std::string, vtkVariant > > >(
@@ -203,7 +203,7 @@ namespace Alder
     }
 
     std::map< std::string, vtkVariant > columnMap = columnPair->second;
-    return 0 == columnMap.find( "is_nullable" )->second.ToString().compare( "YES" );
+    return "YES" == columnMap.find( "is_nullable" )->second.ToString();
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

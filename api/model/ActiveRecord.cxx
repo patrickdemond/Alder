@@ -100,7 +100,7 @@ namespace Alder
       for( int c = 0; c < query->GetNumberOfFields(); ++c )
       {
         std::string column = query->GetFieldName( c );
-        if( 0 != column.compare( "CreateTimestamp" ) && 0 != column.compare( "UpdateTimestamp" ) )
+        if( "CreateTimestamp" != column && "UpdateTimestamp" != column )
           this->ColumnValues.insert( std::pair< std::string, vtkVariant >( column, query->DataValue( c ) ) );
       }
 
@@ -122,7 +122,7 @@ namespace Alder
     bool first = true;
     for( it = this->ColumnValues.begin(); it != this->ColumnValues.end(); ++it )
     {
-      if( 0 != it->first.compare( "Id" ) )
+      if( "Id" != it->first )
       {
         stream << ( first ? "" :  ", " ) << it->first
                << " = " << ( it->second.IsValid() ? query->EscapeString( it->second.ToString() ) : "NULL" );

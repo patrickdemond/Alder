@@ -615,7 +615,7 @@ void vtkCustomCornerAnnotation::SetText(int i, const char *text)
     return;
     }
 
-  if ( this->CornerText[i].compare( text ) == 0 )
+  if ( text == this->CornerText[i] )
     { 
     return;
     } 

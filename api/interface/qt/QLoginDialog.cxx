@@ -51,7 +51,7 @@ void QLoginDialog::slotAccepted()
   if( user->Load( "Name", this->ui->usernameLineEdit->text().toStdString() ) && user->IsPassword( password ) )
   { // login successful
     // if the password matches the default password, force the user to change it
-    while( 0 == password.compare( Alder::User::GetDefaultPassword() ) )
+    while( Alder::User::GetDefaultPassword() == password )
     {
       // prompt for new password
       QString password1 = QInputDialog::getText(

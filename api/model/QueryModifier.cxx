@@ -113,7 +113,7 @@ namespace Alder
         if( !value.IsValid() )
         {
           statement = it->column;
-          statement += ( 0 == it->oper.compare( "=" ) ? " IS NULL" : " IS NOT NULL" );
+          statement += ( "=" == it->oper ? " IS NULL" : " IS NOT NULL" );
         }
         else
         {

@@ -31,7 +31,7 @@ namespace Alder
     // NOTE: it is possible that an exam with state "Ready" has valid data, but we are leaving
     // those exams out for now since we don't know for sure whether they are always valid
     return 0 != this->Get( "Downloaded" ).ToInt() ||
-           0 != this->Get( "Stage" ).ToString().compare( "Completed" );
+           "Completed" != this->Get( "Stage" ).ToString();
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -52,7 +52,7 @@ namespace Alder
       settings[ "ExamId" ] = this->Get( "Id" );
       settings[ "Acquisition" ] = 1;
 
-      if( 0 == type.compare( "CarotidIntima" ) )
+      if( "CarotidIntima" == type )
       {
         // write cineloops 1, 2 and 3
         // for now, assume that the parent image id for the still image
@@ -120,7 +120,7 @@ namespace Alder
           
             if( mapIt->first == stillId ) continue;
             
-            if( 0 == stillAcqDateTime.compare( mapIt->second ) ) 
+            if( mapIt->second == stillAcqDateTime ) 
             {
               parentId = mapIt->first;
               break;
@@ -140,7 +140,7 @@ namespace Alder
           still->Save();
         }
       }
-      else if( 0 == type.compare( "DualHipBoneDensity" ) )
+      else if( "DualHipBoneDensity" == type )
       {
         std::string variable = "Measure.RES_HIP_DICOM";
         std::string sideVariable = "Measure.OUTPUT_HIP_SIDE";
@@ -148,7 +148,7 @@ namespace Alder
         result = this->RetrieveImage( type, variable, UId, settings,
                                       suffix, sideVariable );
       }
-      else if( 0 == type.compare( "ForearmBoneDensity" ) )
+      else if( "ForearmBoneDensity" == type )
       {
         std::string variable = "RES_FA_DICOM";
         std::string sideVariable = "OUTPUT_FA_SIDE";
@@ -156,13 +156,13 @@ namespace Alder
         result = this->RetrieveImage( type, variable, UId, settings,
                                       suffix, sideVariable );
       }
-      else if( 0 == type.compare( "LateralBoneDensity" ) )
+      else if( "LateralBoneDensity" == type )
       {
         std::string variable = "RES_SEL_DICOM_MEASURE";
         std::string suffix = ".dcm";
         result = this->RetrieveImage( type, variable, UId, settings, suffix );
       }
-      else if( 0 == type.compare( "Plaque" ) )
+      else if( "Plaque" == type )
       {
         std::string variable = "Measure.CINELOOP_1";
         std::string sideVariable = "Measure.SIDE";
@@ -170,7 +170,7 @@ namespace Alder
         result = this->RetrieveImage( type, variable, UId, settings,
                                       suffix, sideVariable );
       }
-      else if( 0 == type.compare( "RetinalScan" ) )
+      else if( "RetinalScan" == type )
       {
         std::string variable = "Measure.EYE";
         std::string sideVariable = "Measure.SIDE";
@@ -178,7 +178,7 @@ namespace Alder
         result = this->RetrieveImage( type, variable, UId, settings,
                                       suffix, sideVariable );
       }
-      else if( 0 == type.compare( "WholeBodyBoneDensity" ) )
+      else if( "WholeBodyBoneDensity" == type )
       {
         std::string variable = "RES_WB_DICOM_1";
         std::string suffix = ".dcm";
@@ -233,11 +233,11 @@ namespace Alder
         // if reduced to one side only, add the opposing side
         if( sideList.size() == 1 )
         {
-          if( 0 == Utilities::toLower( sideList[0] ).compare( "right" ) )
+          if( "right" == Utilities::toLower( sideList[0] ) )
           {
             sideList.push_back( "left" );
           }
-          else if( 0 == Utilities::toLower( sideList[0] ).compare( "left" ) )
+          else if( "left" == Utilities::toLower( sideList[0] ) )
           {
             sideList.insert( sideList.begin(), "right" );
           }
@@ -249,7 +249,7 @@ namespace Alder
 
       for( sideListIt = sideList.begin(); sideListIt != sideList.end(); ++sideListIt )
       {
-        if( 0 == Utilities::toLower( *sideListIt ).compare( laterality ) )
+        if( laterality == Utilities::toLower( *sideListIt ) )
         {
           found = true;
           break;

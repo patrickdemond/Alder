@@ -78,7 +78,7 @@ namespace Alder
     else // file exists
     {
       // if the file has a .gz extension, unzip it
-      if( 0 == fileName.substr( fileName.length() - 3, 3 ).compare( ".gz" ) )
+      if( ".gz" == fileName.substr( fileName.length() - 3, 3 ) )
       {
         std::string zipFileName = fileName;
         fileName = fileName.substr( 0, fileName.length() - 3 );
@@ -87,7 +87,7 @@ namespace Alder
         command += zipFileName;
 
         // not a gz file, remove the .gz extension manually
-        if( 0 == Utilities::exec( command ).compare( "ERROR" ) )
+        if( "ERROR" == Utilities::exec( command ) )
           rename( zipFileName.c_str(), fileName.c_str() );
       }
 
