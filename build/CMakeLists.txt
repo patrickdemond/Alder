@@ -45,18 +45,18 @@ IF( UNIX AND NOT APPLE )
   FIND_PACKAGE( ImageMagick COMPONENTS convert REQUIRED )
 ENDIF( UNIX AND NOT APPLE )
 
-SET( ALDER_ROOT_DIR    ${PROJECT_SOURCE_DIR}/.. )
-SET( ALDER_AUX_DIR     ${ALDER_ROOT_DIR}/aux )
-SET( ALDER_API_DIR     ${ALDER_ROOT_DIR}/api )
-SET( ALDER_MODEL_DIR   ${ALDER_API_DIR}/model )
-SET( ALDER_QT_DIR      ${ALDER_API_DIR}/interface/qt )
+SET( ALDER_ROOT_DIR         ${PROJECT_SOURCE_DIR}/.. )
+SET( ALDER_AUX_DIR          ${ALDER_ROOT_DIR}/aux )
+SET( ALDER_API_DIR          ${ALDER_ROOT_DIR}/api )
+SET( ALDER_MODEL_DIR        ${ALDER_API_DIR}/model )
+SET( ALDER_QT_DIR           ${ALDER_API_DIR}/interface/qt )
 SET( ALDER_QT_WIDGETS_DIR   ${ALDER_QT_DIR}/widgets )
 SET( ALDER_QT_RESOURCES_DIR ${ALDER_QT_WIDGETS_DIR}/resources )
-SET( ALDER_VTK_DIR     ${ALDER_API_DIR}/vtk )
-SET( ALDER_CONFIG_FILE ${PROJECT_BINARY_DIR}/config.xml )
-SET( ALDER_DOC_DIR     ${ALDER_ROOT_DIR}/doc )
-SET( ALDER_DOXY_DIR    ${PROJECT_BINARY_DIR}/doxygen )
-SET( ALDER_TESTING_DIR ${ALDER_ROOT_DIR}/testing )
+SET( ALDER_VTK_DIR          ${ALDER_API_DIR}/vtk )
+SET( ALDER_CONFIG_FILE      ${PROJECT_BINARY_DIR}/config.xml )
+SET( ALDER_DOC_DIR          ${ALDER_ROOT_DIR}/doc )
+SET( ALDER_DOXY_DIR         ${PROJECT_BINARY_DIR}/doxygen )
+SET( ALDER_TESTING_DIR      ${ALDER_ROOT_DIR}/testing )
 
 # Create a salt string which can be set at build time
 SET( ALDER_SALT_STRING "this is salt" CACHE STRING "This is salt for encrypting passwords" )
@@ -128,8 +128,9 @@ SET( ALDER_SOURCE
   ${ALDER_QT_DIR}/QUserListDialog.cxx
 
   ${ALDER_QT_WIDGETS_DIR}/QAlderDoubleSlider.cxx
-  ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.cxx
   ${ALDER_QT_WIDGETS_DIR}/QAlderFramePlayerWidget.cxx
+  ${ALDER_QT_WIDGETS_DIR}/QAlderInterviewWidget.cxx
+  ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.cxx
 )
 
 SET_SOURCE_FILES_PROPERTIES(
@@ -148,8 +149,9 @@ SET( ALDER_UIS
   ${ALDER_QT_DIR}/QSelectInterviewDialog.ui
   ${ALDER_QT_DIR}/QUserListDialog.ui
 
-  ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.ui
   ${ALDER_QT_WIDGETS_DIR}/QAlderFramePlayerWidget.ui
+  ${ALDER_QT_WIDGETS_DIR}/QAlderInterviewWidget.ui
+  ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.ui
 )
 
 SET( ALDER_HEADERS
@@ -161,8 +163,9 @@ SET( ALDER_HEADERS
   ${ALDER_QT_DIR}/QUserListDialog.h
 
   ${ALDER_QT_WIDGETS_DIR}/QAlderDoubleSlider.h
-  ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.h
   ${ALDER_QT_WIDGETS_DIR}/QAlderFramePlayerWidget.h
+  ${ALDER_QT_WIDGETS_DIR}/QAlderInterviewWidget.h
+  ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.h
 )
 
 SET( ALDER_QT_QRC
