@@ -159,8 +159,13 @@ namespace Alder
   {
     this->AssertPrimaryId();
 
+    // get the name of the unzipped file
+    std::string fileName = this->GetFileName();
+    if( 0 == fileName.substr( fileName.length() - 3, 3 ).compare( ".gz" ) )
+      fileName = fileName.substr( 0, fileName.length() - 3 );
+
     gdcm::ImageReader reader;
-    reader.SetFileName( this->GetFileName().c_str() );
+    reader.SetFileName( fileName.c_str() );
     reader.Read();
     const gdcm::File &file = reader.GetFile();
     const gdcm::DataSet &ds = file.GetDataSet();
@@ -174,8 +179,13 @@ namespace Alder
   {
     this->AssertPrimaryId();
 
+    // get the name of the unzipped file
+    std::string fileName = this->GetFileName();
+    if( 0 == fileName.substr( fileName.length() - 3, 3 ).compare( ".gz" ) )
+      fileName = fileName.substr( 0, fileName.length() - 3 );
+
     gdcm::ImageReader reader;
-    reader.SetFileName( this->GetFileName().c_str() );
+    reader.SetFileName( fileName.c_str() );
     reader.Read();
     gdcm::Image &image = reader.GetImage();
     
