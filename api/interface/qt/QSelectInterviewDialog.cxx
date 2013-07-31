@@ -15,6 +15,7 @@
 #include "Database.h"
 #include "Exam.h"
 #include "Interview.h"
+#include "Modality.h"
 #include "QueryModifier.h"
 
 #include "vtkSmartPointer.h"
@@ -31,16 +32,36 @@
 QSelectInterviewDialog::QSelectInterviewDialog( QWidget* parent )
   : QDialog( parent )
 {
-  // define the column indeces
-  this->columnIndex["Site"] = 0;
-  this->columnIndex["UId"] = 1;
-  this->columnIndex["VisitDate"] = 2;
-  this->columnIndex["Dexa"] = 3;
-  this->columnIndex["Retinal"] = 4;
-  this->columnIndex["Ultrasound"] = 5;
-
+  int index = 0;
   this->ui = new Ui_QSelectInterviewDialog;
   this->ui->setupUi( this );
+  QStringList labels;
+
+  labels << "Site";
+  this->columnIndex["Site"] = index++;
+
+  labels << "UID";
+  this->columnIndex["UId"] = index++;
+
+  labels << "Visit Date";
+  this->columnIndex["VisitDate"] = index++;
+
+  // all modalities will fill up the remainder of the table
+  std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
+  std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityListIt;
+  Alder::Modality::GetAll( &modalityList );
+
+  // make enough columns for all modalities and set their names
+  this->ui->interviewTableWidget->setColumnCount( index + modalityList.size() );
+  for( modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
+  {
+    std::string name = (*modalityListIt)->Get( "Name" ).ToString();
+    labels << name.c_str();
+    this->ui->interviewTableWidget->setVerticalHeaderItem( index, new QTableWidgetItem( name.c_str() ) );
+    this->columnIndex[name] = index++;
+  }
+
+  this->ui->interviewTableWidget->setHorizontalHeaderLabels( labels );
   this->ui->interviewTableWidget->horizontalHeader()->setResizeMode( QHeaderView::Stretch );
   this->ui->interviewTableWidget->horizontalHeader()->setClickable( true );
   this->ui->interviewTableWidget->verticalHeader()->setVisible( false );
@@ -48,7 +69,7 @@ QSelectInterviewDialog::QSelectInterviewDialog( QWidget* parent )
   this->ui->interviewTableWidget->setSelectionMode( QAbstractItemView::SingleSelection );
 
   this->searchText = "";
-  this->sortColumn = 0;
+  this->sortColumn = 1;
   this->sortOrder = Qt::AscendingOrder;
 
   QObject::connect(
@@ -152,64 +173,55 @@ void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
   Alder::User *user = Alder::Application::GetInstance()->GetActiveUser();
   QString UId = QString( interview->Get( "UId" ).ToString().c_str() );
   
-  // get the list of studies associated with this interview
-  bool dexaUpdated = false, retinalUpdated = false, ultrasoundUpdated = false;
-  int dexaCount = 0, retinalCount = 0, ultrasoundCount = 0;
-  int dexaRatedCount = 0, retinalRatedCount = 0, ultrasoundRatedCount = 0;
-  QString dexaString = "?", retinalString = "?", ultrasoundString = "?";
+  std::map< std::string, bool > updateItemText;
+  std::map< std::string, int > examCount;
+  std::map< std::string, int > ratedCount;
+  std::map< std::string, QString > itemText;
+  std::string modalityName;
+  std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
+  std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityListIt;
+
+  Alder::Modality::GetAll( &modalityList );
+  for( modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
+  {
+    modalityName = (*modalityListIt)->Get( "Name" ).ToString();
+    updateItemText[modalityName] = false;
+    examCount[modalityName] = 0;
+    ratedCount[modalityName] = 0;
+    itemText[modalityName] = "?";
+  }
+
   QString date = tr( "N/A" );
   interview->GetList( &examList );
 
-  // count the number of exams of each modality and whether 
+  // examCount the number of exams of each modality and whether they have been rated
   for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
   {
     exam = examIt->GetPointer();
-    std::string modality = exam->Get( "Modality" ).ToString();
-    std::string stage = exam->Get( "Stage" ).ToString();
+    vtkSmartPointer< Alder::Modality > modality;
+    exam->GetRecord( modality );
+    modalityName = modality->Get( "Name" ).ToString();
     
     // NOTE: it is possible that an exam with state "Ready" has valid data, but we are leaving
     // those exams out for now since we don't know for sure whether they are always valid
-    if( "Dexa" == modality )
-    {
-      dexaUpdated = true;
-      if( 0 == stage.compare( "Completed" ) ) dexaCount++;
-      if( exam->IsRatedBy( user ) ) dexaRatedCount++;
-    }
-    else if( "Retinal" == modality )
-    {
-      retinalUpdated = true;
-      if( 0 == stage.compare( "Completed" ) ) retinalCount++;
-      if( exam->IsRatedBy( user ) ) retinalRatedCount++;
-    }
-    else if( "Ultrasound" == modality )
-    {
-      ultrasoundUpdated = true;
-      if( 0 == stage.compare( "Completed" ) ) ultrasoundCount++;
-      if( exam->IsRatedBy( user ) ) ultrasoundRatedCount++;
-    }
-    // TODO: log if an unknown modality is found
+    updateItemText[modalityName] = true;
+    if( "Completed" == exam->Get( "Stage" ).ToString() ) examCount[modalityName]++;
+    if( exam->IsRatedBy( user ) ) ratedCount[modalityName]++;
   }
 
   // set the text, if updated
-  if( dexaUpdated )
+  std::map< std::string, bool >::iterator updateItemTextIt;
+  for( updateItemTextIt = updateItemText.begin();
+       updateItemTextIt != updateItemText.end();
+       ++updateItemTextIt )
   {
-    dexaString = QString::number( dexaRatedCount );
-    dexaString += tr( " of " );
-    dexaString += QString::number( dexaCount );
-  }
-
-  if( retinalUpdated )
-  {
-    retinalString = QString::number( retinalRatedCount );
-    retinalString += tr( " of " );
-    retinalString += QString::number( retinalCount );
-  }
-
-  if( ultrasoundUpdated )
-  {
-    ultrasoundString = QString::number( ultrasoundRatedCount );
-    ultrasoundString += tr( " of " );
-    ultrasoundString += QString::number( ultrasoundCount );
+    modalityName = updateItemTextIt->first;
+    if( updateItemTextIt->second )
+    {
+      itemText[modalityName] = QString::number( ratedCount[modalityName] );
+      itemText[modalityName] += tr( " of " );
+      itemText[modalityName] += QString::number( examCount[modalityName] );
+    }
   }
 
   if( this->searchText.isEmpty() || UId.contains( this->searchText, Qt::CaseInsensitive ) )
@@ -221,12 +233,14 @@ void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
     if( item ) item->setText( UId );
     item = this->ui->interviewTableWidget->item( row, this->columnIndex["VisitDate"] );
     if( item ) item->setText( QString( interview->Get( "VisitDate" ).ToString().c_str() ) );
-    item = this->ui->interviewTableWidget->item( row, this->columnIndex["Dexa"] );
-    if( item ) item->setText( dexaString );
-    item = this->ui->interviewTableWidget->item( row, this->columnIndex["Retinal"] );
-    if( item ) item->setText( retinalString );
-    item = this->ui->interviewTableWidget->item( row, this->columnIndex["Ultrasound"] );
-    if( item ) item->setText( ultrasoundString );
+
+    // add all modalities to the table
+    std::map< std::string, QString >::iterator itemTextIt;
+    for( itemTextIt = itemText.begin(); itemTextIt != itemText.end(); ++itemTextIt )
+    {
+      item = this->ui->interviewTableWidget->item( row, this->columnIndex[itemTextIt->first] );
+      if( item ) item->setText( itemTextIt->second );
+    }
   }
 }
 
@@ -272,20 +286,17 @@ void QSelectInterviewDialog::updateInterface()
         item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
         this->ui->interviewTableWidget->setItem( 0, this->columnIndex["VisitDate"], item );
 
-        // add dexa interview to row
-        item = new QTableWidgetItem;
-        item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-        this->ui->interviewTableWidget->setItem( 0, this->columnIndex["Dexa"], item );
-
-        // add retinal interview to row
-        item = new QTableWidgetItem;
-        item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-        this->ui->interviewTableWidget->setItem( 0, this->columnIndex["Retinal"], item );
-
-        // add ultrasound interview to row
-        item = new QTableWidgetItem;
-        item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-        this->ui->interviewTableWidget->setItem( 0, this->columnIndex["Ultrasound"], item );
+        // add all modalities (one per column)
+        std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
+        std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityListIt;
+        Alder::Modality::GetAll( &modalityList );
+        for( modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
+        {
+          item = new QTableWidgetItem;
+          item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+          this->ui->interviewTableWidget->setItem(
+            0, this->columnIndex[(*modalityListIt)->Get( "Name" ).ToString()], item );
+        }
 
         this->updateRow( 0, interview );
       }

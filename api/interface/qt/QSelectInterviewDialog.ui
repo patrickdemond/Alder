@@ -41,6 +41,9 @@
      <property name="selectionBehavior">
       <enum>QAbstractItemView::SelectRows</enum>
      </property>
+     <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+      <bool>true</bool>
+     </attribute>
      <column>
       <property name="text">
        <string>Site</string>
@@ -54,21 +57,6 @@
      <column>
       <property name="text">
        <string>Date</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>DEXA</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Retinal</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Ultrasound</string>
       </property>
      </column>
     </widget>

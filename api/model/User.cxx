@@ -20,13 +20,13 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void User::SetVariant( std::string column, vtkVariant value )
   {
-    if( 0 == column.compare( "Password" ) && value.IsValid() )
+    if( "Password" == column && value.IsValid() )
     { // if we are setting the password override the parent so that we can hash
       std::string hashedPassword;
       Utilities::hashString( value.ToString(), hashedPassword );
       value = vtkVariant( hashedPassword );
     }
-    else if( 0 == column.compare( "Name" ) && 0 == value.ToString().length() )
+    else if( "Name" == column && 0 == value.ToString().length() )
     { // don't allow empty user names
       std::stringstream error;
       error << "Tried to set column \"" << this->GetName() << "." << column << "\" which doesn't exist";
@@ -48,6 +48,6 @@ namespace Alder
     // first hash the password argument
     std::string hashedPassword;
     Utilities::hashString( password, hashedPassword );
-    return 0 == hashedPassword.compare( this->Get( "Password" ).ToString() );
+    return this->Get( "Password" ).ToString() == hashedPassword;
   }
 }

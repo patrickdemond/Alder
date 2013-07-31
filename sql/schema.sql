@@ -24,6 +24,22 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `Alder`.`Modality`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Alder`.`Modality` ;
+
+CREATE  TABLE IF NOT EXISTS `Alder`.`Modality` (
+  `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `UpdateTimestamp` TIMESTAMP NOT NULL ,
+  `CreateTimestamp` TIMESTAMP NOT NULL ,
+  `Name` VARCHAR(45) NOT NULL ,
+  `Help` TEXT NOT NULL ,
+  PRIMARY KEY (`Id`) ,
+  UNIQUE INDEX `uqName` (`Name` ASC) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `Alder`.`Exam`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `Alder`.`Exam` ;
@@ -33,7 +49,7 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Exam` (
   `UpdateTimestamp` TIMESTAMP NOT NULL ,
   `CreateTimestamp` TIMESTAMP NOT NULL ,
   `InterviewId` INT UNSIGNED NOT NULL ,
-  `Modality` ENUM('Dexa','Retinal','Ultrasound') NOT NULL ,
+  `ModalityId` INT UNSIGNED NOT NULL ,
   `Type` VARCHAR(255) NOT NULL ,
   `Laterality` ENUM('right','left','none') NOT NULL ,
   `Stage` VARCHAR(45) NOT NULL ,
@@ -45,10 +61,16 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Exam` (
   INDEX `dkLaterality` (`Laterality` ASC) ,
   INDEX `dkType` (`Type` ASC) ,
   INDEX `fkInterviewId` (`InterviewId` ASC) ,
-  INDEX `uqInterviewIdModalityTypeLaterality` (`InterviewId` ASC, `Modality` ASC, `Type` ASC, `Laterality` ASC) ,
+  INDEX `uqInterviewIdModalityIdTypeLaterality` (`InterviewId` ASC, `ModalityId` ASC, `Type` ASC, `Laterality` ASC) ,
+  INDEX `fkExamModalityId` (`ModalityId` ASC) ,
   CONSTRAINT `fkExamInterviewId`
     FOREIGN KEY (`InterviewId` )
     REFERENCES `Alder`.`Interview` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fkExamModalityId`
+    FOREIGN KEY (`ModalityId` )
+    REFERENCES `Alder`.`Modality` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -96,9 +118,6 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`User` (
   `Password` VARCHAR(255) NOT NULL ,
   `Expert` TINYINT(1) NOT NULL DEFAULT 0 ,
   `InterviewId` INT UNSIGNED NULL DEFAULT NULL ,
-  `RateDexa` TINYINT(1) NOT NULL DEFAULT 0 ,
-  `RateUltrasound` TINYINT(1) NOT NULL DEFAULT 0 ,
-  `RateRetinal` TINYINT(1) NOT NULL DEFAULT 0 ,
   `LastLogin` DATETIME NULL DEFAULT NULL ,
   PRIMARY KEY (`Id`) ,
   UNIQUE INDEX `uqName` (`Name` ASC) ,
@@ -137,6 +156,33 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Rating` (
   CONSTRAINT `fkRatingUserId`
     FOREIGN KEY (`UserId` )
     REFERENCES `Alder`.`User` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Alder`.`UserHasModality`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `Alder`.`UserHasModality` ;
+
+CREATE  TABLE IF NOT EXISTS `Alder`.`UserHasModality` (
+  `UserId` INT UNSIGNED NOT NULL ,
+  `ModalityId` INT UNSIGNED NOT NULL ,
+  `UpdateTimestamp` TIMESTAMP NOT NULL ,
+  `CreateTimestamp` TIMESTAMP NOT NULL ,
+  PRIMARY KEY (`UserId`, `ModalityId`) ,
+  INDEX `fkModalityId` (`ModalityId` ASC) ,
+  INDEX `fkUserId` (`UserId` ASC) ,
+  UNIQUE INDEX `uqUserIdModalityId` (`UserId` ASC, `ModalityId` ASC) ,
+  CONSTRAINT `fkUserHasModalityUserId`
+    FOREIGN KEY (`UserId` )
+    REFERENCES `Alder`.`User` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fkUserHasModalityModalityId`
+    FOREIGN KEY (`ModalityId` )
+    REFERENCES `Alder`.`Modality` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
