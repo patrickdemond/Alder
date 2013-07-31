@@ -332,9 +332,20 @@ void QMainAlderWindow::slotShowAtlas()
         if( 0 < newAtlasImage->Get( "Id" ).ToInt() ) app->SetActiveAtlasImage( newAtlasImage );
       }
     }
+
+    // add the widget to the splitter
+    this->ui->imageWidgetSplitter->insertWidget( 0, this->ui->atlasImageWidget );
+
+    QList<int> sizeList = this->ui->imageWidgetSplitter->sizes();
+    int total = sizeList[0] + sizeList[1];
+    sizeList[0] = floor( total / 2 );
+    sizeList[1] = sizeList[0];
+    this->ui->imageWidgetSplitter->setSizes( sizeList );
   }
-  else if( !this->atlasVisible && NULL != atlasImage )
+  else
   {
+    // remove the widget from the splitter
+    this->ui->atlasImageWidget->setParent( NULL );
     app->SetActiveAtlasImage( NULL );
   }
 
@@ -852,6 +863,7 @@ void QMainAlderWindow::updateInterface()
   this->ui->atlasDockWidget->setVisible( this->atlasVisible );
   this->ui->interviewDockWidget->setVisible( !this->atlasVisible );
 
+  /*
   if( this->atlasVisible )
   {
     // make sure the atlas image widget is showing
@@ -874,6 +886,7 @@ void QMainAlderWindow::updateInterface()
       this->ui->imageWidgetSplitter->setSizes( sizeList );
     }
   }
+  */
 
   // set all widget enable states
   this->ui->actionOpenInterview->setEnabled( loggedIn );
@@ -894,18 +907,17 @@ void QMainAlderWindow::updateInterface()
 
   this->ui->framePlayerWidget->setEnabled( loggedIn );
 
-  this->ui->imageWidgetSplitter->setEnabled( this->atlasVisible );
   this->ui->interviewImageWidget->setEnabled( loggedIn );
   this->ui->atlasImageWidget->setEnabled( loggedIn );
-
-  this->updateInterviewTreeWidget();
-  this->updateInterviewInformation();
-  this->updateInterviewImageWidget();
-  this->updateInterviewRating();
 
   if( this->atlasVisible )
   {
     this->updateAtlasInformation();
     this->updateAtlasImageWidget();
   }
+
+  this->updateInterviewTreeWidget();
+  this->updateInterviewInformation();
+  this->updateInterviewImageWidget();
+  this->updateInterviewRating();
 }
