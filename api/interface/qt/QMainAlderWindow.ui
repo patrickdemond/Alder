@@ -65,7 +65,7 @@
       <property name="childrenCollapsible">
        <bool>false</bool>
       </property>
-      <widget class="QVTKWidget" name="atlasImageWidget">
+      <widget class="QVTKWidget" name="atlasImageWidget" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -85,7 +85,7 @@
         </size>
        </property>
       </widget>
-      <widget class="QVTKWidget" name="interviewImageWidget">
+      <widget class="QVTKWidget" name="interviewImageWidget" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -444,7 +444,7 @@
      <x>0</x>
      <y>0</y>
      <width>1281</width>
-     <height>27</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuActions">
