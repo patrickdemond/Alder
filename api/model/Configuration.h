@@ -53,13 +53,13 @@ namespace Alder
      * @param category string
      * @param key string
      */
-    std::string GetValue( std::string category, std::string key );
+    std::string GetValue( const std::string category, const std::string key ) const;
 
     /**
      * Reads a configuration file given a filename
      * @filename string
      */
-    bool Read( std::string filename );
+    bool Read( const std::string filename );
 
   protected:
     Configuration();

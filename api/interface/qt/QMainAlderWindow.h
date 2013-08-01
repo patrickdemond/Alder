@@ -16,12 +16,8 @@
 
 #include "vtkSmartPointer.h"
 
-#include <map>
-
-namespace Alder { class ActiveRecord; };
 class Ui_QMainAlderWindow;
 class vtkMedicalImageViewer;
-class QTreeWidgetItem;
 
 class QMainAlderWindow : public QMainWindow
 {
@@ -31,7 +27,6 @@ public:
   QMainAlderWindow( QWidget* parent = 0 );
   ~QMainAlderWindow();
 
-  
 public slots:
   // action event functions
   virtual void slotOpenInterview();
@@ -40,11 +35,8 @@ public slots:
   virtual void slotUserManagement();
   virtual void slotUpdateDatabase();
 
-  virtual void slotPreviousInterview();
-  virtual void slotNextInterview();
-  virtual void slotTreeSelectionChanged();
-  virtual void slotInterviewRatingChanged( int );
-  virtual void slotInterviewNoteChanged();
+  virtual void slotActiveInterviewChanged();
+  virtual void slotActiveImageChanged();
 
   virtual void slotAtlasRatingChanged( int );
   virtual void slotPreviousAtlasImage();
@@ -62,16 +54,11 @@ protected:
   virtual void readSettings();
   virtual void writeSettings();
   
-  virtual void updateInterviewInformation();
-  virtual void updateInterviewTreeWidget();
   virtual void updateInterviewImageWidget();
-  virtual void updateInterviewRating();
   virtual void updateAtlasInformation();
   virtual void updateAtlasImageWidget();
 
   virtual void updateInterface();
-
-  std::map< QTreeWidgetItem*, vtkSmartPointer<Alder::ActiveRecord> > treeModelMap;
 
 protected slots:
 

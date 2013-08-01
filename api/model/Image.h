@@ -37,7 +37,7 @@ namespace Alder
   public:
     static Image *New();
     vtkTypeMacro( Image, ActiveRecord );
-    std::string GetName() { return "Image"; }
+    std::string GetName() const { return "Image"; }
 
     /**
      * Get the full path to where the image associated with this record belongs.

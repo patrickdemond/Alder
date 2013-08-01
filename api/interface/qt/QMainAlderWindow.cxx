@@ -34,7 +34,6 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QSettings>
-#include <QTreeWidgetItem>
 
 #include <stdexcept>
 
@@ -49,9 +48,6 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   this->ui = new Ui_QMainAlderWindow;
   this->ui->setupUi( this );
   
-  // set up child widgets
-  this->ui->interviewTreeWidget->header()->hide();
-
   // connect the menu items
   QObject::connect(
     this->ui->actionOpenInterview, SIGNAL( triggered() ),
@@ -80,21 +76,13 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this->ui->actionManual, SIGNAL( triggered() ),
     this, SLOT( slotManual() ) );
 
+  // connect the interview widget signals
   QObject::connect(
-    this->ui->interviewPreviousPushButton, SIGNAL( clicked() ),
-    this, SLOT( slotPreviousInterview() ) );
+    this->ui->interviewWidget, SIGNAL( activeInterviewChanged() ),
+    this, SLOT( slotActiveInterviewChanged() ) );
   QObject::connect(
-    this->ui->interviewNextPushButton, SIGNAL( clicked() ),
-    this, SLOT( slotNextInterview() ) );
-  QObject::connect(
-    this->ui->interviewTreeWidget, SIGNAL( itemSelectionChanged() ),
-    this, SLOT( slotTreeSelectionChanged() ) );
-  QObject::connect(
-    this->ui->interviewRatingSlider, SIGNAL( valueChanged( int ) ),
-    this, SLOT( slotInterviewRatingChanged( int ) ) );
-  QObject::connect(
-    this->ui->interviewNoteTextEdit, SIGNAL( textChanged() ),
-    this, SLOT( slotInterviewNoteChanged() ) );
+    this->ui->interviewWidget, SIGNAL( activeImageChanged() ),
+    this, SLOT( slotImageChanged() ) );
 
   QObject::connect(
     this->ui->atlasPreviousPushButton, SIGNAL( clicked() ),
@@ -125,6 +113,7 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   this->AtlasViewer->SetRenderWindow( atlasRenwin );
   this->AtlasViewer->InterpolateOff();
   this->AtlasViewer->SetImageToSinusoid();
+  this->ui->atlasImageWidget->setParent( NULL ); // initial state is invisible
   
   this->ui->framePlayerWidget->setViewer( this->InterviewViewer );
   this->setCorner( Qt::BottomLeftCorner, Qt::BottomDockWidgetArea );
@@ -132,13 +121,6 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
 
   this->readSettings();
   this->updateInterface();
-
-  // give a bit more room to the tree
-  double total = this->ui->interviewTreeWidget->height() + this->ui->interviewNoteTextEdit->height();
-  QList<int> sizeList;
-  sizeList.append( floor( 2 * total / 3 ) );
-  sizeList.append( total - sizeList[0] );
-  this->ui->interviewTextSplitter->setSizes( sizeList );
 };
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -184,94 +166,6 @@ void QMainAlderWindow::slotOpenInterview()
 
     // active interview may have changed so update the interface
     this->updateInterface();
-  }
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotPreviousInterview()
-{
-  Alder::Application *app = Alder::Application::GetInstance();
-  Alder::User *user = app->GetActiveUser();
-  Alder::Interview *activeInterview = app->GetActiveInterview();
-  vtkSmartPointer< Alder::Interview > interview;
-  if( user && activeInterview )
-  {
-    interview = activeInterview->GetPrevious(
-      this->ui->interviewLoadedCheckBox->isChecked(),
-      this->ui->interviewUnratedCheckBox->isChecked() );
-
-    // warn user if the neighbouring interview is an empty record (ie: no neighbour found)
-    vtkVariant vId = interview->Get( "Id" );
-    if( !vId.IsValid() || 0 == vId.ToInt() )
-    {
-      QMessageBox errorMessage( this );
-      errorMessage.setWindowModality( Qt::WindowModal );
-      errorMessage.setIcon( QMessageBox::Warning );
-      errorMessage.setText( tr( "There are no remaining studies available which meet your criteria." ) );
-      errorMessage.exec();
-    }
-    else
-    {
-      if( !interview->HasExamData() || !interview->HasImageData() )
-      {
-        // create a progress dialog to observe the progress of the update
-        QProgressDialog dialog( this );
-        dialog.setModal( true );
-        dialog.setWindowTitle( tr( "Downloading Exam Images" ) );
-        dialog.setMessage( tr( "Please wait while the interview's images are downloaded." ) );
-        dialog.open();
-        interview->UpdateExamData();
-        interview->UpdateImageData();
-        dialog.accept();
-      }
-
-      app->SetActiveInterview( interview );
-      this->updateInterface();
-    }
-  }
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotNextInterview()
-{
-  Alder::Application *app = Alder::Application::GetInstance();
-  Alder::User *user = app->GetActiveUser();
-  Alder::Interview *activeInterview = app->GetActiveInterview();
-  vtkSmartPointer< Alder::Interview > interview;
-  if( user && activeInterview )
-  {
-    interview = activeInterview->GetNext(
-      this->ui->interviewLoadedCheckBox->isChecked(),
-      this->ui->interviewUnratedCheckBox->isChecked() );
-
-    // warn user if the neighbouring interview is an empty record (ie: no neighbour found)
-    vtkVariant vId = interview->Get( "Id" );
-    if( !vId.IsValid() || 0 == vId.ToInt() )
-    {
-      QMessageBox errorMessage( this );
-      errorMessage.setWindowModality( Qt::WindowModal );
-      errorMessage.setIcon( QMessageBox::Warning );
-      errorMessage.setText( tr( "There are no remaining studies available which meet your criteria." ) );
-      errorMessage.exec();
-    }
-    else
-    {
-      if( !interview->HasExamData() || !interview->HasImageData() )
-      {
-        // create a progress dialog to observe the progress of the update
-        QProgressDialog dialog( this );
-        dialog.setModal( true );
-        dialog.setWindowTitle( tr( "Downloading Exam Images" ) );
-        dialog.setMessage( tr( "Please wait while the interview's images are downloaded." ) );
-        dialog.open();
-        interview->UpdateExamData();
-        interview->UpdateImageData();
-        dialog.accept();
-      }
-
-      app->SetActiveInterview( interview );
-      this->updateInterface();
-    }
   }
 }
 
@@ -332,9 +226,20 @@ void QMainAlderWindow::slotShowAtlas()
         if( 0 < newAtlasImage->Get( "Id" ).ToInt() ) app->SetActiveAtlasImage( newAtlasImage );
       }
     }
+
+    // add the widget to the splitter
+    this->ui->imageWidgetSplitter->insertWidget( 0, this->ui->atlasImageWidget );
+
+    QList<int> sizeList = this->ui->imageWidgetSplitter->sizes();
+    int total = sizeList[0] + sizeList[1];
+    sizeList[0] = floor( total / 2 );
+    sizeList[1] = sizeList[0];
+    this->ui->imageWidgetSplitter->setSizes( sizeList );
   }
-  else if( !this->atlasVisible && NULL != atlasImage )
+  else if( !this->atlasVisible )
   {
+    // remove the widget from the splitter
+    this->ui->atlasImageWidget->setParent( NULL );
     app->SetActiveAtlasImage( NULL );
   }
 
@@ -409,6 +314,18 @@ void QMainAlderWindow::slotUpdateDatabase()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotActiveInterviewChanged()
+{
+  this->updateInterface();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotActiveImageChanged()
+{
+  this->updateInterface();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotAbout()
 {
   QAboutDialog dialog( this );
@@ -434,74 +351,6 @@ void QMainAlderWindow::readSettings()
   if( settings.contains( "maximized" ) && settings.value( "maximized" ).toBool() )
     this->showMaximized();
   settings.endGroup();
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotTreeSelectionChanged()
-{
-  Alder::Application *app = Alder::Application::GetInstance();
-  
-  QList<QTreeWidgetItem*> list = this->ui->interviewTreeWidget->selectedItems();
-  if( 0 < list.size() )
-  {
-    std::map< QTreeWidgetItem*, vtkSmartPointer<Alder::ActiveRecord> >::iterator it;
-    it = this->treeModelMap.find( list.at( 0 ) );
-    if( it != this->treeModelMap.end() )
-    {
-      Alder::ActiveRecord *record = it->second;
-      app->SetActiveImage( Alder::Image::SafeDownCast( record ) );
-    }
-  }
-
-  this->updateInterface();
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotInterviewRatingChanged( int value )
-{
-  Alder::Application *app = Alder::Application::GetInstance();
-
-  // make sure we have an active user and image
-  Alder::User *user = app->GetActiveUser();
-  if( !user ) throw std::runtime_error( "Rating slider modified without an active user" );
-  Alder::Image *image = app->GetActiveImage();
-  if( !image ) throw std::runtime_error( "Rating slider modified without an active image" );
-
-  // See if we have a rating for this user and image
-  std::map< std::string, std::string > map;
-  map["UserId"] = user->Get( "Id" ).ToString();
-  map["ImageId"] = image->Get( "Id" ).ToString();
-  vtkNew< Alder::Rating > rating;
-  if( !rating->Load( map ) )
-  { // no record exists, set the user and image ids
-    rating->Set( "UserId", user->Get( "Id" ).ToInt() );
-    rating->Set( "ImageId", image->Get( "Id" ).ToInt() );
-  }
-
-  if( 0 == value ) rating->SetNull( "Rating" );
-  else rating->Set( "Rating", value );
-
-  rating->Save();
-  this->updateInterviewRating();
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotInterviewNoteChanged()
-{
-  vtkSmartPointer< Alder::Exam > exam;
-  Alder::Application *app = Alder::Application::GetInstance();
-
-  // make sure we have an active user and image, and the image has an exam
-  Alder::User *user = app->GetActiveUser();
-  if( user )
-  {
-    Alder::Image *image = app->GetActiveImage();
-    if( image && image->GetRecord( exam ) )
-    {
-      exam->Set( "Note", this->ui->interviewNoteTextEdit->toPlainText().toStdString() );
-      exam->Save();
-    }
-  }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -551,183 +400,6 @@ void QMainAlderWindow::writeSettings()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::updateInterviewInformation()
-{
-  QString noteString = "";
-  QString interviewerString = tr( "N/A" );
-  QString siteString = tr( "N/A" );
-  QString dateString = tr( "N/A" );
-
-  // fill in the active exam information
-  Alder::Interview *interview = Alder::Application::GetInstance()->GetActiveInterview();
-  if( interview )
-  {
-    // get exam from active image
-    Alder::Image *image = Alder::Application::GetInstance()->GetActiveImage();
-
-    if( image )
-    {
-      vtkSmartPointer< Alder::Exam > exam;
-      if( image->GetRecord( exam ) )
-      {
-        noteString = exam->Get( "Note" ).ToString().c_str();
-        interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
-        siteString = interview->Get( "Site" ).ToString().c_str();
-        dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();
-      }
-    }
-  }
-
-  this->ui->interviewNoteTextEdit->setPlainText( noteString );
-  this->ui->interviewInterviewerValueLabel->setText( interviewerString );
-  this->ui->interviewSiteValueLabel->setText( siteString );
-  this->ui->interviewDateValueLabel->setText( dateString );
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::updateInterviewTreeWidget()
-{
-  Alder::Interview *interview = Alder::Application::GetInstance()->GetActiveInterview();
-
-  // stop the tree's signals until we are done
-  bool oldSignalState = this->ui->interviewTreeWidget->blockSignals( true );
-
-  // if a interview is open then populate the interview tree
-  this->treeModelMap.clear();
-  this->ui->interviewTreeWidget->clear();
-  if( interview )
-  {
-    // get the active image so that we can highlight it
-    Alder::Application *app = Alder::Application::GetInstance();
-    Alder::User *user = app->GetActiveUser();
-    Alder::Image *activeImage = app->GetActiveImage();
-    QTreeWidgetItem *selectedItem = NULL, *item = NULL;
-    std::map< std::string, QTreeWidgetItem* > modalityLookup;
-    std::map< std::string, QTreeWidgetItem* >::iterator modalityLookupIt;
-
-    // make root the interview's UID and date
-    QString name = tr( "Interview: " );
-    name += interview->Get( "UId" ).ToString().c_str();
-    name += " (";
-    name += interview->Get( "VisitDate" ).ToString().c_str();
-    name += ")";
-    QTreeWidgetItem *root = new QTreeWidgetItem( this->ui->interviewTreeWidget );
-    root->setText( 0, name );
-    root->setExpanded( true );
-    root->setFlags( Qt::ItemIsEnabled );
-    this->ui->interviewTreeWidget->addTopLevelItem( root );
-
-    // make each modality type a child of the root
-    std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
-    std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityIt;
-    user->GetList( &modalityList );
-    for( modalityIt = modalityList.begin(); modalityIt != modalityList.end(); ++modalityIt )
-    {
-      Alder::Modality *modality = modalityIt->GetPointer();
-      std::string name = modality->Get( "Name" ).ToString();
-      item = new QTreeWidgetItem( root );
-      item->setText( 0, name.c_str() );
-      item->setExpanded( false );
-      item->setFlags( Qt::ItemIsEnabled );
-      modalityLookup[name] = item;
-    }
-    
-    std::vector< vtkSmartPointer< Alder::Exam > > examList;
-    std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
-    interview->GetList( &examList );
-    for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
-    {
-      Alder::Exam *exam = examIt->GetPointer();
-
-      // figure out which parent to add this exam to based on modality
-      vtkSmartPointer< Alder::Modality > modality;
-      exam->GetRecord( modality );
-      modalityLookupIt = modalityLookup.find( modality->Get( "Name" ).ToString() );
-      if( modalityLookup.end() == modalityLookupIt ) continue;
-      QTreeWidgetItem *parentItem = modalityLookupIt->second;
-
-      name = tr( "Exam" ) + ": ";
-      std::string laterality = exam->Get( "Laterality" ).ToString();
-      if( "none" != laterality )
-      {
-        name += laterality.c_str();
-        name += " ";
-      }
-
-      std::string examType = exam->Get( "Type" ).ToString();
-      name += examType.c_str();
-
-      QTreeWidgetItem *examItem = new QTreeWidgetItem( parentItem );
-      this->treeModelMap[examItem] = *examIt;
-      examItem->setText( 0, name );
-      examItem->setIcon(0, QIcon(":/icons/eye-visible-icon" ) );
-      examItem->setExpanded( true );
-      examItem->setFlags( Qt::ItemIsEnabled );
-
-      // add the images for this exam
-      std::vector< vtkSmartPointer< Alder::Image > > imageList;
-      std::vector< vtkSmartPointer< Alder::Image > >::iterator imageIt;
-      exam->GetList( &imageList );
-
-      // if the exam has no images, display the status of the exam
-      if( imageList.empty() )
-      {
-        examItem->setIcon(0, QIcon(":/icons/x-icon" ) );        
-      }
-
-      for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
-      {
-        Alder::Image *image = imageIt->GetPointer();
-        
-        // don't show images with parents (that happens in the loop below instead)
-        if( !image->Get( "ParentImageId" ).IsValid() )
-        {
-          name = tr( "Image #" );
-          name += image->Get( "Acquisition" ).ToString().c_str();
-          QTreeWidgetItem *imageItem = new QTreeWidgetItem( examItem );
-          this->treeModelMap[imageItem] = *imageIt;
-          imageItem->setText( 0, name );
-
-          if( "CarotidIntima" == examType || "Plaque" == examType )
-          {
-            std::vector<int> dims = image->GetDICOMDimensions();
-            if ( dims.size() > 2 && dims[2] > 1 )
-              imageItem->setIcon(0, QIcon(":/icons/movie-icon" ) );             
-          }
-           
-          imageItem->setExpanded( true );
-          imageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-          if( activeImage && activeImage->Get( "Id" ).ToInt() == image->Get( "Id" ).ToInt() )
-            selectedItem = imageItem;
-
-          // add child images for this image
-          std::vector< vtkSmartPointer< Alder::Image > > childImageList;
-          std::vector< vtkSmartPointer< Alder::Image > >::iterator childImageIt;
-          image->GetList( &childImageList, "ParentImageId" );
-          for( childImageIt = childImageList.begin(); childImageIt != childImageList.end(); ++childImageIt )
-          {
-            Alder::Image *childImage = childImageIt->GetPointer();
-            name = tr( "Image #" );
-            name += childImage->Get( "Acquisition" ).ToString().c_str();
-            QTreeWidgetItem *childImageItem = new QTreeWidgetItem( imageItem );
-            this->treeModelMap[childImageItem] = *childImageIt;
-            childImageItem->setText( 0, name );
-            childImageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-            if( activeImage && activeImage->Get( "Id" ).ToInt() == childImage->Get( "Id" ).ToInt() )
-              selectedItem = childImageItem;
-          }
-        }
-      }
-    }
-      
-    if( selectedItem ) this->ui->interviewTreeWidget->setCurrentItem( selectedItem );
-  }
-
-  // re-enable the tree's signals
-  this->ui->interviewTreeWidget->blockSignals( oldSignalState );
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::updateInterviewImageWidget()
 {
   Alder::Image *image = Alder::Application::GetInstance()->GetActiveImage();
@@ -736,39 +408,6 @@ void QMainAlderWindow::updateInterviewImageWidget()
   else this->InterviewViewer->SetImageToSinusoid();
 
   this->ui->framePlayerWidget->updateFromViewer();
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::updateInterviewRating()
-{
-  // stop the rating slider's signals until we are done
-  bool oldSignalState = this->ui->interviewRatingSlider->blockSignals( true );
-
-  int ratingValue = 0;
-  Alder::Application *app = Alder::Application::GetInstance();
-
-  // make sure we have an active image
-  Alder::User *user = app->GetActiveUser();
-  Alder::Image *image = app->GetActiveImage();
-
-  if( user && image )
-  {
-    std::map< std::string, std::string > map;
-    map["UserId"] = user->Get( "Id" ).ToString();
-    map["ImageId"] = image->Get( "Id" ).ToString();
-    vtkNew< Alder::Rating > rating;
-    if( rating->Load( map ) )
-    {
-      vtkVariant v = rating->Get( "Rating" );
-      if( v.IsValid() ) ratingValue = v.ToInt();
-    }
-  }
-
-  this->ui->interviewRatingSlider->setValue( ratingValue );
-  this->ui->interviewRatingValueLabel->setText( 0 == ratingValue ? tr( "N/A" ) : QString::number( ratingValue ) );
-
-  // re-enable the rating slider's signals
-  this->ui->interviewRatingSlider->blockSignals( oldSignalState );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -838,8 +477,6 @@ void QMainAlderWindow::updateAtlasImageWidget()
 void QMainAlderWindow::updateInterface()
 {
   Alder::Application *app = Alder::Application::GetInstance();
-  Alder::Interview *interview = app->GetActiveInterview();
-  Alder::Image *image = app->GetActiveImage();
   Alder::Image *atlasImage = app->GetActiveAtlasImage();
   bool loggedIn = NULL != app->GetActiveUser();
 
@@ -848,43 +485,12 @@ void QMainAlderWindow::updateInterface()
   this->ui->actionShowAtlas->setText( tr( this->atlasVisible ? "Hide Atlas" : "Show Atlas" ) );
 
   // display or hide the image atlas widgets
-  this->ui->imageWidgetSplitter->setChildrenCollapsible( !this->atlasVisible );
   this->ui->atlasDockWidget->setVisible( this->atlasVisible );
   this->ui->interviewDockWidget->setVisible( !this->atlasVisible );
-
-  if( this->atlasVisible )
-  {
-    // make sure the atlas image widget is showing
-    QList<int> sizeList = this->ui->imageWidgetSplitter->sizes();
-    if( 0 == sizeList[0] )
-    {
-      sizeList[0] = floor( sizeList[1] / 2 );
-      sizeList[1] = sizeList[0];
-      this->ui->imageWidgetSplitter->setSizes( sizeList );
-    }
-  }
-  else
-  {
-    // make sure the atlas image widget is not showing
-    QList<int> sizeList = this->ui->imageWidgetSplitter->sizes();
-    if( 0 != sizeList[0] )
-    {
-      sizeList[1] += sizeList[0];
-      sizeList[0] = 0;
-      this->ui->imageWidgetSplitter->setSizes( sizeList );
-    }
-  }
 
   // set all widget enable states
   this->ui->actionOpenInterview->setEnabled( loggedIn );
   this->ui->actionShowAtlas->setEnabled( loggedIn );
-  this->ui->interviewUnratedCheckBox->setEnabled( interview );
-  this->ui->interviewLoadedCheckBox->setEnabled( interview );
-  this->ui->interviewPreviousPushButton->setEnabled( interview );
-  this->ui->interviewNextPushButton->setEnabled( interview );
-  this->ui->interviewRatingSlider->setEnabled( image );
-  this->ui->interviewNoteTextEdit->setEnabled( image );
-  this->ui->interviewTreeWidget->setEnabled( interview );
 
   this->ui->atlasRatingComboBox->setEnabled( atlasImage );
   this->ui->atlasPreviousPushButton->setEnabled( atlasImage );
@@ -893,19 +499,17 @@ void QMainAlderWindow::updateInterface()
   this->ui->atlasNoteTextEdit->setEnabled( atlasImage && this->atlasVisible );
 
   this->ui->framePlayerWidget->setEnabled( loggedIn );
-
-  this->ui->imageWidgetSplitter->setEnabled( this->atlasVisible );
+  this->ui->imageWidgetSplitter->setEnabled( loggedIn );
   this->ui->interviewImageWidget->setEnabled( loggedIn );
   this->ui->atlasImageWidget->setEnabled( loggedIn );
 
-  this->updateInterviewTreeWidget();
-  this->updateInterviewInformation();
   this->updateInterviewImageWidget();
-  this->updateInterviewRating();
 
   if( this->atlasVisible )
   {
     this->updateAtlasInformation();
     this->updateAtlasImageWidget();
   }
+
+  this->ui->interviewWidget->updateInterface();
 }

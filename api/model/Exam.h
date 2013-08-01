@@ -38,7 +38,7 @@ namespace Alder
   public:
     static Exam *New();
     vtkTypeMacro( Exam, ActiveRecord );
-    std::string GetName() { return "Exam"; }
+    std::string GetName() const { return "Exam"; }
 
     /**
      * Returns whether this exam's image data has been downloaded

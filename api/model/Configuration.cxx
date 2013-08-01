@@ -26,7 +26,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  bool Configuration::Read( std::string fileName )
+  bool Configuration::Read( const std::string fileName )
   {
     this->Reader->SetFileName( fileName );
     try
@@ -43,10 +43,13 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string Configuration::GetValue( std::string category, std::string key )
+  std::string Configuration::GetValue( const std::string category, const std::string key ) const
   {
-    return this->Settings.find( category ) != this->Settings.end() &&
-           this->Settings[category].find( key ) != this->Settings[category].end() ?
-           this->Settings[category][key] : "";
+    std::map< std::string, std::map< std::string, std::string > >::const_iterator categoryIt;
+    categoryIt = this->Settings.find( category );
+
+    return categoryIt != this->Settings.cend() &&
+           categoryIt->second.find( key ) != categoryIt->second.cend() ?
+           categoryIt->second.at( key ) : "";
   }
 }

@@ -38,7 +38,7 @@ namespace Alder
   public:
     static Rating *New();
     vtkTypeMacro( Rating, ActiveRecord );
-    std::string GetName() { return "Rating"; }
+    std::string GetName() const { return "Rating"; }
 
   protected:
     Rating() {}
