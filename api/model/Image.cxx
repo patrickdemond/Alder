@@ -161,7 +161,7 @@ namespace Alder
 
     // get the name of the unzipped file
     std::string fileName = this->GetFileName();
-    if( 0 == fileName.substr( fileName.length() - 3, 3 ).compare( ".gz" ) )
+    if( ".gz" == fileName.substr( fileName.length() - 3, 3 ) )
       fileName = fileName.substr( 0, fileName.length() - 3 );
 
     gdcm::ImageReader reader;
@@ -181,7 +181,7 @@ namespace Alder
 
     // get the name of the unzipped file
     std::string fileName = this->GetFileName();
-    if( 0 == fileName.substr( fileName.length() - 3, 3 ).compare( ".gz" ) )
+    if( ".gz" == fileName.substr( fileName.length() - 3, 3 ) )
       fileName = fileName.substr( 0, fileName.length() - 3 );
 
     gdcm::ImageReader reader;
