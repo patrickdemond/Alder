@@ -84,16 +84,6 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this->ui->interviewWidget, SIGNAL( activeImageChanged() ),
     this, SLOT( slotActiveImageChanged() ) );
 
-  QObject::connect(
-    this->ui->atlasPreviousPushButton, SIGNAL( clicked() ),
-    this, SLOT( slotPreviousAtlasImage() ) );
-  QObject::connect(
-    this->ui->atlasNextPushButton, SIGNAL( clicked() ),
-    this, SLOT( slotNextAtlasImage() ) );
-  QObject::connect(
-    this->ui->atlasRatingComboBox, SIGNAL( currentIndexChanged ( int ) ),
-    this, SLOT( slotAtlasRatingChanged( int ) ) );
-
   this->InterviewViewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
   vtkRenderWindow* interviewRenwin = this->ui->interviewImageWidget->GetRenderWindow();
   vtkRenderer* interviewRenderer = this->InterviewViewer->GetRenderer();
@@ -203,6 +193,7 @@ void QMainAlderWindow::slotShowAtlas()
     Alder::Image *image = app->GetActiveImage();
 
     // select an appropriate atlas image, if necessary
+    /*
     if( image )
     {
       int rating = this->ui->atlasRatingComboBox->currentIndex() + 1;
@@ -226,6 +217,7 @@ void QMainAlderWindow::slotShowAtlas()
         if( 0 < newAtlasImage->Get( "Id" ).ToInt() ) app->SetActiveAtlasImage( newAtlasImage );
       }
     }
+    */
 
     // add the widget to the splitter
     this->ui->imageWidgetSplitter->insertWidget( 0, this->ui->atlasImageWidget );
@@ -359,40 +351,6 @@ void QMainAlderWindow::readSettings()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotAtlasRatingChanged( int index )
-{
-  int rating = index + 1;
-
-  // TODO: implement
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotPreviousAtlasImage()
-{
-  Alder::Application *app = Alder::Application::GetInstance();
-  Alder::Image *image = app->GetActiveAtlasImage();
-  
-  if( NULL != image )
-  {
-    app->SetActiveAtlasImage( image->GetPreviousAtlasImage() );
-    this->updateInterface();
-  }
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotNextAtlasImage()
-{
-  Alder::Application *app = Alder::Application::GetInstance();
-  Alder::Image *image = app->GetActiveAtlasImage();
-  
-  if( NULL != image )
-  {
-    app->SetActiveAtlasImage( image->GetNextAtlasImage() );
-    this->updateInterface();
-  }
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::writeSettings()
 {
   QSettings settings( "CLSA", "Alder" );
@@ -413,60 +371,6 @@ void QMainAlderWindow::updateInterviewImageWidget()
   else this->InterviewViewer->SetImageToSinusoid();
 
   this->ui->framePlayerWidget->updateFromViewer();
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::updateAtlasInformation()
-{
-  QString helpString = "";
-  QString noteString = "";
-  QString uidString = tr( "N/A" );
-  QString interviewerString = tr( "N/A" );
-  QString siteString = tr( "N/A" );
-  QString dateString = tr( "N/A" );
-
-  // fill in the active exam information
-  if( this->atlasVisible )
-  {
-    // get exam from active atlas image
-    Alder::Application *app = Alder::Application::GetInstance();
-    Alder::Image *atlasImage = app->GetActiveAtlasImage();
-
-    if( atlasImage )
-    {
-      vtkSmartPointer< Alder::Exam > atlasExam;
-      if( atlasImage->GetRecord( atlasExam ) )
-      {
-        vtkSmartPointer< Alder::Interview > interview;
-        if( atlasExam->GetRecord( interview ) ) uidString = interview->Get( "UId" ).ToString().c_str();
-        noteString = atlasExam->Get( "Note" ).ToString().c_str();
-        interviewerString = atlasExam->Get( "Interviewer" ).ToString().c_str();
-        siteString = interview->Get( "Site" ).ToString().c_str();
-        dateString = atlasExam->Get( "DatetimeAcquired" ).ToString().c_str();
-      }
-    }
-
-    // get the modality help text based on the current image's modality
-    Alder::Image *image = app->GetActiveImage();
-
-    if( image )
-    {
-      vtkSmartPointer< Alder::Exam > exam;
-      if( image->GetRecord( exam ) )
-      {
-        vtkSmartPointer< Alder::Modality > modality;
-        exam->GetRecord( modality );
-        helpString = modality->Get( "Help" ).ToString();
-      }
-    }
-  }
-
-  this->ui->atlasHelpTextEdit->setPlainText( helpString );
-  this->ui->atlasNoteTextEdit->setPlainText( noteString );
-  this->ui->atlasUIdValueLabel->setText( uidString );
-  this->ui->atlasInterviewerValueLabel->setText( interviewerString );
-  this->ui->atlasSiteValueLabel->setText( siteString );
-  this->ui->atlasDateValueLabel->setText( dateString );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -497,12 +401,6 @@ void QMainAlderWindow::updateInterface()
   this->ui->actionOpenInterview->setEnabled( loggedIn );
   this->ui->actionShowAtlas->setEnabled( loggedIn );
 
-  this->ui->atlasRatingComboBox->setEnabled( atlasImage );
-  this->ui->atlasPreviousPushButton->setEnabled( atlasImage );
-  this->ui->atlasNextPushButton->setEnabled( atlasImage );
-  this->ui->atlasHelpTextEdit->setEnabled( this->atlasVisible );
-  this->ui->atlasNoteTextEdit->setEnabled( atlasImage && this->atlasVisible );
-
   this->ui->framePlayerWidget->setEnabled( loggedIn );
   this->ui->imageWidgetSplitter->setEnabled( loggedIn );
 
@@ -515,9 +413,9 @@ void QMainAlderWindow::updateInterface()
 
   if( this->atlasVisible )
   {
-    this->updateAtlasInformation();
     this->updateAtlasImageWidget();
   }
 
   this->ui->interviewWidget->updateInterface();
+  this->ui->atlasWidget->updateInterface();
 }

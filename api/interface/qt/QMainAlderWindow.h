@@ -38,10 +38,6 @@ public slots:
   virtual void slotActiveInterviewChanged();
   virtual void slotActiveImageChanged();
 
-  virtual void slotAtlasRatingChanged( int );
-  virtual void slotPreviousAtlasImage();
-  virtual void slotNextAtlasImage();
-
   // help event functions
   virtual void slotAbout();
   virtual void slotManual();
