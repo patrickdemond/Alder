@@ -235,11 +235,12 @@ void QAlderInterviewWidget::updateInfo()
   QString dateString = tr( "N/A" );
 
   // fill in the active exam information
-  Alder::Interview *interview = Alder::Application::GetInstance()->GetActiveInterview();
+  Alder::Application *app = Alder::Application::GetInstance();
+  Alder::Interview *interview = app->GetActiveInterview();
   if( interview )
   {
     // get exam from active image
-    Alder::Image *image = Alder::Application::GetInstance()->GetActiveImage();
+    Alder::Image *image = app->GetActiveImage();
 
     if( image )
     {
@@ -263,7 +264,8 @@ void QAlderInterviewWidget::updateInfo()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderInterviewWidget::updateExamTreeWidget()
 {
-  Alder::Interview *interview = Alder::Application::GetInstance()->GetActiveInterview();
+  Alder::Application *app = Alder::Application::GetInstance();
+  Alder::Interview *interview = app->GetActiveInterview();
 
   // stop the tree's signals until we are done
   bool oldSignalState = this->ui->examTreeWidget->blockSignals( true );
@@ -274,7 +276,6 @@ void QAlderInterviewWidget::updateExamTreeWidget()
   if( interview )
   {
     // get the active image so that we can highlight it
-    Alder::Application *app = Alder::Application::GetInstance();
     Alder::User *user = app->GetActiveUser();
     Alder::Image *activeImage = app->GetActiveImage();
     QTreeWidgetItem *selectedItem = NULL, *item = NULL;

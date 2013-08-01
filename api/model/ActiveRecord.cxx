@@ -44,8 +44,8 @@ namespace Alder
     this->ColumnValues.clear();
 
     Database *db = Application::GetInstance()->GetDB();
-    std::vector<std::string>::iterator it;
     std::vector<std::string> columns = db->GetColumnNames( this->GetName() );
+    std::vector<std::string>::iterator it;
 
     // When first creating an active record we want the ColumnValues ivar to have an empty
     // value for every column in the active record's table.  We use mysql's information_schema
@@ -63,15 +63,13 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool ActiveRecord::Load( std::map< std::string, std::string > map )
   {
-    this->ColumnValues.clear();
-
-    Database *db = Application::GetInstance()->GetDB();
     vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
-    std::map< std::string, std::string >::iterator it;
+    this->ColumnValues.clear();
 
     // create an sql statement using the provided map
     std::stringstream stream;
     stream << "SELECT * FROM " << this->GetName();
+    std::map< std::string, std::string >::iterator it;
     for( it = map.begin(); it != map.end(); ++it )
       stream << ( map.begin() == it ? " WHERE " : " AND " )
              << it->first << " = " << query->EscapeString( it->second );
@@ -170,11 +168,10 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   int ActiveRecord::GetLastInsertId()
   {
-    Application *app = Application::GetInstance();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
     std::stringstream stream;
     stream << "SELECT Max( Id ) FROM " << this->GetName();
-    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
-        
+    
     Utilities::log( "Getting last insert id for table: " + this->GetName() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
@@ -193,9 +190,9 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void ActiveRecord::Remove()
   {
+    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
     this->AssertPrimaryId();
 
-    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
     std::stringstream stream;
     stream << "DELETE FROM " << this->GetName() << " "
            << "WHERE Id = " << query->EscapeString( this->Get( "Id" ).ToString() );
@@ -213,11 +210,10 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   int ActiveRecord::GetCount( std::string recordType )
   {
-    Application *app = Application::GetInstance();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
     std::stringstream stream;
     stream << "SELECT COUNT(*) FROM " << recordType << " "
            << "WHERE " << this->GetName() << "Id = " << this->Get( "Id" ).ToString();
-    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
     Utilities::log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );

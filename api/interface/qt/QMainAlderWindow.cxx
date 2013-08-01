@@ -82,7 +82,7 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this, SLOT( slotActiveInterviewChanged() ) );
   QObject::connect(
     this->ui->interviewWidget, SIGNAL( activeImageChanged() ),
-    this, SLOT( slotImageChanged() ) );
+    this, SLOT( slotActiveImageChanged() ) );
 
   QObject::connect(
     this->ui->atlasPreviousPushButton, SIGNAL( clicked() ),
@@ -140,7 +140,8 @@ void QMainAlderWindow::closeEvent( QCloseEvent *event )
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotOpenInterview()
 {
-  bool loggedIn = NULL != Alder::Application::GetInstance()->GetActiveUser();
+  Alder::Application *app = Alder::Application::GetInstance();
+  bool loggedIn = NULL != app->GetActiveUser();
 
   if( loggedIn )
   {
@@ -150,7 +151,6 @@ void QMainAlderWindow::slotOpenInterview()
     dialog.exec();
 
     // update the interview's exams
-    Alder::Application *app = Alder::Application::GetInstance();
     Alder::Interview *activeInterview = app->GetActiveInterview();
     if( activeInterview && !activeInterview->HasImageData() )
     {
@@ -172,11 +172,12 @@ void QMainAlderWindow::slotOpenInterview()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotLogin()
 {
-  bool loggedIn = NULL != Alder::Application::GetInstance()->GetActiveUser();
+  Alder::Application *app = Alder::Application::GetInstance();
+  bool loggedIn = NULL != app->GetActiveUser();
 
   if( loggedIn )
   {
-    Alder::Application::GetInstance()->ResetApplication();
+    app->ResetApplication();
   }
   else
   {
@@ -322,7 +323,9 @@ void QMainAlderWindow::slotActiveInterviewChanged()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotActiveImageChanged()
 {
-  this->updateInterface();
+  this->updateInterviewImageWidget();
+  //TODO: if the current interview image changes, then the atlas
+  // should change accordingly too
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -424,7 +427,8 @@ void QMainAlderWindow::updateAtlasInformation()
   if( this->atlasVisible )
   {
     // get exam from active atlas image
-    Alder::Image *atlasImage = Alder::Application::GetInstance()->GetActiveAtlasImage();
+    Alder::Application *app = Alder::Application::GetInstance();
+    Alder::Image *atlasImage = app->GetActiveAtlasImage();
 
     if( atlasImage )
     {
@@ -440,8 +444,8 @@ void QMainAlderWindow::updateAtlasInformation()
       }
     }
 
-    // get the modality help text based on the current image's exam's modality
-    Alder::Image *image = Alder::Application::GetInstance()->GetActiveAtlasImage();
+    // get the modality help text based on the current image's modality
+    Alder::Image *image = app->GetActiveImage();
 
     if( image )
     {
@@ -453,7 +457,6 @@ void QMainAlderWindow::updateAtlasInformation()
         helpString = modality->Get( "Help" ).ToString();
       }
     }
-    
   }
 
   this->ui->atlasHelpTextEdit->setPlainText( helpString );
@@ -500,6 +503,9 @@ void QMainAlderWindow::updateInterface()
 
   this->ui->framePlayerWidget->setEnabled( loggedIn );
   this->ui->imageWidgetSplitter->setEnabled( loggedIn );
+
+  //TODO: interviewImageWidget probably only needs to self->updateInterface
+  // when setEnabled emits a signal
   this->ui->interviewImageWidget->setEnabled( loggedIn );
   this->ui->atlasImageWidget->setEnabled( loggedIn );
 
