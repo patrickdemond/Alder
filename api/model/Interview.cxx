@@ -304,133 +304,54 @@ namespace Alder
     // only update the exams if there are none in the database
     if( !this->HasExamData() )
     {
-      // get the records for all modalities
-      vtkNew<Modality> dexaModality;
-      dexaModality->Load( "Name", "Dexa" );
-      vtkNew<Modality> retinalModality;
-      retinalModality->Load( "Name", "Retinal" );
-      vtkNew<Modality> ultrasoundModality;
-      ultrasoundModality->Load( "Name", "Ultrasound" );
+      vtkVariant interviewId = this->Get( "Id" );
 
       // get exam metadata from Opal for this interview
       examData = opal->GetRow( "alder", "Exam", this->Get( "UId" ).ToString() );
 
-      // CarotidIntima
-      exam = vtkSmartPointer<Exam>::New();
-      exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "ModalityId", ultrasoundModality->Get( "Id" ) );
-      exam->Set( "Type", "CarotidIntima" );
-      exam->Set( "Laterality", "left" );
-      exam->Set( "Stage", examData["CarotidIntima.Stage"] );
-      exam->Set( "Interviewer", examData["CarotidIntima.Interviewer"] );
-      exam->Set( "DatetimeAcquired", examData["CarotidIntima.DatetimeAcquired"] );
-      exam->Save();
+      // build a map of modalities and exams
+      std::map<  std::string, std::vector< std::pair< std::string, std::string > > >
+        modalityMap;
 
-      exam = vtkSmartPointer<Exam>::New();
-      exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "ModalityId", ultrasoundModality->Get( "Id" ) );
-      exam->Set( "Type", "CarotidIntima" );
-      exam->Set( "Laterality", "right" );
-      exam->Set( "Stage", examData["CarotidIntima.Stage"] );
-      exam->Set( "Interviewer", examData["CarotidIntima.Interviewer"] );
-      exam->Set( "DatetimeAcquired", examData["CarotidIntima.DatetimeAcquired"] );
-      exam->Save();
+       modalityMap["Ultrasound"] = {
+         {"CarotidIntima","left"},
+         {"CarotidIntima","right"},
+         {"Plaque","left"},
+         {"Plaque","right"}
+       };
+       modalityMap["Dexa"] = {
+         {"DualHipBoneDensity","left"},
+         {"DualHipBoneDensity","right"},
+         {"ForearmBoneDensity","none"},
+         {"LateralBoneDensity","none"},
+         {"WholeBodyBoneDensity","none"}
+       };
+       modalityMap["Retinal"] = {
+         {"RetinalScan","left"},
+         {"RetinalScan","right"}
+       };  
 
-      // DualHipBoneDensity
-      exam = vtkSmartPointer<Exam>::New();
-      exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "ModalityId", dexaModality->Get( "Id" ) );
-      exam->Set( "Type", "DualHipBoneDensity" );
-      exam->Set( "Laterality", "left" );
-      exam->Set( "Stage", examData["DualHipBoneDensity.Stage"] );
-      exam->Set( "Interviewer", examData["DualHipBoneDensity.Interviewer"] );
-      exam->Set( "DatetimeAcquired", examData["DualHipBoneDensity.DatetimeAcquired"] );
-      exam->Save();
-
-      exam = vtkSmartPointer<Exam>::New();
-      exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "ModalityId", dexaModality->Get( "Id" ) );
-      exam->Set( "Type", "DualHipBoneDensity" );
-      exam->Set( "Laterality", "right" );
-      exam->Set( "Stage", examData["DualHipBoneDensity.Stage"] );
-      exam->Set( "Interviewer", examData["DualHipBoneDensity.Interviewer"] );
-      exam->Set( "DatetimeAcquired", examData["DualHipBoneDensity.DatetimeAcquired"] );
-      exam->Save();
-
-      // ForearmBoneDensity
-      exam = vtkSmartPointer<Exam>::New();
-      exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "ModalityId", dexaModality->Get( "Id" ) );
-      exam->Set( "Type", "ForearmBoneDensity" );
-      exam->Set( "Laterality", "none" );
-      exam->Set( "Stage", examData["ForearmBoneDensity.Stage"] );
-      exam->Set( "Interviewer", examData["ForearmBoneDensity.Interviewer"] );
-      exam->Set( "DatetimeAcquired", examData["ForearmBoneDensity.DatetimeAcquired"] );
-      exam->Save();
-
-      // LateralBoneDensity
-      exam = vtkSmartPointer<Exam>::New();
-      exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "ModalityId", dexaModality->Get( "Id" ) );
-      exam->Set( "Type", "LateralBoneDensity" );
-      exam->Set( "Laterality", "none" );
-      exam->Set( "Stage", examData["LateralBoneDensity.Stage"] );
-      exam->Set( "Interviewer", examData["LateralBoneDensity.Interviewer"] );
-      exam->Set( "DatetimeAcquired", examData["LateralBoneDensity.DatetimeAcquired"] );
-      exam->Save();
-
-      // Plaque
-      exam = vtkSmartPointer<Exam>::New();
-      exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "ModalityId", ultrasoundModality->Get( "Id" ) );
-      exam->Set( "Type", "Plaque" );
-      exam->Set( "Laterality", "left" );
-      exam->Set( "Stage", examData["Plaque.Stage"] );
-      exam->Set( "Interviewer", examData["Plaque.Interviewer"] );
-      exam->Set( "DatetimeAcquired", examData["Plaque.DatetimeAcquired"] );
-      exam->Save();
-
-      exam = vtkSmartPointer<Exam>::New();
-      exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "ModalityId", ultrasoundModality->Get( "Id" ) );
-      exam->Set( "Type", "Plaque" );
-      exam->Set( "Laterality", "right" );
-      exam->Set( "Stage", examData["Plaque.Stage"] );
-      exam->Set( "Interviewer", examData["Plaque.Interviewer"] );
-      exam->Set( "DatetimeAcquired", examData["Plaque.DatetimeAcquired"] );
-      exam->Save();
-
-      // RetinalScan
-      exam = vtkSmartPointer<Exam>::New();
-      exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "ModalityId", retinalModality->Get( "Id" ) );
-      exam->Set( "Type", "RetinalScan" );
-      exam->Set( "Laterality", "left" );
-      exam->Set( "Stage", examData["RetinalScan.Stage"] );
-      exam->Set( "Interviewer", examData["RetinalScan.Interviewer"] );
-      exam->Set( "DatetimeAcquired", examData["RetinalScan.DatetimeAcquired"] );
-      exam->Save();
-
-      exam = vtkSmartPointer<Exam>::New();
-      exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "ModalityId", retinalModality->Get( "Id" ) );
-      exam->Set( "Type", "RetinalScan" );
-      exam->Set( "Laterality", "right" );
-      exam->Set( "Stage", examData["RetinalScan.Stage"] );
-      exam->Set( "Interviewer", examData["RetinalScan.Interviewer"] );
-      exam->Set( "DatetimeAcquired", examData["RetinalScan.DatetimeAcquired"] );
-      exam->Save();
-
-      // WholeBodyBoneDensity
-      exam = vtkSmartPointer<Exam>::New();
-      exam->Set( "InterviewId", this->Get( "Id" ) );
-      exam->Set( "ModalityId", dexaModality->Get( "Id" ) );
-      exam->Set( "Type", "WholeBodyBoneDensity" );
-      exam->Set( "Laterality", "none" );
-      exam->Set( "Stage", examData["WholeBodyBoneDensity.Stage"] );
-      exam->Set( "Interviewer", examData["WholeBodyBoneDensity.Interviewer"] );
-      exam->Set( "DatetimeAcquired", examData["WholeBodyBoneDensity.DatetimeAcquired"] );
-      exam->Save();
+      std::map< std::string,
+                std::vector< std::pair< std::string, std::string > > >::iterator mapIt;
+      for( mapIt = modalityMap.begin(); mapIt != modalityMap.end(); ++mapIt )
+      {
+        vtkNew<Modality> modality;
+        modality->Load( "Name", mapIt->first );
+        vtkVariant modalityId = modality->Get( "Id" );
+        std::vector< std::pair< std::string, std::string > >::iterator vecIt;
+        for( vecIt = mapIt->second.begin(); vecIt != mapIt->second.end(); ++vecIt )
+        {
+          exam = vtkSmartPointer<Exam>::New();
+          exam->Set( "InterviewId", interviewId );
+          exam->Set( "ModalityId", modalityId );
+          exam->Set( "Type", vecIt->first );
+          exam->Set( "Laterality", vecIt->second );
+          exam->Set( "Stage", examData[ vecIt->first + ".Stage" ] );
+          exam->Set( "Interviewer", examData[ vecIt->first + ".Interviewer"] );
+          exam->Set( "DatetimeAcquired", examData[ vecIt->first + ".DatetimeAcquired"] );
+          exam->Save();
+        }
+      }
     }
   }
 
