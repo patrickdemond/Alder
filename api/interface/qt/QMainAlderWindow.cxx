@@ -43,7 +43,7 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
 {
   Alder::Application *app = Alder::Application::GetInstance();
   QMenu *menu;
-  this->atlasVisible = false;
+  this->atlasVisible = true; // this will be toggled to false at the end of this method
   
   this->ui = new Ui_QMainAlderWindow;
   this->ui->setupUi( this );
@@ -113,14 +113,13 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   this->AtlasViewer->SetRenderWindow( atlasRenwin );
   this->AtlasViewer->InterpolateOff();
   this->AtlasViewer->SetImageToSinusoid();
-  this->ui->atlasImageWidget->setParent( NULL ); // initial state is invisible
-  
+
   this->ui->framePlayerWidget->setViewer( this->InterviewViewer );
   this->setCorner( Qt::BottomLeftCorner, Qt::BottomDockWidgetArea );
   this->setCorner( Qt::BottomRightCorner, Qt::RightDockWidgetArea );
 
   this->readSettings();
-  this->updateInterface();
+  this->slotShowAtlas(); // this actually hides the atlas
 };
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -197,10 +196,10 @@ void QMainAlderWindow::slotShowAtlas()
   this->atlasVisible = !this->atlasVisible;
 
   Alder::Application *app = Alder::Application::GetInstance();
-  Alder::Image *atlasImage = app->GetActiveAtlasImage();
 
   if( this->atlasVisible )
   {
+    Alder::Image *atlasImage = app->GetActiveAtlasImage();
     Alder::Image *image = app->GetActiveImage();
 
     // select an appropriate atlas image, if necessary
@@ -230,6 +229,7 @@ void QMainAlderWindow::slotShowAtlas()
 
     // add the widget to the splitter
     this->ui->imageWidgetSplitter->insertWidget( 0, this->ui->atlasImageWidget );
+    this->ui->atlasImageWidget->setVisible( true );
 
     QList<int> sizeList = this->ui->imageWidgetSplitter->sizes();
     int total = sizeList[0] + sizeList[1];
@@ -240,7 +240,9 @@ void QMainAlderWindow::slotShowAtlas()
   else if( !this->atlasVisible )
   {
     // remove the widget from the splitter
-    this->ui->atlasImageWidget->setParent( NULL );
+    this->ui->atlasImageWidget->setVisible( false );
+    this->ui->atlasImageWidget->setParent( this );
+
     app->SetActiveAtlasImage( NULL );
   }
 

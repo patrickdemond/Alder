@@ -57,7 +57,7 @@ namespace Alder
     /**
      * Returns whether this record has a particular column
      */
-    bool ColumnNameExists( std::string column );
+    bool ColumnNameExists( const std::string column );
 
     //@{
     /**
@@ -65,17 +65,17 @@ namespace Alder
      * of a primary or unique key in the corresponding table.
      * @throws runtime_error
      */
-    bool Load( std::string key, std::string value )
+    bool Load( const std::string key, const std::string value )
     {
       return this->Load( std::pair< std::string, std::string >( key, value ) );
     }
-    bool Load( std::pair< std::string, std::string > pair )
+    bool Load( std::pair< const std::string, const std::string > pair )
     {
       std::map< std::string, std::string > map;
       map.insert( pair );
       return this->Load( map );
     }
-    virtual bool Load( std::map< std::string, std::string > map );
+    virtual bool Load( const std::map< std::string, std::string > map );
     //@}
 
     /**
@@ -83,7 +83,7 @@ namespace Alder
      * then a new record will be inserted into the database.
      * @param replace bool Whether to replace an existing record
      */
-    virtual void Save( bool replace = false );
+    virtual void Save( const bool replace = false );
 
     /**
      * Removes the current record from the database.
@@ -136,7 +136,7 @@ namespace Alder
      * @param list vector An existing vector to put all records into.
      * @throws runtime_error
      */
-    template< class T > void GetList( std::vector< vtkSmartPointer< T > > *list, std::string override = "" )
+    template< class T > void GetList( std::vector< vtkSmartPointer< T > > *list, const std::string override = "" )
     {
       Application *app = Application::GetInstance();
       Database *db = app->GetDB();
@@ -191,7 +191,7 @@ namespace Alder
      * due to a joining table (N-to-N relationship) or a foreign key column (1-to-N relationship)
      * @throws runtime_error
      */
-    template <class T> bool Has( vtkSmartPointer< T > &record, std::string override = "" )
+    template <class T> bool Has( vtkSmartPointer< T > &record, const std::string override = "" )
     {
       Application *app = Application::GetInstance();
       Database *db = app->GetDB();
@@ -294,13 +294,13 @@ namespace Alder
      * Returns the number of records which are related to this record by foreign key.
      * @param std::string recordType The associated table name.
      */
-    int GetCount( std::string recordType );
+    int GetCount( const std::string recordType );
 
     /**
      * Get the value of any column in the record.
      * @throws runtime_error
      */
-    virtual vtkVariant Get( std::string column );
+    virtual vtkVariant Get( const std::string column );
 
     /**
      * Get the record which has a foreign key in this table.
@@ -340,15 +340,15 @@ namespace Alder
      * Save() needs to be called.
      * If you wish to set the value to NULL then use the SetNull() method instead of Set()
      */
-    template <class T> void Set( std::map< std::string, T > map )
+    template <class T> void Set( const std::map< std::string, T > map )
     {
-      typename std::map< std::string, T >::iterator it;
-      for( it = map.begin(); it != map.end(); ++it )
+      typename std::map< std::string, T >::const_iterator it;
+      for( it = map.cbegin(); it != map.cend(); ++it )
         this->SetVariant( it->first, vtkVariant( it->second ) );
     }
-    template <class T> void Set( std::string column, T value )
+    template <class T> void Set( const std::string column, const T value )
     { this->SetVariant( column, vtkVariant( value ) ); }
-    void SetNull( std::string column )
+    void SetNull( const std::string column )
     { this->SetVariant( column, vtkVariant() ); }
 
     /**
@@ -385,7 +385,7 @@ namespace Alder
      * Internal method used by Set()
      * @throws runtime_error
      */
-    virtual void SetVariant( std::string column, vtkVariant value );
+    virtual void SetVariant( const std::string column, const vtkVariant value );
 
     enum RelationshipType
     {
@@ -398,7 +398,7 @@ namespace Alder
     /**
      * Determines the relationship between this record and another
      */
-    int GetRelationship( std::string table, std::string override = "" ) const;
+    int GetRelationship( const std::string table, const std::string override = "" ) const;
 
     std::map<std::string,vtkVariant> ColumnValues;
     bool Initialized;
