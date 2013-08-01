@@ -43,7 +43,7 @@ QAlderAtlasWidget::QAlderAtlasWidget( QWidget* parent )
     this->ui->nextPushButton, SIGNAL( clicked() ),
     this, SLOT( slotNext() ) );
   QObject::connect(
-    this->ui->ratingSlider, SIGNAL( valueChanged( int ) ),
+    this->ui->ratingComboBox, SIGNAL( valueChanged( int ) ),
     this, SLOT( slotRatingChanged( int ) ) );
   QObject::connect(
     this->ui->noteTextEdit, SIGNAL( textChanged() ),
@@ -112,25 +112,6 @@ void QAlderAtlasWidget::slotRatingChanged( int value )
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QAlderAtlasWidget::slotNoteChanged()
-{
-  vtkSmartPointer< Alder::Rating > rating;
-  Alder::Application *app = Alder::Application::GetInstance();
-
-  // make sure we have an active user and image with an expert rating
-  Alder::User *user = app->GetActiveUser();
-  if( user )
-  {
-    Alder::Image *image = app->GetActiveAtlasImage();
-    if( image && image->GetRecord( rating ) )
-    {
-      rating->Set( "Note", this->ui->noteTextEdit->toPlainText().toStdString() );
-      rating->Save();
-    }
-  }
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderAtlasWidget::updateInfo()
 {
   QString helpString = "";
@@ -172,41 +153,6 @@ void QAlderAtlasWidget::updateInfo()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QAlderAtlasWidget::updateRating()
-{
-  // stop the rating slider's signals until we are done
-  bool oldSignalState = this->ui->ratingSlider->blockSignals( true );
-
-  int ratingValue = 0;
-  Alder::Application *app = Alder::Application::GetInstance();
-
-  // make sure we have an active image
-  Alder::User *user = app->GetActiveUser();
-  Alder::Image *image = app->GetActiveImage();
-
-  if( user && image )
-  {
-/*
-    std::map< std::string, std::string > map;
-    map["UserId"] = user->Get( "Id" ).ToString();
-    map["ImageId"] = image->Get( "Id" ).ToString();
-    vtkNew< Alder::Rating > rating;
-    if( rating->Load( map ) )
-    {
-      vtkVariant v = rating->Get( "Rating" );
-      if( v.IsValid() ) ratingValue = v.ToInt();
-    }
-*/
-  }
-
-  this->ui->ratingSlider->setValue( ratingValue );
-  this->ui->ratingValueLabel->setText( 0 == ratingValue ? tr( "N/A" ) : QString::number( ratingValue ) );
-
-  // re-enable the rating slider's signals
-  this->ui->ratingSlider->blockSignals( oldSignalState );
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderAtlasWidget::updateInterface()
 {
   Alder::Application *app = Alder::Application::GetInstance();
@@ -220,5 +166,4 @@ void QAlderAtlasWidget::updateInterface()
   this->ui->ratingComboBox->setEnabled( image );
 
   this->updateInfo();
-  this->updateRating();
 }
