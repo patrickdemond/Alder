@@ -127,6 +127,7 @@ SET( ALDER_SOURCE
   ${ALDER_QT_DIR}/QSelectInterviewDialog.cxx
   ${ALDER_QT_DIR}/QUserListDialog.cxx
 
+  ${ALDER_QT_WIDGETS_DIR}/QAlderAtlasWidget.cxx
   ${ALDER_QT_WIDGETS_DIR}/QAlderDoubleSlider.cxx
   ${ALDER_QT_WIDGETS_DIR}/QAlderFramePlayerWidget.cxx
   ${ALDER_QT_WIDGETS_DIR}/QAlderInterviewWidget.cxx
@@ -149,6 +150,7 @@ SET( ALDER_UIS
   ${ALDER_QT_DIR}/QSelectInterviewDialog.ui
   ${ALDER_QT_DIR}/QUserListDialog.ui
 
+  ${ALDER_QT_WIDGETS_DIR}/QAlderAtlasWidget.ui
   ${ALDER_QT_WIDGETS_DIR}/QAlderFramePlayerWidget.ui
   ${ALDER_QT_WIDGETS_DIR}/QAlderInterviewWidget.ui
   ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.ui
@@ -162,6 +164,7 @@ SET( ALDER_HEADERS
   ${ALDER_QT_DIR}/QSelectInterviewDialog.h
   ${ALDER_QT_DIR}/QUserListDialog.h
 
+  ${ALDER_QT_WIDGETS_DIR}/QAlderAtlasWidget.h
   ${ALDER_QT_WIDGETS_DIR}/QAlderDoubleSlider.h
   ${ALDER_QT_WIDGETS_DIR}/QAlderFramePlayerWidget.h
   ${ALDER_QT_WIDGETS_DIR}/QAlderInterviewWidget.h

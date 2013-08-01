@@ -193,10 +193,11 @@ void QMainAlderWindow::slotShowAtlas()
     Alder::Image *image = app->GetActiveImage();
 
     // select an appropriate atlas image, if necessary
-    /*
     if( image )
     {
-      int rating = this->ui->atlasRatingComboBox->currentIndex() + 1;
+      //this->ui->atlasRatingComboBox->currentIndex() + 1;
+      //TODO: get the currently selected rating
+      int rating = 5;
       bool getNewAtlasImage = false;
 
       vtkSmartPointer< Alder::Exam > exam;
@@ -214,10 +215,13 @@ void QMainAlderWindow::slotShowAtlas()
       {
         vtkSmartPointer<Alder::Image> newAtlasImage = 
           Alder::Image::GetAtlasImage( exam->Get( "Type" ).ToString(), rating );
-        if( 0 < newAtlasImage->Get( "Id" ).ToInt() ) app->SetActiveAtlasImage( newAtlasImage );
+        if( 0 < newAtlasImage->Get( "Id" ).ToInt() )
+        {
+          app->SetActiveAtlasImage( newAtlasImage );
+          // TODO: send a signal to the render widget to load the new atlas image
+        }
       }
     }
-    */
 
     // add the widget to the splitter
     this->ui->imageWidgetSplitter->insertWidget( 0, this->ui->atlasImageWidget );

@@ -51,7 +51,6 @@ protected:
   virtual void writeSettings();
   
   virtual void updateInterviewImageWidget();
-  virtual void updateAtlasInformation();
   virtual void updateAtlasImageWidget();
 
   virtual void updateInterface();

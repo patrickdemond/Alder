@@ -6,3 +6,4 @@ A list of things which need to be done (in no particular order)
 - add const expressions where possible (includeing const_iterator)
 - make error when no modalities exist user-friendly
 - consider overloading native operators in active record class
+- consider passing control of viewer widgets to atlas and interview widgets
