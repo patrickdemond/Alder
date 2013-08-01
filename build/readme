@@ -156,7 +156,7 @@ After building Alder you are now ready to prepare the database.
 
 2. Go to the sql directory and run the schema.sql script into the Alder database
 
-   EG: cat schema.sql | mysql Alder -u someuser -p
+   EG: cat schema.sql Modality.sql | mysql Alder -u someuser -p
 
 3. The build procedure (see "Building Alder") will create a config.xml file in the root of the
    build directory.  Edit the file to include the database and Opal configuration as well as the
