@@ -16,6 +16,7 @@
 
 #include "vtkSmartPointer.h"
 
+class vtkMedicalImageViewer;
 class Ui_QAlderAtlasWidget;
 
 class QAlderAtlasWidget : public QWidget
@@ -27,6 +28,8 @@ public:
   ~QAlderAtlasWidget();
 
   virtual void updateInterface();
+  vtkMedicalImageViewer *GetViewer() { return this->Viewer; }
+  virtual void setVisible( bool visible );
 
 signals:
   void activeImageChanged();
@@ -46,6 +49,8 @@ protected slots:
 private:
   // Designer form
   Ui_QAlderAtlasWidget *ui;
+
+  vtkSmartPointer<vtkMedicalImageViewer> Viewer;
 };
 
 #endif

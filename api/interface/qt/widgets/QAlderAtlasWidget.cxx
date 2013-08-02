@@ -49,19 +49,68 @@ QAlderAtlasWidget::QAlderAtlasWidget( QWidget* parent )
     this->ui->noteTextEdit, SIGNAL( textChanged() ),
     this, SLOT( slotNoteChanged() ) );
 
-  this->updateInterface();
+  this->Viewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
+  vtkRenderWindow* renwin = this->ui->interviewImageWidget->GetRenderWindow();
+  vtkRenderer* renderer = this->Viewer->GetRenderer();
+  renderer->GradientBackgroundOn();
+  renderer->SetBackground( 0, 0, 0 );
+  renderer->SetBackground2( 0, 0, 1 );
+  this->Viewer->SetRenderWindow( renwin );
+  this->Viewer->InterpolateOff();
+  this->Viewer->SetImageToSinusoid();
 
-  // give a bit more room to the help edit
-  double total = this->ui->helpTextEdit->height() + this->ui->noteTextEdit->height();
-  QList<int> sizeList;
-  sizeList.append( floor( 2 * total / 3 ) );
-  sizeList.append( total - sizeList[0] );
-  this->ui->splitter->setSizes( sizeList );
+  this->updateInterface();
 };
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QAlderAtlasWidget::~QAlderAtlasWidget()
 {
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QAlderAtlasWidget::setVisible( bool visible )
+{
+  if( visible )
+  {
+    Alder::Image *atlasImage = app->GetActiveAtlasImage();
+    Alder::Image *image = app->GetActiveImage();
+
+    // select an appropriate atlas image, if necessary
+    if( image )
+    {
+      //this->ui->atlasRatingComboBox->currentIndex() + 1;
+      //TODO: get the currently selected rating
+      int rating = 5;
+      bool getNewAtlasImage = false;
+
+      vtkSmartPointer< Alder::Exam > exam;
+      image->GetRecord( exam );
+
+      if( NULL == atlasImage ) getNewAtlasImage = true;
+      else
+      {
+        vtkSmartPointer< Alder::Exam > atlasExam;
+        atlasImage->GetRecord( atlasExam );
+        if( exam->Get( "Type" ) != atlasExam->Get( "Type" ) ) getNewAtlasImage = true;
+      }
+
+      if( getNewAtlasImage )
+      {
+        vtkSmartPointer<Alder::Image> newAtlasImage =
+          Alder::Image::GetAtlasImage( exam->Get( "Type" ).ToString(), rating );
+        if( 0 < newAtlasImage->Get( "Id" ).ToInt() )
+        {
+          app->SetActiveAtlasImage( newAtlasImage );
+          // TODO: send a signal to the render widget to load the new atlas image
+        }
+      }
+    }
+  }
+  else
+  {
+  }
+
+  QWidget::setVisible( visible );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

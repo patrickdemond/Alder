@@ -14,10 +14,7 @@
 
 #include <QMainWindow>
 
-#include "vtkSmartPointer.h"
-
 class Ui_QMainAlderWindow;
-class vtkMedicalImageViewer;
 
 class QMainAlderWindow : public QMainWindow
 {
@@ -35,9 +32,6 @@ public slots:
   virtual void slotUserManagement();
   virtual void slotUpdateDatabase();
 
-  virtual void slotActiveInterviewChanged();
-  virtual void slotActiveImageChanged();
-
   // help event functions
   virtual void slotAbout();
   virtual void slotManual();
@@ -50,9 +44,6 @@ protected:
   virtual void readSettings();
   virtual void writeSettings();
   
-  virtual void updateInterviewImageWidget();
-  virtual void updateAtlasImageWidget();
-
   virtual void updateInterface();
 
 protected slots:
@@ -61,8 +52,6 @@ private:
   // Designer form
   Ui_QMainAlderWindow *ui;
 
-  vtkSmartPointer<vtkMedicalImageViewer> InterviewViewer;
-  vtkSmartPointer<vtkMedicalImageViewer> AtlasViewer;
   bool atlasVisible;
 };
 

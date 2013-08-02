@@ -79,43 +79,22 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   // connect the interview widget signals
   QObject::connect(
     this->ui->interviewWidget, SIGNAL( activeInterviewChanged() ),
-    this, SLOT( slotActiveInterviewChanged() ) );
+    this, SLOT( this->ui->atlasWidget->slotActiveInterviewChanged() ) );
   QObject::connect(
     this->ui->interviewWidget, SIGNAL( activeImageChanged() ),
-    this, SLOT( slotActiveImageChanged() ) );
+    this, SLOT( this->ui->atlasWidget->slotActiveImageChanged() ) );
 
-  this->InterviewViewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
-  vtkRenderWindow* interviewRenwin = this->ui->interviewImageWidget->GetRenderWindow();
-  vtkRenderer* interviewRenderer = this->InterviewViewer->GetRenderer();
-  interviewRenderer->GradientBackgroundOn();
-  interviewRenderer->SetBackground( 0, 0, 0 );
-  interviewRenderer->SetBackground2( 0, 0, 1 );
-  this->InterviewViewer->SetRenderWindow( interviewRenwin );
-  this->InterviewViewer->InterpolateOff();
-  this->InterviewViewer->SetImageToSinusoid();
-    
-  this->AtlasViewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
-  vtkRenderWindow* atlasRenwin = this->ui->atlasImageWidget->GetRenderWindow();
-  vtkRenderer* atlasRenderer = this->AtlasViewer->GetRenderer();
-  atlasRenderer->GradientBackgroundOn();
-  atlasRenderer->SetBackground( 0, 0, 0 );
-  atlasRenderer->SetBackground2( 0, 0, 1 );
-  this->AtlasViewer->SetRenderWindow( atlasRenwin );
-  this->AtlasViewer->InterpolateOff();
-  this->AtlasViewer->SetImageToSinusoid();
-
-  this->ui->framePlayerWidget->setViewer( this->InterviewViewer );
-  this->setCorner( Qt::BottomLeftCorner, Qt::BottomDockWidgetArea );
-  this->setCorner( Qt::BottomRightCorner, Qt::RightDockWidgetArea );
+  // TODO: need to connect atlasWidget to the frame player as well
+  this->ui->framePlayerWidget->setViewer( this->ui->interviewWidget->GetViewer() );
 
   this->readSettings();
   this->slotShowAtlas(); // this actually hides the atlas
-};
+}
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QMainAlderWindow::~QMainAlderWindow()
 {
-  this->ui->framePlayerWidget->play(false);
+  this->ui->framePlayerWidget->play( false );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -185,61 +164,25 @@ void QMainAlderWindow::slotShowAtlas()
 {
   this->atlasVisible = !this->atlasVisible;
 
-  Alder::Application *app = Alder::Application::GetInstance();
-
   if( this->atlasVisible )
   {
-    Alder::Image *atlasImage = app->GetActiveAtlasImage();
-    Alder::Image *image = app->GetActiveImage();
-
-    // select an appropriate atlas image, if necessary
-    if( image )
-    {
-      //this->ui->atlasRatingComboBox->currentIndex() + 1;
-      //TODO: get the currently selected rating
-      int rating = 5;
-      bool getNewAtlasImage = false;
-
-      vtkSmartPointer< Alder::Exam > exam;
-      image->GetRecord( exam );
-
-      if( NULL == atlasImage ) getNewAtlasImage = true;
-      else
-      {
-        vtkSmartPointer< Alder::Exam > atlasExam;
-        atlasImage->GetRecord( atlasExam );
-        if( exam->Get( "Type" ) != atlasExam->Get( "Type" ) ) getNewAtlasImage = true;
-      }
-
-      if( getNewAtlasImage )
-      {
-        vtkSmartPointer<Alder::Image> newAtlasImage = 
-          Alder::Image::GetAtlasImage( exam->Get( "Type" ).ToString(), rating );
-        if( 0 < newAtlasImage->Get( "Id" ).ToInt() )
-        {
-          app->SetActiveAtlasImage( newAtlasImage );
-          // TODO: send a signal to the render widget to load the new atlas image
-        }
-      }
-    }
-
     // add the widget to the splitter
-    this->ui->imageWidgetSplitter->insertWidget( 0, this->ui->atlasImageWidget );
-    this->ui->atlasImageWidget->setVisible( true );
+    this->ui->splitter->insertWidget( 0, this->ui->atlasWidget );
+    this->ui->atlasWidget->setVisible( true );
 
-    QList<int> sizeList = this->ui->imageWidgetSplitter->sizes();
+    QList<int> sizeList = this->ui->splitter->sizes();
     int total = sizeList[0] + sizeList[1];
     sizeList[0] = floor( total / 2 );
     sizeList[1] = sizeList[0];
-    this->ui->imageWidgetSplitter->setSizes( sizeList );
+    this->ui->splitter->setSizes( sizeList );
   }
   else if( !this->atlasVisible )
   {
     // remove the widget from the splitter
-    this->ui->atlasImageWidget->setVisible( false );
-    this->ui->atlasImageWidget->setParent( this );
+    this->ui->atlasWidget->setVisible( false );
+    this->ui->atlasWidget->setParent( this );
 
-    app->SetActiveAtlasImage( NULL );
+    Alder::Application::GetInstance()->SetActiveAtlasImage( NULL );
   }
 
   this->updateInterface();
@@ -406,7 +349,7 @@ void QMainAlderWindow::updateInterface()
   this->ui->actionShowAtlas->setEnabled( loggedIn );
 
   this->ui->framePlayerWidget->setEnabled( loggedIn );
-  this->ui->imageWidgetSplitter->setEnabled( loggedIn );
+  this->ui->splitter->setEnabled( loggedIn );
 
   //TODO: interviewImageWidget probably only needs to self->updateInterface
   // when setEnabled emits a signal

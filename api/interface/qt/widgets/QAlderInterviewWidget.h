@@ -19,6 +19,7 @@
 #include <map>
 
 namespace Alder { class ActiveRecord; };
+class vtkMedicalImageViewer;
 class Ui_QAlderInterviewWidget;
 class QTreeWidgetItem;
 
@@ -31,6 +32,7 @@ public:
   ~QAlderInterviewWidget();
 
   virtual void updateInterface();
+  vtkMedicalImageViewer *GetViewer() { return this->Viewer; }
 
 signals:
   void activeInterviewChanged();
@@ -57,6 +59,8 @@ protected slots:
 private:
   // Designer form
   Ui_QAlderInterviewWidget *ui;
+
+  vtkSmartPointer<vtkMedicalImageViewer> Viewer;
 };
 
 #endif
