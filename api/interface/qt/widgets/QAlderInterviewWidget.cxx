@@ -20,6 +20,9 @@
 #include "User.h"
 
 #include "vtkNew.h"
+#include "vtkMedicalImageViewer.h"
+#include "vtkRenderer.h"
+#include "vtkRenderWindow.h"
 
 #include "QProgressDialog.h"
 
@@ -57,7 +60,7 @@ QAlderInterviewWidget::QAlderInterviewWidget( QWidget* parent )
     this, SLOT( slotNoteChanged() ) );
 
   this->Viewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
-  vtkRenderWindow* renwin = this->ui->interviewImageWidget->GetRenderWindow();
+  vtkRenderWindow* renwin = this->ui->imageWidget->GetRenderWindow();
   vtkRenderer* renderer = this->Viewer->GetRenderer();
   renderer->GradientBackgroundOn();
   renderer->SetBackground( 0, 0, 0 );
@@ -82,13 +85,18 @@ QAlderInterviewWidget::~QAlderInterviewWidget()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+vtkMedicalImageViewer* QAlderInterviewWidget::GetViewer()
+{
+  return static_cast<vtkMedicalImageViewer*>(this->Viewer.GetPointer());
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderInterviewWidget::slotPrevious()
 {
   Alder::Application *app = Alder::Application::GetInstance();
-  Alder::User *user = app->GetActiveUser();
   Alder::Interview *activeInterview = app->GetActiveInterview();
   vtkSmartPointer< Alder::Interview > interview;
-  if( user && activeInterview )
+  if( activeInterview )
   {
     interview = activeInterview->GetPrevious(
       this->ui->loadedCheckBox->isChecked(),
@@ -120,6 +128,7 @@ void QAlderInterviewWidget::slotPrevious()
       }
 
       app->SetActiveInterview( interview );
+      this->updateInterface();
       emit this->activeInterviewChanged();
     }
   }
@@ -129,10 +138,9 @@ void QAlderInterviewWidget::slotPrevious()
 void QAlderInterviewWidget::slotNext()
 {
   Alder::Application *app = Alder::Application::GetInstance();
-  Alder::User *user = app->GetActiveUser();
   Alder::Interview *activeInterview = app->GetActiveInterview();
   vtkSmartPointer< Alder::Interview > interview;
-  if( user && activeInterview )
+  if( activeInterview )
   {
     interview = activeInterview->GetNext(
       this->ui->loadedCheckBox->isChecked(),
@@ -164,6 +172,7 @@ void QAlderInterviewWidget::slotNext()
       }
 
       app->SetActiveInterview( interview );
+      this->updateInterface();
       emit this->activeInterviewChanged();
     }
   }
@@ -172,8 +181,6 @@ void QAlderInterviewWidget::slotNext()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderInterviewWidget::slotTreeSelectionChanged()
 {
-  Alder::Application *app = Alder::Application::GetInstance();
-  
   QList<QTreeWidgetItem*> list = this->ui->examTreeWidget->selectedItems();
   if( 0 < list.size() )
   {
@@ -182,7 +189,8 @@ void QAlderInterviewWidget::slotTreeSelectionChanged()
     if( it != this->treeModelMap.end() )
     {
       Alder::ActiveRecord *record = it->second;
-      app->SetActiveImage( Alder::Image::SafeDownCast( record ) );
+      Alder::Application::GetInstance()->SetActiveImage( Alder::Image::SafeDownCast( record ) );
+      this->updateInterface();
       emit this->activeImageChanged();
     }
   }
@@ -215,6 +223,37 @@ void QAlderInterviewWidget::slotRatingChanged( int value )
 
   rating->Save();
   this->updateRating();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QAlderInterviewWidget::slotHideControls( bool hide )
+{
+  // hide/show all the widgets to show only the image viewer
+  QList<QLayout*> layouts;
+  layouts.append( &*this->ui->verticalLayout );
+  layouts.append( &*this->ui->infoLayout );
+  layouts.append( &*this->ui->ratingLayout );
+  layouts.append( &*this->ui->buttonLayout );
+
+  QList<QWidget*> widgets;
+  for( int i = 0; i < layouts.count(); ++i )
+  {
+     QLayout* layout = layouts.at( i );
+    for( int j = 0; j < layout->count(); ++j )
+    {
+      if( QWidgetItem* item = dynamic_cast<QWidgetItem*>(
+          layout->itemAt( j ) ) )
+      {    
+        widgets.append( &*item->widget() );
+      }  
+    }  
+  }
+  for( int i = 0; i < widgets.count(); ++i )
+  {
+    QWidget* item = qobject_cast<QWidget*>( widgets.at( i ) );
+    if( hide ) item->hide();
+    else item->show();
+  }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -448,6 +487,14 @@ void QAlderInterviewWidget::updateRating()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QAlderInterviewWidget::updateViewer()
+{
+  Alder::Image *image = Alder::Application::GetInstance()->GetActiveImage();
+  if( image ) this->Viewer->Load( image->GetFileName().c_str() );
+  else this->Viewer->SetImageToSinusoid();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderInterviewWidget::updateInterface()
 {
   Alder::Application *app = Alder::Application::GetInstance();
@@ -466,4 +513,5 @@ void QAlderInterviewWidget::updateInterface()
   this->updateExamTreeWidget();
   this->updateInfo();
   this->updateRating();
+  this->updateViewer();
 }

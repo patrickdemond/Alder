@@ -196,7 +196,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QVTKWidget" name="imageWidget">
+    <widget class="QVTKWidget" name="imageWidget" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
        <horstretch>0</horstretch>

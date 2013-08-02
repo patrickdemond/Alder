@@ -12,17 +12,11 @@
 #include "ui_QMainAlderWindow.h"
 
 #include "Application.h"
-#include "Exam.h"
-#include "Image.h"
 #include "Interview.h"
-#include "Modality.h"
-#include "Rating.h"
 #include "User.h"
 
 #include "vtkMedicalImageViewer.h"
 #include "vtkNew.h"
-#include "vtkRenderer.h"
-#include "vtkRenderWindow.h"
 
 #include "QAboutDialog.h"
 #include "QLoginDialog.h"
@@ -41,10 +35,6 @@
 QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   : QMainWindow( parent )
 {
-  Alder::Application *app = Alder::Application::GetInstance();
-  QMenu *menu;
-  this->atlasVisible = true; // this will be toggled to false at the end of this method
-  
   this->ui = new Ui_QMainAlderWindow;
   this->ui->setupUi( this );
   
@@ -76,19 +66,22 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this->ui->actionManual, SIGNAL( triggered() ),
     this, SLOT( slotManual() ) );
 
-  // connect the interview widget signals
-  QObject::connect(
-    this->ui->interviewWidget, SIGNAL( activeInterviewChanged() ),
-    this, SLOT( this->ui->atlasWidget->slotActiveInterviewChanged() ) );
-  QObject::connect(
-    this->ui->interviewWidget, SIGNAL( activeImageChanged() ),
-    this, SLOT( this->ui->atlasWidget->slotActiveImageChanged() ) );
+  QObject::connect( 
+    this->ui->atlasWidget, SIGNAL( showing( bool ) ),
+    this->ui->interviewWidget, SLOT( slotHideControls( bool ) ) );
 
   // TODO: need to connect atlasWidget to the frame player as well
   this->ui->framePlayerWidget->setViewer( this->ui->interviewWidget->GetViewer() );
 
+  QObject::connect(
+    this->ui->interviewWidget, SIGNAL( activeImageChanged() ),
+    this->ui->framePlayerWidget, SLOT( updateFromViewer() ) );
+
   this->readSettings();
-  this->slotShowAtlas(); // this actually hides the atlas
+
+  // toggle visibility of the atlas widget
+  this->atlasVisible = true;
+  this->slotShowAtlas();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -163,6 +156,7 @@ void QMainAlderWindow::slotLogin()
 void QMainAlderWindow::slotShowAtlas()
 {
   this->atlasVisible = !this->atlasVisible;
+  this->ui->actionShowAtlas->setText( tr( this->atlasVisible ? "Hide Atlas" : "Show Atlas" ) );
 
   if( this->atlasVisible )
   {
@@ -176,7 +170,7 @@ void QMainAlderWindow::slotShowAtlas()
     sizeList[1] = sizeList[0];
     this->ui->splitter->setSizes( sizeList );
   }
-  else if( !this->atlasVisible )
+  else
   {
     // remove the widget from the splitter
     this->ui->atlasWidget->setVisible( false );
@@ -184,8 +178,6 @@ void QMainAlderWindow::slotShowAtlas()
 
     Alder::Application::GetInstance()->SetActiveAtlasImage( NULL );
   }
-
-  this->updateInterface();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -256,20 +248,6 @@ void QMainAlderWindow::slotUpdateDatabase()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotActiveInterviewChanged()
-{
-  this->updateInterface();
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::slotActiveImageChanged()
-{
-  this->updateInterviewImageWidget();
-  //TODO: if the current interview image changes, then the atlas
-  // should change accordingly too
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotAbout()
 {
   QAboutDialog dialog( this );
@@ -310,39 +288,13 @@ void QMainAlderWindow::writeSettings()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::updateInterviewImageWidget()
-{
-  Alder::Image *image = Alder::Application::GetInstance()->GetActiveImage();
-
-  if( image ) this->InterviewViewer->Load( image->GetFileName().c_str() );
-  else this->InterviewViewer->SetImageToSinusoid();
-
-  this->ui->framePlayerWidget->updateFromViewer();
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::updateAtlasImageWidget()
-{
-  Alder::Image *image = Alder::Application::GetInstance()->GetActiveAtlasImage();
-
-  if( image ) this->AtlasViewer->Load( image->GetFileName().c_str() );
-  else this->AtlasViewer->SetImageToSinusoid();
-}
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::updateInterface()
 {
   Alder::Application *app = Alder::Application::GetInstance();
-  Alder::Image *atlasImage = app->GetActiveAtlasImage();
   bool loggedIn = NULL != app->GetActiveUser();
 
   // dynamic menu action names
   this->ui->actionLogin->setText( tr( loggedIn ? "Logout" : "Login" ) );
-  this->ui->actionShowAtlas->setText( tr( this->atlasVisible ? "Hide Atlas" : "Show Atlas" ) );
-
-  // display or hide the image atlas widgets
-  this->ui->atlasDockWidget->setVisible( this->atlasVisible );
-  this->ui->interviewDockWidget->setVisible( !this->atlasVisible );
 
   // set all widget enable states
   this->ui->actionOpenInterview->setEnabled( loggedIn );
@@ -350,18 +302,6 @@ void QMainAlderWindow::updateInterface()
 
   this->ui->framePlayerWidget->setEnabled( loggedIn );
   this->ui->splitter->setEnabled( loggedIn );
-
-  //TODO: interviewImageWidget probably only needs to self->updateInterface
-  // when setEnabled emits a signal
-  this->ui->interviewImageWidget->setEnabled( loggedIn );
-  this->ui->atlasImageWidget->setEnabled( loggedIn );
-
-  this->updateInterviewImageWidget();
-
-  if( this->atlasVisible )
-  {
-    this->updateAtlasImageWidget();
-  }
 
   this->ui->interviewWidget->updateInterface();
   this->ui->atlasWidget->updateInterface();

@@ -2,6 +2,7 @@ A list of things which need to be done (in no particular order)
 ---------------------------------------------------------------
 
 - add an image atlas (ie: a way for a user to view expert ratings)
+- consider opening exam tree and displaying same exam type during next/prev operations
 - add option in CMake chain to create initial database
 - add const expressions where possible (includeing const_iterator)
 - make error when no modalities exist user-friendly

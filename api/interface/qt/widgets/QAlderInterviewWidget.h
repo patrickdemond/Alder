@@ -32,25 +32,25 @@ public:
   ~QAlderInterviewWidget();
 
   virtual void updateInterface();
-  vtkMedicalImageViewer *GetViewer() { return this->Viewer; }
+  vtkMedicalImageViewer *GetViewer();
 
 signals:
   void activeInterviewChanged();
   void activeImageChanged();
   
 public slots:
-  // action event functions
   virtual void slotPrevious();
   virtual void slotNext();
   virtual void slotTreeSelectionChanged();
   virtual void slotRatingChanged( int );
   virtual void slotNoteChanged();
+  virtual void slotHideControls( bool );
 
 protected:
-  // read/write application GUI settings
   virtual void updateInfo();
   virtual void updateExamTreeWidget();
   virtual void updateRating();
+  virtual void updateViewer();
 
   std::map< QTreeWidgetItem*, vtkSmartPointer<Alder::ActiveRecord> > treeModelMap;
 

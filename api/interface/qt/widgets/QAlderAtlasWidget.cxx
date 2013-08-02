@@ -20,10 +20,9 @@
 #include "User.h"
 
 #include "vtkNew.h"
-
-#include "QProgressDialog.h"
-
-#include <QMessageBox>
+#include "vtkMedicalImageViewer.h"
+#include "vtkRenderer.h"
+#include "vtkRenderWindow.h"
 
 #include <stdexcept>
 
@@ -43,14 +42,11 @@ QAlderAtlasWidget::QAlderAtlasWidget( QWidget* parent )
     this->ui->nextPushButton, SIGNAL( clicked() ),
     this, SLOT( slotNext() ) );
   QObject::connect(
-    this->ui->ratingComboBox, SIGNAL( valueChanged( int ) ),
+    this->ui->ratingComboBox, SIGNAL( currentIndexChanged( int ) ),
     this, SLOT( slotRatingChanged( int ) ) );
-  QObject::connect(
-    this->ui->noteTextEdit, SIGNAL( textChanged() ),
-    this, SLOT( slotNoteChanged() ) );
 
   this->Viewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
-  vtkRenderWindow* renwin = this->ui->interviewImageWidget->GetRenderWindow();
+  vtkRenderWindow* renwin = this->ui->imageWidget->GetRenderWindow();
   vtkRenderer* renderer = this->Viewer->GetRenderer();
   renderer->GradientBackgroundOn();
   renderer->SetBackground( 0, 0, 0 );
@@ -68,49 +64,68 @@ QAlderAtlasWidget::~QAlderAtlasWidget()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QAlderAtlasWidget::setVisible( bool visible )
+void QAlderAtlasWidget::showEvent( QShowEvent* event )
 {
-  if( visible )
+  QWidget::showEvent( event );
+
+  this->updateAtlasImage();
+
+  emit showing( true );
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QAlderAtlasWidget::hideEvent( QHideEvent* event )
+{
+  QWidget::hideEvent( event );
+  emit showing( false );
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+vtkMedicalImageViewer* QAlderAtlasWidget::GetViewer()
+{ 
+  return static_cast<vtkMedicalImageViewer*>(this->Viewer.GetPointer());
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QAlderAtlasWidget::updateAtlasImage()
+{
+  if( ! this->isVisible() ) return;
+  
+  Alder::Application *app = Alder::Application::GetInstance();
+  Alder::Image *atlasImage = app->GetActiveAtlasImage();
+  Alder::Image *image = app->GetActiveImage();
+
+  // select an appropriate atlas image, if necessary
+  if( image )
   {
-    Alder::Image *atlasImage = app->GetActiveAtlasImage();
-    Alder::Image *image = app->GetActiveImage();
+    //this->ui->atlasRatingComboBox->currentIndex() + 1;
+    //TODO: get the currently selected rating
+    int rating = 5;
+    bool getNewAtlasImage = false;
 
-    // select an appropriate atlas image, if necessary
-    if( image )
+    vtkSmartPointer< Alder::Exam > exam;
+    image->GetRecord( exam );
+
+    if( NULL == atlasImage ) getNewAtlasImage = true;
+    else
     {
-      //this->ui->atlasRatingComboBox->currentIndex() + 1;
-      //TODO: get the currently selected rating
-      int rating = 5;
-      bool getNewAtlasImage = false;
+      vtkSmartPointer< Alder::Exam > atlasExam;
+      atlasImage->GetRecord( atlasExam );
+      if( exam->Get( "Type" ) != atlasExam->Get( "Type" ) ) getNewAtlasImage = true;
+    }
 
-      vtkSmartPointer< Alder::Exam > exam;
-      image->GetRecord( exam );
-
-      if( NULL == atlasImage ) getNewAtlasImage = true;
-      else
+    if( getNewAtlasImage )
+    {
+      vtkSmartPointer<Alder::Image> newAtlasImage =
+        Alder::Image::GetAtlasImage( exam->Get( "Type" ).ToString(), rating );
+      if( 0 < newAtlasImage->Get( "Id" ).ToInt() )
       {
-        vtkSmartPointer< Alder::Exam > atlasExam;
-        atlasImage->GetRecord( atlasExam );
-        if( exam->Get( "Type" ) != atlasExam->Get( "Type" ) ) getNewAtlasImage = true;
-      }
-
-      if( getNewAtlasImage )
-      {
-        vtkSmartPointer<Alder::Image> newAtlasImage =
-          Alder::Image::GetAtlasImage( exam->Get( "Type" ).ToString(), rating );
-        if( 0 < newAtlasImage->Get( "Id" ).ToInt() )
-        {
-          app->SetActiveAtlasImage( newAtlasImage );
-          // TODO: send a signal to the render widget to load the new atlas image
-        }
+        app->SetActiveAtlasImage( newAtlasImage );
+        this->updateInterface();
+        emit this->activeImageChanged();
       }
     }
   }
-  else
-  {
-  }
-
-  QWidget::setVisible( visible );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -123,6 +138,7 @@ void QAlderAtlasWidget::slotPrevious()
   {
     app->SetActiveAtlasImage( image->GetPreviousAtlasImage() );
     this->updateInterface();
+    emit this->activeImageChanged();
   }
 }
 
@@ -135,8 +151,8 @@ void QAlderAtlasWidget::slotNext()
   if( NULL != image )
   {
     app->SetActiveAtlasImage( image->GetNextAtlasImage() );
-    emit this->activeImageChanged();
     this->updateInterface();
+    emit this->activeImageChanged();
   }
 }
 
@@ -174,7 +190,7 @@ void QAlderAtlasWidget::updateInfo()
   Alder::Interview *interview = app->GetActiveInterview();
   if( interview )
   {
-    Alder::Image *image = app->GetActiveAtlasImage();
+    Alder::Image *image = app->GetActiveImage();
     if( image )
     {
       vtkSmartPointer< Alder::Exam > exam;
@@ -184,7 +200,7 @@ void QAlderAtlasWidget::updateInfo()
         interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
         siteString = interview->Get( "Site" ).ToString().c_str();
         dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();
-        uidString = ""; // ->Get( "UId" );
+        uidString = interview->Get( "UId" ).ToString().c_str();
 
         vtkSmartPointer< Alder::Modality > modality;
         exam->GetRecord( modality );
@@ -202,6 +218,14 @@ void QAlderAtlasWidget::updateInfo()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QAlderAtlasWidget::updateViewer()
+{
+  Alder::Image *image = Alder::Application::GetInstance()->GetActiveAtlasImage();
+  if( image ) this->Viewer->Load( image->GetFileName().c_str() );
+  else this->Viewer->SetImageToSinusoid();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderAtlasWidget::updateInterface()
 {
   Alder::Application *app = Alder::Application::GetInstance();
@@ -215,4 +239,5 @@ void QAlderAtlasWidget::updateInterface()
   this->ui->ratingComboBox->setEnabled( image );
 
   this->updateInfo();
+  this->updateViewer();
 }

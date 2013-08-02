@@ -28,21 +28,23 @@ public:
   ~QAlderAtlasWidget();
 
   virtual void updateInterface();
-  vtkMedicalImageViewer *GetViewer() { return this->Viewer; }
-  virtual void setVisible( bool visible );
+  vtkMedicalImageViewer *GetViewer();
+  virtual void showEvent( QShowEvent* );
+  virtual void hideEvent( QHideEvent* );
 
 signals:
   void activeImageChanged();
+  void showing( bool );
   
 public slots:
-  // action event functions
   virtual void slotPrevious();
   virtual void slotNext();
   virtual void slotRatingChanged( int );
 
 protected:
-  // read/write application GUI settings
   virtual void updateInfo();
+  virtual void updateViewer();
+  virtual void updateAtlasImage();
 
 protected slots:
 

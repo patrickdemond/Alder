@@ -62,7 +62,7 @@
       <property name="childrenCollapsible">
        <bool>false</bool>
       </property>
-      <widget class="QAlderAtlasWidget" name="atlasWidget">
+      <widget class="QAlderAtlasWidget" name="atlasWidget" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -82,7 +82,7 @@
         </size>
        </property>
       </widget>
-      <widget class="QAlderInterviewWidget" name="interviewWidget">
+      <widget class="QAlderInterviewWidget" name="interviewWidget" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -167,7 +167,7 @@
      <x>0</x>
      <y>0</y>
      <width>1281</width>
-     <height>27</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuActions">
@@ -284,15 +284,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QAtlasImageWidget</class>
+   <class>QAlderAtlasWidget</class>
    <extends>QWidget</extends>
-   <header>QAtlasImageWidget.h</header>
+   <header>QAlderAtlasWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>QInterviewImageWidget</class>
+   <class>QAlderInterviewWidget</class>
    <extends>QWidget</extends>
-   <header>QInterviewImageWidget.h</header>
+   <header>QAlderInterviewWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
