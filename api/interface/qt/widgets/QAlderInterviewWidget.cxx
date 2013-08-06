@@ -88,13 +88,6 @@ QAlderInterviewWidget::QAlderInterviewWidget( QWidget* parent )
   this->Viewer->InterpolateOff();
   this->Viewer->SetImageToSinusoid();
 
-  // give a bit more room to the tree
-  double total = this->ui->examTreeWidget->height() + this->ui->noteTextEdit->height();
-  QList<int> sizeList;
-  sizeList.append( floor( 2 * total / 3 ) );
-  sizeList.append( total - sizeList[0] );
-  this->ui->splitter->setSizes( sizeList );
-
   this->updateEnabled();  
 };
 
