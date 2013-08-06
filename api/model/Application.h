@@ -32,6 +32,8 @@
 
 #include "Utilities.h"
 
+#include "vtkCommand.h"
+
 #include <iostream>
 #include <stdexcept>
 
@@ -55,6 +57,14 @@ namespace Alder
     static Application *GetInstance();
     static void DeleteInstance();
     
+    enum CustomEvents
+    {
+      ActiveUserEvent = vtkCommand::UserEvent + 100,
+      ActiveInterviewEvent,
+      ActiveImageEvent,
+      ActiveAtlasImageEvent
+    };
+
     /**
      * Reads configuration variables from a given file
      * @param filename string The file to read the configuration from

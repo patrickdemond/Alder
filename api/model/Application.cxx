@@ -37,7 +37,10 @@ namespace Alder
     this->Config = Configuration::New();
     this->DB = Database::New();
     this->Opal = OpalService::New();
-    this->ResetApplication();
+    this->ActiveUser = NULL;
+    this->ActiveInterview = NULL;
+    this->ActiveImage = NULL;
+    this->ActiveAtlasImage = NULL;
 
     // populate the constructor and class name registries with all active record classes
     this->ConstructorRegistry["Exam"] = &createInstance<Exam>;
@@ -215,6 +218,7 @@ namespace Alder
         if( this->ActiveUser->GetRecord( interview ) ) this->SetActiveInterview( interview );
       }
       this->Modified();
+      this->InvokeEvent( Application::ActiveUserEvent );
     }
   }
 
@@ -240,12 +244,21 @@ namespace Alder
         this->ActiveUser->Save();
       }
       this->Modified();
+      this->InvokeEvent( Application::ActiveInterviewEvent );
     }
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  vtkCxxSetObjectMacro( Application, ActiveImage, Image );
+  void Application::SetActiveImage( Image* image )
+  {
+    vtkSetObjectBodyMacro( ActiveImage, Image, image);
+    this->InvokeEvent( Application::ActiveImageEvent );
+  }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  vtkCxxSetObjectMacro( Application, ActiveAtlasImage, Image );
+  void Application::SetActiveAtlasImage( Image* image )
+  {
+    vtkSetObjectBodyMacro( ActiveAtlasImage, Image, image);
+    this->InvokeEvent( Application::ActiveAtlasImageEvent );
+  }
 }

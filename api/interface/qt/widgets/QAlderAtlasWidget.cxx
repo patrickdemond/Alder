@@ -19,8 +19,9 @@
 #include "Rating.h"
 #include "User.h"
 
-#include "vtkNew.h"
+#include "vtkEventQtSlotConnect.h"
 #include "vtkMedicalImageViewer.h"
+#include "vtkNew.h"
 #include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 
@@ -45,6 +46,16 @@ QAlderAtlasWidget::QAlderAtlasWidget( QWidget* parent )
     this->ui->ratingComboBox, SIGNAL( currentIndexChanged( int ) ),
     this, SLOT( slotRatingChanged( int ) ) );
 
+  this->Connections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
+  this->Connections->Connect( Alder::Application::GetInstance(),
+    Alder::Application::ActiveAtlasImageEvent,
+    this,
+    SLOT(updateInfo()));
+  this->Connections->Connect( Alder::Application::GetInstance(),
+    Alder::Application::ActiveAtlasImageEvent,
+    this,
+    SLOT(updateViewer()));
+
   this->Viewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
   vtkRenderWindow* renwin = this->ui->imageWidget->GetRenderWindow();
   vtkRenderer* renderer = this->Viewer->GetRenderer();
@@ -55,7 +66,7 @@ QAlderAtlasWidget::QAlderAtlasWidget( QWidget* parent )
   this->Viewer->InterpolateOff();
   this->Viewer->SetImageToSinusoid();
 
-  this->updateInterface();
+  this->updateEnabled();
 };
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -121,8 +132,6 @@ void QAlderAtlasWidget::updateAtlasImage()
       if( 0 < newAtlasImage->Get( "Id" ).ToInt() )
       {
         app->SetActiveAtlasImage( newAtlasImage );
-        this->updateInterface();
-        emit this->activeImageChanged();
       }
     }
   }
@@ -137,8 +146,6 @@ void QAlderAtlasWidget::slotPrevious()
   if( NULL != image )
   {
     app->SetActiveAtlasImage( image->GetPreviousAtlasImage() );
-    this->updateInterface();
-    emit this->activeImageChanged();
   }
 }
 
@@ -151,8 +158,6 @@ void QAlderAtlasWidget::slotNext()
   if( NULL != image )
   {
     app->SetActiveAtlasImage( image->GetNextAtlasImage() );
-    this->updateInterface();
-    emit this->activeImageChanged();
   }
 }
 
@@ -188,24 +193,21 @@ void QAlderAtlasWidget::updateInfo()
 
   Alder::Application *app = Alder::Application::GetInstance();
   Alder::Interview *interview = app->GetActiveInterview();
-  if( interview )
+  Alder::Image *image = app->GetActiveImage();
+  if( interview && image )
   {
-    Alder::Image *image = app->GetActiveImage();
-    if( image )
+    vtkSmartPointer< Alder::Exam > exam;
+    if( image->GetRecord( exam ) )
     {
-      vtkSmartPointer< Alder::Exam > exam;
-      if( image->GetRecord( exam ) )
-      {
-        noteString = exam->Get( "Note" ).ToString().c_str();
-        interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
-        siteString = interview->Get( "Site" ).ToString().c_str();
-        dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();
-        uidString = interview->Get( "UId" ).ToString().c_str();
+      noteString = exam->Get( "Note" ).ToString().c_str();
+      interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
+      siteString = interview->Get( "Site" ).ToString().c_str();
+      dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();
+      uidString = interview->Get( "UId" ).ToString().c_str();
 
-        vtkSmartPointer< Alder::Modality > modality;
-        exam->GetRecord( modality );
-        helpString = modality->Get( "Help" ).ToString();
-      }
+      vtkSmartPointer< Alder::Modality > modality;
+      exam->GetRecord( modality );
+      helpString = modality->Get( "Help" ).ToString();
     }
   }
 
@@ -226,7 +228,7 @@ void QAlderAtlasWidget::updateViewer()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QAlderAtlasWidget::updateInterface()
+void QAlderAtlasWidget::updateEnabled()
 {
   Alder::Application *app = Alder::Application::GetInstance();
   Alder::Image *image = app->GetActiveAtlasImage();
@@ -237,7 +239,4 @@ void QAlderAtlasWidget::updateInterface()
   this->ui->noteTextEdit->setEnabled( image );
   this->ui->helpTextEdit->setEnabled( image );
   this->ui->ratingComboBox->setEnabled( image );
-
-  this->updateInfo();
-  this->updateViewer();
 }

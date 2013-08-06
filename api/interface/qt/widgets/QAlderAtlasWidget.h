@@ -16,6 +16,7 @@
 
 #include "vtkSmartPointer.h"
 
+class vtkEventQtSlotConnect;
 class vtkMedicalImageViewer;
 class Ui_QAlderAtlasWidget;
 
@@ -27,13 +28,13 @@ public:
   QAlderAtlasWidget( QWidget* parent = 0 );
   ~QAlderAtlasWidget();
 
-  virtual void updateInterface();
+  virtual void updateEnabled();
+
   vtkMedicalImageViewer *GetViewer();
   virtual void showEvent( QShowEvent* );
   virtual void hideEvent( QHideEvent* );
 
 signals:
-  void activeImageChanged();
   void showing( bool );
   
 public slots:
@@ -41,7 +42,6 @@ public slots:
   virtual void slotNext();
   virtual void slotRatingChanged( int );
 
-protected:
   virtual void updateInfo();
   virtual void updateViewer();
   virtual void updateAtlasImage();
@@ -53,6 +53,7 @@ private:
   Ui_QAlderAtlasWidget *ui;
 
   vtkSmartPointer<vtkMedicalImageViewer> Viewer;
+  vtkSmartPointer<vtkEventQtSlotConnect> Connections;
 };
 
 #endif

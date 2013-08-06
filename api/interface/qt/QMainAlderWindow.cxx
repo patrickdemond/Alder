@@ -15,6 +15,7 @@
 #include "Interview.h"
 #include "User.h"
 
+#include "vtkEventQtSlotConnect.h"
 #include "vtkMedicalImageViewer.h"
 #include "vtkNew.h"
 
@@ -73,8 +74,9 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   // TODO: need to connect atlasWidget to the frame player as well
   this->ui->framePlayerWidget->setViewer( this->ui->interviewWidget->GetViewer() );
 
-  QObject::connect(
-    this->ui->interviewWidget, SIGNAL( activeImageChanged() ),
+  this->Connections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
+  this->Connections->Connect( Alder::Application::GetInstance(),
+    Alder::Application::ActiveImageEvent,
     this->ui->framePlayerWidget, SLOT( updateFromViewer() ) );
 
   this->readSettings();
@@ -303,6 +305,8 @@ void QMainAlderWindow::updateInterface()
   this->ui->framePlayerWidget->setEnabled( loggedIn );
   this->ui->splitter->setEnabled( loggedIn );
 
-  this->ui->interviewWidget->updateInterface();
-  this->ui->atlasWidget->updateInterface();
+  this->ui->interviewWidget->setEnabled( loggedIn );
+  this->ui->interviewWidget->updateEnabled();
+  this->ui->atlasWidget->setEnabled( loggedIn );
+  this->ui->atlasWidget->updateEnabled();
 }

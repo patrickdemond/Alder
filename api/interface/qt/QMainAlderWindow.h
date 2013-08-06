@@ -14,6 +14,9 @@
 
 #include <QMainWindow>
 
+#include "vtkSmartPointer.h"
+
+class vtkEventQtSlotConnect;
 class Ui_QMainAlderWindow;
 
 class QMainAlderWindow : public QMainWindow
@@ -53,6 +56,8 @@ private:
   Ui_QMainAlderWindow *ui;
 
   bool atlasVisible;
+
+  vtkSmartPointer<vtkEventQtSlotConnect> Connections;
 };
 
 #endif
