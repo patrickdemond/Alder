@@ -166,7 +166,7 @@ namespace Alder
   }
   
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  int ActiveRecord::GetLastInsertId()
+  int ActiveRecord::GetLastInsertId() const
   {
     vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
     std::stringstream stream;

@@ -90,14 +90,14 @@ namespace Alder
           // get the list of cIMT images in this exam
 
           std::vector< vtkSmartPointer< Alder::Image > > imageList;
-          std::vector< vtkSmartPointer< Alder::Image > >::iterator imageIt;
+          std::vector< vtkSmartPointer< Alder::Image > >::const_iterator imageIt;
           this->GetList( &imageList );
           if( imageList.empty() ) throw std::runtime_error( "Failed list load during cIMT parenting" );
 
           // map the AcquisitionDateTimes from the dicom file headers to the images
 
           std::map< int, std::string > acqDateTimes;
-          for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
+          for( imageIt = imageList.cbegin(); imageIt != imageList.cend(); ++imageIt )
           {
             Alder::Image *image = imageIt->GetPointer();
             acqDateTimes[ image->Get( "Id" ).ToInt() ] = image->GetDICOMAcquisitionDateTime();
@@ -113,9 +113,9 @@ namespace Alder
           // in case of no matching datetime associate the still with
           // the group of cineloops
 
-          std::map< int, std::string >::iterator mapIt;
+          std::map< int, std::string >::const_iterator mapIt;
           int parentId = -1;
-          for( mapIt = acqDateTimes.begin(); mapIt != acqDateTimes.end(); mapIt++ )
+          for( mapIt = acqDateTimes.cbegin(); mapIt != acqDateTimes.cend(); mapIt++ )
           {
           
             if( mapIt->first == stillId ) continue;
@@ -199,9 +199,13 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  bool Exam::RetrieveImage( std::string type, std::string variable, std::string UId,
-                            std::map<std::string, vtkVariant> settings,
-                            std::string suffix, std::string sideVariable )
+  bool Exam::RetrieveImage(
+    const std::string type,
+    const std::string variable,
+    const std::string UId,
+    const std::map<std::string, vtkVariant> settings,
+    const std::string suffix,
+    const std::string sideVariable )
   {
     Application *app = Application::GetInstance();
     OpalService *opal = app->GetOpal();
@@ -212,7 +216,7 @@ namespace Alder
     if( repeatable )
     {
       std::vector< std::string > sideList;
-      std::vector< std::string >::iterator sideListIt;
+      std::vector< std::string >::const_iterator sideListIt;
       sideList = opal->GetValues( "clsa-dcs-images", type, UId, sideVariable );
      
       int numSides = sideList.empty() ? 0 : sideList.size();
@@ -247,7 +251,7 @@ namespace Alder
       bool found = false;
       std::string laterality = this->Get( "Laterality" ).ToString();
 
-      for( sideListIt = sideList.begin(); sideListIt != sideList.end(); ++sideListIt )
+      for( sideListIt = sideList.cbegin(); sideListIt != sideList.cend(); ++sideListIt )
       {
         if( laterality == Utilities::toLower( *sideListIt ) )
         {
@@ -266,8 +270,8 @@ namespace Alder
 
     // add a new entry in the image table (or replace it)
     vtkNew< Alder::Image > image;
-    std::map< std::string, vtkVariant >::iterator it = settings.begin();
-    for( it = settings.begin(); it != settings.end(); it++ ) image->Set( it->first, it->second );
+    std::map< std::string, vtkVariant >::const_iterator it = settings.cbegin();
+    for( it = settings.cbegin(); it != settings.cend(); it++ ) image->Set( it->first, it->second );
     image->Save( true );
 
     // now write the file and validate it
@@ -295,9 +299,9 @@ namespace Alder
 
     // loop through all images
     std::vector< vtkSmartPointer< Image > > imageList;
-    std::vector< vtkSmartPointer< Image > >::iterator imageIt;
+    std::vector< vtkSmartPointer< Image > >::const_iterator imageIt;
     this->GetList( &imageList );
-    for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
+    for( imageIt = imageList.cbegin(); imageIt != imageList.cend(); ++imageIt )
     {
       Image *image = *(imageIt);
       if( !image->IsRatedBy( user ) ) return false;

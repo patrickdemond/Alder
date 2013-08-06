@@ -50,7 +50,7 @@ namespace Alder
      * NOTE: this method does not depend on the file already existing, it simply uses
      * the image's path and the provided extension to create an empty file.
      */
-    std::string CreateFile( std::string suffix );
+    std::string CreateFile( const std::string suffix );
 
     /**
      * Once the file is written to the disk this method validates it.  It will unzip gzipped files
@@ -84,7 +84,7 @@ namespace Alder
     /**
      * Returns the neighbouring interview in UId/VisitDate order.
      */
-    vtkSmartPointer<Image> GetNeighbourAtlasImage( bool forward );
+    vtkSmartPointer<Image> GetNeighbourAtlasImage( const bool forward ) const;
     vtkSmartPointer<Image> GetNextAtlasImage()
     { return this->GetNeighbourAtlasImage( true ); }
     vtkSmartPointer<Image> GetPreviousAtlasImage()
@@ -93,7 +93,7 @@ namespace Alder
     /**
      * Returns an atlas image for a specified type and rating
      */
-    static vtkSmartPointer<Image> GetAtlasImage( std::string type, int rating );
+    static vtkSmartPointer<Image> GetAtlasImage( const std::string type, const int rating );
 
   protected:
     Image() {}

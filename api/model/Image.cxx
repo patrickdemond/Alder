@@ -55,7 +55,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string Image::CreateFile( std::string suffix )
+  std::string Image::CreateFile( const std::string suffix )
   {
     // first get the path and create it if it doesn't exist
     std::string path = this->GetFilePath();
@@ -197,7 +197,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  vtkSmartPointer<Image> Image::GetNeighbourAtlasImage( bool forward )
+  vtkSmartPointer<Image> Image::GetNeighbourAtlasImage( const bool forward ) const
   {
     this->AssertPrimaryId();
     vtkSmartPointer<Image> image = vtkSmartPointer<Image>::New();
@@ -208,7 +208,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  vtkSmartPointer<Image> Image::GetAtlasImage( std::string type, int rating )
+  vtkSmartPointer<Image> Image::GetAtlasImage( const std::string type, const int rating )
   {
     vtkSmartPointer<Image> image = vtkSmartPointer<Image>::New();
 

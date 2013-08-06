@@ -62,34 +62,34 @@ namespace Alder
      * @param port int
      */
     bool Connect(
-      std::string name,
-      std::string user,
-      std::string pass,
-      std::string host,
-      int port );
+      const std::string name,
+      const std::string user,
+      const std::string pass,
+      const std::string host,
+      const int port );
 
     /**
      * Returns a vtkAlderMySQLQuery object for performing queries
      * This method should only be used by Model objects.
      */
-    vtkSmartPointer<vtkAlderMySQLQuery> GetQuery();
+    vtkSmartPointer<vtkAlderMySQLQuery> GetQuery() const;
 
     /**
      * Returns a list of column names for a given table
      * @param table string
      * @throws runtime_error
      */
-    std::vector<std::string> GetColumnNames( std::string table );
+    std::vector<std::string> GetColumnNames( const std::string table ) const;
 
     /**
      * Returns whether a table.column exists
      */
-    bool TableExists( std::string table ) const;
+    bool TableExists( const std::string table ) const;
 
     /**
      * Returns whether a table.column exists
      */
-    bool ColumnExists( std::string table, std::string column ) const;
+    bool ColumnExists( const std::string table, const std::string column ) const;
 
     /**
      * Returns the default value for a table's column
@@ -97,7 +97,7 @@ namespace Alder
      * @param column string
      * @throws runtime_error
      */
-    vtkVariant GetColumnDefault( std::string table, std::string column );
+    vtkVariant GetColumnDefault( const std::string table, const std::string column ) const;
 
     /**
      * Returns whether a table's column value may be null
@@ -105,7 +105,7 @@ namespace Alder
      * @param column string
      * @throws runtime_error
      */
-    bool IsColumnNullable( std::string table, std::string column );
+    bool IsColumnNullable( const std::string table, const std::string column ) const;
 
     /**
      * Returns whether a table's column is a foreign key
@@ -115,7 +115,7 @@ namespace Alder
      * @param column string
      * @throws runtime_error
      */
-    bool IsColumnForeignKey( std::string table, std::string column );
+    bool IsColumnForeignKey( const std::string table, const std::string column ) const;
 
   protected:
     Database();
