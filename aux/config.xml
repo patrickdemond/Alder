@@ -1,19 +1,19 @@
 <Configuration>
   <Database>
-    <Name></Name>
-    <Username></Username>
-    <Password></Password>
-    <Host>localhost</Host>
-    <Port>3306</Port>
+    <Host>%DB_HOST%</Host>
+    <Port>%DB_PORT%</Port>
+    <Username>%DB_USERNAME%</Username>
+    <Password>%DB_PASSWORD%</Password>
+    <Name>%DB_NAME%</Name>
   </Database>
   <Opal>
-    <Username></Username>
-    <Password></Password>
-    <Host>localhost</Host>
-    <Port>8843</Port>
-    <Timeout>10</Timeout>
+    <Host>%OPAL_HOST%</Host>
+    <Port>%OPAL_PORT%</Port>
+    <Username>%OPAL_USERNAME%</Username>
+    <Password>%OPAL_PASSWORD%</Password>
+    <Timeout>%OPAL_TIMEOUT%</Timeout>
   </Opal>
   <Path>
-    <ImageData></ImageData>
+    <ImageData>%IMAGEDATA_PATH%</ImageData>
   </Path>
 </Configuration>

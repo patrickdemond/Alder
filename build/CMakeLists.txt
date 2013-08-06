@@ -75,10 +75,10 @@ CONFIGURE_FILE( ${ALDER_API_DIR}/Utilities.h.in
 CONFIGURE_FILE( ${ALDER_ROOT_DIR}/readme
                 ${PROJECT_BINARY_DIR}/readme COPYONLY )
 
-# Copy the config xml file to the build path (if not found)
+# Run the configuration initialization script if the config xml file is not found
 IF( NOT EXISTS ${ALDER_CONFIG_FILE} )
-  CONFIGURE_FILE( ${ALDER_AUX_DIR}/config.xml
-                  ${ALDER_CONFIG_FILE} COPYONLY )
+  MESSAGE( "No config.xml file was found, building one" )
+  EXECUTE_PROCESS( COMMAND ${ALDER_AUX_DIR}/init_config ${ALDER_CONFIG_FILE} )
 ENDIF( NOT EXISTS ${ALDER_CONFIG_FILE} )
 
 # Set up include directories
