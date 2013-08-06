@@ -19,8 +19,9 @@
 #include "Rating.h"
 #include "User.h"
 
-#include "vtkNew.h"
+#include "vtkEventQtSlotConnect.h"
 #include "vtkMedicalImageViewer.h"
+#include "vtkNew.h"
 #include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 
@@ -59,6 +60,24 @@ QAlderInterviewWidget::QAlderInterviewWidget( QWidget* parent )
     this->ui->noteTextEdit, SIGNAL( textChanged() ),
     this, SLOT( slotNoteChanged() ) );
 
+  this->Connections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
+  this->Connections->Connect( Alder::Application::GetInstance(),
+    Alder::Application::ActiveInterviewEvent,
+    this,
+    SLOT(updateExamTreeWidget()));
+  this->Connections->Connect( Alder::Application::GetInstance(),
+    Alder::Application::ActiveImageEvent,
+    this,
+    SLOT(updateInfo()));
+  this->Connections->Connect( Alder::Application::GetInstance(),
+    Alder::Application::ActiveImageEvent,
+    this,
+    SLOT(updateRating()));
+  this->Connections->Connect( Alder::Application::GetInstance(),
+    Alder::Application::ActiveImageEvent,
+    this,
+    SLOT(updateViewer()));
+
   this->Viewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
   vtkRenderWindow* renwin = this->ui->imageWidget->GetRenderWindow();
   vtkRenderer* renderer = this->Viewer->GetRenderer();
@@ -69,14 +88,14 @@ QAlderInterviewWidget::QAlderInterviewWidget( QWidget* parent )
   this->Viewer->InterpolateOff();
   this->Viewer->SetImageToSinusoid();
 
-  this->updateInterface();
-
   // give a bit more room to the tree
   double total = this->ui->examTreeWidget->height() + this->ui->noteTextEdit->height();
   QList<int> sizeList;
   sizeList.append( floor( 2 * total / 3 ) );
   sizeList.append( total - sizeList[0] );
   this->ui->splitter->setSizes( sizeList );
+
+  this->updateEnabled();  
 };
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -128,10 +147,9 @@ void QAlderInterviewWidget::slotPrevious()
       }
 
       app->SetActiveInterview( interview );
-      this->updateInterface();
-      emit this->activeInterviewChanged();
     }
   }
+  this->updateEnabled();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -172,10 +190,9 @@ void QAlderInterviewWidget::slotNext()
       }
 
       app->SetActiveInterview( interview );
-      this->updateInterface();
-      emit this->activeInterviewChanged();
     }
   }
+  this->updateEnabled();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -190,8 +207,6 @@ void QAlderInterviewWidget::slotTreeSelectionChanged()
     {
       Alder::ActiveRecord *record = it->second;
       Alder::Application::GetInstance()->SetActiveImage( Alder::Image::SafeDownCast( record ) );
-      this->updateInterface();
-      emit this->activeImageChanged();
     }
   }
 }
@@ -203,26 +218,25 @@ void QAlderInterviewWidget::slotRatingChanged( int value )
 
   // make sure we have an active user and image
   Alder::User *user = app->GetActiveUser();
-  if( !user ) throw std::runtime_error( "Rating slider modified without an active user" );
   Alder::Image *image = app->GetActiveImage();
-  if( !image ) throw std::runtime_error( "Rating slider modified without an active image" );
+  if( user && image )
+  {
+    // See if we have a rating for this user and image
+    std::map< std::string, std::string > map;
+    map["UserId"] = user->Get( "Id" ).ToString();
+    map["ImageId"] = image->Get( "Id" ).ToString();
+    vtkNew< Alder::Rating > rating;
+    if( !rating->Load( map ) )
+    { // no record exists, set the user and image ids
+      rating->Set( "UserId", user->Get( "Id" ).ToInt() );
+      rating->Set( "ImageId", image->Get( "Id" ).ToInt() );
+    }
 
-  // See if we have a rating for this user and image
-  std::map< std::string, std::string > map;
-  map["UserId"] = user->Get( "Id" ).ToString();
-  map["ImageId"] = image->Get( "Id" ).ToString();
-  vtkNew< Alder::Rating > rating;
-  if( !rating->Load( map ) )
-  { // no record exists, set the user and image ids
-    rating->Set( "UserId", user->Get( "Id" ).ToInt() );
-    rating->Set( "ImageId", image->Get( "Id" ).ToInt() );
+    if( 0 == value ) rating->SetNull( "Rating" );
+    else rating->Set( "Rating", value );
+
+    rating->Save();
   }
-
-  if( 0 == value ) rating->SetNull( "Rating" );
-  else rating->Set( "Rating", value );
-
-  rating->Save();
-  this->updateRating();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -259,15 +273,15 @@ void QAlderInterviewWidget::slotHideControls( bool hide )
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderInterviewWidget::slotNoteChanged()
 {
-  vtkSmartPointer< Alder::Exam > exam;
   Alder::Application *app = Alder::Application::GetInstance();
 
   // make sure we have an active user and image, and the image has an exam
   Alder::User *user = app->GetActiveUser();
-  if( user )
+  Alder::Image *image = app->GetActiveImage();
+  if( user && image )
   {
-    Alder::Image *image = app->GetActiveImage();
-    if( image && image->GetRecord( exam ) )
+    vtkSmartPointer< Alder::Exam > exam;
+    if( image->GetRecord( exam ) )
     {
       exam->Set( "Note", this->ui->noteTextEdit->toPlainText().toStdString() );
       exam->Save();
@@ -285,26 +299,27 @@ void QAlderInterviewWidget::updateInfo()
 
   // fill in the active exam information
   Alder::Application *app = Alder::Application::GetInstance();
+
   Alder::Interview *interview = app->GetActiveInterview();
-  if( interview )
+  Alder::Image *image = app->GetActiveImage();
+  if( interview && image )
   {
     // get exam from active image
-    Alder::Image *image = app->GetActiveImage();
-
-    if( image )
+    vtkSmartPointer< Alder::Exam > exam;
+    if( image->GetRecord( exam ) )
     {
-      vtkSmartPointer< Alder::Exam > exam;
-      if( image->GetRecord( exam ) )
-      {
-        noteString = exam->Get( "Note" ).ToString().c_str();
-        interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
-        siteString = interview->Get( "Site" ).ToString().c_str();
-        dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();
-      }
+      noteString = exam->Get( "Note" ).ToString().c_str();
+      interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
+      siteString = interview->Get( "Site" ).ToString().c_str();
+      dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();
     }
   }
 
+  // set the text edit content from the exam note
+  bool oldSignalState = this->ui->noteTextEdit->blockSignals( true );
   this->ui->noteTextEdit->setPlainText( noteString );
+  this->ui->noteTextEdit->blockSignals( oldSignalState );
+
   this->ui->infoInterviewerValueLabel->setText( interviewerString );
   this->ui->infoSiteValueLabel->setText( siteString );
   this->ui->infoDateValueLabel->setText( dateString );
@@ -386,7 +401,6 @@ void QAlderInterviewWidget::updateExamTreeWidget()
       QTreeWidgetItem *examItem = new QTreeWidgetItem( parentItem );
       this->treeModelMap[examItem] = *examIt;
       examItem->setText( 0, name );
-      examItem->setIcon(0, QIcon(":/icons/eye-visible-icon" ) );
       examItem->setExpanded( true );
       examItem->setFlags( Qt::ItemIsEnabled );
 
@@ -395,11 +409,11 @@ void QAlderInterviewWidget::updateExamTreeWidget()
       std::vector< vtkSmartPointer< Alder::Image > >::iterator imageIt;
       exam->GetList( &imageList );
 
-      // if the exam has no images, display the status of the exam
-      if( imageList.empty() )
-      {
-        examItem->setIcon(0, QIcon(":/icons/x-icon" ) );        
-      }
+      // display the status of the exam
+      examItem->setIcon( 0,
+        imageList.empty() ? 
+        QIcon(":/icons/x-icon" ) : 
+        QIcon(":/icons/eye-visible-icon" ) );
 
       for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
       {
@@ -430,7 +444,8 @@ void QAlderInterviewWidget::updateExamTreeWidget()
           std::vector< vtkSmartPointer< Alder::Image > > childImageList;
           std::vector< vtkSmartPointer< Alder::Image > >::iterator childImageIt;
           image->GetList( &childImageList, "ParentImageId" );
-          for( childImageIt = childImageList.begin(); childImageIt != childImageList.end(); ++childImageIt )
+          for( childImageIt = childImageList.begin();
+               childImageIt != childImageList.end(); ++childImageIt )
           {
             Alder::Image *childImage = childImageIt->GetPointer();
             name = tr( "Image #" );
@@ -465,7 +480,7 @@ void QAlderInterviewWidget::updateRating()
   // make sure we have an active image
   Alder::User *user = app->GetActiveUser();
   Alder::Image *image = app->GetActiveImage();
-
+  
   if( user && image )
   {
     std::map< std::string, std::string > map;
@@ -480,7 +495,9 @@ void QAlderInterviewWidget::updateRating()
   }
 
   this->ui->ratingSlider->setValue( ratingValue );
-  this->ui->ratingValueLabel->setText( 0 == ratingValue ? tr( "N/A" ) : QString::number( ratingValue ) );
+  this->ui->ratingValueLabel->setText( 0 == ratingValue ? 
+    tr( "N/A" ) : 
+    QString::number( ratingValue ) );
 
   // re-enable the rating slider's signals
   this->ui->ratingSlider->blockSignals( oldSignalState );
@@ -495,7 +512,7 @@ void QAlderInterviewWidget::updateViewer()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QAlderInterviewWidget::updateInterface()
+void QAlderInterviewWidget::updateEnabled()
 {
   Alder::Application *app = Alder::Application::GetInstance();
   Alder::Interview *interview = app->GetActiveInterview();
@@ -506,12 +523,8 @@ void QAlderInterviewWidget::updateInterface()
   this->ui->loadedCheckBox->setEnabled( interview );
   this->ui->previousPushButton->setEnabled( interview );
   this->ui->nextPushButton->setEnabled( interview );
-  this->ui->ratingSlider->setEnabled( image );
-  this->ui->noteTextEdit->setEnabled( image );
   this->ui->examTreeWidget->setEnabled( interview );
 
-  this->updateExamTreeWidget();
-  this->updateInfo();
-  this->updateRating();
-  this->updateViewer();
+  this->ui->ratingSlider->setEnabled( image );
+  this->ui->noteTextEdit->setEnabled( image );
 }

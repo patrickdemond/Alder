@@ -19,6 +19,7 @@
 #include <map>
 
 namespace Alder { class ActiveRecord; };
+class vtkEventQtSlotConnect;
 class vtkMedicalImageViewer;
 class Ui_QAlderInterviewWidget;
 class QTreeWidgetItem;
@@ -31,13 +32,9 @@ public:
   QAlderInterviewWidget( QWidget* parent = 0 );
   ~QAlderInterviewWidget();
 
-  virtual void updateInterface();
+  virtual void updateEnabled();
   vtkMedicalImageViewer *GetViewer();
 
-signals:
-  void activeInterviewChanged();
-  void activeImageChanged();
-  
 public slots:
   virtual void slotPrevious();
   virtual void slotNext();
@@ -45,12 +42,12 @@ public slots:
   virtual void slotRatingChanged( int );
   virtual void slotNoteChanged();
   virtual void slotHideControls( bool );
-
-protected:
   virtual void updateInfo();
   virtual void updateExamTreeWidget();
   virtual void updateRating();
   virtual void updateViewer();
+
+protected:
 
   std::map< QTreeWidgetItem*, vtkSmartPointer<Alder::ActiveRecord> > treeModelMap;
 
@@ -61,6 +58,7 @@ private:
   Ui_QAlderInterviewWidget *ui;
 
   vtkSmartPointer<vtkMedicalImageViewer> Viewer;
+  vtkSmartPointer<vtkEventQtSlotConnect> Connections;
 };
 
 #endif
