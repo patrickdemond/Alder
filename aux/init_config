@@ -108,6 +108,9 @@ if [ $rebuild_database -eq 1 ]; then
   echo "Rebuilding the database..."
   sed -e "s;\`Alder\`;\`$db_name\`;" $DIR/../sql/schema.sql $DIR/../sql/Modality.sql |
   mysql --host="$db_host" --port=$db_port --user="$db_username" --password="$db_password"
+
+  echo "Deleting old cached image files..."
+  rm -rf $imagedata_path/*
   
   echo ""
 fi
