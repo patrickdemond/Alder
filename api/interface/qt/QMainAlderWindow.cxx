@@ -123,12 +123,9 @@ void QMainAlderWindow::slotOpenInterview()
       dialog.setWindowTitle( tr( "Downloading Exam Images" ) );
       dialog.setMessage( tr( "Please wait while the interview's images are downloaded." ) );
       dialog.open();
-      activeInterview->UpdateImageData();
+      app->UpdateActiveInterviewImageData();
       dialog.accept();
     }
-
-    // active interview may have changed so update the interface
-    this->updateInterface();
   }
 }
 

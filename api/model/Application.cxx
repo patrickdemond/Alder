@@ -261,4 +261,14 @@ namespace Alder
     vtkSetObjectBodyMacro( ActiveAtlasImage, Image, image);
     this->InvokeEvent( Application::ActiveAtlasImageEvent );
   }
+  
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Application::UpdateActiveInterviewImageData()
+  {
+    if( this->ActiveInterview )
+    {
+      this->ActiveInterview->UpdateImageData();
+      this->InvokeEvent( Application::ActiveInterviewUpdateImageDataEvent );
+    }  
+  }
 }

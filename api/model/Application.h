@@ -61,6 +61,7 @@ namespace Alder
     {
       ActiveUserEvent = vtkCommand::UserEvent + 100,
       ActiveInterviewEvent,
+      ActiveInterviewUpdateImageDataEvent,
       ActiveImageEvent,
       ActiveAtlasImageEvent
     };
@@ -116,6 +117,11 @@ namespace Alder
      */
     virtual void SetActiveAtlasImage( Image* );
     
+    /**
+     * Proxy request for the active interview to update/download its image data
+     */
+    virtual void UpdateActiveInterviewImageData();
+
     /**
      * Creates a new instance of a model object given its class name
      * @param className string
