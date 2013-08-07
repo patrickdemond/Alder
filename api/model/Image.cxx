@@ -155,7 +155,7 @@ namespace Alder
   }
   
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string Image::GetDICOMAcquisitionDateTime()
+  std::string Image::GetDICOMTag( const std::string tagName )
   {
     this->AssertPrimaryId();
 
@@ -170,8 +170,14 @@ namespace Alder
     const gdcm::File &file = reader.GetFile();
     const gdcm::DataSet &ds = file.GetDataSet();
 
+    // TODO: use GDCM to get the correct tags
+    gdcm::Tag tag;
+    if( "Acquisition DateTime" == tagName ) tag = gdcm::Tag( 0x0008, 0x002a );
+    else if( "SeriesNumber" == tagName ) tag = gdcm::Tag( 0x0020,0x0011 );
+    else throw std::runtime_error( "Unknown DICOM tag name." );
+
     return std::string( 
-      gdcm::DirectoryHelper::GetStringValueFromTag( gdcm::Tag(0x0008,0x002a), ds ) );
+      gdcm::DirectoryHelper::GetStringValueFromTag( tag, ds ) );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

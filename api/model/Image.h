@@ -72,6 +72,11 @@ namespace Alder
     bool IsRatedBy( User* user );
 
     /**
+     * Get arbitrary DICOM tag value.  Works only for dicom images.
+     */
+    std::string GetDICOMTag( const std::string tagName );
+
+    /**
      * Get the acquisition date time.  Works only for dicom images.
      */
     std::string GetDICOMAcquisitionDateTime();
