@@ -1,9 +1,6 @@
 A list of things which need to be done (in no particular order)
 ---------------------------------------------------------------
 
-- add an image atlas (ie: a way for a user to view expert ratings)
 - consider opening exam tree and displaying same exam type during next/prev operations
 - add const expressions where possible (including const_iterator)
-- whole body dexa scans have two different "exam types"
 - consider overloading native operators in active record class
-- make parent class for QAlder*Widget
