@@ -33,6 +33,7 @@
 #include "QueryModifier.h"
 
 #include "vtkAlderMySQLQuery.h"
+#include "vtkNew.h"
 #include "vtkSmartPointer.h"
 #include "vtkVariant.h"
 
@@ -134,15 +135,26 @@ namespace Alder
      * Provides a list of all records which are related to this record by foreign key or
      * has a joining N-to-N relationship with another table.
      * @param list vector An existing vector to put all records into.
+     * @param modifier QueryModifier
      * @throws runtime_error
      */
-    template< class T > void GetList( std::vector< vtkSmartPointer< T > > *list, const std::string override = "" )
+    template< class T > void GetList(
+      std::vector< vtkSmartPointer< T > > *list, QueryModifier *modifier = NULL )
+    { this->GetList( list, modifier, "" ); }
+    template< class T > void GetList(
+      std::vector< vtkSmartPointer< T > > *list, const std::string override )
+    { this->GetList( list, NULL, override ); }
+    template< class T > void GetList(
+      std::vector< vtkSmartPointer< T > > *list, QueryModifier *modifier, const std::string override )
     {
       Application *app = Application::GetInstance();
       Database *db = app->GetDB();
-      std::stringstream sql;
+      std::stringstream stream;
       std::string type = app->GetUnmangledClassName( typeid(T).name() );
       vtkSmartPointer<vtkAlderMySQLQuery> query = db->GetQuery();
+
+      vtkNew<QueryModifier> mod;
+      if( NULL != modifier ) mod->Merge( modifier );
 
       // if no override is provided, figure out necessary table/column names
       std::string joiningTable = override.empty() ? this->GetName() + "Has" + type : override;
@@ -151,13 +163,13 @@ namespace Alder
       int relationship = this->GetRelationship( type, override );
       if( ActiveRecord::ManyToMany == relationship )
       {
-        sql << "SELECT " << type << "Id FROM " << joiningTable << " "
-            << "WHERE " << this->GetName() << "Id = " << this->Get( "Id" ).ToString();
+        stream << "SELECT " << type << "Id FROM " << joiningTable;
+        mod->Where( this->GetName() + "Id", "=", this->Get( "Id" ).ToString() );
       }
       else if( ActiveRecord::OneToMany == relationship )
       {
-        sql << "SELECT Id FROM " << type << " "
-            << "WHERE " << column << " = " << this->Get( "Id" ).ToString();
+        stream << "SELECT Id FROM " << type;
+        mod->Where( column, "=", this->Get( "Id" ).ToString() );
       }
       else // no relationship (we don't support one-to-one relationships)
       {
@@ -167,8 +179,9 @@ namespace Alder
       }
 
       // execute the query, check for errors, put results in the list
-      Utilities::log( "Querying Database: " + sql.str() );
-      query->SetQuery( sql.str().c_str() );
+      std::string sql = stream.str() + " " + mod->GetSql();
+      Utilities::log( "Querying Database: " + sql );
+      query->SetQuery( sql.c_str() );
       query->Execute();
       if( query->HasError() )
       {
