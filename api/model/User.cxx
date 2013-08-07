@@ -18,7 +18,7 @@ namespace Alder
   vtkStandardNewMacro( User );
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void User::SetVariant( std::string column, vtkVariant value )
+  void User::SetVariant( const std::string column, vtkVariant value )
   {
     if( "Password" == column && value.IsValid() )
     { // if we are setting the password override the parent so that we can hash
@@ -43,7 +43,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  bool User::IsPassword( std::string password )
+  bool User::IsPassword( const std::string password )
   {
     // first hash the password argument
     std::string hashedPassword;

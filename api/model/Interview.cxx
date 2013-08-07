@@ -30,7 +30,8 @@ namespace Alder
   vtkStandardNewMacro( Interview );
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  vtkSmartPointer<Interview> Interview::GetNeighbour( bool forward, bool loaded, bool unrated )
+  vtkSmartPointer<Interview> Interview::GetNeighbour(
+    const bool forward, const bool loaded, const bool unrated )
   {
     this->AssertPrimaryId();
 
@@ -236,9 +237,9 @@ namespace Alder
     int total = 0;
 
     std::vector< vtkSmartPointer< Exam > > examList;
-    std::vector< vtkSmartPointer< Exam > >::iterator examIt;
+    std::vector< vtkSmartPointer< Exam > >::const_iterator examIt;
     this->GetList( &examList );
-    for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
+    for( examIt = examList.cbegin(); examIt != examList.cend(); ++examIt )
     {
       Exam *exam = *(examIt);
       total += exam->GetCount( "Image" );
@@ -256,9 +257,9 @@ namespace Alder
     if( !user ) throw std::runtime_error( "Tried to get rating for null user" );
 
     std::vector< vtkSmartPointer< Exam > > examList;
-    std::vector< vtkSmartPointer< Exam > >::iterator examIt;
+    std::vector< vtkSmartPointer< Exam > >::const_iterator examIt;
     this->GetList( &examList );
-    for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
+    for( examIt = examList.cbegin(); examIt != examList.cend(); ++examIt )
     {
       Exam *exam = *(examIt);
       if( !exam->IsRatedBy( user ) ) return false;
@@ -279,9 +280,9 @@ namespace Alder
     this->AssertPrimaryId();
 
     std::vector< vtkSmartPointer< Exam > > examList;
-    std::vector< vtkSmartPointer< Exam > >::iterator examIt;
+    std::vector< vtkSmartPointer< Exam > >::const_iterator examIt;
     this->GetList( &examList );
-    for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
+    for( examIt = examList.cbegin(); examIt != examList.cend(); ++examIt )
     {
       Exam *exam = *(examIt);
       if( !exam->HasImageData() ) return false;
@@ -332,14 +333,14 @@ namespace Alder
        };  
 
       std::map< std::string,
-                std::vector< std::pair< std::string, std::string > > >::iterator mapIt;
-      for( mapIt = modalityMap.begin(); mapIt != modalityMap.end(); ++mapIt )
+                std::vector< std::pair< std::string, std::string > > >::const_iterator mapIt;
+      for( mapIt = modalityMap.cbegin(); mapIt != modalityMap.cend(); ++mapIt )
       {
         vtkNew<Modality> modality;
         modality->Load( "Name", mapIt->first );
         vtkVariant modalityId = modality->Get( "Id" );
-        std::vector< std::pair< std::string, std::string > >::iterator vecIt;
-        for( vecIt = mapIt->second.begin(); vecIt != mapIt->second.end(); ++vecIt )
+        std::vector< std::pair< std::string, std::string > >::const_iterator vecIt;
+        for( vecIt = mapIt->second.cbegin(); vecIt != mapIt->second.cend(); ++vecIt )
         {
           exam = vtkSmartPointer<Exam>::New();
           exam->Set( "InterviewId", interviewId );
@@ -366,7 +367,7 @@ namespace Alder
       double index = 0;
       bool global = true;
       std::pair<bool, double> progressConfig = std::pair<bool, double>( global, 0.0 );
-      std::vector< vtkSmartPointer< Exam > >::iterator examIt;
+      std::vector< vtkSmartPointer< Exam > >::const_iterator examIt;
       Application *app = Application::GetInstance();
 
       // we are going to be downloading file type data here, so
@@ -376,7 +377,7 @@ namespace Alder
 
       app->InvokeEvent( vtkCommand::StartEvent, static_cast<void *>( &global ) );
 
-      for( examIt = examList.begin(); examIt != examList.end(); ++examIt, ++index )
+      for( examIt = examList.cbegin(); examIt != examList.cend(); ++examIt, ++index )
       {
         progressConfig.second = index / examList.size();
         app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progressConfig ) );
@@ -398,7 +399,7 @@ namespace Alder
     // get a list of all interview start dates
     std::map< std::string, std::map< std::string, std::string > > list;
     std::map< std::string, std::string > map, key;
-    std::map< std::string, std::map< std::string, std::string > >::iterator it;
+    std::map< std::string, std::map< std::string, std::string > >::const_iterator it;
     bool done = false;
     bool global = true;
     std::pair<bool, double> progressConfig = std::pair<bool, double>( global, 0.0 );
@@ -422,7 +423,7 @@ namespace Alder
       if( app->GetAbortFlag() ) break;
       list = opal->GetRows( "alder", "Interview", index, limit ); // invokes progress events
 
-      for( it = list.begin(); it != list.end(); ++it )
+      for( it = list.cbegin(); it != list.cend(); ++it )
       {
         std::string UId = it->first;
         map = it->second;

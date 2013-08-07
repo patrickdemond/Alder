@@ -61,18 +61,18 @@ namespace Alder
     /**
      * Returns the neighbouring interview in UId/VisitDate order.
      */
-    vtkSmartPointer<Interview> GetNeighbour( bool forward, bool loaded, bool unRated );
-    vtkSmartPointer<Interview> GetNext( bool loaded, bool unRated )
+    vtkSmartPointer<Interview> GetNeighbour( const bool forward, const bool loaded, const bool unRated );
+    vtkSmartPointer<Interview> GetNext( const bool loaded, const bool unRated )
     { return this->GetNeighbour( true, loaded, unRated ); }
-    vtkSmartPointer<Interview> GetNextLoaded( bool unRated )
+    vtkSmartPointer<Interview> GetNextLoaded( const bool unRated )
     { return this->GetNeighbour( true, true, unRated ); }
-    vtkSmartPointer<Interview> GetNextUnLoaded( bool unRated )
+    vtkSmartPointer<Interview> GetNextUnLoaded( const bool unRated )
     { return this->GetNeighbour( true, false, unRated ); }
-    vtkSmartPointer<Interview> GetPrevious( bool loaded, bool unRated )
+    vtkSmartPointer<Interview> GetPrevious( const bool loaded, const bool unRated )
     { return this->GetNeighbour( false, loaded, unRated ); }
-    vtkSmartPointer<Interview> GetPreviousLoaded( bool unRated )
+    vtkSmartPointer<Interview> GetPreviousLoaded( const bool unRated )
     { return this->GetNeighbour( false, true, unRated ); }
-    vtkSmartPointer<Interview> GetPreviousUnLoaded( bool unRated )
+    vtkSmartPointer<Interview> GetPreviousUnLoaded( const bool unRated )
     { return this->GetNeighbour( false, false, unRated ); }
 
     /**

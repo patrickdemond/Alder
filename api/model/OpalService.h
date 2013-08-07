@@ -56,11 +56,11 @@ namespace Alder
      * Defines connection parameters to use when communicating with the Opal server
      */
     void Setup(
-      std::string username,
-      std::string password,
-      std::string host,
-      int port = 8843,
-      int timeout = 10 );
+      const std::string username,
+      const std::string password,
+      const std::string host,
+      const int port = 8843,
+      const int timeout = 10 );
 
     vtkGetMacro( Port, int );
     vtkSetMacro( Port, int );
@@ -76,7 +76,7 @@ namespace Alder
      * to be downloaded is non-zero.  For file type data, this should be called
      * with false, since we expect (image) files to have significant size.
      */
-    static void SetCurlProgressChecking( bool check = true )
+    static void SetCurlProgressChecking( const bool check = true )
     {
       OpalService::configureEventSent = false;
       OpalService::curlProgressChecking = check;
@@ -87,7 +87,7 @@ namespace Alder
      * @param dataSource string
      * @param table string
      */
-    std::vector< std::string > GetIdentifiers( std::string dataSource, std::string table );
+    std::vector< std::string > GetIdentifiers( const std::string dataSource, const std::string table ) const;
 
     /**
      * Returns all variables for all identifiers limited by the offset and limit parameters
@@ -97,8 +97,8 @@ namespace Alder
      * @param limit int The limit of how many key/value pairs to return
      */
     std::map< std::string, std::map< std::string, std::string > > GetRows(
-      std::string dataSource, std::string table,
-      int offset = 0, int limit = 100 );
+      const std::string dataSource, const std::string table,
+      const int offset = 0, const int limit = 100 ) const;
 
     /**
      * Returns all variables for a given identifier
@@ -107,7 +107,7 @@ namespace Alder
      * @param identifier string
      */
     std::map< std::string, std::string > GetRow(
-      std::string dataSource, std::string table, std::string identifier );
+      const std::string dataSource, const std::string table, const std::string identifier ) const;
 
     /**
      * Returns all values for a particular variable limited by the offset and limit parameters
@@ -118,8 +118,8 @@ namespace Alder
      * @param limit int The limit of how many key/value pairs to return
      */
     std::map< std::string, std::string > GetColumn(
-      std::string dataSource, std::string table, std::string variable,
-      int offset = 0, int limit = 100 );
+      const std::string dataSource, const std::string table, const std::string variable,
+      const int offset = 0, const int limit = 100 );
 
     /**
      * Returns a particular variable for a given identifier
@@ -129,7 +129,8 @@ namespace Alder
      * @param variable string
      */
     std::string GetValue(
-      std::string dataSource, std::string table, std::string identifier, std::string variable );
+      const std::string dataSource, const std::string table,
+      const std::string identifier, const std::string variable ) const;
 
     /**
      * Returns an array variable for a given identifier
@@ -139,7 +140,8 @@ namespace Alder
      * @param variable string
      */
     std::vector< std::string > GetValues(
-      std::string dataSource, std::string table, std::string identifier, std::string variable );
+      const std::string dataSource, const std::string table,
+      const std::string identifier, const std::string variable ) const;
 
     /**
      * Returns a particular variable for a given identifier
@@ -151,12 +153,12 @@ namespace Alder
      * @param integer position
      */
     void SaveFile(
-      std::string fileName,
-      std::string dataSource,
-      std::string table,
-      std::string identifier,
-      std::string variable,
-      int position = -1 );
+      const std::string fileName,
+      const std::string dataSource,
+      const std::string table,
+      const std::string identifier,
+      const std::string variable,
+      const int position = -1 ) const;
 
   protected:
     OpalService();
@@ -170,8 +172,8 @@ namespace Alder
      * @param doProgress bool
      * @throws runtime_error
      */
-    virtual Json::Value Read( std::string servicePath, std::string fileName = "",
-                              bool progress = true );
+    virtual Json::Value Read(
+      const std::string servicePath, const std::string fileName = "", const bool progress = true ) const;
 
     std::map< std::string, std::map< std::string, std::map< std::string, std::string > > > Columns;
     std::string Username;
@@ -184,7 +186,7 @@ namespace Alder
     OpalService( const OpalService& ); /** Not implemented. */
     void operator=( const OpalService& ); /** Not implemented. */
 
-    static int curlProgressCallback( void*, double, double, double, double );
+    static int curlProgressCallback( const void* const , const double, const double, const double, const double );
     static bool configureEventSent;
     static bool curlProgressChecking;
   };

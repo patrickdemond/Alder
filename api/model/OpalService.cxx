@@ -32,7 +32,9 @@ namespace Alder
 
   // this function is used by curl to send progress signals
   int OpalService::curlProgressCallback(
-    void *notUsed, double downTotal, double downNow, double upTotal, double upNow )
+    const void * const notUsed,
+    const double downTotal, const double downNow,
+    const double upTotal, const double upNow )
   {
     Application *app = Application::GetInstance();
 
@@ -74,7 +76,8 @@ namespace Alder
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void OpalService::Setup(
-    std::string username, std::string password, std::string host, int port, int timeout )
+    const std::string username, const std::string password,
+    const std::string host, const int port, const int timeout )
   {
     this->Username = username;
     this->Password = password;
@@ -84,7 +87,8 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  Json::Value OpalService::Read( std::string servicePath, std::string fileName, bool progress )
+  Json::Value OpalService::Read(
+    const std::string servicePath, const std::string fileName, const bool progress ) const
   {
     bool toFile = 0 < fileName.length();
     FILE *file;
@@ -184,7 +188,8 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::vector< std::string > OpalService::GetIdentifiers( std::string dataSource, std::string table )
+  std::vector< std::string > OpalService::GetIdentifiers(
+    const std::string dataSource, const std::string table ) const
   {
     std::stringstream stream;
     stream << "/datasource/" << dataSource << "/table/" << table << "/entities";
@@ -204,7 +209,7 @@ namespace Alder
   
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   std::map< std::string, std::map< std::string, std::string > > OpalService::GetRows(
-    std::string dataSource, std::string table, int offset, int limit )
+    const std::string dataSource, const std::string table, const int offset, const int limit ) const
   {
     std::map< std::string, std::map< std::string, std::string > > list;
     std::string identifier, key, value;
@@ -236,7 +241,7 @@ namespace Alder
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   std::map< std::string, std::string > OpalService::GetRow(
-    std::string dataSource, std::string table, std::string identifier )
+    const std::string dataSource, const std::string table, const std::string identifier ) const
   {
     std::map< std::string, std::string > map;
     std::string key, value;
@@ -246,9 +251,7 @@ namespace Alder
            << "/valueSet/" << identifier;
     Json::Value root = this->Read( stream.str(), "", false );
     
-    identifier = root["valueSets"][0].get( "identifier", "" ).asString();
-
-    if( 0 < identifier.length() )
+    if( 0 < root["valueSets"][0].get( "identifier", "" ).asString().length() )
     {
       for( int j = 0; j < root["valueSets"][0]["values"].size(); ++j )
       {
@@ -263,7 +266,8 @@ namespace Alder
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   std::map< std::string, std::string > OpalService::GetColumn(
-    std::string dataSource, std::string table, std::string variable, int offset, int limit )
+    const std::string dataSource, const std::string table,
+    const std::string variable, const int offset, const int limit )
   {
     std::map< std::string, std::string > map;
     std::string identifier, value;
@@ -290,7 +294,8 @@ namespace Alder
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   std::string OpalService::GetValue(
-    std::string dataSource, std::string table, std::string identifier, std::string variable )
+    const std::string dataSource, const std::string table,
+    const std::string identifier, const std::string variable ) const
   {
     std::stringstream stream;
     stream << "/datasource/" << dataSource << "/table/" << table
@@ -300,7 +305,8 @@ namespace Alder
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   std::vector< std::string > OpalService::GetValues(
-    std::string dataSource, std::string table, std::string identifier, std::string variable )
+    const std::string dataSource, const std::string table,
+    const std::string identifier, const std::string variable ) const
   {
     std::vector< std::string > retValues;
     std::stringstream stream;
@@ -318,12 +324,12 @@ namespace Alder
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void OpalService::SaveFile(
-    std::string fileName,
-    std::string dataSource,
-    std::string table,
-    std::string identifier,
-    std::string variable,
-    int position )
+    const std::string fileName,
+    const std::string dataSource,
+    const std::string table,
+    const std::string identifier,
+    const std::string variable,
+    const int position ) const
   {
     std::stringstream stream;
     stream << "/datasource/" << dataSource << "/table/" << table

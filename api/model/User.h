@@ -40,7 +40,7 @@ namespace Alder
     vtkTypeMacro( User, ActiveRecord );
 
     virtual void ResetPassword();
-    virtual bool IsPassword( std::string );
+    virtual bool IsPassword( const std::string );
     static std::string GetDefaultPassword() { return "password"; }
     std::string GetName() const { return "User"; }
 
@@ -48,7 +48,7 @@ namespace Alder
     User() {}
     ~User() {}
 
-    virtual void SetVariant( std::string column, vtkVariant value );
+    virtual void SetVariant( const std::string column, vtkVariant value );
 
   private:
     User( const User& ); // Not implemented

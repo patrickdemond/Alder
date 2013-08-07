@@ -74,7 +74,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string QueryModifier::GetSql( bool appending )
+  std::string QueryModifier::GetSql( bool appending ) const
   {
     std::string retVal;
     retVal  = this->GetWhere( appending );
@@ -85,15 +85,15 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string QueryModifier::GetWhere( bool appending )
+  std::string QueryModifier::GetWhere( bool appending ) const
   {
     bool firstItem = true, lastOpenBracket = false;
     std::string statement;
     std::stringstream stream;
-    std::vector<WhereParameter>::iterator it;
+    std::vector<WhereParameter>::const_iterator it;
 
     // loop through each where parameter
-    for( it = this->WhereList.begin(); it != this->WhereList.end(); ++it )
+    for( it = this->WhereList.cbegin(); it != this->WhereList.cend(); ++it )
     {
       if( QueryModifier::NONE != it->bracket )
       {
@@ -145,13 +145,13 @@ namespace Alder
   }
   
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string QueryModifier::GetGroup()
+  std::string QueryModifier::GetGroup() const
   {
     std::stringstream sql;
     bool first = true;
-    std::vector<std::string>::iterator it;
+    std::vector<std::string>::const_iterator it;
 
-    for( it = this->GroupList.begin(); it != this->GroupList.end(); ++it )
+    for( it = this->GroupList.cbegin(); it != this->GroupList.cend(); ++it )
     {
       sql << ( first ? "GROUP BY " : ", " ) << *it;
       if( first ) first = false;
@@ -161,13 +161,13 @@ namespace Alder
   }
   
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string QueryModifier::GetOrder()
+  std::string QueryModifier::GetOrder() const
   {
     std::stringstream sql;
     bool first = true;
-    std::map<std::string,bool>::iterator it;
+    std::map<std::string,bool>::const_iterator it;
 
-    for( it = this->OrderList.begin(); it != this->OrderList.end(); ++it )
+    for( it = this->OrderList.cbegin(); it != this->OrderList.cend(); ++it )
     {
       sql << ( first ? "ORDER BY " : ", " ) << it->first << " " << ( it->second ? "DESC" : "" );
       if( first ) first = false;
@@ -177,7 +177,7 @@ namespace Alder
   }
   
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string QueryModifier::GetLimit()
+  std::string QueryModifier::GetLimit() const
   {
     std::stringstream sql;
     if( 0 < this->LimitCount )
