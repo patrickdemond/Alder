@@ -32,8 +32,8 @@
 #include <QTimer>
 
 // VTK includes
-#include <vtkMedicalImageViewer.h>
 #include <vtkMath.h>
+#include <vtkMedicalImageViewer.h>
 #include <vtkNew.h>
 #include <vtkSmartPointer.h>
 
@@ -82,8 +82,9 @@ public:
 };
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+//
 // QAlderFramePlayerWidgetPrivate methods
-
+//
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QAlderFramePlayerWidgetPrivate::QAlderFramePlayerWidgetPrivate
 (QAlderFramePlayerWidget& object)
@@ -225,6 +226,8 @@ void QAlderFramePlayerWidgetPrivate::updateUi(const PipelineInfoType& pipeInfo)
   this->playReverseButton->setEnabled((pipeInfo.numberOfFrames > 1));
   this->nextFrameButton->setEnabled((pipeInfo.currentFrame < pipeInfo.frameRange[1]));
   this->lastFrameButton->setEnabled((pipeInfo.currentFrame < pipeInfo.frameRange[1]));
+  this->repeatButton->setEnabled((pipeInfo.numberOfFrames > 1));
+  this->speedFactorSpinBox->setEnabled((pipeInfo.numberOfFrames > 1));
 
   // Slider
   this->frameSlider->blockSignals(true);
@@ -279,8 +282,9 @@ bool QAlderFramePlayerWidgetPrivate::isConnected()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+//
 // QAlderFramePlayerWidget methods
-
+//
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 QAlderFramePlayerWidget::QAlderFramePlayerWidget(QWidget* parentWidget)
   : Superclass(parentWidget)
@@ -447,8 +451,6 @@ void QAlderFramePlayerWidget::pause()
     d->timer->stop();
     emit this->playing(false);
   }
-
-  return;
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -545,10 +547,9 @@ void QAlderFramePlayerWidget::setPlaySpeed(double speedFactor)
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+//
 // QAlderFramePlayerWidget methods -- Widgets Interface
-
-//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-
+//
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setFirstFrameIcon(const QIcon& ico)
 {
@@ -653,6 +654,7 @@ void QAlderFramePlayerWidget::setPlayReverseVisibility(bool visible)
   Q_D(QAlderFramePlayerWidget);
   d->playReverseButton->setVisible(visible);
 }
+
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setBoundFramesVisibility(bool visible)
 {
@@ -661,6 +663,7 @@ void QAlderFramePlayerWidget::setBoundFramesVisibility(bool visible)
   d->firstFrameButton->setVisible(visible);
   d->lastFrameButton->setVisible(visible);
 }
+
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setGoToVisibility(bool visible)
 {
@@ -669,6 +672,7 @@ void QAlderFramePlayerWidget::setGoToVisibility(bool visible)
   d->previousFrameButton->setVisible(visible);
   d->nextFrameButton->setVisible(visible);
 }
+
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setFrameSpinBoxVisibility(bool visible)
 {
@@ -683,6 +687,7 @@ bool QAlderFramePlayerWidget::playReverseVisibility() const
   return d->playReverseButton->isVisibleTo(
     const_cast<QAlderFramePlayerWidget*>(this));
 }
+
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 bool QAlderFramePlayerWidget::boundFramesVisibility() const
 {
@@ -692,6 +697,7 @@ bool QAlderFramePlayerWidget::boundFramesVisibility() const
           d->lastFrameButton->isVisibleTo(
             const_cast<QAlderFramePlayerWidget*>(this)));
 }
+
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 bool QAlderFramePlayerWidget::goToVisibility() const
 {
@@ -701,6 +707,7 @@ bool QAlderFramePlayerWidget::goToVisibility() const
           d->nextFrameButton->isVisibleTo(
             const_cast<QAlderFramePlayerWidget*>(this)));
 }
+
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 bool QAlderFramePlayerWidget::frameSpinBoxVisibility() const
 {
@@ -715,6 +722,7 @@ void QAlderFramePlayerWidget::setSliderDecimals(int decimals)
   Q_D(QAlderFramePlayerWidget);
   d->frameSlider->setDecimals(decimals);
 }
+
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderFramePlayerWidget::setSliderPageStep(double pageStep)
 {
@@ -727,7 +735,7 @@ void QAlderFramePlayerWidget::setSliderSingleStep(double singleStep)
 {
   Q_D(QAlderFramePlayerWidget);
 
-  if (singleStep < 0) {
+  if (singleStep < 0.) {
     return;
   }
 
@@ -740,6 +748,7 @@ int QAlderFramePlayerWidget::sliderDecimals() const
   Q_D(const QAlderFramePlayerWidget);
   return d->frameSlider->decimals();
 }
+
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 double QAlderFramePlayerWidget::sliderPageStep() const
 {

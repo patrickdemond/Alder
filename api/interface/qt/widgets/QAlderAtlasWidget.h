@@ -28,8 +28,6 @@ public:
   QAlderAtlasWidget( QWidget* parent = 0 );
   ~QAlderAtlasWidget();
 
-  virtual void updateEnabled();
-
   vtkMedicalImageViewer *GetViewer();
   virtual void showEvent( QShowEvent* );
   virtual void hideEvent( QHideEvent* );
@@ -41,10 +39,10 @@ public slots:
   virtual void slotPrevious();
   virtual void slotNext();
   virtual void slotRatingChanged( int );
-
   virtual void updateInfo();
   virtual void updateViewer();
   virtual void updateAtlasImage();
+  virtual void updateEnabled();
 
 protected slots:
 

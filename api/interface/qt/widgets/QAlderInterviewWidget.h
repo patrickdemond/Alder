@@ -32,7 +32,6 @@ public:
   QAlderInterviewWidget( QWidget* parent = 0 );
   ~QAlderInterviewWidget();
 
-  virtual void updateEnabled();
   vtkMedicalImageViewer *GetViewer();
 
 public slots:
@@ -46,6 +45,7 @@ public slots:
   virtual void updateExamTreeWidget();
   virtual void updateRating();
   virtual void updateViewer();
+  virtual void updateEnabled();
 
 protected:
 
