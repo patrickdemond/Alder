@@ -131,6 +131,11 @@ void QSelectInterviewDialog::slotAccepted()
     interview->Load( map );
   }
 
+  // if the active interview is changed, Application invokes an ActiveInterviewEvent
+  // the interview may not have downloaded images though
+  // this dialog closes after accept is called and the main application window
+  // slot that originally launched this dialog forces the active interview to 
+  // update its image data
   Alder::Application::GetInstance()->SetActiveInterview( interview );
   this->accept();
 }
@@ -159,7 +164,11 @@ void QSelectInterviewDialog::slotHeaderClicked( int index )
 {
   // reverse order if already sorted
   if( this->sortColumn == index )
-    this->sortOrder = Qt::AscendingOrder == this->sortOrder ? Qt::DescendingOrder : Qt::AscendingOrder;
+  {
+    this->sortOrder = 
+      Qt::AscendingOrder == this->sortOrder ? Qt::DescendingOrder : Qt::AscendingOrder;
+  }
+
   this->sortColumn = index;
   this->updateInterface();
 }
@@ -290,7 +299,8 @@ void QSelectInterviewDialog::updateInterface()
         std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
         std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityListIt;
         Alder::Modality::GetAll( &modalityList );
-        for( modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
+        for( modalityListIt = modalityList.begin();
+             modalityListIt != modalityList.end(); ++modalityListIt )
         {
           item = new QTableWidgetItem;
           item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );

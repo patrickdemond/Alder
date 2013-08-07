@@ -66,6 +66,10 @@ QAlderInterviewWidget::QAlderInterviewWidget( QWidget* parent )
     this,
     SLOT( updateExamTreeWidget() ) );
   this->Connections->Connect( app,
+    Alder::Application::ActiveInterviewUpdateImageDataEvent,
+    this,
+    SLOT( updateExamTreeWidget() ) );
+  this->Connections->Connect( app,
     Alder::Application::ActiveImageEvent,
     this,
     SLOT( updateInfo() ) );
@@ -151,7 +155,6 @@ void QAlderInterviewWidget::slotPrevious()
       app->SetActiveInterview( interview );
     }
   }
-  //this->updateEnabled();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
