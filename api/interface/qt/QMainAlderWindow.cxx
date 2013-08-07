@@ -171,6 +171,8 @@ void QMainAlderWindow::slotShowAtlas()
     sizeList[0] = floor( total / 2 );
     sizeList[1] = sizeList[0];
     this->ui->splitter->setSizes( sizeList );
+
+    this->ui->atlasWidget->updateViewer();
   }
   else
   {
