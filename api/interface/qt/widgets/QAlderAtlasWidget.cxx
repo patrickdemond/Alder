@@ -125,13 +125,9 @@ void QAlderAtlasWidget::updateAtlasImage()
 
     if( getNewAtlasImage )
     {
-      vtkSmartPointer<Alder::Image> newAtlasImage =
-        Alder::Image::GetAtlasImage(
-          exam->Get( "Type" ).ToString(), this->ui->ratingComboBox->currentIndex() + 1 );
-      if( 0 < newAtlasImage->Get( "Id" ).ToInt() )
-      {
-        app->SetActiveAtlasImage( newAtlasImage );
-      }
+      vtkSmartPointer< Alder::Image > image = Alder::Image::GetAtlasImage(
+        exam->Get( "Type" ).ToString(), this->ui->ratingComboBox->currentIndex() + 1 );
+      app->SetActiveAtlasImage( image->Get( "Id" ).IsValid() ? image : NULL );
     }
   }
 }
@@ -144,8 +140,9 @@ void QAlderAtlasWidget::slotPrevious()
   
   if( NULL != image )
   {
-    app->SetActiveAtlasImage(
-      image->GetPreviousAtlasImage( this->ui->ratingComboBox->currentIndex() + 1 ) );
+    vtkSmartPointer< Alder::Image > previousImage =
+      image->GetPreviousAtlasImage( this->ui->ratingComboBox->currentIndex() + 1 );
+    app->SetActiveAtlasImage( previousImage->Get( "Id" ).IsValid() ? previousImage : NULL );
   }
 }
 
@@ -157,18 +154,15 @@ void QAlderAtlasWidget::slotNext()
   
   if( NULL != image )
   {
-    app->SetActiveAtlasImage(
-      image->GetNextAtlasImage( this->ui->ratingComboBox->currentIndex() + 1 ) );
+    vtkSmartPointer< Alder::Image > nextImage =
+      image->GetNextAtlasImage( this->ui->ratingComboBox->currentIndex() + 1 );
+    app->SetActiveAtlasImage( nextImage->Get( "Id" ).IsValid() ? nextImage : NULL );
   }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderAtlasWidget::slotRatingChanged( int value )
 {
-  //TODO: implement
-  // when the rating changes for the current interview's image
-  // find another expert rated image of the same modality and exam type
-  
   Alder::Application *app = Alder::Application::GetInstance();
 
   // make sure we have an active user and image
@@ -178,8 +172,11 @@ void QAlderAtlasWidget::slotRatingChanged( int value )
   if( !image ) throw std::runtime_error( "Rating slider modified without an active image" );
 
   // See if we have an atlas entry for this kind of image at the requested rating
-
-  // if we do, update the current atlas image and display
+  vtkSmartPointer< Alder::Exam > exam;
+  image->GetRecord( exam );
+  vtkSmartPointer< Alder::Image > atlasImage = Alder::Image::GetAtlasImage(
+    exam->Get( "Type" ).ToString(), this->ui->ratingComboBox->currentIndex() + 1 );
+  app->SetActiveAtlasImage( atlasImage->Get( "Id" ).IsValid() ? atlasImage : NULL );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -192,13 +189,12 @@ void QAlderAtlasWidget::updateInfo()
   QString dateString = tr( "N/A" );
   QString uidString = tr( "N/A" );
 
-  Alder::Application *app = Alder::Application::GetInstance();
-  Alder::Interview *interview = app->GetActiveInterview();
-  Alder::Image *image = app->GetActiveImage();
-  if( interview && image )
+  Alder::Image *image = Alder::Application::GetInstance()->GetActiveAtlasImage();
+  if( image )
   {
     vtkSmartPointer< Alder::Exam > exam;
-    if( image->GetRecord( exam ) )
+    vtkSmartPointer< Alder::Interview > interview;
+    if( image->GetRecord( exam ) && exam->GetRecord( interview ) )
     {
       noteString = image->Get( "Note" ).ToString().c_str();
       interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
@@ -239,5 +235,5 @@ void QAlderAtlasWidget::updateEnabled()
   this->ui->nextPushButton->setEnabled( image );
   this->ui->noteTextEdit->setEnabled( image );
   this->ui->helpTextEdit->setEnabled( image );
-  this->ui->ratingComboBox->setEnabled( image );
+  this->ui->ratingComboBox->setEnabled( this->isVisible() );
 }

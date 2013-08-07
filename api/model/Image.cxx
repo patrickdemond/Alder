@@ -203,8 +203,7 @@ namespace Alder
 
     // get neighbouring image which matches this image's exam type and the given rating
     std::stringstream stream;
-    stream << "SELECT Id, UId FROM ( "
-           << "SELECT Image.Id "
+    stream << "SELECT Image.Id "
            << "FROM Image "
            << "JOIN Exam ON Image.ExamId = Exam.Id "
            << "JOIN Interview ON Exam.InterviewId = Interview.Id "

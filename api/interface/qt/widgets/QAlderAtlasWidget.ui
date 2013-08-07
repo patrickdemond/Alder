@@ -91,6 +91,9 @@
           <height>0</height>
          </size>
         </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
        </widget>
        <widget class="QTextEdit" name="noteTextEdit">
         <property name="sizePolicy">
@@ -104,6 +107,9 @@
           <width>200</width>
           <height>0</height>
          </size>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </widget>
@@ -196,7 +202,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QVTKWidget" name="imageWidget" native="true">
+    <widget class="QVTKWidget" name="imageWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
        <horstretch>0</horstretch>
