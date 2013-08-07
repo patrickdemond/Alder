@@ -47,14 +47,15 @@ QAlderAtlasWidget::QAlderAtlasWidget( QWidget* parent )
     this, SLOT( slotRatingChanged( int ) ) );
 
   this->Connections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
-  this->Connections->Connect( Alder::Application::GetInstance(),
+  this->Connections->Connect( app,
     Alder::Application::ActiveAtlasImageEvent,
-    this,
-    SLOT(updateInfo()));
-  this->Connections->Connect( Alder::Application::GetInstance(),
+    this, SLOT( updateInfo() ) );
+  this->Connections->Connect( app,
     Alder::Application::ActiveAtlasImageEvent,
-    this,
-    SLOT(updateViewer()));
+    this, SLOT( updateViewer() ) );
+  this->Connections->Connect( app,
+    Alder::Application::ActiveAtlasImageEvent,
+    this, SLOT( updateEnabled() ) );    
 
   this->Viewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
   vtkRenderWindow* renwin = this->ui->imageWidget->GetRenderWindow();
@@ -199,7 +200,7 @@ void QAlderAtlasWidget::updateInfo()
     vtkSmartPointer< Alder::Exam > exam;
     if( image->GetRecord( exam ) )
     {
-      noteString = exam->Get( "Note" ).ToString().c_str();
+      noteString = image->Get( "Note" ).ToString().c_str();
       interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
       siteString = interview->Get( "Site" ).ToString().c_str();
       dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();
