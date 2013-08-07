@@ -109,9 +109,7 @@ void QAlderAtlasWidget::updateAtlasImage()
   // select an appropriate atlas image, if necessary
   if( image )
   {
-    //this->ui->atlasRatingComboBox->currentIndex() + 1;
-    //TODO: get the currently selected rating
-    int rating = 5;
+    int rating = this->ui->ratingComboBox->currentIndex() + 1;
     bool getNewAtlasImage = false;
 
     vtkSmartPointer< Alder::Exam > exam;
