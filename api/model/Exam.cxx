@@ -42,7 +42,7 @@ namespace Alder
     // start by getting the UId
     this->GetRecord( interview );
     std::string UId = interview->Get( "UId" ).ToString();
-    bool result = false;
+    bool result;
 
     if( !this->HasImageData() )
     {
@@ -68,8 +68,7 @@ namespace Alder
           variable += vtkVariant( i ).ToString();
           settings[ "Acquisition" ] = i;
 
-          result = this->RetrieveImage( type, variable, UId, settings,
-                                        suffix, sideVariable );
+          result = this->RetrieveImage( type, variable, UId, settings, suffix, sideVariable );
           if( result )
           {
             hasParent = true;
@@ -82,8 +81,7 @@ namespace Alder
         acquisition++;
         settings[ "Acquisition" ] = acquisition;
         std::string variable = "Measure.STILL_IMAGE";
-        result = this->RetrieveImage( type, variable, UId, settings,
-                                      suffix, sideVariable );
+        result = this->RetrieveImage( type, variable, UId, settings, suffix, sideVariable );
 
         if( hasParent && result )
         {
@@ -100,7 +98,7 @@ namespace Alder
           for( imageIt = imageList.cbegin(); imageIt != imageList.cend(); ++imageIt )
           {
             Alder::Image *image = imageIt->GetPointer();
-            acqDateTimes[ image->Get( "Id" ).ToInt() ] = image->GetDICOMAcquisitionDateTime();
+            acqDateTimes[ image->Get( "Id" ).ToInt() ] = image->GetDICOMTag( "Acquisition DateTime" );
           }
 
           // find which cineloop has a matching datetime to the still and set the still's
@@ -145,38 +143,34 @@ namespace Alder
         std::string variable = "Measure.RES_HIP_DICOM";
         std::string sideVariable = "Measure.OUTPUT_HIP_SIDE";
         std::string suffix = ".dcm";
-        result = this->RetrieveImage( type, variable, UId, settings,
-                                      suffix, sideVariable );
+        this->RetrieveImage( type, variable, UId, settings, suffix, sideVariable );
       }
       else if( "ForearmBoneDensity" == type )
       {
         std::string variable = "RES_FA_DICOM";
         std::string sideVariable = "OUTPUT_FA_SIDE";
         std::string suffix = ".dcm";
-        result = this->RetrieveImage( type, variable, UId, settings,
-                                      suffix, sideVariable );
+        this->RetrieveImage( type, variable, UId, settings, suffix, sideVariable );
       }
       else if( "LateralBoneDensity" == type )
       {
         std::string variable = "RES_SEL_DICOM_MEASURE";
         std::string suffix = ".dcm";
-        result = this->RetrieveImage( type, variable, UId, settings, suffix );
+        this->RetrieveImage( type, variable, UId, settings, suffix );
       }
       else if( "Plaque" == type )
       {
         std::string variable = "Measure.CINELOOP_1";
         std::string sideVariable = "Measure.SIDE";
         std::string suffix = ".dcm.gz";
-        result = this->RetrieveImage( type, variable, UId, settings,
-                                      suffix, sideVariable );
+        this->RetrieveImage( type, variable, UId, settings, suffix, sideVariable );
       }
       else if( "RetinalScan" == type )
       {
         std::string variable = "Measure.EYE";
         std::string sideVariable = "Measure.SIDE";
         std::string suffix = ".jpg";
-        result = this->RetrieveImage( type, variable, UId, settings,
-                                      suffix, sideVariable );
+        this->RetrieveImage( type, variable, UId, settings, suffix, sideVariable );
       }
       else if( "WholeBodyBoneDensity" == type )
       {
@@ -186,9 +180,18 @@ namespace Alder
 
         if( result )
         {
+          // store the previous image's id
+          vtkNew< Alder::Image > image;
+          int parentId = image->GetLastInsertId();
+
           variable = "RES_WB_DICOM_2";
           settings[ "Acquisition" ] = 2;
-          result = this->RetrieveImage( type, variable, UId, settings, suffix );
+          this->RetrieveImage( type, variable, UId, settings, suffix );
+
+          // re-parent this image to the first one
+          image->Load( "Id", vtkVariant( image->GetLastInsertId() ).ToString() );
+          image->Set( "ParentImageId", parentId );
+          image->Save();
         }
       }
 
