@@ -61,22 +61,30 @@ QAlderInterviewWidget::QAlderInterviewWidget( QWidget* parent )
     this, SLOT( slotNoteChanged() ) );
 
   this->Connections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
-  this->Connections->Connect( Alder::Application::GetInstance(),
+  this->Connections->Connect( app,
     Alder::Application::ActiveInterviewEvent,
     this,
-    SLOT(updateExamTreeWidget()));
-  this->Connections->Connect( Alder::Application::GetInstance(),
+    SLOT( updateExamTreeWidget() ) );
+  this->Connections->Connect( app,
     Alder::Application::ActiveImageEvent,
     this,
-    SLOT(updateInfo()));
-  this->Connections->Connect( Alder::Application::GetInstance(),
+    SLOT( updateInfo() ) );
+  this->Connections->Connect( app,
     Alder::Application::ActiveImageEvent,
     this,
-    SLOT(updateRating()));
-  this->Connections->Connect( Alder::Application::GetInstance(),
+    SLOT( updateRating() ) );
+  this->Connections->Connect( app,
     Alder::Application::ActiveImageEvent,
     this,
-    SLOT(updateViewer()));
+    SLOT( updateViewer() ) );
+  this->Connections->Connect( app,
+    Alder::Application::ActiveInterviewEvent,
+    this,
+    SLOT( updateEnabled() ) );
+  this->Connections->Connect( app,
+    Alder::Application::ActiveImageEvent,
+    this,
+    SLOT( updateEnabled() ) );
 
   this->Viewer = vtkSmartPointer<vtkMedicalImageViewer>::New();
   vtkRenderWindow* renwin = this->ui->imageWidget->GetRenderWindow();
@@ -121,7 +129,8 @@ void QAlderInterviewWidget::slotPrevious()
       QMessageBox errorMessage( this );
       errorMessage.setWindowModality( Qt::WindowModal );
       errorMessage.setIcon( QMessageBox::Warning );
-      errorMessage.setText( tr( "There are no remaining studies available which meet your criteria." ) );
+      errorMessage.setText( 
+        tr( "There are no remaining studies available which meet your criteria." ) );
       errorMessage.exec();
     }
     else
@@ -142,7 +151,7 @@ void QAlderInterviewWidget::slotPrevious()
       app->SetActiveInterview( interview );
     }
   }
-  this->updateEnabled();
+  //this->updateEnabled();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -164,7 +173,8 @@ void QAlderInterviewWidget::slotNext()
       QMessageBox errorMessage( this );
       errorMessage.setWindowModality( Qt::WindowModal );
       errorMessage.setIcon( QMessageBox::Warning );
-      errorMessage.setText( tr( "There are no remaining studies available which meet your criteria." ) );
+      errorMessage.setText(
+        tr( "There are no remaining studies available which meet your criteria." ) );
       errorMessage.exec();
     }
     else
@@ -185,7 +195,7 @@ void QAlderInterviewWidget::slotNext()
       app->SetActiveInterview( interview );
     }
   }
-  this->updateEnabled();
+  //this->updateEnabled();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
