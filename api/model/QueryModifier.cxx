@@ -185,4 +185,12 @@ namespace Alder
 
     return sql.str();
   }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void QueryModifier::Merge( QueryModifier *modifier )
+  {
+    this->WhereList.insert( this->WhereList.end(), modifier->WhereList.begin(), modifier->WhereList.end() );
+    this->GroupList.insert( this->GroupList.end(), modifier->GroupList.begin(), modifier->GroupList.end() );
+    this->OrderList.insert( modifier->OrderList.begin(), modifier->OrderList.end() );
+  }
 }

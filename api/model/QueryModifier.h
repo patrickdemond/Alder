@@ -142,6 +142,11 @@ namespace Alder
      */
     virtual std::string GetLimit() const;
 
+    /**
+     * Merges another modifier with this one.  Merging only includes where, group and order items.
+     */
+    virtual void Merge( QueryModifier *modifier );
+
   protected:
     QueryModifier();
     ~QueryModifier() {}
