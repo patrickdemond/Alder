@@ -199,7 +199,7 @@ void QAlderAtlasWidget::updateInfo()
     vtkSmartPointer< Alder::Exam > exam;
     if( image->GetRecord( exam ) )
     {
-      noteString = exam->Get( "Note" ).ToString().c_str();
+      noteString = image->Get( "Note" ).ToString().c_str();
       interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
       siteString = interview->Get( "Site" ).ToString().c_str();
       dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();

@@ -268,17 +268,13 @@ void QAlderInterviewWidget::slotNoteChanged()
 {
   Alder::Application *app = Alder::Application::GetInstance();
 
-  // make sure we have an active user and image, and the image has an exam
+  // make sure we have an active user and image
   Alder::User *user = app->GetActiveUser();
   Alder::Image *image = app->GetActiveImage();
   if( user && image )
   {
-    vtkSmartPointer< Alder::Exam > exam;
-    if( image->GetRecord( exam ) )
-    {
-      exam->Set( "Note", this->ui->noteTextEdit->toPlainText().toStdString() );
-      exam->Save();
-    }
+    image->Set( "Note", this->ui->noteTextEdit->toPlainText().toStdString() );
+    image->Save();
   }
 }
 
@@ -301,7 +297,7 @@ void QAlderInterviewWidget::updateInfo()
     vtkSmartPointer< Alder::Exam > exam;
     if( image->GetRecord( exam ) )
     {
-      noteString = exam->Get( "Note" ).ToString().c_str();
+      noteString = image->Get( "Note" ).ToString().c_str();
       interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
       siteString = interview->Get( "Site" ).ToString().c_str();
       dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();
