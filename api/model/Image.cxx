@@ -200,6 +200,7 @@ namespace Alder
   vtkSmartPointer<Image> Image::GetNeighbourAtlasImage( const int rating, const bool forward )
   {
     this->AssertPrimaryId();
+    Image *activeImage = Application::GetInstance()->GetActiveImage();
 
     // get neighbouring image which matches this image's exam type and the given rating
     std::stringstream stream;
@@ -216,10 +217,13 @@ namespace Alder
            <<   "WHERE Image.Id = " << this->Get( "Id" ).ToString() << " "
            << ") "
            << "AND Rating = " << rating << " "
-           << "AND User.Expert = true "
-           << "ORDER BY Interview.UId ";
+           << "AND User.Expert = true ";
+
+    // do not show the active image
+    if( NULL != activeImage ) stream << "AND Image.Id != " << activeImage << " ";
 
     // order the query by UId (descending if not forward)
+    stream << "ORDER BY Interview.UId ";
     if( !forward ) stream << "DESC ";
 
     Utilities::log( "Querying Database: " + stream.str() );
@@ -270,6 +274,7 @@ namespace Alder
   vtkSmartPointer<Image> Image::GetAtlasImage( const std::string type, const int rating )
   {
     vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+    Image *activeImage = Application::GetInstance()->GetActiveImage();
 
     // get any image rated by an expert user having the given exam type and rating score
     std::stringstream stream;
@@ -280,8 +285,13 @@ namespace Alder
            << "JOIN User ON Rating.UserId = User.Id "
            << "WHERE Exam.Type = " << query->EscapeString( type ) << " "
            << "AND Rating = " << rating << " "
-           << "AND User.Expert = true "
-           << "LIMIT 1";
+           << "AND User.Expert = true ";
+
+    // do not show the active image
+    if( NULL != activeImage ) stream << "AND Image.Id != " << activeImage << " ";
+
+    // only need one record (since any record will do)
+    stream << "LIMIT 1";
 
     Utilities::log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
