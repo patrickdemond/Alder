@@ -92,9 +92,9 @@ namespace Alder
     { return this->GetNeighbourAtlasImage( rating, false ); }
 
     /**
-     * Returns an atlas image for a specified type and rating
+     * Returns an atlas image matching the current image type
      */
-    static vtkSmartPointer<Image> GetAtlasImage( const std::string type, const int rating );
+    vtkSmartPointer<Image> GetAtlasImage( const int rating );
 
   protected:
     Image() {}

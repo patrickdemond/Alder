@@ -125,9 +125,9 @@ void QAlderAtlasWidget::updateAtlasImage()
 
     if( getNewAtlasImage )
     {
-      vtkSmartPointer< Alder::Image > image = Alder::Image::GetAtlasImage(
-        exam->Get( "Type" ).ToString(), this->ui->ratingComboBox->currentIndex() + 1 );
-      app->SetActiveAtlasImage( image->Get( "Id" ).IsValid() ? image : NULL );
+      vtkSmartPointer< Alder::Image > newAtlasImage =
+        image->GetAtlasImage( this->ui->ratingComboBox->currentIndex() + 1 );
+      app->SetActiveAtlasImage( newAtlasImage->Get( "Id" ).IsValid() ? newAtlasImage : NULL );
     }
   }
 }
@@ -174,9 +174,9 @@ void QAlderAtlasWidget::slotRatingChanged( int value )
   // See if we have an atlas entry for this kind of image at the requested rating
   vtkSmartPointer< Alder::Exam > exam;
   image->GetRecord( exam );
-  vtkSmartPointer< Alder::Image > atlasImage = Alder::Image::GetAtlasImage(
-    exam->Get( "Type" ).ToString(), this->ui->ratingComboBox->currentIndex() + 1 );
-  app->SetActiveAtlasImage( atlasImage->Get( "Id" ).IsValid() ? atlasImage : NULL );
+  vtkSmartPointer< Alder::Image > newAtlasImage =
+    image->GetAtlasImage( this->ui->ratingComboBox->currentIndex() + 1 );
+  app->SetActiveAtlasImage( newAtlasImage->Get( "Id" ).IsValid() ? newAtlasImage : NULL );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
