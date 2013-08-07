@@ -83,12 +83,13 @@ namespace Alder
 
     /**
      * Returns the neighbouring interview in UId/VisitDate order.
+     * The rating must be provided since an image may have more than one rating
      */
-    vtkSmartPointer<Image> GetNeighbourAtlasImage( const bool forward ) const;
-    vtkSmartPointer<Image> GetNextAtlasImage()
-    { return this->GetNeighbourAtlasImage( true ); }
-    vtkSmartPointer<Image> GetPreviousAtlasImage()
-    { return this->GetNeighbourAtlasImage( false ); }
+    vtkSmartPointer<Image> GetNeighbourAtlasImage( const int rating, const bool forward );
+    vtkSmartPointer<Image> GetNextAtlasImage( const int rating )
+    { return this->GetNeighbourAtlasImage( rating, true ); }
+    vtkSmartPointer<Image> GetPreviousAtlasImage( const int rating )
+    { return this->GetNeighbourAtlasImage( rating, false ); }
 
     /**
      * Returns an atlas image for a specified type and rating

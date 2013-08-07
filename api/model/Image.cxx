@@ -197,23 +197,105 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  vtkSmartPointer<Image> Image::GetNeighbourAtlasImage( const bool forward ) const
+  vtkSmartPointer<Image> Image::GetNeighbourAtlasImage( const int rating, const bool forward )
   {
     this->AssertPrimaryId();
+
+    // get neighbouring image which matches this image's exam type and the given rating
+    std::stringstream stream;
+    stream << "SELECT Id, UId FROM ( "
+           << "SELECT Image.Id "
+           << "FROM Image "
+           << "JOIN Exam ON Image.ExamId = Exam.Id "
+           << "JOIN Interview ON Exam.InterviewId = Interview.Id "
+           << "JOIN Rating ON Image.Id = Rating.ImageId "
+           << "JOIN User ON Rating.UserId = User.Id "
+           << "WHERE Exam.Type = ( "
+           <<   "SELECT Exam.Type "
+           <<   "FROM Exam "
+           <<   "JOIN Image ON Exam.Id = Image.ExamId "
+           <<   "WHERE Image.Id = " << this->Get( "Id" ).ToString() << " "
+           << ") "
+           << "AND Rating = " << rating << " "
+           << "AND User.Expert = true "
+           << "ORDER BY Interview.UId ";
+
+    // order the query by UId (descending if not forward)
+    if( !forward ) stream << "DESC ";
+
+    Utilities::log( "Querying Database: " + stream.str() );
+    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+    query->SetQuery( stream.str().c_str() );
+    query->Execute();
+
+    if( query->HasError() )
+    {
+      Utilities::log( query->GetLastErrorText() );
+      throw std::runtime_error( "There was an error while trying to query the database." );
+    }
+
+    vtkVariant neighbourId;
+
+    // store the first record in case we need to loop over
+    if( query->NextRow() )
+    {
+      bool found = false;
+      vtkVariant currentId = this->Get( "Id" );
+
+      // if the current id is last in the following loop then we need the first id
+      neighbourId = query->DataValue( 0 );
+
+      do // keep looping until we find the current Id
+      {
+        vtkVariant id = query->DataValue( 0 );
+        if( found )
+        {
+          neighbourId = id;
+          break;
+        }
+
+        if( currentId == id ) found = true;
+      }
+      while( query->NextRow() );
+
+      // we should always find the current image id
+      if( !found ) throw std::runtime_error( "Cannot find current atlas image in database." );
+    }
+
     vtkSmartPointer<Image> image = vtkSmartPointer<Image>::New();
-
-    // TODO: get neighbouring image which matches the requested exam type and image rating (from an expert user)
-
+    if( neighbourId.IsValid() ) image->Load( "Id", neighbourId.ToString() );
     return image;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   vtkSmartPointer<Image> Image::GetAtlasImage( const std::string type, const int rating )
   {
+    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+
+    // get any image rated by an expert user having the given exam type and rating score
+    std::stringstream stream;
+    stream << "SELECT Image.Id "
+           << "FROM Image "
+           << "JOIN Exam ON Image.ExamId = Exam.Id "
+           << "JOIN Rating ON Image.Id = Rating.ImageId "
+           << "JOIN User ON Rating.UserId = User.Id "
+           << "WHERE Exam.Type = " << query->EscapeString( type ) << " "
+           << "AND Rating = " << rating << " "
+           << "AND User.Expert = true "
+           << "LIMIT 1";
+
+    Utilities::log( "Querying Database: " + stream.str() );
+    query->SetQuery( stream.str().c_str() );
+    query->Execute();
+
+    if( query->HasError() )
+    {   
+      Utilities::log( query->GetLastErrorText() );
+      throw std::runtime_error( "There was an error while trying to query the database." );
+    }   
+
     vtkSmartPointer<Image> image = vtkSmartPointer<Image>::New();
-
-    // TODO: get any image which matches the requested exam type and image rating (from an expert user)
-
+    if( query->NextRow() ) image->Load( "Id", query->DataValue( 0 ).ToString() );
     return image;
   }
 }

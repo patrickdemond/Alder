@@ -109,7 +109,6 @@ void QAlderAtlasWidget::updateAtlasImage()
   // select an appropriate atlas image, if necessary
   if( image )
   {
-    int rating = this->ui->ratingComboBox->currentIndex() + 1;
     bool getNewAtlasImage = false;
 
     vtkSmartPointer< Alder::Exam > exam;
@@ -126,7 +125,8 @@ void QAlderAtlasWidget::updateAtlasImage()
     if( getNewAtlasImage )
     {
       vtkSmartPointer<Alder::Image> newAtlasImage =
-        Alder::Image::GetAtlasImage( exam->Get( "Type" ).ToString(), rating );
+        Alder::Image::GetAtlasImage(
+          exam->Get( "Type" ).ToString(), this->ui->ratingComboBox->currentIndex() + 1 );
       if( 0 < newAtlasImage->Get( "Id" ).ToInt() )
       {
         app->SetActiveAtlasImage( newAtlasImage );
@@ -143,7 +143,8 @@ void QAlderAtlasWidget::slotPrevious()
   
   if( NULL != image )
   {
-    app->SetActiveAtlasImage( image->GetPreviousAtlasImage() );
+    app->SetActiveAtlasImage(
+      image->GetPreviousAtlasImage( this->ui->ratingComboBox->currentIndex() + 1 ) );
   }
 }
 
@@ -155,7 +156,8 @@ void QAlderAtlasWidget::slotNext()
   
   if( NULL != image )
   {
-    app->SetActiveAtlasImage( image->GetNextAtlasImage() );
+    app->SetActiveAtlasImage(
+      image->GetNextAtlasImage( this->ui->ratingComboBox->currentIndex() + 1 ) );
   }
 }
 
