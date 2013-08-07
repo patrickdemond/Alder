@@ -1,0 +1,19 @@
+<Configuration>
+   <Database>
+     <Host>localhost</Host>
+     <Port>3306</Port>
+     <Username>alder</Username>
+     <Password></Password>
+     <Name>alder</Name>
+   </Database>
+   <Opal>
+     <Host>localhost</Host>
+     <Port>8843</Port>
+     <Username>administrator</Username>
+     <Password></Password>
+     <Timeout>10</Timeout>
+   </Opal>
+   <Path>
+     <ImageData>./data</ImageData>
+   </Path>
+ </Configuration>

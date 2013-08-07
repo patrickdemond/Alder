@@ -60,9 +60,13 @@ namespace Alder
      * Retrieves an image from Opal.
      * @throws exception 
      */
-    bool RetrieveImage( std::string type, std::string variable, std::string UId,
-                        std::map<std::string, vtkVariant> settings,
-                        std::string suffix, std::string sideVariable = "" );
+    bool RetrieveImage(
+      const std::string type,
+      const std::string variable,
+      const std::string UId,
+      const std::map<std::string, vtkVariant> settings,
+      const std::string suffix,
+      const std::string sideVariable = "" );
 
   protected:
     Exam() {}

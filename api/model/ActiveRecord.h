@@ -94,7 +94,7 @@ namespace Alder
     /**
      * Get the id of the last inserted record.
      */
-    int GetLastInsertId();
+    int GetLastInsertId() const;
     
     /**
      * Provides a list of all records which exist in a table.

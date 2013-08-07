@@ -121,7 +121,7 @@ namespace Alder
      * @param className string
      * @throws runtime_error
      */
-    ModelObject* Create( std::string className ) const
+    ModelObject* Create( const std::string className ) const
     {
       // make sure the constructor registry has the class name being asked for
       std::map< std::string, ModelObject*(*)() >::const_iterator pair;
@@ -142,7 +142,7 @@ namespace Alder
      * must be registered in this class' constructor.
      * @throws runtime_error
      */
-    std::string GetUnmangledClassName( std::string mangledName ) const;
+    std::string GetUnmangledClassName( const std::string mangledName ) const;
 
     vtkSetMacro( AbortFlag, bool );
     vtkGetMacro( AbortFlag, bool );

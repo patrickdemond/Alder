@@ -37,11 +37,11 @@ namespace Alder
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool Database::Connect(
-    std::string name,
-    std::string user,
-    std::string pass,
-    std::string host,
-    int port )
+    const std::string name,
+    const std::string user,
+    const std::string pass,
+    const std::string host,
+    const int port )
   {
     // set the database parameters using the configuration object
     this->MySQLDatabase->SetDatabaseName( name.c_str() );
@@ -110,11 +110,11 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::vector<std::string> Database::GetColumnNames( std::string table )
+  std::vector<std::string> Database::GetColumnNames( const std::string table ) const
   {
-    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::iterator tablePair;
+    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::const_iterator tablePair;
     tablePair = this->Columns.find( table );
-    if( this->Columns.end() == tablePair )
+    if( this->Columns.cend() == tablePair )
     {
       std::stringstream error;
       error << "Tried to get column names for table \"" << table << "\" which doesn't exist";
@@ -123,26 +123,26 @@ namespace Alder
 
     std::map< std::string,std::map< std::string, vtkVariant > > tableMap = tablePair->second;
     std::vector<std::string> columns;
-    std::map< std::string,std::map< std::string, vtkVariant > >::iterator it;
-    for( it = tableMap.begin(); it != tableMap.end(); ++it ) columns.push_back( it->first );
+    std::map< std::string,std::map< std::string, vtkVariant > >::const_iterator it;
+    for( it = tableMap.cbegin(); it != tableMap.cend(); ++it ) columns.push_back( it->first );
 
     return columns;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  bool Database::TableExists( std::string table ) const
+  bool Database::TableExists( const std::string table ) const
   {
     std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::const_iterator
       tablePair = this->Columns.find( table );
-    return this->Columns.end() != tablePair;
+    return this->Columns.cend() != tablePair;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  bool Database::ColumnExists( std::string table, std::string column ) const
+  bool Database::ColumnExists( const std::string table, const std::string column ) const
   {
     std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::const_iterator
       tablePair = this->Columns.find( table );
-    if( this->Columns.end() == tablePair )
+    if( this->Columns.cend() == tablePair )
     {
       std::stringstream error;
       error << "Tried to get whether a column exists from table \"" << table << "\" which doesn't exist";
@@ -151,24 +151,24 @@ namespace Alder
 
     std::map< std::string,std::map< std::string, vtkVariant > >::const_iterator
       columnPair = tablePair->second.find( column );
-    return tablePair->second.end() != columnPair;
+    return tablePair->second.cend() != columnPair;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  vtkVariant Database::GetColumnDefault( std::string table, std::string column )
+  vtkVariant Database::GetColumnDefault( const std::string table, const std::string column ) const
   {
-    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::iterator
+    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::const_iterator
       tablePair = this->Columns.find( table );
-    if( this->Columns.end() == tablePair )
+    if( this->Columns.cend() == tablePair )
     {
       std::stringstream error;
       error << "Tried to get default column value from table \"" << table << "\" which doesn't exist";
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string,std::map< std::string, vtkVariant > >::iterator
+    std::map< std::string,std::map< std::string, vtkVariant > >::const_iterator
       columnPair = tablePair->second.find( column );
-    if( tablePair->second.end() == columnPair )
+    if( tablePair->second.cend() == columnPair )
     {
       std::stringstream error;
       error << "Tried to get default column value for \""
@@ -181,20 +181,20 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  bool Database::IsColumnNullable( std::string table, std::string column )
+  bool Database::IsColumnNullable( const std::string table, const std::string column ) const
   {
-    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::iterator
+    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::const_iterator
       tablePair = this->Columns.find( table );
-    if( this->Columns.end() == tablePair )
+    if( this->Columns.cend() == tablePair )
     {
       std::stringstream error;
       error << "Tried to get column nullable from table \"" << table << "\" which doesn't exist";
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string,std::map< std::string, vtkVariant > >::iterator
+    std::map< std::string,std::map< std::string, vtkVariant > >::const_iterator
       columnPair = tablePair->second.find( column );
-    if( tablePair->second.end() == columnPair )
+    if( tablePair->second.cend() == columnPair )
     {
       std::stringstream error;
       error << "Tried to get column nullable for \""
@@ -207,20 +207,20 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  bool Database::IsColumnForeignKey( std::string table, std::string column )
+  bool Database::IsColumnForeignKey( const std::string table, const std::string column ) const
   {
-    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::iterator
+    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::const_iterator
       tablePair = this->Columns.find( table );
-    if( this->Columns.end() == tablePair )
+    if( this->Columns.cend() == tablePair )
     {
       std::stringstream error;
       error << "Tried to get column foreign key from table \"" << table << "\" which doesn't exist";
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string,std::map< std::string, vtkVariant > >::iterator
+    std::map< std::string,std::map< std::string, vtkVariant > >::const_iterator
       columnPair = tablePair->second.find( column );
-    if( tablePair->second.end() == columnPair )
+    if( tablePair->second.cend() == columnPair )
     {
       std::stringstream error;
       error << "Tried to get column foreign key for \""
@@ -232,7 +232,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  vtkSmartPointer<vtkAlderMySQLQuery> Database::GetQuery()
+  vtkSmartPointer<vtkAlderMySQLQuery> Database::GetQuery() const
   {
     return vtkSmartPointer<vtkAlderMySQLQuery>::Take(
       vtkAlderMySQLQuery::SafeDownCast( this->MySQLDatabase->GetQueryInstance() ) );
