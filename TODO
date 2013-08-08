@@ -4,3 +4,4 @@ A list of things which need to be done (in no particular order)
 - consider opening exam tree and displaying same exam type during next/prev operations
 - add const expressions where possible (including const_iterator)
 - add dicom tag review dialog
+- consider adding active record caching to reduce calls to the database
