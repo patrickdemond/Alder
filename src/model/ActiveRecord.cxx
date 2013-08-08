@@ -61,6 +61,19 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void ActiveRecord::LoadFromQuery( vtkAlderMySQLQuery *query )
+  {
+    for( int c = 0; c < query->GetNumberOfFields(); ++c )
+    {   
+      std::string column = query->GetFieldName( c );
+      if( "CreateTimestamp" != column && "UpdateTimestamp" != column )
+        this->ColumnValues.insert(
+          std::pair< std::string, vtkVariant >( column, query->DataValue( c ) ) );
+    }   
+    this->Initialized = true;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool ActiveRecord::Load( const std::map< std::string, std::string > map )
   {
     vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
@@ -95,18 +108,11 @@ namespace Alder
         throw std::runtime_error( error.str() );
       }
 
-      for( int c = 0; c < query->GetNumberOfFields(); ++c )
-      {
-        std::string column = query->GetFieldName( c );
-        if( "CreateTimestamp" != column && "UpdateTimestamp" != column )
-          this->ColumnValues.insert( std::pair< std::string, vtkVariant >( column, query->DataValue( c ) ) );
-      }
-
+      this->LoadFromQuery( query );
       if( first ) first = false;
     }
 
     // if we didn't find a row then first is still true
-    this->Initialized = !first;
     return !first;
   }
 

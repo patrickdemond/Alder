@@ -96,6 +96,7 @@ namespace Alder
         command += zipFileName;
 
         // not a gz file, remove the .gz extension manually
+        Utilities::log( std::string( "Unzipping file: " ) + fileName );
         if( "ERROR" == Utilities::exec( command ) )
           rename( zipFileName.c_str(), fileName.c_str() );
       }

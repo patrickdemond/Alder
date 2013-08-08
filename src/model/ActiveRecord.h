@@ -108,7 +108,7 @@ namespace Alder
       // get the class name of T, return error if not found
       std::string type = app->GetUnmangledClassName( typeid(T).name() );
       std::stringstream stream;
-      stream << "SELECT Id FROM " << type;
+      stream << "SELECT * FROM " << type;
       if( NULL != modifier ) stream << " " << modifier->GetSql();
       vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
@@ -126,7 +126,7 @@ namespace Alder
       {
         // create a new instance of the child class
         vtkSmartPointer< T > record = vtkSmartPointer< T >::Take( T::SafeDownCast( T::New() ) );
-        record->Load( "Id", query->DataValue( 0 ).ToString() );
+        record->LoadFromQuery( query );
         list->push_back( record );
       }
     }
@@ -163,12 +163,14 @@ namespace Alder
       int relationship = this->GetRelationship( type, override );
       if( ActiveRecord::ManyToMany == relationship )
       {
-        stream << "SELECT " << type << "Id FROM " << joiningTable;
+        stream << "SELECT " << type << ".* "
+               << "FROM " << joiningTable << " "
+               << "JOIN " << type << " ON " << joiningTable << "." << type << "Id = " << type << ".Id";
         mod->Where( this->GetName() + "Id", "=", this->Get( "Id" ).ToString() );
       }
       else if( ActiveRecord::OneToMany == relationship )
       {
-        stream << "SELECT Id FROM " << type;
+        stream << "SELECT * FROM " << type;
         mod->Where( column, "=", this->Get( "Id" ).ToString() );
       }
       else // no relationship (we don't support one-to-one relationships)
@@ -192,9 +194,8 @@ namespace Alder
       while( query->NextRow() )
       {
         // create a new instance of the child class
-        vtkSmartPointer< T > record = vtkSmartPointer< T >::Take(
-          T::SafeDownCast( app->Create( type ) ) );
-        record->Load( "Id", query->DataValue( 0 ).ToString() );
+        vtkSmartPointer< T > record = vtkSmartPointer< T >::Take( T::SafeDownCast( app->Create( type ) ) );
+        record->LoadFromQuery( query );
         list->push_back( record );
       }
     }
@@ -378,6 +379,11 @@ namespace Alder
      * Sets up the record with default values for all table columns
      */
     void Initialize();
+
+    /**
+     * Loads values into the record from a query's current row
+     */
+    void LoadFromQuery( vtkAlderMySQLQuery *query );
 
     /**
      * Runs a check to make sure the record exists in the database
