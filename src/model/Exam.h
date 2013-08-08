@@ -41,6 +41,11 @@ namespace Alder
     std::string GetName() const { return "Exam"; }
 
     /**
+     * Returns the exam's code (used to determine the exam's path in the image data directory)
+     */
+    virtual std::string GetCode();
+
+    /**
      * Returns whether this exam's image data has been downloaded
      */
     bool HasImageData();

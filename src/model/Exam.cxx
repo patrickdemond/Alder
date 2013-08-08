@@ -24,6 +24,20 @@ namespace Alder
   vtkStandardNewMacro( Exam );
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::string Exam::GetCode()
+  {
+    this->AssertPrimaryId();
+
+    vtkSmartPointer< Interview > interview;
+    if( !this->GetRecord( interview ) )
+      throw std::runtime_error( "Exam has no parent interview!" );
+
+    std::stringstream stream;
+    stream << interview->Get( "Id" ).ToString() << "/" << this->Get( "Id" ).ToString();
+    return stream.str();
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool Exam::HasImageData()
   {
     // An exam has all images if it is marked as downloaded or if the stage is not complete.

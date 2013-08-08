@@ -32,24 +32,33 @@ namespace Alder
   vtkStandardNewMacro( Image );
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string Image::GetFilePath()
+  std::string Image::GetCode()
   {
     this->AssertPrimaryId();
 
-    // get the exam for this record
+    // get the exam's code and add append the image id
     vtkSmartPointer< Exam > exam;
     if( !this->GetRecord( exam ) )
       throw std::runtime_error( "Image has no parent exam!" );
 
-    vtkSmartPointer< Interview > interview;
-    if( !exam->GetRecord( interview ) )
-      throw std::runtime_error( "Exam has no parent interview!" );
-
     std::stringstream stream;
-    // get the path of the file (we don't know file type yet)
+    stream << exam->GetCode() << "/" << this->Get( "Id" ).ToString();
+    return stream.str();
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::string Image::GetFilePath()
+  {
+    this->AssertPrimaryId();
+
+    vtkSmartPointer< Exam > exam;
+    if( !this->GetRecord( exam ) )
+      throw std::runtime_error( "Image has no parent exam!" );
+
+    // the image file's directory is simply the image data path and the exam code
+    std::stringstream stream;
     stream << Application::GetInstance()->GetConfig()->GetValue( "Path", "ImageData" )
-           << "/" << interview->Get( "Id" ).ToString()
-           << "/" << exam->Get( "Id" ).ToString();
+           << "/" << exam->GetCode();
 
     return stream.str();
   }

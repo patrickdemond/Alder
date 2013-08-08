@@ -188,6 +188,7 @@ void QAlderAtlasWidget::updateInfo()
   QString siteString = tr( "N/A" );
   QString dateString = tr( "N/A" );
   QString uidString = tr( "N/A" );
+  QString codeString = tr( "N/A" );
 
   Alder::Image *image = Alder::Application::GetInstance()->GetActiveAtlasImage();
   if( image )
@@ -201,6 +202,7 @@ void QAlderAtlasWidget::updateInfo()
       siteString = interview->Get( "Site" ).ToString().c_str();
       dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();
       uidString = interview->Get( "UId" ).ToString().c_str();
+      codeString = image->GetCode().c_str();
 
       vtkSmartPointer< Alder::Modality > modality;
       exam->GetRecord( modality );
@@ -213,6 +215,7 @@ void QAlderAtlasWidget::updateInfo()
   this->ui->infoInterviewerValueLabel->setText( interviewerString );
   this->ui->infoSiteValueLabel->setText( siteString );
   this->ui->infoDateValueLabel->setText( dateString );
+  this->ui->infoCodeValueLabel->setText( codeString );
   this->ui->infoUIdValueLabel->setText( uidString );
 }
 
