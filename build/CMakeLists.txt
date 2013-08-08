@@ -49,12 +49,12 @@ ENDIF( UNIX AND NOT APPLE )
 
 SET( ALDER_ROOT_DIR         ${PROJECT_SOURCE_DIR}/.. )
 SET( ALDER_AUX_DIR          ${ALDER_ROOT_DIR}/aux )
-SET( ALDER_API_DIR          ${ALDER_ROOT_DIR}/api )
-SET( ALDER_MODEL_DIR        ${ALDER_API_DIR}/model )
-SET( ALDER_QT_DIR           ${ALDER_API_DIR}/interface/qt )
+SET( ALDER_SRC_DIR          ${ALDER_ROOT_DIR}/src )
+SET( ALDER_MODEL_DIR        ${ALDER_SRC_DIR}/model )
+SET( ALDER_QT_DIR           ${ALDER_SRC_DIR}/interface/qt )
 SET( ALDER_QT_WIDGETS_DIR   ${ALDER_QT_DIR}/widgets )
 SET( ALDER_QT_RESOURCES_DIR ${ALDER_QT_WIDGETS_DIR}/resources )
-SET( ALDER_VTK_DIR          ${ALDER_API_DIR}/vtk )
+SET( ALDER_VTK_DIR          ${ALDER_SRC_DIR}/vtk )
 SET( ALDER_CONFIG_FILE      ${PROJECT_BINARY_DIR}/config.xml )
 SET( ALDER_DOC_DIR          ${ALDER_ROOT_DIR}/doc )
 SET( ALDER_DOXY_DIR         ${PROJECT_BINARY_DIR}/doxygen )
@@ -70,7 +70,7 @@ SET( ALDER_LOG_PATH ${PROJECT_BINARY_DIR}/log CACHE FILEPATH "The location of th
 SET( ALDER_STACK_DEPTH "10" CACHE STRING "The stack depth to display on thrown exceptions" )
 
 # Configure the utitlities header
-CONFIGURE_FILE( ${ALDER_API_DIR}/Utilities.h.in
+CONFIGURE_FILE( ${ALDER_SRC_DIR}/Utilities.h.in
                 ${PROJECT_BINARY_DIR}/Utilities.h @ONLY IMMEDIATE )
 
 # Copy the readme file to build
@@ -92,7 +92,7 @@ SET( ALDER_INCLUDE_DIR
 )
 
 SET( ALDER_SOURCE
-  ${ALDER_API_DIR}/Alder.cxx
+  ${ALDER_SRC_DIR}/Alder.cxx
 
   ${ALDER_MODEL_DIR}/ActiveRecord.cxx
   ${ALDER_MODEL_DIR}/Application.cxx
@@ -274,7 +274,7 @@ IF( BUILD_DOCUMENTATION )
     ${ALDER_DOXY_DIR}/doc_mainpage.dox )
 
   SET( DOXY_INPUT_SOURCE 
-    ${ALDER_API_DIR}
+    ${ALDER_SRC_DIR}
     ${ALDER_MODEL_DIR}
     ${ALDER_VTK_DIR}
     ${ALDER_QT_DIR}
