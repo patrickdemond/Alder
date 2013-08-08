@@ -66,6 +66,7 @@ public:
     unsigned int numberOfFrames;
     double frameRange[2];
     double currentFrame;
+    int maxFrameRate;
 
     void printSelf()const;
     double clampTimeInterval(double, double) const; // Transform a frameRate into a time interval
@@ -104,6 +105,7 @@ QAlderFramePlayerWidgetPrivate::PipelineInfoType::PipelineInfoType()
   : isConnected(false)
   , numberOfFrames(0)
   , currentFrame(0)
+  , maxFrameRate(60)
 {
   this->frameRange[0] = 0;
   this->frameRange[1] = 0;
@@ -117,6 +119,7 @@ void QAlderFramePlayerWidgetPrivate::PipelineInfoType::printSelf()const
             << "Number of image frames: " << this->numberOfFrames << std::endl
             << "Frame range: " << this->frameRange[0] << " " << this->frameRange[1] << std::endl
             << "Last frame request: " << this->currentFrame << std::endl
+            << "Maximum frame rate: " << this->maxFrameRate << std::endl
             << "Is connected: " << this->isConnected << std::endl;
 
 }
@@ -139,6 +142,8 @@ QAlderFramePlayerWidgetPrivate::retrievePipelineInfo()
   pipeInfo.frameRange[1] = this->viewer->GetSliceMax();
   
   pipeInfo.currentFrame = this->viewer->GetSlice();
+  pipeInfo.maxFrameRate = this->viewer->GetMaxFrameRate();
+
   return pipeInfo;
 }
 
@@ -235,6 +240,15 @@ void QAlderFramePlayerWidgetPrivate::updateUi(const PipelineInfoType& pipeInfo)
   this->frameSlider->setRange(pipeInfo.frameRange[0], pipeInfo.frameRange[1]);
   this->frameSlider->setValue(pipeInfo.currentFrame);
   this->frameSlider->blockSignals(false);
+
+  // SpinBox
+  // the max frame rate from the pipeinfo object is set fom the viewer's information
+  // about frame rate.  The value of the speed factor spin box set here is a suggested
+  // value.  The speed can be set and is clamped between 1 and whatever the max frame
+  // rate set through the QAlderFramePlayerWidget's maxFrameRate property.
+  this->speedFactorSpinBox->blockSignals( true );
+  this->speedFactorSpinBox->setValue( pipeInfo.maxFrameRate );
+  this->speedFactorSpinBox->blockSignals( false );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
