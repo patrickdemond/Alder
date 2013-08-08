@@ -40,6 +40,11 @@ namespace Alder
     std::string GetName() const { return "Image"; }
 
     /**
+     * Returns the image's code (used to determine the image's path in the image data directory)
+     */
+    virtual std::string GetCode();
+
+    /**
      * Get the full path to where the image associated with this record belongs.
      */
     std::string GetFilePath();

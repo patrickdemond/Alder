@@ -298,6 +298,7 @@ void QAlderInterviewWidget::updateInfo()
   QString interviewerString = tr( "N/A" );
   QString siteString = tr( "N/A" );
   QString dateString = tr( "N/A" );
+  QString codeString = tr( "N/A" );
 
   // fill in the active exam information
   Alder::Application *app = Alder::Application::GetInstance();
@@ -314,6 +315,7 @@ void QAlderInterviewWidget::updateInfo()
       interviewerString = exam->Get( "Interviewer" ).ToString().c_str();
       siteString = interview->Get( "Site" ).ToString().c_str();
       dateString = exam->Get( "DatetimeAcquired" ).ToString().c_str();
+      codeString = image->GetCode().c_str();
     }
   }
 
@@ -325,6 +327,7 @@ void QAlderInterviewWidget::updateInfo()
   this->ui->infoInterviewerValueLabel->setText( interviewerString );
   this->ui->infoSiteValueLabel->setText( siteString );
   this->ui->infoDateValueLabel->setText( dateString );
+  this->ui->infoCodeValueLabel->setText( codeString );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
