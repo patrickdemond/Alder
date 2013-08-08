@@ -6,4 +6,3 @@ A list of things which need to be done (in no particular order)
 - consider overloading native operators in active record class
 - add file path label to interview widget
 - add dicom tag review dialog
-- fix max frame rate and playback speed : get info from cineloop dicom tags
