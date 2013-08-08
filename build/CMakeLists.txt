@@ -1,9 +1,11 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
 PROJECT( Alder )
 
-# Set the version
-SET( ALDER_VERSION_MAJOR 0 )
-SET( ALDER_VERSION_MINOR 1 )
+# The major version number is incremented after major milestones are met
+SET( ALDER_VERSION_MAJOR 1 )
+# The minor version number is incremented after a development branch is merged to qa
+SET( ALDER_VERSION_MINOR 0 )
+# The patch version number is incremented when changes are made to the release branch
 SET( ALDER_VERSION_PATCH 0 )
 
 # Icons sizes to build
