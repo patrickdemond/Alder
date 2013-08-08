@@ -29,10 +29,12 @@
 #define __vtkImageDataReader_h
 
 #include "vtkObject.h"
+#include "vtkSmartPointer.h"
 #include "vtkTimeStamp.h"
 
 class vtkAlgorithm;
 class vtkImageData;
+class vtkMedicalImageProperties;
 
 class vtkImageDataReader : public vtkObject 
 {
@@ -77,6 +79,12 @@ public:
    */
   static bool IsValidFileName( const char* );
 
+  /**
+   * Get the medical image properties if the image, if there are any.
+   * For DICOM images, we add additional user defined tags.
+   */
+  vtkMedicalImageProperties* GetMedicalImageProperties();
+
 protected:
   vtkImageDataReader();
   ~vtkImageDataReader();
@@ -90,6 +98,7 @@ protected:
   std::string FileName;
   vtkAlgorithm* Reader;
   vtkTimeStamp ReadMTime;
+  vtkSmartPointer<vtkMedicalImageProperties> MedicalImageProperties;
   
 private:
   vtkImageDataReader( const vtkImageDataReader& );  /** Not implemented. */

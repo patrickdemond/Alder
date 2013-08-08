@@ -16,6 +16,7 @@
 #include "vtkGESignaReader.h"
 #include "vtkImageData.h"
 #include "vtkJPEGReader.h"
+#include "vtkMedicalImageProperties.h"
 #include "vtkMetaImageReader.h"
 #include "vtkMINCImageReader.h"
 #include "vtkNew.h"
@@ -23,10 +24,12 @@
 #include "vtkPNGReader.h"
 #include "vtkPNMReader.h"
 #include "vtkSLCReader.h"
-#include "vtkSmartPointer.h"
 #include "vtkStringArray.h"
 #include "vtkTIFFReader.h"
 #include "vtkXMLImageDataReader.h"
+
+#include "gdcmImageReader.h"
+#include "gdcmDirectoryHelper.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -38,12 +41,19 @@ vtkCxxSetObjectMacro( vtkImageDataReader, Reader, vtkAlgorithm );
 vtkImageDataReader::vtkImageDataReader()
 {
   this->Reader = NULL;
+  this->MedicalImageProperties = vtkSmartPointer<vtkMedicalImageProperties>::New();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 vtkImageDataReader::~vtkImageDataReader()
 {
   this->SetReader( NULL );
+}
+  
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+vtkMedicalImageProperties* vtkImageDataReader::GetMedicalImageProperties()
+{
+  return static_cast<vtkMedicalImageProperties*>(this->MedicalImageProperties.GetPointer());
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -358,6 +368,7 @@ vtkImageData* vtkImageDataReader::GetOutput()
   vtkGDCMImageReader* gdcmReader = NULL;
   vtkImageReader2* imageReader = NULL;
   vtkImageData* image = NULL;
+  this->MedicalImageProperties->Clear();
 
   // if the file name or reader are null simply return null
   if( this->FileName.empty() || NULL == this->Reader )
@@ -425,12 +436,8 @@ vtkImageData* vtkImageDataReader::GetOutput()
     // we know that Reader must be a vtkImageReader2 object
     imageReader = vtkImageReader2::SafeDownCast( this->Reader );
 
-    // see if we have already read the data from the disk, and return it if we have
-    if( this->ReadMTime >= this->GetMTime() )
-    {
-      image = imageReader->GetOutput();
-    }
-    else // this reader is not up to date, re-read the file
+    // if this reader is not up to date, re-read the file
+    if( this->ReadMTime < this->GetMTime() )
     {
       // the GDCM reader has not implemented CanReadFile, so skip that check
       if( !imageReader->IsA( "vtkGDCMImageReader" ) )
@@ -449,8 +456,8 @@ vtkImageData* vtkImageDataReader::GetOutput()
 
       // get a reference to the (updated) output image
       imageReader->Update();
-      image = imageReader->GetOutput();
     }
+    image = imageReader->GetOutput();
   }
 
   // if we did get an image, check that it has valid extents:
@@ -462,6 +469,40 @@ vtkImageData* vtkImageDataReader::GetOutput()
     {    
       return NULL;
     }
+  }
+
+  // set up the medical image properties
+  if( this->Reader->IsA( "vtkGESignaReader" ) )
+  {
+    vtkGESignaReader* imageReader = vtkGESignaReader::SafeDownCast( this->Reader );
+    this->MedicalImageProperties->DeepCopy( imageReader->GetMedicalImageProperties() );
+  }
+  else if( this->Reader->IsA( "vtkGDCMImageReader" ) )
+  {
+    vtkGDCMImageReader* imageReader = vtkGDCMImageReader::SafeDownCast( this->Reader );
+    this->MedicalImageProperties->DeepCopy( imageReader->GetMedicalImageProperties() );
+    
+    gdcm::ImageReader reader;
+    reader.SetFileName( imageReader->GetFileName() );
+    reader.Read();
+    const gdcm::File &file = reader.GetFile();
+    const gdcm::DataSet &ds = file.GetDataSet();
+    
+    std::map< std::string, gdcm::Tag > dicomMap;
+    dicomMap["AcquisitionDateTime"] = gdcm::Tag( 0x0008, 0x002a );
+    dicomMap["SeriesNumber"] = gdcm::Tag( 0x0020, 0x0011 );
+    dicomMap["CineRate"] = gdcm::Tag( 0x0018, 0x0040 );
+    dicomMap["RecommendedDisplayFrameRate"] = gdcm::Tag( 0x0008, 0x2114 );
+    
+    std::map< std::string, gdcm::Tag >::const_iterator it;
+    for( it = dicomMap.cbegin(); it != dicomMap.cend(); ++it )
+    {
+      if( ds.FindDataElement( it->second ) )
+      {
+        this->MedicalImageProperties->AddUserDefinedValue( it->first.c_str(),
+          gdcm::DirectoryHelper::GetStringValueFromTag( it->second, ds ).c_str() );
+      }
+    }  
   }
 
   this->ReadMTime.Modified();
