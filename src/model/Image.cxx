@@ -172,9 +172,12 @@ namespace Alder
 
     // TODO: use GDCM to get the correct tags
     gdcm::Tag tag;
-    if( "Acquisition DateTime" == tagName ) tag = gdcm::Tag( 0x0008, 0x002a );
+    if( "AcquisitionDateTime" == tagName ) tag = gdcm::Tag( 0x0008, 0x002a );
     else if( "SeriesNumber" == tagName ) tag = gdcm::Tag( 0x0020,0x0011 );
     else throw std::runtime_error( "Unknown DICOM tag name." );
+
+    if( !ds.FindDataElement( tag ) )
+      throw std::runtime_error( "Unknown DICOM tag with name " + tagName );
 
     return std::string( 
       gdcm::DirectoryHelper::GetStringValueFromTag( tag, ds ) );

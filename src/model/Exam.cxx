@@ -98,7 +98,7 @@ namespace Alder
           for( imageIt = imageList.cbegin(); imageIt != imageList.cend(); ++imageIt )
           {
             Alder::Image *image = imageIt->GetPointer();
-            acqDateTimes[ image->Get( "Id" ).ToInt() ] = image->GetDICOMTag( "Acquisition DateTime" );
+            acqDateTimes[ image->Get( "Id" ).ToInt() ] = image->GetDICOMTag( "AcquisitionDateTime" );
           }
 
           // find which cineloop has a matching datetime to the still and set the still's
