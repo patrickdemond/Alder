@@ -254,11 +254,18 @@ bool vtkMedicalImageViewer::Load( const std::string& fileName )
       this->SetInput( image );
       success = true;
       vtkMedicalImageProperties* properties = reader->GetMedicalImageProperties();
-      if( NULL != properties->GetUserDefinedValue( "CineRate" ) )
+
+      // vtkMedicalImageProperties has a bug which crashes if the CineRate is checked for
+      // images with no 3rd dimension, so only set the frame rate for 3D images
+      int *extent = image->GetExtent();
+      if( 0 < extent[5] )
       {
-        this->SetMaxFrameRate( 
-          vtkVariant( properties->GetUserDefinedValue( "CineRate" ) ).ToInt() );
-        this->SetFrameRate( this->MaxFrameRate );  
+        if( NULL != properties->GetUserDefinedValue( "CineRate" ) )
+        {
+          this->SetMaxFrameRate( 
+            vtkVariant( properties->GetUserDefinedValue( "CineRate" ) ).ToInt() );
+          this->SetFrameRate( this->MaxFrameRate );  
+        }
       }
     }  
   }
