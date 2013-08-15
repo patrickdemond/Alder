@@ -105,10 +105,7 @@ VTK also uses CMake to set up the build environment.  The following option must 
 CMakeCache.txt file:
 
   GDCM_USE_VTK:BOOL=ON
-
-Make sure that the GDCM_BUILD_SHARED_LIBS parameter in GDCM's CMakeLists.txt file matches the
-BUILD_SHARED_LIBS parameter in VTK's CMakeLists.txt file, otherwise you may get linker errors
-when building Alder.
+  GDCM_BUILD_SHARED_LIBS:BOOL=ON
 
 
 Building Alder
