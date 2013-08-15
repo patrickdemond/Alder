@@ -73,6 +73,10 @@ SET( ALDER_STACK_DEPTH "10" CACHE STRING "The stack depth to display on thrown e
 CONFIGURE_FILE( ${ALDER_SRC_DIR}/Utilities.h.in
                 ${PROJECT_BINARY_DIR}/Utilities.h @ONLY IMMEDIATE )
 
+# Configure the desktop file
+CONFIGURE_FILE( ${ALDER_AUX_DIR}/alder.desktop.in
+                ${PROJECT_BINARY_DIR}/alder.desktop @ONLY IMMEDIATE )
+
 # Copy the readme file to build
 CONFIGURE_FILE( ${ALDER_ROOT_DIR}/readme
                 ${PROJECT_BINARY_DIR}/readme COPYONLY )
@@ -202,6 +206,9 @@ INCLUDE_DIRECTORIES(
 # We're using cbegin and cend so we need c++11
 SET( CMAKE_CXX_FLAGS "-std=c++0x -Wno-deprecated " )
 
+# Make sure to include RPATH in the installed binary to support linking to libraries
+SET( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
+
 # Targets
 ADD_EXECUTABLE( alder ${ALDER_SOURCE} ${ALDER_UISrcs} ${MOCSrcs} ${QRCSrcs})
 
@@ -231,9 +238,8 @@ ADD_CUSTOM_TARGET( dist
 
 # Desktop entries and icons
 IF( UNIX AND NOT APPLE )
-  INSTALL( FILES desktop/alder.desktop DESTINATION share/applications )
+  INSTALL( FILES ${PROJECT_BINARY_DIR}/alder.desktop DESTINATION share/applications )
 
-  INSTALL( FILES desktop/logo_clsa.png DESTINATION share/icons/hicolor/scalable/apps )
   FOREACH( SIZE ${ALDER_ICON_SIZES} )
     ADD_CUSTOM_COMMAND( OUTPUT logo_clsa_${SIZE}.png
       COMMAND convert -background none -resize ${SIZE} ${ALDER_AUX_DIR}/logo_clsa.png logo_clsa_${SIZE}.png
