@@ -53,7 +53,7 @@ vtkImageDataReader::~vtkImageDataReader()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 vtkMedicalImageProperties* vtkImageDataReader::GetMedicalImageProperties()
 {
-  return static_cast<vtkMedicalImageProperties*>(this->MedicalImageProperties.GetPointer());
+  return this->MedicalImageProperties;
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
