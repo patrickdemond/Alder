@@ -257,8 +257,7 @@ bool vtkMedicalImageViewer::Load( const std::string& fileName )
 
       // vtkMedicalImageProperties has a bug which crashes if the CineRate is checked for
       // images with no 3rd dimension, so only set the frame rate for 3D images
-      int *extent = image->GetExtent();
-      if( 0 < extent[5] )
+      if( this->GetImageDimensionality() == 3 )
       {
         if( NULL != properties->GetUserDefinedValue( "CineRate" ) )
         {
