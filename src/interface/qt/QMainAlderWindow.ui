@@ -176,6 +176,7 @@
     </property>
     <addaction name="actionOpenInterview"/>
     <addaction name="actionShowAtlas"/>
+    <addaction name="actionShowDicomTags"/>
     <addaction name="separator"/>
     <addaction name="actionLogin"/>
     <addaction name="actionExit"/>
@@ -279,6 +280,14 @@
   <action name="actionUpdateDatabase">
    <property name="text">
     <string>Update Database</string>
+   </property>
+  </action>
+  <action name="actionShowDicomTags">
+   <property name="text">
+    <string>Show Dicom Tags</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
    </property>
   </action>
  </widget>

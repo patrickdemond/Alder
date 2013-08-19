@@ -8,22 +8,23 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "QMainAlderWindow.h"
-#include "ui_QMainAlderWindow.h"
+#include <QMainAlderWindow.h>
+#include <ui_QMainAlderWindow.h>
 
-#include "Application.h"
-#include "Interview.h"
-#include "User.h"
+#include <Application.h>
+#include <Interview.h>
+#include <User.h>
 
-#include "vtkEventQtSlotConnect.h"
-#include "vtkMedicalImageViewer.h"
-#include "vtkNew.h"
+#include <vtkEventQtSlotConnect.h>
+#include <vtkMedicalImageViewer.h>
+#include <vtkNew.h>
 
-#include "QAboutDialog.h"
-#include "QLoginDialog.h"
-#include "QProgressDialog.h"
-#include "QSelectInterviewDialog.h"
-#include "QUserListDialog.h"
+#include <QAboutDialog.h>
+#include <QAlderDicomTagWidget.h>
+#include <QLoginDialog.h>
+#include <QProgressDialog.h>
+#include <QSelectInterviewDialog.h>
+#include <QUserListDialog.h>
 
 #include <QCloseEvent>
 #include <QInputDialog>
@@ -46,6 +47,9 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   QObject::connect(
     this->ui->actionShowAtlas, SIGNAL( triggered() ),
     this, SLOT( slotShowAtlas() ) );
+  QObject::connect(
+    this->ui->actionShowDicomTags, SIGNAL( triggered() ),
+    this, SLOT( slotShowDicomTags() ) );
   QObject::connect(
     this->ui->actionLogin, SIGNAL( triggered() ),
     this, SLOT( slotLogin() ) );
@@ -84,6 +88,11 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   // toggle visibility of the atlas widget
   this->atlasVisible = true;
   this->slotShowAtlas();
+  this->DicomTagWidget = new QAlderDicomTagWidget( this );
+  this->dicomTagsVisible = false;
+  this->DicomTagWidget->hide();
+
+  this->updateInterface();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -178,6 +187,27 @@ void QMainAlderWindow::slotShowAtlas()
     this->ui->atlasWidget->setParent( this );
 
     Alder::Application::GetInstance()->SetActiveAtlasImage( NULL );
+  }
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotShowDicomTags()
+{
+  //if( this->atlasVisible )  this->slotShowAtlas();
+  this->dicomTagsVisible = !this->dicomTagsVisible;
+
+  this->ui->actionShowDicomTags->setText( 
+    tr( this->dicomTagsVisible ? "Hide Dicom Tags" : "Show Dicom Tags" ) );
+
+  if( this->dicomTagsVisible )
+  {
+    this->ui->splitter->insertWidget( 0, qobject_cast<QWidget*>(this->DicomTagWidget));
+    this->DicomTagWidget->show();
+  }
+  else
+  {
+    this->DicomTagWidget->hide();
+    this->DicomTagWidget->setParent( this );
   }
 }
 
@@ -308,4 +338,7 @@ void QMainAlderWindow::updateInterface()
   this->ui->interviewWidget->updateEnabled();
   this->ui->atlasWidget->setEnabled( loggedIn );
   this->ui->atlasWidget->updateEnabled();
+
+  this->ui->actionShowDicomTags->setEnabled( loggedIn );
+  this->DicomTagWidget->setEnabled( loggedIn );
 }

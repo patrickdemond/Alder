@@ -18,6 +18,7 @@
 
 class vtkEventQtSlotConnect;
 class Ui_QMainAlderWindow;
+class QAlderDicomTagWidget;
 
 class QMainAlderWindow : public QMainWindow
 {
@@ -31,6 +32,7 @@ public slots:
   // action event functions
   virtual void slotOpenInterview();
   virtual void slotShowAtlas();
+  virtual void slotShowDicomTags();
   virtual void slotLogin();
   virtual void slotUserManagement();
   virtual void slotUpdateDatabase();
@@ -49,13 +51,13 @@ protected:
   
   virtual void updateInterface();
 
-protected slots:
-
 private:
   // Designer form
   Ui_QMainAlderWindow *ui;
 
   bool atlasVisible;
+  bool dicomTagsVisible;
+  QAlderDicomTagWidget* DicomTagWidget;
 
   vtkSmartPointer<vtkEventQtSlotConnect> Connections;
 };
