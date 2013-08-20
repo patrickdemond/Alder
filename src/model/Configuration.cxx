@@ -45,8 +45,7 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   std::string Configuration::GetValue( const std::string category, const std::string key ) const
   {
-    std::map< std::string, std::map< std::string, std::string > >::const_iterator categoryIt;
-    categoryIt = this->Settings.find( category );
+    auto categoryIt = this->Settings.find( category );
 
     return categoryIt != this->Settings.cend() &&
            categoryIt->second.find( key ) != categoryIt->second.cend() ?

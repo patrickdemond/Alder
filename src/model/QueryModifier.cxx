@@ -90,10 +90,9 @@ namespace Alder
     bool firstItem = true, lastOpenBracket = false;
     std::string statement;
     std::stringstream stream;
-    std::vector<WhereParameter>::const_iterator it;
 
     // loop through each where parameter
-    for( it = this->WhereList.cbegin(); it != this->WhereList.cend(); ++it )
+    for( auto it = this->WhereList.cbegin(); it != this->WhereList.cend(); ++it )
     {
       if( QueryModifier::NONE != it->bracket )
       {
@@ -149,9 +148,8 @@ namespace Alder
   {
     std::stringstream sql;
     bool first = true;
-    std::vector<std::string>::const_iterator it;
 
-    for( it = this->GroupList.cbegin(); it != this->GroupList.cend(); ++it )
+    for( auto it = this->GroupList.cbegin(); it != this->GroupList.cend(); ++it )
     {
       sql << ( first ? "GROUP BY " : ", " ) << *it;
       if( first ) first = false;
@@ -165,9 +163,8 @@ namespace Alder
   {
     std::stringstream sql;
     bool first = true;
-    std::map<std::string,bool>::const_iterator it;
 
-    for( it = this->OrderList.cbegin(); it != this->OrderList.cend(); ++it )
+    for( auto it = this->OrderList.cbegin(); it != this->OrderList.cend(); ++it )
     {
       sql << ( first ? "ORDER BY " : ", " ) << it->first << " " << ( it->second ? "DESC" : "" );
       if( first ) first = false;

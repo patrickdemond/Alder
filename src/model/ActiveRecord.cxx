@@ -34,7 +34,7 @@ namespace Alder
     // make sure the record is initialized
     if( !this->Initialized ) this->Initialize();
 
-    std::map< std::string, vtkVariant >::const_iterator pair = this->ColumnValues.find( column );
+    auto pair = this->ColumnValues.find( column );
     return this->ColumnValues.cend() != pair;
   }
 
@@ -45,12 +45,11 @@ namespace Alder
 
     Database *db = Application::GetInstance()->GetDB();
     std::vector<std::string> columns = db->GetColumnNames( this->GetName() );
-    std::vector<std::string>::const_iterator it;
 
     // When first creating an active record we want the ColumnValues ivar to have an empty
     // value for every column in the active record's table.  We use mysql's information_schema
     // database for this purpose.  This is all implemented by the Database model
-    for( it = columns.cbegin(); it != columns.cend(); ++it )
+    for( auto it = columns.cbegin(); it != columns.cend(); ++it )
     {
       const std::string column = *it;
       vtkVariant columnDefault = db->GetColumnDefault( this->GetName(), column );
@@ -82,8 +81,7 @@ namespace Alder
     // create an sql statement using the provided map
     std::stringstream stream;
     stream << "SELECT * FROM " << this->GetName();
-    std::map< std::string, std::string >::const_iterator it;
-    for( it = map.cbegin(); it != map.cend(); ++it )
+    for( auto it = map.cbegin(); it != map.cend(); ++it )
       stream << ( map.cbegin() == it ? " WHERE " : " AND " )
              << it->first << " = " << query->EscapeString( it->second );
     
@@ -120,11 +118,10 @@ namespace Alder
   void ActiveRecord::Save( const bool replace )
   {
     vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
-    std::map< std::string, vtkVariant >::const_iterator it;
     std::stringstream stream;
 
     bool first = true;
-    for( it = this->ColumnValues.cbegin(); it != this->ColumnValues.cend(); ++it )
+    for( auto it = this->ColumnValues.cbegin(); it != this->ColumnValues.cend(); ++it )
     {
       if( "Id" != it->first )
       {
@@ -247,8 +244,7 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string, vtkVariant >::const_iterator pair = this->ColumnValues.find( column );
-    return pair->second;
+    return this->ColumnValues.find( column )->second;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -262,8 +258,7 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string, vtkVariant >::iterator pair = this->ColumnValues.find( column );
-    pair->second = value;
+    this->ColumnValues.find( column )->second = value;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -294,8 +289,7 @@ namespace Alder
 
     os << indent << "Initialized: " << ( this->Initialized ? "Yes" : "No" ) << endl;
     os << indent << "Column Values:" << endl;
-    std::map< std::string, vtkVariant >::const_iterator it;
-    for( it = this->ColumnValues.cbegin(); it != this->ColumnValues.cend(); ++it )
+    for( auto it = this->ColumnValues.cbegin(); it != this->ColumnValues.cend(); ++it )
     {
       os << indent.GetNextIndent() << it->first << ": " << it->second
          << ( it->second.IsValid() ? it->second.ToString() : "NULL" ) << endl;

@@ -55,11 +55,10 @@ QUserListDialog::QUserListDialog( QWidget* parent )
 
   // list all modalities (to see if user rates them)
   std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
-  std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityListIt;
   Alder::Modality::GetAll( &modalityList );
 
   this->ui->userTableWidget->setColumnCount( index + modalityList.size() );
-  for( modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
+  for( auto modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
   {
     std::string name = (*modalityListIt)->Get( "Name" ).ToString();
     labels << name.c_str();
@@ -230,9 +229,8 @@ void QUserListDialog::slotItemChanged( QTableWidgetItem *item )
   else
   {
     std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
-    std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityListIt;
     Alder::Modality::GetAll( &modalityList );
-    for( modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
+    for( auto modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
     {
       std::string name = (*modalityListIt)->Get( "Name" ).ToString();
       if( this->columnIndex[name] == item->column() )
@@ -257,8 +255,7 @@ void QUserListDialog::updateInterface()
 
   std::vector< vtkSmartPointer< Alder::User > > userList;
   Alder::User::GetAll( &userList );
-  std::vector< vtkSmartPointer< Alder::User > >::iterator it;
-  for( it = userList.begin(); it != userList.end(); ++it )
+  for( auto it = userList.begin(); it != userList.end(); ++it )
   { // for every user, add a new row
     Alder::User *user = (*it);
     this->ui->userTableWidget->insertRow( 0 );
@@ -283,9 +280,8 @@ void QUserListDialog::updateInterface()
 
     // add all modalities (one per column)
     std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
-    std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityListIt;
     Alder::Modality::GetAll( &modalityList );
-    for( modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
+    for( auto modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
     {
       std::string name = (*modalityListIt)->Get( "Name" ).ToString();
       item = new QTableWidgetItem;

@@ -426,15 +426,8 @@ void vtkMedicalImageViewer::UnInstallPipeline()
   this->UnInstallAnnotation();
 
   if( this->InteractorStyle && !this->WindowLevelCallbackTags.empty() )
-  {
-    std::vector<unsigned long>::iterator it;
- 
-    for( it = this->WindowLevelCallbackTags.begin();
-         it != this->WindowLevelCallbackTags.end(); it++ )
-    {     
+    for( auto it = this->WindowLevelCallbackTags.begin(); it != this->WindowLevelCallbackTags.end(); it++ )
       this->InteractorStyle->RemoveObserver( ( *it ) );
-    }  
-  }
 
   if( this->RenderWindow && this->Renderer )
     this->RenderWindow->RemoveRenderer( this->Renderer );

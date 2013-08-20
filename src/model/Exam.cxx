@@ -102,14 +102,13 @@ namespace Alder
           // get the list of cIMT images in this exam
 
           std::vector< vtkSmartPointer< Alder::Image > > imageList;
-          std::vector< vtkSmartPointer< Alder::Image > >::const_iterator imageIt;
           this->GetList( &imageList );
           if( imageList.empty() ) throw std::runtime_error( "Failed list load during cIMT parenting" );
 
           // map the AcquisitionDateTimes from the dicom file headers to the images
 
           std::map< int, std::string > acqDateTimes;
-          for( imageIt = imageList.cbegin(); imageIt != imageList.cend(); ++imageIt )
+          for( auto imageIt = imageList.cbegin(); imageIt != imageList.cend(); ++imageIt )
           {
             Alder::Image *image = imageIt->GetPointer();
             acqDateTimes[ image->Get( "Id" ).ToInt() ] = image->GetDICOMTag( "AcquisitionDateTime" );
@@ -125,9 +124,8 @@ namespace Alder
           // in case of no matching datetime associate the still with
           // the group of cineloops
 
-          std::map< int, std::string >::const_iterator mapIt;
           int parentId = -1;
-          for( mapIt = acqDateTimes.cbegin(); mapIt != acqDateTimes.cend(); mapIt++ )
+          for( auto mapIt = acqDateTimes.cbegin(); mapIt != acqDateTimes.cend(); mapIt++ )
           {
           
             if( mapIt->first == stillId ) continue;
@@ -233,7 +231,6 @@ namespace Alder
     if( repeatable )
     {
       std::vector< std::string > sideList;
-      std::vector< std::string >::const_iterator sideListIt;
       sideList = opal->GetValues( "clsa-dcs-images", type, UId, sideVariable );
      
       int numSides = sideList.empty() ? 0 : sideList.size();
@@ -268,7 +265,7 @@ namespace Alder
       bool found = false;
       std::string laterality = this->Get( "Laterality" ).ToString();
 
-      for( sideListIt = sideList.cbegin(); sideListIt != sideList.cend(); ++sideListIt )
+      for( auto sideListIt = sideList.cbegin(); sideListIt != sideList.cend(); ++sideListIt )
       {
         if( laterality == Utilities::toLower( *sideListIt ) )
         {
@@ -287,8 +284,7 @@ namespace Alder
 
     // add a new entry in the image table (or replace it)
     vtkNew< Alder::Image > image;
-    std::map< std::string, vtkVariant >::const_iterator it = settings.cbegin();
-    for( it = settings.cbegin(); it != settings.cend(); it++ ) image->Set( it->first, it->second );
+    for( auto it = settings.cbegin(); it != settings.cend(); it++ ) image->Set( it->first, it->second );
     image->Save( true );
 
     // now write the file and validate it
@@ -316,9 +312,8 @@ namespace Alder
 
     // loop through all images
     std::vector< vtkSmartPointer< Image > > imageList;
-    std::vector< vtkSmartPointer< Image > >::const_iterator imageIt;
     this->GetList( &imageList );
-    for( imageIt = imageList.cbegin(); imageIt != imageList.cend(); ++imageIt )
+    for( auto imageIt = imageList.cbegin(); imageIt != imageList.cend(); ++imageIt )
     {
       Image *image = *(imageIt);
       if( !image->IsRatedBy( user ) ) return false;

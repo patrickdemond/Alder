@@ -130,8 +130,7 @@ namespace Alder
     ModelObject* Create( const std::string className ) const
     {
       // make sure the constructor registry has the class name being asked for
-      std::map< std::string, ModelObject*(*)() >::const_iterator pair;
-      pair = this->ConstructorRegistry.find( className );
+      auto pair = this->ConstructorRegistry.find( className );
       if( pair == this->ConstructorRegistry.end() )
       {
         std::stringstream stream;

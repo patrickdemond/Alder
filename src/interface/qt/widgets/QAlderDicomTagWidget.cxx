@@ -141,19 +141,17 @@ void QAlderDicomTagWidgetPrivate::updateUi()
     {
       this->tableWidget->setRowCount( this->dicomStrings.size() );
       int row = 0;
-      std::vector< std::vector< std::string > >::const_iterator it;
-      for( it = this->dicomStrings.begin(); it != this->dicomStrings.end(); ++it )
+      for( auto it = this->dicomStrings.begin(); it != this->dicomStrings.end(); ++it )
       {
-        std::vector< std::string >::const_iterator vit;
         std::stringstream tag;        
         int i = 0;
         int col = 0;
-        for( vit = (*it).begin(); vit != (*it).end(); ++vit )
+        for( auto vIt = (*it).begin(); vIt != (*it).end(); ++vIt )
         {
-          if(i==0) tag << "(" << *vit << ",";
+          if(i==0) tag << "(" << *vIt << ",";
           else if(i==1) 
           {
-            tag << *vit << ")";
+            tag << *vIt << ")";
             QTableWidgetItem* item = new QTableWidgetItem();
             item->setText( tag.str().c_str() );
             this->tableWidget->setItem( row, col++, item );   
@@ -161,7 +159,7 @@ void QAlderDicomTagWidgetPrivate::updateUi()
           else
           { 
             QTableWidgetItem* item = new QTableWidgetItem();
-            item->setText( (*vit).c_str() );
+            item->setText( (*vIt).c_str() );
             this->tableWidget->setItem( row, col++, item );   
           }
           i++;
@@ -212,8 +210,7 @@ void QAlderDicomTagWidgetPrivate::dumpElements(
   const gdcm::Global& g = gdcm::GlobalInstance;
   const gdcm::Dicts &dicts = g.GetDicts();
 
-  std::vector< std::pair< std::string, gdcm::DataElement > >::const_iterator it;
-  for( it = elemMap.begin(); it != elemMap.end(); ++it )
+  for( auto it = elemMap.begin(); it != elemMap.end(); ++it )
   {
     gdcm::DataElement de = it->second;
     gdcm::Tag t = de.GetTag();
@@ -241,10 +238,9 @@ void QAlderDicomTagWidgetPrivate::dumpElements(
 
       if( sqi )
       {
-        for( gdcm::SequenceOfItems::ItemVector::const_iterator sit = sqi->Items.begin();
-          sit != sqi->Items.end(); ++sit )
+        for( auto sIt = sqi->Items.begin(); sIt != sqi->Items.end(); ++sIt )
         {
-          const gdcm::Item& item = *sit;
+          const gdcm::Item& item = *sIt;
 
           const gdcm::DataSet& nds = item.GetNestedDataSet();
 

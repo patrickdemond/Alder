@@ -356,8 +356,7 @@ namespace Alder
      */
     template <class T> void Set( const std::map< std::string, T > map )
     {
-      typename std::map< std::string, T >::const_iterator it;
-      for( it = map.cbegin(); it != map.cend(); ++it )
+      for( auto it = map.cbegin(); it != map.cend(); ++it )
         this->SetVariant( it->first, vtkVariant( it->second ) );
     }
     template <class T> void Set( const std::string column, const T value )
@@ -391,7 +390,7 @@ namespace Alder
      */
     inline void AssertPrimaryId() const
     {
-      std::map< std::string, vtkVariant >::const_iterator pair = this->ColumnValues.find( "Id" );
+      auto pair = this->ColumnValues.find( "Id" );
       if( this->ColumnValues.end() == pair )
         throw std::runtime_error( "Assert failed: primary id column name is not Id" );
 

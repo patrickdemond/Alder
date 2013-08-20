@@ -48,12 +48,11 @@ QSelectInterviewDialog::QSelectInterviewDialog( QWidget* parent )
 
   // all modalities will fill up the remainder of the table
   std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
-  std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityListIt;
   Alder::Modality::GetAll( &modalityList );
 
   // make enough columns for all modalities and set their names
   this->ui->interviewTableWidget->setColumnCount( index + modalityList.size() );
-  for( modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
+  for( auto modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
   {
     std::string name = (*modalityListIt)->Get( "Name" ).ToString();
     labels << name.c_str();
@@ -177,7 +176,6 @@ void QSelectInterviewDialog::slotHeaderClicked( int index )
 void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
 {
   std::vector< vtkSmartPointer< Alder::Exam > > examList;
-  std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
   Alder::Exam *exam;
   Alder::User *user = Alder::Application::GetInstance()->GetActiveUser();
   QString UId = QString( interview->Get( "UId" ).ToString().c_str() );
@@ -188,10 +186,9 @@ void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
   std::map< std::string, QString > itemText;
   std::string modalityName;
   std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
-  std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityListIt;
 
   Alder::Modality::GetAll( &modalityList );
-  for( modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
+  for( auto modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
   {
     modalityName = (*modalityListIt)->Get( "Name" ).ToString();
     updateItemText[modalityName] = false;
@@ -204,7 +201,7 @@ void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
   interview->GetList( &examList );
 
   // examCount the number of exams of each modality and whether they have been rated
-  for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
+  for( auto examIt = examList.begin(); examIt != examList.end(); ++examIt )
   {
     exam = examIt->GetPointer();
     vtkSmartPointer< Alder::Modality > modality;
@@ -219,8 +216,7 @@ void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
   }
 
   // set the text, if updated
-  std::map< std::string, bool >::iterator updateItemTextIt;
-  for( updateItemTextIt = updateItemText.begin();
+  for( auto updateItemTextIt = updateItemText.begin();
        updateItemTextIt != updateItemText.end();
        ++updateItemTextIt )
   {
@@ -244,8 +240,7 @@ void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
     if( item ) item->setText( QString( interview->Get( "VisitDate" ).ToString().c_str() ) );
 
     // add all modalities to the table
-    std::map< std::string, QString >::iterator itemTextIt;
-    for( itemTextIt = itemText.begin(); itemTextIt != itemText.end(); ++itemTextIt )
+    for( auto itemTextIt = itemText.begin(); itemTextIt != itemText.end(); ++itemTextIt )
     {
       item = this->ui->interviewTableWidget->item( row, this->columnIndex[itemTextIt->first] );
       if( item ) item->setText( itemTextIt->second );
@@ -270,8 +265,7 @@ void QSelectInterviewDialog::updateInterface()
     // now get all the interviews given the search text
     std::vector< vtkSmartPointer< Alder::Interview > > interviewList;
     Alder::Interview::GetAll( &interviewList, modifier );
-    std::vector< vtkSmartPointer< Alder::Interview > >::iterator it;
-    for( it = interviewList.begin(); it != interviewList.end(); ++it )
+    for( auto it = interviewList.begin(); it != interviewList.end(); ++it )
     { // for every interview, add a new row
       Alder::Interview *interview = *it;
       QString UId = QString( interview->Get( "UId" ).ToString().c_str() );
@@ -297,10 +291,10 @@ void QSelectInterviewDialog::updateInterface()
 
         // add all modalities (one per column)
         std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
-        std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityListIt;
         Alder::Modality::GetAll( &modalityList );
-        for( modalityListIt = modalityList.begin();
-             modalityListIt != modalityList.end(); ++modalityListIt )
+        for( auto modalityListIt = modalityList.begin();
+             modalityListIt != modalityList.end();
+             ++modalityListIt )
         {
           item = new QTableWidgetItem;
           item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );

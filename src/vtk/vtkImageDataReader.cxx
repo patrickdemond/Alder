@@ -494,8 +494,7 @@ vtkImageData* vtkImageDataReader::GetOutput()
     dicomMap["CineRate"] = gdcm::Tag( 0x0018, 0x0040 );
     dicomMap["RecommendedDisplayFrameRate"] = gdcm::Tag( 0x0008, 0x2114 );
     
-    std::map< std::string, gdcm::Tag >::const_iterator it;
-    for( it = dicomMap.cbegin(); it != dicomMap.cend(); ++it )
+    for( auto it = dicomMap.cbegin(); it != dicomMap.cend(); ++it )
     {
       if( ds.FindDataElement( it->second ) )
       {

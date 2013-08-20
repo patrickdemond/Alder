@@ -112,8 +112,7 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   std::vector<std::string> Database::GetColumnNames( const std::string table ) const
   {
-    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::const_iterator tablePair;
-    tablePair = this->Columns.find( table );
+    auto tablePair = this->Columns.find( table );
     if( this->Columns.cend() == tablePair )
     {
       std::stringstream error;
@@ -123,8 +122,7 @@ namespace Alder
 
     std::map< std::string,std::map< std::string, vtkVariant > > tableMap = tablePair->second;
     std::vector<std::string> columns;
-    std::map< std::string,std::map< std::string, vtkVariant > >::const_iterator it;
-    for( it = tableMap.cbegin(); it != tableMap.cend(); ++it ) columns.push_back( it->first );
+    for( auto it = tableMap.cbegin(); it != tableMap.cend(); ++it ) columns.push_back( it->first );
 
     return columns;
   }
@@ -132,16 +130,13 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool Database::TableExists( const std::string table ) const
   {
-    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::const_iterator
-      tablePair = this->Columns.find( table );
-    return this->Columns.cend() != tablePair;
+    return this->Columns.cend() != this->Columns.find( table );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool Database::ColumnExists( const std::string table, const std::string column ) const
   {
-    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::const_iterator
-      tablePair = this->Columns.find( table );
+    auto tablePair = this->Columns.find( table );
     if( this->Columns.cend() == tablePair )
     {
       std::stringstream error;
@@ -149,16 +144,13 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string,std::map< std::string, vtkVariant > >::const_iterator
-      columnPair = tablePair->second.find( column );
-    return tablePair->second.cend() != columnPair;
+    return tablePair->second.cend() != tablePair->second.find( column );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   vtkVariant Database::GetColumnDefault( const std::string table, const std::string column ) const
   {
-    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::const_iterator
-      tablePair = this->Columns.find( table );
+    auto tablePair = this->Columns.find( table );
     if( this->Columns.cend() == tablePair )
     {
       std::stringstream error;
@@ -166,8 +158,7 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string,std::map< std::string, vtkVariant > >::const_iterator
-      columnPair = tablePair->second.find( column );
+    auto columnPair = tablePair->second.find( column );
     if( tablePair->second.cend() == columnPair )
     {
       std::stringstream error;
@@ -183,8 +174,7 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool Database::IsColumnNullable( const std::string table, const std::string column ) const
   {
-    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::const_iterator
-      tablePair = this->Columns.find( table );
+    auto tablePair = this->Columns.find( table );
     if( this->Columns.cend() == tablePair )
     {
       std::stringstream error;
@@ -192,8 +182,7 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string,std::map< std::string, vtkVariant > >::const_iterator
-      columnPair = tablePair->second.find( column );
+    auto columnPair = tablePair->second.find( column );
     if( tablePair->second.cend() == columnPair )
     {
       std::stringstream error;
@@ -209,8 +198,7 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool Database::IsColumnForeignKey( const std::string table, const std::string column ) const
   {
-    std::map< std::string,std::map< std::string,std::map< std::string, vtkVariant > > >::const_iterator
-      tablePair = this->Columns.find( table );
+    auto tablePair = this->Columns.find( table );
     if( this->Columns.cend() == tablePair )
     {
       std::stringstream error;
@@ -218,8 +206,7 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    std::map< std::string,std::map< std::string, vtkVariant > >::const_iterator
-      columnPair = tablePair->second.find( column );
+    auto columnPair = tablePair->second.find( column );
     if( tablePair->second.cend() == columnPair )
     {
       std::stringstream error;

@@ -138,8 +138,7 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   std::string Application::GetUnmangledClassName( const std::string mangledName ) const
   {
-    std::map< std::string, std::string >::const_iterator it;
-    for( it = this->ClassNameRegistry.begin(); it != this->ClassNameRegistry.end(); ++it )
+    for( auto it = this->ClassNameRegistry.begin(); it != this->ClassNameRegistry.end(); ++it )
       if( it->second == mangledName ) return it->first;
     
     throw std::runtime_error( "Tried to unmangle class name which isn't registered." );

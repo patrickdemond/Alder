@@ -207,8 +207,7 @@ void QAlderInterviewWidget::slotTreeSelectionChanged()
   QList<QTreeWidgetItem*> list = this->ui->examTreeWidget->selectedItems();
   if( 0 < list.size() )
   {
-    std::map< QTreeWidgetItem*, vtkSmartPointer<Alder::ActiveRecord> >::iterator it;
-    it = this->treeModelMap.find( list.at( 0 ) );
+    auto it = this->treeModelMap.find( list.at( 0 ) );
     if( it != this->treeModelMap.end() )
     {
       Alder::ActiveRecord *record = it->second;
@@ -349,7 +348,6 @@ void QAlderInterviewWidget::updateExamTreeWidget()
     Alder::Image *activeImage = app->GetActiveImage();
     QTreeWidgetItem *selectedItem = NULL, *item = NULL;
     std::map< std::string, QTreeWidgetItem* > modalityLookup;
-    std::map< std::string, QTreeWidgetItem* >::iterator modalityLookupIt;
 
     // make root the interview's UID and date
     QString name = tr( "Interview: " );
@@ -365,9 +363,8 @@ void QAlderInterviewWidget::updateExamTreeWidget()
 
     // make each modality type a child of the root
     std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
-    std::vector< vtkSmartPointer< Alder::Modality > >::iterator modalityIt;
     user->GetList( &modalityList );
-    for( modalityIt = modalityList.begin(); modalityIt != modalityList.end(); ++modalityIt )
+    for( auto modalityIt = modalityList.begin(); modalityIt != modalityList.end(); ++modalityIt )
     {
       Alder::Modality *modality = modalityIt->GetPointer();
       std::string name = modality->Get( "Name" ).ToString();
@@ -379,16 +376,15 @@ void QAlderInterviewWidget::updateExamTreeWidget()
     }
     
     std::vector< vtkSmartPointer< Alder::Exam > > examList;
-    std::vector< vtkSmartPointer< Alder::Exam > >::iterator examIt;
     interview->GetList( &examList );
-    for( examIt = examList.begin(); examIt != examList.end(); ++examIt )
+    for( auto examIt = examList.begin(); examIt != examList.end(); ++examIt )
     {
       Alder::Exam *exam = examIt->GetPointer();
 
       // figure out which parent to add this exam to based on modality
       vtkSmartPointer< Alder::Modality > modality;
       exam->GetRecord( modality );
-      modalityLookupIt = modalityLookup.find( modality->Get( "Name" ).ToString() );
+      auto modalityLookupIt = modalityLookup.find( modality->Get( "Name" ).ToString() );
       if( modalityLookup.end() == modalityLookupIt ) continue;
       QTreeWidgetItem *parentItem = modalityLookupIt->second;
 
@@ -411,7 +407,6 @@ void QAlderInterviewWidget::updateExamTreeWidget()
 
       // add the images for this exam
       std::vector< vtkSmartPointer< Alder::Image > > imageList;
-      std::vector< vtkSmartPointer< Alder::Image > >::iterator imageIt;
       exam->GetList( &imageList );
 
       // display the status of the exam
@@ -420,7 +415,7 @@ void QAlderInterviewWidget::updateExamTreeWidget()
         QIcon(":/icons/x-icon" ) : 
         QIcon(":/icons/eye-visible-icon" ) );
 
-      for( imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
+      for( auto imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
       {
         Alder::Image *image = imageIt->GetPointer();
         
@@ -447,10 +442,10 @@ void QAlderInterviewWidget::updateExamTreeWidget()
 
           // add child images for this image
           std::vector< vtkSmartPointer< Alder::Image > > childImageList;
-          std::vector< vtkSmartPointer< Alder::Image > >::iterator childImageIt;
           image->GetList( &childImageList, "ParentImageId" );
-          for( childImageIt = childImageList.begin();
-               childImageIt != childImageList.end(); ++childImageIt )
+          for( auto childImageIt = childImageList.begin();
+               childImageIt != childImageList.end();
+               ++childImageIt )
           {
             Alder::Image *childImage = childImageIt->GetPointer();
             name = tr( "Image #" );
