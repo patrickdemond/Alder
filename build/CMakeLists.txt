@@ -4,7 +4,7 @@ PROJECT( Alder )
 # The major version number is incremented after major milestones are met
 SET( ALDER_VERSION_MAJOR 1 )
 # The minor version number is incremented after a development branch is merged to qa
-SET( ALDER_VERSION_MINOR 0 )
+SET( ALDER_VERSION_MINOR 1 )
 # The patch version number is incremented when changes are made to the release branch
 SET( ALDER_VERSION_PATCH 0 )
 
@@ -49,12 +49,12 @@ ENDIF( UNIX AND NOT APPLE )
 
 SET( ALDER_ROOT_DIR         ${PROJECT_SOURCE_DIR}/.. )
 SET( ALDER_AUX_DIR          ${ALDER_ROOT_DIR}/aux )
-SET( ALDER_API_DIR          ${ALDER_ROOT_DIR}/api )
-SET( ALDER_MODEL_DIR        ${ALDER_API_DIR}/model )
-SET( ALDER_QT_DIR           ${ALDER_API_DIR}/interface/qt )
+SET( ALDER_SRC_DIR          ${ALDER_ROOT_DIR}/src )
+SET( ALDER_MODEL_DIR        ${ALDER_SRC_DIR}/model )
+SET( ALDER_QT_DIR           ${ALDER_SRC_DIR}/interface/qt )
 SET( ALDER_QT_WIDGETS_DIR   ${ALDER_QT_DIR}/widgets )
 SET( ALDER_QT_RESOURCES_DIR ${ALDER_QT_WIDGETS_DIR}/resources )
-SET( ALDER_VTK_DIR          ${ALDER_API_DIR}/vtk )
+SET( ALDER_VTK_DIR          ${ALDER_SRC_DIR}/vtk )
 SET( ALDER_CONFIG_FILE      ${PROJECT_BINARY_DIR}/config.xml )
 SET( ALDER_DOC_DIR          ${ALDER_ROOT_DIR}/doc )
 SET( ALDER_DOXY_DIR         ${PROJECT_BINARY_DIR}/doxygen )
@@ -70,8 +70,12 @@ SET( ALDER_LOG_PATH ${PROJECT_BINARY_DIR}/log CACHE FILEPATH "The location of th
 SET( ALDER_STACK_DEPTH "10" CACHE STRING "The stack depth to display on thrown exceptions" )
 
 # Configure the utitlities header
-CONFIGURE_FILE( ${ALDER_API_DIR}/Utilities.h.in
+CONFIGURE_FILE( ${ALDER_SRC_DIR}/Utilities.h.in
                 ${PROJECT_BINARY_DIR}/Utilities.h @ONLY IMMEDIATE )
+
+# Configure the desktop file
+CONFIGURE_FILE( ${ALDER_AUX_DIR}/alder.desktop.in
+                ${PROJECT_BINARY_DIR}/alder.desktop @ONLY IMMEDIATE )
 
 # Copy the readme file to build
 CONFIGURE_FILE( ${ALDER_ROOT_DIR}/readme
@@ -92,7 +96,7 @@ SET( ALDER_INCLUDE_DIR
 )
 
 SET( ALDER_SOURCE
-  ${ALDER_API_DIR}/Alder.cxx
+  ${ALDER_SRC_DIR}/Alder.cxx
 
   ${ALDER_MODEL_DIR}/ActiveRecord.cxx
   ${ALDER_MODEL_DIR}/Application.cxx
@@ -130,6 +134,7 @@ SET( ALDER_SOURCE
   ${ALDER_QT_DIR}/QUserListDialog.cxx
 
   ${ALDER_QT_WIDGETS_DIR}/QAlderAtlasWidget.cxx
+  ${ALDER_QT_WIDGETS_DIR}/QAlderDicomTagWidget.cxx
   ${ALDER_QT_WIDGETS_DIR}/QAlderDoubleSlider.cxx
   ${ALDER_QT_WIDGETS_DIR}/QAlderFramePlayerWidget.cxx
   ${ALDER_QT_WIDGETS_DIR}/QAlderInterviewWidget.cxx
@@ -153,6 +158,7 @@ SET( ALDER_UIS
   ${ALDER_QT_DIR}/QUserListDialog.ui
 
   ${ALDER_QT_WIDGETS_DIR}/QAlderAtlasWidget.ui
+  ${ALDER_QT_WIDGETS_DIR}/QAlderDicomTagWidget.ui
   ${ALDER_QT_WIDGETS_DIR}/QAlderFramePlayerWidget.ui
   ${ALDER_QT_WIDGETS_DIR}/QAlderInterviewWidget.ui
   ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.ui
@@ -167,6 +173,7 @@ SET( ALDER_HEADERS
   ${ALDER_QT_DIR}/QUserListDialog.h
 
   ${ALDER_QT_WIDGETS_DIR}/QAlderAtlasWidget.h
+  ${ALDER_QT_WIDGETS_DIR}/QAlderDicomTagWidget.h
   ${ALDER_QT_WIDGETS_DIR}/QAlderDoubleSlider.h
   ${ALDER_QT_WIDGETS_DIR}/QAlderFramePlayerWidget.h
   ${ALDER_QT_WIDGETS_DIR}/QAlderInterviewWidget.h
@@ -202,6 +209,9 @@ INCLUDE_DIRECTORIES(
 # We're using cbegin and cend so we need c++11
 SET( CMAKE_CXX_FLAGS "-std=c++0x -Wno-deprecated " )
 
+# Make sure to include RPATH in the installed binary to support linking to libraries
+SET( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
+
 # Targets
 ADD_EXECUTABLE( alder ${ALDER_SOURCE} ${ALDER_UISrcs} ${MOCSrcs} ${QRCSrcs})
 
@@ -214,6 +224,7 @@ TARGET_LINK_LIBRARIES( alder
   vtkgdcm
   gdcmDSED
   gdcmMSFF
+  gdcmDICT
   ${QT_LIBRARIES}
   ${LIBXML2_LIBRARIES}
   ${CURL_LIBRARY}
@@ -231,9 +242,8 @@ ADD_CUSTOM_TARGET( dist
 
 # Desktop entries and icons
 IF( UNIX AND NOT APPLE )
-  INSTALL( FILES desktop/alder.desktop DESTINATION share/applications )
+  INSTALL( FILES ${PROJECT_BINARY_DIR}/alder.desktop DESTINATION share/applications )
 
-  INSTALL( FILES desktop/logo_clsa.png DESTINATION share/icons/hicolor/scalable/apps )
   FOREACH( SIZE ${ALDER_ICON_SIZES} )
     ADD_CUSTOM_COMMAND( OUTPUT logo_clsa_${SIZE}.png
       COMMAND convert -background none -resize ${SIZE} ${ALDER_AUX_DIR}/logo_clsa.png logo_clsa_${SIZE}.png
@@ -274,7 +284,7 @@ IF( BUILD_DOCUMENTATION )
     ${ALDER_DOXY_DIR}/doc_mainpage.dox )
 
   SET( DOXY_INPUT_SOURCE 
-    ${ALDER_API_DIR}
+    ${ALDER_SRC_DIR}
     ${ALDER_MODEL_DIR}
     ${ALDER_VTK_DIR}
     ${ALDER_QT_DIR}

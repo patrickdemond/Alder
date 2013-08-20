@@ -86,6 +86,7 @@ VTK uses CMake to set up the build environment the same way that Alder does:
 4. You should now have a CMakeCache.txt file (along with a bunch of other stuff).  Open it
    with your favourite editor and set the following:
 
+   BUILD_SHARED_LIBS:BOOL=ON
    CMAKE_BUILD_TYPE:STRING=Release
    VTK_USE_QT:BOOL=ON
    VTK_USE_MYSQL:BOOL=ON
@@ -104,10 +105,7 @@ VTK also uses CMake to set up the build environment.  The following option must 
 CMakeCache.txt file:
 
   GDCM_USE_VTK:BOOL=ON
-
-Make sure that the GDCM_BUILD_SHARED_LIBS parameter in GDCM's CMakeLists.txt file matches the
-BUILD_SHARED_LIBS parameter in VTK's CMakeLists.txt file, otherwise you may get linker errors
-when building Alder.
+  GDCM_BUILD_SHARED_LIBS:BOOL=ON
 
 
 Building Alder
