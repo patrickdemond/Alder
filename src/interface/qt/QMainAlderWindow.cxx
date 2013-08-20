@@ -163,6 +163,10 @@ void QMainAlderWindow::slotLogin()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotShowAtlas()
 {
+  bool lastVisible = this->atlasVisible;
+
+  if( !lastVisible && this->dicomTagsVisible ) this->slotShowDicomTags();
+
   this->atlasVisible = !this->atlasVisible;
   this->ui->actionShowAtlas->setText( tr( this->atlasVisible ? "Hide Atlas" : "Show Atlas" ) );
 
@@ -193,7 +197,8 @@ void QMainAlderWindow::slotShowAtlas()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotShowDicomTags()
 {
-  //if( this->atlasVisible )  this->slotShowAtlas();
+  if( this->atlasVisible ) return;
+
   this->dicomTagsVisible = !this->dicomTagsVisible;
 
   this->ui->actionShowDicomTags->setText( 
