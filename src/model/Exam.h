@@ -71,6 +71,7 @@ namespace Alder
       const std::string UId,
       const std::map<std::string, vtkVariant> settings,
       const std::string suffix,
+      const bool repeatable = false,
       const std::string sideVariable = "" );
 
   protected:

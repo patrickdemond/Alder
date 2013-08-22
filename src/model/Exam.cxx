@@ -75,6 +75,7 @@ namespace Alder
         std::string suffix = ".dcm.gz";
         std::string sideVariable = "Measure.SIDE";
         int acquisition = 0;
+        bool repeatable = true;
 
         for( int i = 1; i <= 3; ++i )
         {
@@ -82,7 +83,9 @@ namespace Alder
           variable += vtkVariant( i ).ToString();
           settings[ "Acquisition" ] = i;
 
-          result = this->RetrieveImage( type, variable, UId, settings, suffix, sideVariable );
+          result = this->RetrieveImage( 
+            type, variable, UId, settings, suffix, repeatable, sideVariable );
+
           if( result )
           {
             hasParent = true;
@@ -95,7 +98,8 @@ namespace Alder
         acquisition++;
         settings[ "Acquisition" ] = acquisition;
         std::string variable = "Measure.STILL_IMAGE";
-        result = this->RetrieveImage( type, variable, UId, settings, suffix, sideVariable );
+        result = this->RetrieveImage( 
+          type, variable, UId, settings, suffix, repeatable, sideVariable );
 
         if( hasParent && result )
         {
@@ -103,7 +107,8 @@ namespace Alder
 
           std::vector< vtkSmartPointer< Alder::Image > > imageList;
           this->GetList( &imageList );
-          if( imageList.empty() ) throw std::runtime_error( "Failed list load during cIMT parenting" );
+          if( imageList.empty() ) 
+            throw std::runtime_error( "Failed list load during cIMT parenting" );
 
           // map the AcquisitionDateTimes from the dicom file headers to the images
 
@@ -155,14 +160,16 @@ namespace Alder
         std::string variable = "Measure.RES_HIP_DICOM";
         std::string sideVariable = "Measure.OUTPUT_HIP_SIDE";
         std::string suffix = ".dcm";
-        this->RetrieveImage( type, variable, UId, settings, suffix, sideVariable );
+        bool repeatable = true;
+        this->RetrieveImage( type, variable, UId, settings, suffix, repeatable, sideVariable );
       }
       else if( "ForearmBoneDensity" == type )
       {
         std::string variable = "RES_FA_DICOM";
         std::string sideVariable = "OUTPUT_FA_SIDE";
         std::string suffix = ".dcm";
-        this->RetrieveImage( type, variable, UId, settings, suffix, sideVariable );
+        bool repeatable = false;
+        this->RetrieveImage( type, variable, UId, settings, suffix, repeatable, sideVariable );
       }
       else if( "LateralBoneDensity" == type )
       {
@@ -174,15 +181,17 @@ namespace Alder
       {
         std::string variable = "Measure.CINELOOP_1";
         std::string sideVariable = "Measure.SIDE";
-        std::string suffix = ".dcm.gz";
-        this->RetrieveImage( type, variable, UId, settings, suffix, sideVariable );
+        std::string suffix = ".dcm.gz";        
+        bool repeatable = true;
+        this->RetrieveImage( type, variable, UId, settings, suffix, repeatable, sideVariable );
       }
       else if( "RetinalScan" == type )
       {
         std::string variable = "Measure.EYE";
         std::string sideVariable = "Measure.SIDE";
         std::string suffix = ".jpg";
-        this->RetrieveImage( type, variable, UId, settings, suffix, sideVariable );
+        bool repeatable = true;
+        this->RetrieveImage( type, variable, UId, settings, suffix, repeatable, sideVariable );
       }
       else if( "WholeBodyBoneDensity" == type )
       {
@@ -220,19 +229,29 @@ namespace Alder
     const std::string UId,
     const std::map<std::string, vtkVariant> settings,
     const std::string suffix,
+    const bool repeatable,
     const std::string sideVariable )
   {
     Application *app = Application::GetInstance();
     OpalService *opal = app->GetOpal();
-    bool repeatable = sideVariable.length() > 0;
     bool result = true;
     int sideIndex = 0;
+    std::stringstream log;
+    std::string laterality = this->Get( "Laterality" ).ToString();
 
-    if( repeatable )
+    if( laterality != "none" )
     {
       std::vector< std::string > sideList;
-      sideList = opal->GetValues( "clsa-dcs-images", type, UId, sideVariable );
-     
+      if( repeatable )
+      {
+        sideList = opal->GetValues( "clsa-dcs-images", type, UId, sideVariable );
+      }  
+      else
+      {
+        std::string side = opal->GetValue( "clsa-dcs-images", type, UId, sideVariable );
+        if( !side.empty() ) sideList.push_back( side );
+      }
+
       int numSides = sideList.empty() ? 0 : sideList.size();
       
       if( numSides > 1 )
@@ -263,7 +282,6 @@ namespace Alder
       }  
 
       bool found = false;
-      std::string laterality = this->Get( "Laterality" ).ToString();
 
       for( auto sideListIt = sideList.cbegin(); sideListIt != sideList.cend(); ++sideListIt )
       {
@@ -278,7 +296,6 @@ namespace Alder
       if( !found ) return false;
     }
 
-    std::stringstream log;
     log << "Adding " << variable << " to database for UId \"" << UId << "\"";
     app->Log( log.str() );
 

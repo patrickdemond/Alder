@@ -320,7 +320,8 @@ namespace Alder
        modalityMap["Dexa"] = {
          {"DualHipBoneDensity","left"},
          {"DualHipBoneDensity","right"},
-         {"ForearmBoneDensity","none"},
+         {"ForearmBoneDensity","left"},
+         {"ForearmBoneDensity","right"},
          {"LateralBoneDensity","none"},
          {"WholeBodyBoneDensity","none"}
        };
