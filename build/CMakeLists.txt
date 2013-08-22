@@ -55,10 +55,21 @@ SET( ALDER_QT_DIR           ${ALDER_SRC_DIR}/interface/qt )
 SET( ALDER_QT_WIDGETS_DIR   ${ALDER_QT_DIR}/widgets )
 SET( ALDER_QT_RESOURCES_DIR ${ALDER_QT_WIDGETS_DIR}/resources )
 SET( ALDER_VTK_DIR          ${ALDER_SRC_DIR}/vtk )
-SET( ALDER_CONFIG_FILE      ${PROJECT_BINARY_DIR}/config.xml )
 SET( ALDER_DOC_DIR          ${ALDER_ROOT_DIR}/doc )
 SET( ALDER_DOXY_DIR         ${PROJECT_BINARY_DIR}/doxygen )
 SET( ALDER_TESTING_DIR      ${ALDER_ROOT_DIR}/testing )
+
+# Define the config file location, then test to see if it is in the install path when installing
+SET( ALDER_CONFIG_FILE ${PROJECT_BINARY_DIR}/config.xml CACHE PATH "The location of Alder's runtime config file" )
+
+IF( NOT ${ALDER_CONFIG_FILE} MATCHES ${CMAKE_INSTALL_PREFIX} )
+  INSTALL( CODE "MESSAGE( \"
+### WARNING ###
+The location of the config is not within the install prefix!
+In order to use the installed version of the config file (${CMAKE_INSTALL_PREFIX}/etc/config.xml)
+you must explicitly set ALDER_CONFIG_FILE to that path
+\" )" )
+ENDIF( NOT ${ALDER_CONFIG_FILE} MATCHES ${CMAKE_INSTALL_PREFIX} )
 
 # Create a salt string which can be set at build time
 SET( ALDER_SALT_STRING "this is salt" CACHE STRING "This is salt for encrypting passwords" )
@@ -230,6 +241,7 @@ TARGET_LINK_LIBRARIES( alder
   ${MYSQL_LIBRARY}
 )
 INSTALL( TARGETS alder RUNTIME DESTINATION bin )
+INSTALL( FILES ${CMAKE_BINARY_DIR}/config.xml DESTINATION etc )
 
 ADD_CUSTOM_TARGET( dist
   COMMAND git archive --prefix=${ALDER_ARCHIVE_NAME}/ HEAD
