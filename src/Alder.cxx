@@ -44,6 +44,23 @@ int main( int argc, char** argv )
       Application::DeleteInstance();
       return status;
     }
+
+    if( !app->OpenLogFile() )
+    {
+      std::string logPath = app->GetConfig()->GetValue( "Path", "Log" );
+      cerr << "ERROR: unable to open log file \"" << logPath << "\"" << endl;
+      Application::DeleteInstance();
+      return status;
+    }
+
+    if( !app->TestImageDataPath() )
+    {
+      std::string imageDataPath = app->GetConfig()->GetValue( "Path", "ImageData" );
+      cerr << "ERROR: no write access to image data directory \"" << imageDataPath << "\"" << endl;
+      Application::DeleteInstance();
+      return status;
+    }
+
     if( !app->ConnectToDatabase() )
     {
       cerr << "ERROR: error while connecting to the database" << endl;

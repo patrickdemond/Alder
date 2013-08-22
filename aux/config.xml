@@ -14,6 +14,7 @@
     <Timeout>%OPAL_TIMEOUT%</Timeout>
   </Opal>
   <Path>
+    <Log>%LOG_PATH%</Log>
     <ImageData>%IMAGEDATA_PATH%</ImageData>
   </Path>
 </Configuration>

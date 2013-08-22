@@ -20,24 +20,15 @@
 #define ALDER_VERSION_MINOR @ALDER_VERSION_MINOR@
 #define ALDER_VERSION_PATCH @ALDER_VERSION_PATCH@
 
-#define ALDER_ROOT_DIR "@ALDER_ROOT_DIR@"
-#define ALDER_AUX_DIR "@ALDER_AUX_DIR@"
-#define ALDER_API_DIR "@ALDER_API_DIR@"
-#define ALDER_APP_DIR "@ALDER_APP_DIR@"
-#define ALDER_QT_DIR "@ALDER_QT_DIR@"
-#define ALDER_VTK_DIR "@ALDER_VTK_DIR@"
 #define ALDER_CONFIG_FILE "@ALDER_CONFIG_FILE@"
-
 #define ALDER_SALT_STRING "@ALDER_SALT_STRING@"
-#define ALDER_LOG_PATH "@ALDER_LOG_PATH@"
 #define ALDER_STACK_DEPTH @ALDER_STACK_DEPTH@
+
+#include "Configuration.h"
 
 #include <algorithm>
 #include <base64.h>
 #include <cctype>
-#include <cxxabi.h>
-#include <dlfcn.h>
-#include <execinfo.h>
 #include <fstream>
 #include <json/reader.h>
 #include <sha.h>
@@ -195,37 +186,6 @@ namespace Alder
       }
       if( str.length() > 0 ) results.push_back( str );
       return results;
-    }
-
-    static void log( std::string str )
-    {
-      std::ofstream log( ALDER_LOG_PATH, std::ofstream::out | std::ofstream::app );
-      log << "[" << Utilities::getTime( "%y-%m-%d %T" ) << "] " << str << std::endl;
-      log.close();
-    }
-
-    static void log_backtrace()
-    {
-      std::ofstream log( ALDER_LOG_PATH, std::ofstream::out | std::ofstream::app );
-      
-      int status;
-      Dl_info dlinfo;
-      void *trace[ALDER_STACK_DEPTH];
-      int trace_size = backtrace( trace, ALDER_STACK_DEPTH );
-      
-      for( int i = 0; i < trace_size; ++i )
-      {  
-        if( !dladdr( trace[i], &dlinfo ) ) continue;
-
-        const char* symname = dlinfo.dli_sname;
-        char* demangled = abi::__cxa_demangle( symname, NULL, 0, &status );
-        if( 0 == status && NULL != demangled ) symname = demangled;
-        log << dlinfo.dli_fname << "::" << symname << std::endl;
-
-        if (demangled) free( demangled );
-      }  
-
-      log.close();
     }
   };
 }

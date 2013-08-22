@@ -280,7 +280,7 @@ namespace Alder
 
     std::stringstream log;
     log << "Adding " << variable << " to database for UId \"" << UId << "\"";
-    Utilities::log( log.str() );
+    app->Log( log.str() );
 
     // add a new entry in the image table (or replace it)
     vtkNew< Alder::Image > image;
@@ -295,7 +295,7 @@ namespace Alder
     {
       log.str( "" );
       log << "Removing " << variable << " from database (invalid)";
-      Utilities::log( log.str() );
+      app->Log( log.str() );
       image->Remove();
       result = false;
     }

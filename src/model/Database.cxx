@@ -57,6 +57,7 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void Database::ReadInformationSchema()
   {
+    Application *app = Application::GetInstance();
     vtkSmartPointer<vtkAlderMySQLQuery> query = this->GetQuery();
 
     std::stringstream stream; 
@@ -73,7 +74,7 @@ namespace Alder
 
     if( query->HasError() )
     {
-      Utilities::log( query->GetLastErrorText() );
+      app->Log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }
     

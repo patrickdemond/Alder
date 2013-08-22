@@ -107,7 +107,7 @@ namespace Alder
 
     urlStream << "https://" << this->Host << ":" << this->Port << "/ws" + servicePath;
     url = urlStream.str();
-    Utilities::log( "Querying Opal: " + url );
+    app->Log( "Querying Opal: " + url );
 
     curl = curl_easy_init();
     if( !curl ) 

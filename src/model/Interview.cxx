@@ -165,14 +165,14 @@ namespace Alder
     stream << "ORDER BY UId ";
     if( !forward ) stream << "DESC ";
 
-    Utilities::log( "Querying Database: " + stream.str() );
+    app->Log( "Querying Database: " + stream.str() );
     vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
     query->SetQuery( stream.str().c_str() );
     query->Execute();
 
     if( query->HasError() )
     {
-      Utilities::log( query->GetLastErrorText() );
+      app->Log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }
 
@@ -219,7 +219,7 @@ namespace Alder
 
     if( query->HasError() )
     {
-      Utilities::log( query->GetLastErrorText() );
+      app->Log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }
 

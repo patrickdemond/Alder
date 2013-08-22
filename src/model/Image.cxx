@@ -78,6 +78,7 @@ namespace Alder
   {
     bool valid;
     std::string fileName = this->GetFileName();
+    Application *app = Application::GetInstance();
 
     // now check the file, if it is empty delete the image and the file
     if( 0 == Utilities::getFileLength( fileName ) )
@@ -96,7 +97,7 @@ namespace Alder
         command += zipFileName;
 
         // not a gz file, remove the .gz extension manually
-        Utilities::log( std::string( "Unzipping file: " ) + fileName );
+        app->Log( std::string( "Unzipping file: " ) + fileName );
         if( "ERROR" == Utilities::exec( command ) )
           rename( zipFileName.c_str(), fileName.c_str() );
       }
@@ -219,7 +220,8 @@ namespace Alder
   vtkSmartPointer<Image> Image::GetNeighbourAtlasImage( const int rating, const bool forward )
   {
     this->AssertPrimaryId();
-    Image *activeImage = Application::GetInstance()->GetActiveImage();
+    Application *app = Application::GetInstance();
+    Image *activeImage = app->GetActiveImage();
     bool hasParent = this->Get( "ParentImageId" ).IsValid();
 
     // get neighbouring image which matches this image's exam type and the given rating
@@ -247,14 +249,14 @@ namespace Alder
     stream << "ORDER BY Interview.UId ";
     if( !forward ) stream << "DESC ";
 
-    Utilities::log( "Querying Database: " + stream.str() );
-    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+    app->Log( "Querying Database: " + stream.str() );
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
     query->SetQuery( stream.str().c_str() );
     query->Execute();
 
     if( query->HasError() )
     {
-      Utilities::log( query->GetLastErrorText() );
+      app->Log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }
 
@@ -294,7 +296,8 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   vtkSmartPointer<Image> Image::GetAtlasImage( const int rating )
   {
-    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+    Application *app = Application::GetInstance();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
     vtkSmartPointer<Exam> exam;
     this->GetRecord( exam );
@@ -314,13 +317,13 @@ namespace Alder
            << "AND Image.Id != " << this->Get( "Id" ).ToString() << " "
            << "LIMIT 1";
 
-    Utilities::log( "Querying Database: " + stream.str() );
+    app->Log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
 
     if( query->HasError() )
     {   
-      Utilities::log( query->GetLastErrorText() );
+      app->Log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }   
 

@@ -112,13 +112,13 @@ namespace Alder
       if( NULL != modifier ) stream << " " << modifier->GetSql();
       vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
 
-      Utilities::log( "Querying Database: " + stream.str() );
+      app->Log( "Querying Database: " + stream.str() );
       query->SetQuery( stream.str().c_str() );
       query->Execute();
 
       if( query->HasError() )
       {
-        Utilities::log( query->GetLastErrorText() );
+        app->Log( query->GetLastErrorText() );
         throw std::runtime_error( "There was an error while trying to query the database." );
       }
 
@@ -182,12 +182,12 @@ namespace Alder
 
       // execute the query, check for errors, put results in the list
       std::string sql = stream.str() + " " + mod->GetSql();
-      Utilities::log( "Querying Database: " + sql );
+      app->Log( "Querying Database: " + sql );
       query->SetQuery( sql.c_str() );
       query->Execute();
       if( query->HasError() )
       {
-        Utilities::log( query->GetLastErrorText() );
+        app->Log( query->GetLastErrorText() );
         throw std::runtime_error( "There was an error while trying to query the database." );
       }
 
@@ -237,12 +237,12 @@ namespace Alder
       }
 
       // execute the query, check for errors, put results in the list
-      Utilities::log( "Querying Database: " + sql.str() );
+      app->Log( "Querying Database: " + sql.str() );
       query->SetQuery( sql.str().c_str() );
       query->Execute();
       if( query->HasError() )
       {
-        Utilities::log( query->GetLastErrorText() );
+        app->Log( query->GetLastErrorText() );
         throw std::runtime_error( "There was an error while trying to query the database." );
       }
 
@@ -272,7 +272,7 @@ namespace Alder
           << "VALUES (" << this->Get( "Id" ).ToInt() << ", " << record->Get( "Id" ).ToInt() << ")";
 
       // execute the query, check for errors, put results in the list
-      Utilities::log( "Querying Database: " + sql.str() );
+      app->Log( "Querying Database: " + sql.str() );
       query->SetQuery( sql.str().c_str() );
       query->Execute();
     }
@@ -299,7 +299,7 @@ namespace Alder
           << "AND " << type << "Id = " << record->Get( "Id" ).ToInt();
 
       // execute the query, check for errors, put results in the list
-      Utilities::log( "Querying Database: " + sql.str() );
+      app->Log( "Querying Database: " + sql.str() );
       query->SetQuery( sql.str().c_str() );
       query->Execute();
     }

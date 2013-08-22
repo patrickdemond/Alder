@@ -35,6 +35,7 @@
 #include "vtkCommand.h"
 
 #include <iostream>
+#include <ostream>
 #include <stdexcept>
 
 /**
@@ -67,6 +68,13 @@ namespace Alder
     };
 
     /**
+     * Logging functions
+     */
+    bool OpenLogFile();
+    void Log( const std::string );
+    void LogBacktrace();
+
+    /**
      * Reads configuration variables from a given file
      * @param filename string The file to read the configuration from
      */
@@ -76,6 +84,11 @@ namespace Alder
      * Uses database values in the configuration to connect to a database
      */
     bool ConnectToDatabase();
+    
+    /**
+     * Tests whether the application has read/write access to the image data path
+     */
+    bool TestImageDataPath();
     
     /**
      * Uses opal values in the configuration to set up a connection to Opal
@@ -174,6 +187,7 @@ namespace Alder
 
     std::map< std::string, ModelObject*(*)() > ConstructorRegistry;
     std::map< std::string, std::string > ClassNameRegistry;
+    std::ofstream LogStream;
   };
 
   template <class T> ModelObject* createInstance() { return T::New(); }

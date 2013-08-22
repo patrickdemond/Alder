@@ -75,7 +75,8 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool ActiveRecord::Load( const std::map< std::string, std::string > map )
   {
-    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+    Application *app = Application::GetInstance();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
     this->ColumnValues.clear();
 
     // create an sql statement using the provided map
@@ -85,13 +86,13 @@ namespace Alder
       stream << ( map.cbegin() == it ? " WHERE " : " AND " )
              << it->first << " = " << query->EscapeString( it->second );
     
-    Utilities::log( "Querying Database: " + stream.str() );
+    app->Log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
 
     if( query->HasError() )
     {
-      Utilities::log( query->GetLastErrorText() );
+      app->Log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }
 
@@ -117,7 +118,8 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void ActiveRecord::Save( const bool replace )
   {
-    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+    Application *app = Application::GetInstance();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
     std::stringstream stream;
 
     bool first = true;
@@ -151,13 +153,13 @@ namespace Alder
              << " WHERE Id = " << query->EscapeString( this->Get( "Id" ).ToString() );
     }
 
-    Utilities::log( "Querying Database: " + stream.str() );
+    app->Log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
 
     if( query->HasError() )
     {
-      Utilities::log( query->GetLastErrorText() );
+      app->Log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }
 
@@ -171,17 +173,18 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   int ActiveRecord::GetLastInsertId() const
   {
-    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+    Application *app = Application::GetInstance();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
     std::stringstream stream;
     stream << "SELECT Max( Id ) FROM " << this->GetName();
     
-    Utilities::log( "Getting last insert id for table: " + this->GetName() );
+    app->Log( "Getting last insert id for table: " + this->GetName() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
 
     if( query->HasError() )
     {
-      Utilities::log( query->GetLastErrorText() );
+      app->Log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }
 
@@ -193,19 +196,20 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void ActiveRecord::Remove()
   {
-    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+    Application *app = Application::GetInstance();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
     this->AssertPrimaryId();
 
     std::stringstream stream;
     stream << "DELETE FROM " << this->GetName() << " "
            << "WHERE Id = " << query->EscapeString( this->Get( "Id" ).ToString() );
-    Utilities::log( "Querying Database: " + stream.str() );
+    app->Log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
 
     if( query->HasError() )
     {
-      Utilities::log( query->GetLastErrorText() );
+      app->Log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }
   }
@@ -213,18 +217,19 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   int ActiveRecord::GetCount( const std::string recordType )
   {
-    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+    Application *app = Application::GetInstance();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
     std::stringstream stream;
     stream << "SELECT COUNT(*) FROM " << recordType << " "
            << "WHERE " << this->GetName() << "Id = " << this->Get( "Id" ).ToString();
 
-    Utilities::log( "Querying Database: " + stream.str() );
+    app->Log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     query->Execute();
 
     if( query->HasError() )
     {
-      Utilities::log( query->GetLastErrorText() );
+      app->Log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }
     
