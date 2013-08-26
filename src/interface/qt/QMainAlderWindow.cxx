@@ -61,7 +61,7 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
     this, SLOT( slotUpdateDatabase() ) );
   QObject::connect(
     this->ui->actionExit, SIGNAL( triggered() ),
-    qApp, SLOT( closeAllWindows() ) );
+    qApp, SLOT( closeAllWindows() ) );  
   
   // connect the help menu items
   QObject::connect(
@@ -241,6 +241,16 @@ void QMainAlderWindow::slotUserManagement()
       QUserListDialog usersDialog( this );
       usersDialog.setModal( true );
       usersDialog.setWindowTitle( tr( "User Management" ) );
+
+      Alder::Application *app = Alder::Application::GetInstance();
+      bool loggedIn = NULL != app->GetActiveUser();
+      if( loggedIn )
+      {
+        QObject::connect( 
+          &usersDialog , SIGNAL( userModalityChanged() ), 
+         this->ui->interviewWidget, SLOT( updateExamTreeWidget() ));
+      }   
+
       usersDialog.exec();
       break;
     }

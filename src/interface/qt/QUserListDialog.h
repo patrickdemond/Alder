@@ -28,7 +28,10 @@ public:
   QUserListDialog( QWidget* parent = 0 );
   //destructor
   ~QUserListDialog();
-  
+
+signals:
+  void userModalityChanged();
+
 public slots:
   virtual void slotAdd();
   virtual void slotRemove();

@@ -243,6 +243,7 @@ void QUserListDialog::slotItemChanged( QTableWidgetItem *item )
   }
 
   user->Save();
+  emit this->userModalityChanged();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
