@@ -46,31 +46,31 @@ namespace Alder
     std::string id = query->EscapeString( this->Get( "Id" ).ToString() );
     
     stream << "DELETE FROM Rating WHERE UserId = " << id;
-    app->Log( "Querying Database: " + stream.str() );
+    Utilities::log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     if( !query->Execute() )
     {
-      app->Log( query->GetLastErrorText() );
+      Utilities::log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }
 
     stream.str("");
     stream << "DELETE FROM UserHasModality WHERE UserId = " << id;
-    app->Log( "Querying Database: " + stream.str() );
+    Utilities::log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     if( !query->Execute() )
     {
-      app->Log( query->GetLastErrorText() );
+      Utilities::log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }
 
     stream.str("");
     stream << "DELETE FROM User WHERE Id = " << id;
-    app->Log( "Querying Database: " + stream.str() );
+    Utilities::log( "Querying Database: " + stream.str() );
     query->SetQuery( stream.str().c_str() );
     if( !query->Execute() )
     {
-      app->Log( query->GetLastErrorText() );
+      Utilities::log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }
   }
