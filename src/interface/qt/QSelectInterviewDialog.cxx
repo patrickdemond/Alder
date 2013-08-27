@@ -22,6 +22,7 @@
 
 #include <QInputDialog>
 #include <QList>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -117,25 +118,23 @@ void QSelectInterviewDialog::slotAccepted()
   // get the UId of the selected row
   vtkSmartPointer< Alder::Interview > interview;
   QList<QTableWidgetItem *> list = this->ui->interviewTableWidget->selectedItems();
-  if( list.empty() )
-  {
-    interview = NULL;
-  }
-  else
+  if( !list.empty() )  
   {
     std::map< std::string, std::string > map;
     map["UId"] = list.at( this->columnIndex["UId"] )->text().toStdString();
     map["VisitDate"] = list.at( this->columnIndex["VisitDate"] )->text().toStdString();
     interview = vtkSmartPointer< Alder::Interview >::New();
     interview->Load( map );
+
+    // if the active interview is changed, Application invokes an ActiveInterviewEvent
+    // the interview may not have downloaded images though
+    // this dialog closes after accept is called and the main application window
+    // slot that originally launched this dialog forces the active interview to 
+    // update its image data
+
+    Alder::Application::GetInstance()->SetActiveInterview( interview );
   }
 
-  // if the active interview is changed, Application invokes an ActiveInterviewEvent
-  // the interview may not have downloaded images though
-  // this dialog closes after accept is called and the main application window
-  // slot that originally launched this dialog forces the active interview to 
-  // update its image data
-  Alder::Application::GetInstance()->SetActiveInterview( interview );
   this->accept();
 }
 
@@ -251,61 +250,75 @@ void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QSelectInterviewDialog::updateInterface()
 {
+  if( this->searchText.isEmpty() ) return;
+
+  // create a modifier using the search text
+  std::string where = this->searchText.toStdString();
+  where += "%";
+  vtkSmartPointer< Alder::QueryModifier > modifier = vtkSmartPointer< Alder::QueryModifier >::New();
+  modifier->Where( "UId", "LIKE", vtkVariant( where ) );
+
+  // get all the interviews given the search text
+  std::vector< vtkSmartPointer< Alder::Interview > > interviewList;
+  Alder::Interview::GetAll( &interviewList, modifier );
+
+  // if the search fails to find any UId's, inform the user and return
+  if( interviewList.empty() )
+  {
+    QMessageBox messageBox( this );
+    messageBox.setWindowModality( Qt::WindowModal );
+    messageBox.setIcon( QMessageBox::Information );
+    std::string s = "No matches for search criteria ";
+    s += where.c_str();
+    s += ", please try again.";
+    messageBox.setText( tr( s.c_str() ) );
+    messageBox.exec();
+    return;
+  }
+
   this->ui->interviewTableWidget->setRowCount( 0 );
   QTableWidgetItem *item;
-  
-  if( !this->searchText.isEmpty() )
-  {
-    // create a modifier using the search text
-    std::string where = this->searchText.toStdString();
-    where += "%";
-    vtkSmartPointer< Alder::QueryModifier > modifier = vtkSmartPointer< Alder::QueryModifier >::New();
-    modifier->Where( "UId", "LIKE", vtkVariant( where ) );
 
-    // now get all the interviews given the search text
-    std::vector< vtkSmartPointer< Alder::Interview > > interviewList;
-    Alder::Interview::GetAll( &interviewList, modifier );
-    for( auto it = interviewList.begin(); it != interviewList.end(); ++it )
-    { // for every interview, add a new row
-      Alder::Interview *interview = *it;
-      QString UId = QString( interview->Get( "UId" ).ToString().c_str() );
-      
-      if( this->searchText.isEmpty() || UId.contains( this->searchText, Qt::CaseInsensitive ) )
+  for( auto it = interviewList.begin(); it != interviewList.end(); ++it )
+  { // for every interview, add a new row
+    Alder::Interview *interview = *it;
+    QString UId = QString( interview->Get( "UId" ).ToString().c_str() );
+    
+    if( this->searchText.isEmpty() || UId.contains( this->searchText, Qt::CaseInsensitive ) )
+    {
+      this->ui->interviewTableWidget->insertRow( 0 );
+
+      // add site to row
+      item = new QTableWidgetItem;
+      item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+      this->ui->interviewTableWidget->setItem( 0, this->columnIndex["Site"], item );
+
+      // add UId to row
+      item = new QTableWidgetItem;
+      item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+      this->ui->interviewTableWidget->setItem( 0, this->columnIndex["UId"], item );
+
+      // add visit date to row
+      item = new QTableWidgetItem;
+      item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+      this->ui->interviewTableWidget->setItem( 0, this->columnIndex["VisitDate"], item );
+
+      // add all modalities (one per column)
+      std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
+      Alder::Modality::GetAll( &modalityList );
+      for( auto modalityListIt = modalityList.begin();
+           modalityListIt != modalityList.end();
+           ++modalityListIt )
       {
-        this->ui->interviewTableWidget->insertRow( 0 );
-
-        // add site to row
         item = new QTableWidgetItem;
         item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-        this->ui->interviewTableWidget->setItem( 0, this->columnIndex["Site"], item );
-
-        // add UId to row
-        item = new QTableWidgetItem;
-        item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-        this->ui->interviewTableWidget->setItem( 0, this->columnIndex["UId"], item );
-
-        // add visit date to row
-        item = new QTableWidgetItem;
-        item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-        this->ui->interviewTableWidget->setItem( 0, this->columnIndex["VisitDate"], item );
-
-        // add all modalities (one per column)
-        std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
-        Alder::Modality::GetAll( &modalityList );
-        for( auto modalityListIt = modalityList.begin();
-             modalityListIt != modalityList.end();
-             ++modalityListIt )
-        {
-          item = new QTableWidgetItem;
-          item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-          this->ui->interviewTableWidget->setItem(
-            0, this->columnIndex[(*modalityListIt)->Get( "Name" ).ToString()], item );
-        }
-
-        this->updateRow( 0, interview );
+        this->ui->interviewTableWidget->setItem(
+          0, this->columnIndex[(*modalityListIt)->Get( "Name" ).ToString()], item );
       }
-    }
 
-    this->ui->interviewTableWidget->sortItems( this->sortColumn, this->sortOrder );
+      this->updateRow( 0, interview );
+    }
   }
+
+  this->ui->interviewTableWidget->sortItems( this->sortColumn, this->sortOrder );
 }
