@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QProgressDialog</class>
- <widget class="QDialog" name="QProgressDialog">
+ <class>QVTKProgressDialog</class>
+ <widget class="QDialog" name="QVTKProgressDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -74,7 +74,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>QProgressDialog</receiver>
+   <receiver>QVTKProgressDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

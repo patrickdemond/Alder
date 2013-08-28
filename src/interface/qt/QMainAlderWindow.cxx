@@ -22,9 +22,9 @@
 #include <QAboutDialog.h>
 #include <QAlderDicomTagWidget.h>
 #include <QLoginDialog.h>
-#include <QProgressDialog.h>
 #include <QSelectInterviewDialog.h>
 #include <QUserListDialog.h>
+#include <QVTKProgressDialog.h>
 
 #include <QCloseEvent>
 #include <QInputDialog>
@@ -127,7 +127,7 @@ void QMainAlderWindow::slotOpenInterview()
     if( activeInterview && !activeInterview->HasImageData() )
     {
       // create a progress dialog to observe the progress of the update
-      QProgressDialog dialog( this );
+      QVTKProgressDialog dialog( this );
       dialog.setModal( true );
       dialog.setWindowTitle( tr( "Downloading Exam Images" ) );
       dialog.setMessage( tr( "Please wait while the interview's images are downloaded." ) );
@@ -270,7 +270,7 @@ void QMainAlderWindow::slotUpdateDatabase()
     if( user->IsPassword( text.toStdString().c_str() ) )
     {
       // create a progress dialog to observe the progress of the update
-      QProgressDialog dialog( this );
+      QVTKProgressDialog dialog( this );
       dialog.setModal( true );
       dialog.setWindowTitle( tr( "Updating Database" ) );
       dialog.setMessage( tr( "Please wait while the database is updated." ) );

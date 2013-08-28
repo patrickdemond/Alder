@@ -25,7 +25,7 @@
 #include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 
-#include "QProgressDialog.h"
+#include "QVTKProgressDialog.h"
 
 #include <QMessageBox>
 #include <QTreeWidgetItem>
@@ -167,7 +167,7 @@ void QAlderInterviewWidget::updateActiveInterview( Alder::Interview* interview )
     if( !interview->HasExamData() || !interview->HasImageData() )
     {
       // create a progress dialog to observe the progress of the update
-      QProgressDialog dialog( this );
+      QVTKProgressDialog dialog( this );
       dialog.setModal( true );
       dialog.setWindowTitle( tr( "Downloading Exam Images" ) );
       dialog.setMessage( tr( "Please wait while the interview's images are downloaded." ) );
