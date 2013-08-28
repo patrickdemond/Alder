@@ -39,7 +39,6 @@ namespace Alder
     static User *New();
     vtkTypeMacro( User, ActiveRecord );
 
-    virtual void Remove();
     virtual void ResetPassword();
     virtual bool IsPassword( const std::string );
     static std::string GetDefaultPassword() { return "password"; }
