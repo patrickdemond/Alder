@@ -65,8 +65,8 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Exam` (
   CONSTRAINT `fkExamInterviewId`
     FOREIGN KEY (`InterviewId` )
     REFERENCES `Alder`.`Interview` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fkExamModalityId`
     FOREIGN KEY (`ModalityId` )
     REFERENCES `Alder`.`Modality` (`Id` )
@@ -95,8 +95,8 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Image` (
   CONSTRAINT `fkImageExamId`
     FOREIGN KEY (`ExamId` )
     REFERENCES `Alder`.`Exam` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fkImageParentImageId`
     FOREIGN KEY (`ParentImageId` )
     REFERENCES `Alder`.`Image` (`Id` )
@@ -151,13 +151,13 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Rating` (
   CONSTRAINT `fkRatingImageId`
     FOREIGN KEY (`ImageId` )
     REFERENCES `Alder`.`Image` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fkRatingUserId`
     FOREIGN KEY (`UserId` )
     REFERENCES `Alder`.`User` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -178,13 +178,13 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`UserHasModality` (
   CONSTRAINT `fkUserHasModalityUserId`
     FOREIGN KEY (`UserId` )
     REFERENCES `Alder`.`User` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fkUserHasModalityModalityId`
     FOREIGN KEY (`ModalityId` )
     REFERENCES `Alder`.`Modality` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 

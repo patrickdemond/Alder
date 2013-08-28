@@ -1,0 +1,19 @@
+ALTER TABLE UserHasModality
+DROP FOREIGN KEY fkUserHasModalityUserId;
+
+ALTER TABLE UserHasModality
+ADD CONSTRAINT fkUserHasModalityUserId
+FOREIGN KEY ( UserId )
+REFERENCES User ( Id )
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE UserHasModality
+DROP FOREIGN KEY fkUserHasModalityModalityId;
+
+ALTER TABLE UserHasModality
+ADD CONSTRAINT fkUserHasModalityModalityId
+FOREIGN KEY ( ModalityId )
+REFERENCES Modality ( Id )
+ON DELETE CASCADE
+ON UPDATE CASCADE;
