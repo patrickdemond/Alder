@@ -23,6 +23,7 @@
 #define __Interview_h
 
 #include "ActiveRecord.h"
+#include "Image.h"
 
 #include <iostream>
 
@@ -57,6 +58,8 @@ namespace Alder
      */
     void UpdateExamData();
     void UpdateImageData();
+
+     std::string GetSimilarImage( const std::string imageId );
 
     /**
      * Returns the neighbouring interview in UId/VisitDate order.
