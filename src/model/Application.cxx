@@ -21,9 +21,13 @@
 #include "Rating.h"
 #include "User.h"
 
+#include "vtkDirectory.h"
 #include "vtkObjectFactory.h"
 #include "vtkVariant.h"
 
+#include <cxxabi.h>
+#include <dlfcn.h>
+#include <execinfo.h>
 #include <stdexcept>
 
 namespace Alder
@@ -60,6 +64,8 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   Application::~Application()
   {
+    this->LogStream.close();
+
     if( NULL != this->Config )
     {
       this->Config->Delete();
@@ -136,6 +142,41 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Application::OpenLogFile()
+  {
+    std::string logPath = this->Config->GetValue( "Path", "Log" );
+    this->LogStream.open( logPath, std::ofstream::out | std::ofstream::app );
+    return this->LogStream.is_open();
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Application::Log( const std::string message )
+  {
+    this->LogStream << "[" << Utilities::getTime( "%y-%m-%d %T" ) << "] " << message << std::endl;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Application::LogBacktrace()
+  {
+    int status;
+    Dl_info dlinfo;
+    void *trace[ALDER_STACK_DEPTH];
+    int trace_size = backtrace( trace, ALDER_STACK_DEPTH );
+    
+    for( int i = 0; i < trace_size; ++i )
+    {  
+      if( !dladdr( trace[i], &dlinfo ) ) continue;
+
+      const char* symname = dlinfo.dli_sname;
+      char* demangled = abi::__cxa_demangle( symname, NULL, 0, &status );
+      if( 0 == status && NULL != demangled ) symname = demangled;
+      this->LogStream << dlinfo.dli_fname << "::" << symname << std::endl;
+
+      if (demangled) free( demangled );
+    }  
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   std::string Application::GetUnmangledClassName( const std::string mangledName ) const
   {
     for( auto it = this->ClassNameRegistry.begin(); it != this->ClassNameRegistry.end(); ++it )
@@ -176,6 +217,13 @@ namespace Alder
     if( 0 == port.length() ) port = "3306";
 
     return this->DB->Connect( name, user, pass, host, vtkVariant( port ).ToInt() );
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Application::TestImageDataPath()
+  {
+    std::string imageDataPath = this->Config->GetValue( "Path", "ImageData" );
+    return vtkDirectory::MakeDirectory( imageDataPath.c_str() );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -226,12 +274,30 @@ namespace Alder
   {
     if( interview != this->ActiveInterview )
     {
-      if( this->ActiveInterview ) this->ActiveInterview->UnRegister( this );
+      if( this->ActiveInterview )
+      {
+        this->ActiveInterview->UnRegister( this );
+      }
+
       this->ActiveInterview = interview;
+
       if( this->ActiveInterview )
       {
         this->ActiveInterview->Register( this );
-        this->SetActiveImage( NULL );
+
+        std::string lastId;
+        if( this->ActiveImage ) lastId = this->ActiveImage->Get( "Id" ).ToString();
+        std::string similar = interview->GetSimilarImage( lastId );
+        if( !similar.empty() )
+        {
+          vtkSmartPointer<Image> image = vtkSmartPointer<Image>::New();
+          image->Load( "Id", similar );
+          this->SetActiveImage( image );
+        }
+        else
+        {
+          this->SetActiveImage( NULL );
+        }  
         this->SetActiveAtlasImage( NULL );
       }
 

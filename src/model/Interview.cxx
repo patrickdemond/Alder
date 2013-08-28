@@ -165,14 +165,14 @@ namespace Alder
     stream << "ORDER BY UId ";
     if( !forward ) stream << "DESC ";
 
-    Utilities::log( "Querying Database: " + stream.str() );
-    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+    app->Log( "Querying Database: " + stream.str() );
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
     query->SetQuery( stream.str().c_str() );
     query->Execute();
 
     if( query->HasError() )
     {
-      Utilities::log( query->GetLastErrorText() );
+      app->Log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }
 
@@ -219,7 +219,7 @@ namespace Alder
 
     if( query->HasError() )
     {
-      Utilities::log( query->GetLastErrorText() );
+      app->Log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }
 
@@ -441,4 +441,44 @@ namespace Alder
     if( app->GetAbortFlag() ) app->SetAbortFlag( false );
     else app->InvokeEvent( vtkCommand::EndEvent, static_cast<void *>( &global ) );
   }
-}
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::string Interview::GetSimilarImage( const std::string imageId )
+  { 
+    this->AssertPrimaryId();
+    std::string matchId = "";
+    if( imageId.empty() ) return matchId;
+    
+    std::stringstream stream;
+    stream << "SELECT Image.Id "
+           << "FROM Image "
+           << "JOIN Exam ON Image.ExamId = Exam.Id "
+           << "JOIN Exam AS simExam ON Exam.ModalityId = simExam.ModalityId "
+           << "AND Exam.Type = simExam.Type "
+           << "AND Exam.Laterality = simExam.Laterality "
+           << "AND Exam.Stage = simExam.Stage "
+           << "JOIN Image AS simImage ON simImage.ExamId = simExam.Id "
+           << "WHERE Exam.InterviewId = " << this->Get( "Id" ).ToString() << " "
+           << "AND simImage.Id = " << imageId << " "
+           << "LIMIT 1";
+
+    Application *app = Application::GetInstance();
+    app->Log( "Querying Database: " + stream.str() );
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
+    query->SetQuery( stream.str().c_str() );
+    query->Execute();
+
+    if( query->HasError() )
+    {
+      app->Log( query->GetLastErrorText() );
+      throw std::runtime_error( "There was an error while trying to query the database." );
+    }
+
+    if( query->NextRow() )
+    {
+      matchId = query->DataValue( 0 ).ToString();
+    }
+    return matchId;
+  }
+
+} // end namespace Alder
