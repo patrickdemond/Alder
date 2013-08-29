@@ -274,12 +274,30 @@ namespace Alder
   {
     if( interview != this->ActiveInterview )
     {
-      if( this->ActiveInterview ) this->ActiveInterview->UnRegister( this );
+      if( this->ActiveInterview )
+      {
+        this->ActiveInterview->UnRegister( this );
+      }
+
       this->ActiveInterview = interview;
+
       if( this->ActiveInterview )
       {
         this->ActiveInterview->Register( this );
-        this->SetActiveImage( NULL );
+
+        std::string lastId;
+        if( this->ActiveImage ) lastId = this->ActiveImage->Get( "Id" ).ToString();
+        std::string similar = interview->GetSimilarImage( lastId );
+        if( !similar.empty() )
+        {
+          vtkSmartPointer<Image> image = vtkSmartPointer<Image>::New();
+          image->Load( "Id", similar );
+          this->SetActiveImage( image );
+        }
+        else
+        {
+          this->SetActiveImage( NULL );
+        }  
         this->SetActiveAtlasImage( NULL );
       }
 

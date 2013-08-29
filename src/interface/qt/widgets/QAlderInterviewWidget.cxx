@@ -25,7 +25,7 @@
 #include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 
-#include "QProgressDialog.h"
+#include "QVTKProgressDialog.h"
 
 #include <QMessageBox>
 #include <QTreeWidgetItem>
@@ -126,34 +126,7 @@ void QAlderInterviewWidget::slotPrevious()
       this->ui->loadedCheckBox->isChecked(),
       this->ui->unratedCheckBox->isChecked() );
 
-    // warn user if the neighbouring interview is an empty record (ie: no neighbour found)
-    vtkVariant vId = interview->Get( "Id" );
-    if( !vId.IsValid() || 0 == vId.ToInt() )
-    {
-      QMessageBox errorMessage( this );
-      errorMessage.setWindowModality( Qt::WindowModal );
-      errorMessage.setIcon( QMessageBox::Warning );
-      errorMessage.setText( 
-        tr( "There are no remaining studies available which meet your criteria." ) );
-      errorMessage.exec();
-    }
-    else
-    {
-      if( !interview->HasExamData() || !interview->HasImageData() )
-      {
-        // create a progress dialog to observe the progress of the update
-        QProgressDialog dialog( this );
-        dialog.setModal( true );
-        dialog.setWindowTitle( tr( "Downloading Exam Images" ) );
-        dialog.setMessage( tr( "Please wait while the interview's images are downloaded." ) );
-        dialog.open();
-        interview->UpdateExamData();
-        interview->UpdateImageData();
-        dialog.accept();
-      }
-
-      app->SetActiveInterview( interview );
-    }
+    this->updateActiveInterview( interview );  
   }
 }
 
@@ -169,36 +142,46 @@ void QAlderInterviewWidget::slotNext()
       this->ui->loadedCheckBox->isChecked(),
       this->ui->unratedCheckBox->isChecked() );
 
-    // warn user if the neighbouring interview is an empty record (ie: no neighbour found)
-    vtkVariant vId = interview->Get( "Id" );
-    if( !vId.IsValid() || 0 == vId.ToInt() )
-    {
-      QMessageBox errorMessage( this );
-      errorMessage.setWindowModality( Qt::WindowModal );
-      errorMessage.setIcon( QMessageBox::Warning );
-      errorMessage.setText(
-        tr( "There are no remaining studies available which meet your criteria." ) );
-      errorMessage.exec();
-    }
-    else
-    {
-      if( !interview->HasExamData() || !interview->HasImageData() )
-      {
-        // create a progress dialog to observe the progress of the update
-        QProgressDialog dialog( this );
-        dialog.setModal( true );
-        dialog.setWindowTitle( tr( "Downloading Exam Images" ) );
-        dialog.setMessage( tr( "Please wait while the interview's images are downloaded." ) );
-        dialog.open();
-        interview->UpdateExamData();
-        interview->UpdateImageData();
-        dialog.accept();
-      }
-
-      app->SetActiveInterview( interview );
-    }
+    this->updateActiveInterview( interview );  
   }
-  //this->updateEnabled();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QAlderInterviewWidget::updateActiveInterview( Alder::Interview* interview )
+{
+  if( !interview ) return;
+
+  // warn user if the neighbouring interview is an empty record (ie: no neighbour found)
+  vtkVariant vId = interview->Get( "Id" );
+  if( !vId.IsValid() || 0 == vId.ToInt() )
+  {
+    QMessageBox errorMessage( this );
+    errorMessage.setWindowModality( Qt::WindowModal );
+    errorMessage.setIcon( QMessageBox::Warning );
+    errorMessage.setText(
+      tr( "There are no remaining studies available which meet your criteria." ) );
+    errorMessage.exec();
+  }
+  else
+  {
+    if( !interview->HasExamData() )
+    {
+      interview->UpdateExamData();
+    } 
+    if( !interview->HasImageData() )
+    {
+      // create a progress dialog to observe the progress of the update
+      QVTKProgressDialog dialog( this );
+      dialog.setModal( true );
+      dialog.setWindowTitle( tr( "Downloading Exam Images" ) );
+      dialog.setMessage( tr( "Please wait while the interview's images are downloaded." ) );
+      dialog.open();
+      interview->UpdateImageData();
+      dialog.accept();
+    }
+    
+    Alder::Application::GetInstance()->SetActiveInterview( interview );
+  }
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -242,6 +225,9 @@ void QAlderInterviewWidget::slotRatingChanged( int value )
 
     rating->Save();
   }
+  this->ui->ratingValueLabel->setText( 0 == value ? 
+    tr( "N/A" ) : 
+    QString::number( value ) );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -249,10 +235,10 @@ void QAlderInterviewWidget::slotHideControls( bool hide )
 {
   // hide/show all the widgets to show only the image viewer
   QList<QLayout*> layouts;
-  layouts.append( &*this->ui->verticalLayout );
-  layouts.append( &*this->ui->infoLayout );
-  layouts.append( &*this->ui->ratingLayout );
-  layouts.append( &*this->ui->buttonLayout );
+  layouts.append( this->ui->verticalLayout );
+  layouts.append( this->ui->infoLayout );
+  layouts.append( this->ui->ratingLayout );
+  layouts.append( this->ui->buttonLayout );
 
   QList<QWidget*> widgets;
   for( int i = 0; i < layouts.count(); ++i )
@@ -263,7 +249,7 @@ void QAlderInterviewWidget::slotHideControls( bool hide )
       if( QWidgetItem* item = dynamic_cast<QWidgetItem*>(
           layout->itemAt( j ) ) )
       {    
-        widgets.append( &*item->widget() );
+        widgets.append( item->widget() );
       }  
     }  
   }
@@ -333,20 +319,28 @@ void QAlderInterviewWidget::updateInfo()
 void QAlderInterviewWidget::updateExamTreeWidget()
 {
   Alder::Application *app = Alder::Application::GetInstance();
+
+  QApplication::setOverrideCursor( QCursor( Qt::WaitCursor ) );
+
   Alder::Interview *interview = app->GetActiveInterview();
 
   // stop the tree's signals until we are done
   bool oldSignalState = this->ui->examTreeWidget->blockSignals( true );
 
   // if a interview is open then populate the interview tree
+  QTreeWidgetItem *selectedItem = NULL;
   this->treeModelMap.clear();
   this->ui->examTreeWidget->clear();
+
   if( interview )
   {
     // get the active image so that we can highlight it
     Alder::User *user = app->GetActiveUser();
     Alder::Image *activeImage = app->GetActiveImage();
-    QTreeWidgetItem *selectedItem = NULL, *item = NULL;
+    vtkVariant activeImageId;
+    if( activeImage ) activeImageId = activeImage->Get( "Id" );
+
+    QTreeWidgetItem *item = NULL;
     std::map< std::string, QTreeWidgetItem* > modalityLookup;
 
     // make root the interview's UID and date
@@ -437,7 +431,8 @@ void QAlderInterviewWidget::updateExamTreeWidget()
            
           imageItem->setExpanded( true );
           imageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-          if( activeImage && activeImage->Get( "Id" ).ToInt() == image->Get( "Id" ).ToInt() )
+
+          if( activeImage && activeImageId == image->Get( "Id" ) )
             selectedItem = imageItem;
 
           // add child images for this image
@@ -454,18 +449,29 @@ void QAlderInterviewWidget::updateExamTreeWidget()
             this->treeModelMap[childImageItem] = *childImageIt;
             childImageItem->setText( 0, name );
             childImageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-            if( activeImage && activeImage->Get( "Id" ).ToInt() == childImage->Get( "Id" ).ToInt() )
+
+            if( activeImage && activeImageId == childImage->Get( "Id" ) )
               selectedItem = childImageItem;
           }
         }
       }
     }
-      
-    if( selectedItem ) this->ui->examTreeWidget->setCurrentItem( selectedItem );
   }
 
   // re-enable the tree's signals
   this->ui->examTreeWidget->blockSignals( oldSignalState );
+
+  // set and expand the selected item after restoring signals
+  // so that other UI elements get updated
+  if( selectedItem ) 
+  { 
+    QTreeWidgetItem* item = selectedItem;
+    while( item->parent() ) item = item->parent();
+    this->ui->examTreeWidget->expandItem( item );
+    this->ui->examTreeWidget->setCurrentItem( selectedItem );
+  }
+
+  QApplication::restoreOverrideCursor();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

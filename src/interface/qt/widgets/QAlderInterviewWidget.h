@@ -18,7 +18,11 @@
 
 #include <map>
 
-namespace Alder { class ActiveRecord; };
+namespace Alder { 
+class ActiveRecord; 
+class Interview;
+};
+
 class vtkEventQtSlotConnect;
 class vtkMedicalImageViewer;
 class Ui_QAlderInterviewWidget;
@@ -59,6 +63,11 @@ private:
 
   vtkSmartPointer<vtkMedicalImageViewer> Viewer;
   vtkSmartPointer<vtkEventQtSlotConnect> Connections;
+
+  /**
+   * Internal update method used in slotPrevious, slotNext
+   */
+  void updateActiveInterview( Alder::Interview* );
 };
 
 #endif

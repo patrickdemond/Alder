@@ -1,25 +1,25 @@
 /*=========================================================================
 
   Program:  Alder (CLSA Medical Image Quality Assessment Tool)
-  Module:   QProgressDialog.cxx
+  Module:   QVTKProgressDialog.cxx
   Language: C++
 
   Author: Patrick Emond <emondpd AT mcmaster DOT ca>
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "QProgressDialog.h"
-#include "ui_QProgressDialog.h"
+#include "QVTKProgressDialog.h"
+#include "ui_QVTKProgressDialog.h"
 
 #include "Application.h"
 
 #include <utility>
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-QProgressDialog::QProgressDialog( QWidget* parent )
+QVTKProgressDialog::QVTKProgressDialog( QWidget* parent )
   : QDialog( parent )
 {
-  this->ui = new Ui_QProgressDialog;
+  this->ui = new Ui_QVTKProgressDialog;
   this->ui->setupUi( this );
   
   QObject::connect(
@@ -37,25 +37,25 @@ QProgressDialog::QProgressDialog( QWidget* parent )
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-QProgressDialog::~QProgressDialog()
+QVTKProgressDialog::~QVTKProgressDialog()
 {
   Alder::Application::GetInstance()->RemoveObserver( this->observer );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QProgressDialog::setMessage( QString message )
+void QVTKProgressDialog::setMessage( QString message )
 {
   this->ui->label->setText( message );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QProgressDialog::slotCancel()
+void QVTKProgressDialog::slotCancel()
 {
   Alder::Application::GetInstance()->SetAbortFlag( true );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QProgressDialog::Command::Execute(
+void QVTKProgressDialog::Command::Execute(
   vtkObject *caller, unsigned long eventId, void *callData )
 {
   if( this->ui )
