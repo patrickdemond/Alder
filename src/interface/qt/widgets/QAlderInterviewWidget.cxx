@@ -166,9 +166,7 @@ void QAlderInterviewWidget::updateActiveInterview( Alder::Interview* interview )
   {
     if( !interview->HasExamData() )
     {
-      QApplication::setOverrideCursor( QCursor( Qt::WaitCursor ) );
       interview->UpdateExamData();
-      QApplication::restoreOverrideCursor();
     } 
     if( !interview->HasImageData() )
     {
@@ -369,7 +367,7 @@ void QAlderInterviewWidget::updateExamTreeWidget()
       item->setExpanded( false );
       item->setFlags( Qt::ItemIsEnabled );
       modalityLookup[name] = item;
-QApplication::setOverrideCursor( QCursor( Qt::WaitCursor ) );    }
+    }
     
     std::vector< vtkSmartPointer< Alder::Exam > > examList;
     interview->GetList( &examList );
