@@ -164,7 +164,11 @@ void QAlderInterviewWidget::updateActiveInterview( Alder::Interview* interview )
   }
   else
   {
-    if( !interview->HasExamData() || !interview->HasImageData() )
+    if( !interview->HasExamData() )
+    {
+      interview->UpdateExamData();
+    } 
+    if( !interview->HasImageData() )
     {
       // create a progress dialog to observe the progress of the update
       QVTKProgressDialog dialog( this );
@@ -172,7 +176,6 @@ void QAlderInterviewWidget::updateActiveInterview( Alder::Interview* interview )
       dialog.setWindowTitle( tr( "Downloading Exam Images" ) );
       dialog.setMessage( tr( "Please wait while the interview's images are downloaded." ) );
       dialog.open();
-      interview->UpdateExamData();
       interview->UpdateImageData();
       dialog.accept();
     }
