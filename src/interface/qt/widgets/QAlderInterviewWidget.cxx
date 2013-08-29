@@ -64,7 +64,7 @@ QAlderInterviewWidget::QAlderInterviewWidget( QWidget* parent )
   this->Connections->Connect( app,
     Alder::Application::ActiveInterviewEvent,
     this,
-    SLOT( updateExamTreeWidget() ) );
+    SLOT( updateExamTreeWidget() ), 1.0 );
   this->Connections->Connect( app,
     Alder::Application::ActiveInterviewUpdateImageDataEvent,
     this,
@@ -227,6 +227,9 @@ void QAlderInterviewWidget::slotRatingChanged( int value )
 
     rating->Save();
   }
+  this->ui->ratingValueLabel->setText( 0 == ratingValue ? 
+    tr( "N/A" ) : 
+    QString::number( ratingValue ) );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -366,7 +369,7 @@ void QAlderInterviewWidget::updateExamTreeWidget()
       item->setExpanded( false );
       item->setFlags( Qt::ItemIsEnabled );
       modalityLookup[name] = item;
-    }
+QApplication::setOverrideCursor( QCursor( Qt::WaitCursor ) );    }
     
     std::vector< vtkSmartPointer< Alder::Exam > > examList;
     interview->GetList( &examList );
