@@ -316,6 +316,9 @@ void QAlderInterviewWidget::updateInfo()
 void QAlderInterviewWidget::updateExamTreeWidget()
 {
   Alder::Application *app = Alder::Application::GetInstance();
+
+  QApplication::setOverrideCursor( QCursor( Qt::WaitCursor ) );
+
   Alder::Interview *interview = app->GetActiveInterview();
 
   // stop the tree's signals until we are done
@@ -325,6 +328,7 @@ void QAlderInterviewWidget::updateExamTreeWidget()
   QTreeWidgetItem *selectedItem = NULL;
   this->treeModelMap.clear();
   this->ui->examTreeWidget->clear();
+
   if( interview )
   {
     // get the active image so that we can highlight it
@@ -463,6 +467,8 @@ void QAlderInterviewWidget::updateExamTreeWidget()
     this->ui->examTreeWidget->expandItem( item );
     this->ui->examTreeWidget->setCurrentItem( selectedItem );
   }
+
+  QApplication::restoreOverrideCursor();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
