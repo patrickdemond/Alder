@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=@ALDER_VERSION_MAJOR@.@ALDER_VERSION_MINOR@.@ALDER_VERSION_PATCH@
+Type=Application
+Name=Alder
+GenericName=Alder (CLSA Medical Image Quality Assessment Tool)
+Comment=Canadian Longitudinal Study on Aging
+Exec=alder
+TryExec=alder
+Icon=logo_clsa
+Categories=Viewer;DataVisualization;Opal;CLSA;Qt;MySQL;

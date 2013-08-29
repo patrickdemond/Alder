@@ -3,7 +3,5 @@ A list of things which need to be done (in no particular order)
 
 - consider opening exam tree and displaying same exam type during next/prev operations
 - add const expressions where possible (including const_iterator)
-- consider overloading native operators in active record class
-- add file path label to interview widget
-- add dicom tag review dialog
-- fix max frame rate and playback speed : get info from cineloop dicom tags
+- minimize lag time between login dialog closing and interview widget populating with last image
+- add warning when user logs in and they do not have access to any modalities
