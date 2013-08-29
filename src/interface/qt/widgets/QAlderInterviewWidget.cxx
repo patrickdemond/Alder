@@ -64,7 +64,7 @@ QAlderInterviewWidget::QAlderInterviewWidget( QWidget* parent )
   this->Connections->Connect( app,
     Alder::Application::ActiveInterviewEvent,
     this,
-    SLOT( updateExamTreeWidget() ), 1.0 );
+    SLOT( updateExamTreeWidget() ) );
   this->Connections->Connect( app,
     Alder::Application::ActiveInterviewUpdateImageDataEvent,
     this,
@@ -227,9 +227,9 @@ void QAlderInterviewWidget::slotRatingChanged( int value )
 
     rating->Save();
   }
-  this->ui->ratingValueLabel->setText( 0 == ratingValue ? 
+  this->ui->ratingValueLabel->setText( 0 == value ? 
     tr( "N/A" ) : 
-    QString::number( ratingValue ) );
+    QString::number( value ) );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -237,10 +237,10 @@ void QAlderInterviewWidget::slotHideControls( bool hide )
 {
   // hide/show all the widgets to show only the image viewer
   QList<QLayout*> layouts;
-  layouts.append( &*this->ui->verticalLayout );
-  layouts.append( &*this->ui->infoLayout );
-  layouts.append( &*this->ui->ratingLayout );
-  layouts.append( &*this->ui->buttonLayout );
+  layouts.append( this->ui->verticalLayout );
+  layouts.append( this->ui->infoLayout );
+  layouts.append( this->ui->ratingLayout );
+  layouts.append( this->ui->buttonLayout );
 
   QList<QWidget*> widgets;
   for( int i = 0; i < layouts.count(); ++i )
@@ -251,7 +251,7 @@ void QAlderInterviewWidget::slotHideControls( bool hide )
       if( QWidgetItem* item = dynamic_cast<QWidgetItem*>(
           layout->itemAt( j ) ) )
       {    
-        widgets.append( &*item->widget() );
+        widgets.append( item->widget() );
       }  
     }  
   }
