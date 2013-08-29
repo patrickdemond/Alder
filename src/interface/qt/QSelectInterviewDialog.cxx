@@ -153,7 +153,12 @@ void QSelectInterviewDialog::slotSelectionChanged()
     map["VisitDate"] = list.at( this->columnIndex["VisitDate"] )->text().toStdString();
     interview = vtkSmartPointer< Alder::Interview >::New();
     interview->Load( map );
-    if( !interview->HasExamData() ) interview->UpdateExamData();
+    if( !interview->HasExamData() )
+    {
+      QApplication::setOverrideCursor( QCursor( Qt::WaitCursor ) );
+      interview->UpdateExamData();
+      QApplication::restoreOverrideCursor();
+    }  
     this->updateRow( list.at( 0 )->row(), interview );
   }
 }

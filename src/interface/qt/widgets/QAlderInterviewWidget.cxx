@@ -166,7 +166,9 @@ void QAlderInterviewWidget::updateActiveInterview( Alder::Interview* interview )
   {
     if( !interview->HasExamData() )
     {
+      QApplication::setOverrideCursor( QCursor( Qt::WaitCursor ) );
       interview->UpdateExamData();
+      QApplication::restoreOverrideCursor();
     } 
     if( !interview->HasImageData() )
     {
