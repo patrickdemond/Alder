@@ -458,14 +458,14 @@ namespace Alder
            << "LIMIT 1";
 
     Application *app = Application::GetInstance();
-    Utilities::log( "Querying Database: " + stream.str() );
+    app->Log( "Querying Database: " + stream.str() );
     vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
     query->SetQuery( stream.str().c_str() );
     query->Execute();
 
     if( query->HasError() )
     {
-      Utilities::log( query->GetLastErrorText() );
+      app->Log( query->GetLastErrorText() );
       throw std::runtime_error( "There was an error while trying to query the database." );
     }
 
