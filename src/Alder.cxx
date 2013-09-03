@@ -23,7 +23,7 @@
 #include <QObject>
 #include <QString>
 
-#include "vtkSmartPointer.h"
+#include "vtkNew.h"
 
 #include <stdexcept>
 
@@ -74,7 +74,7 @@ int main( int argc, char** argv )
     QMainAlderWindow mainWindow;
 
     // check to see if an admin user exists, create if not
-    vtkSmartPointer< User > user = vtkSmartPointer< User >::New();
+    vtkNew< User > user; 
     if( !user->Load( "Name", "administrator" ) )
     {
       QString text = QInputDialog::getText(
