@@ -91,7 +91,7 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   this->DicomTagWidget = new QAlderDicomTagWidget( this );
   this->Connections->Connect( Alder::Application::GetInstance(),
     Alder::Application::ActiveImageEvent,
-    this, SLOT( updateDicomTagWidget( vtkObject*, unsigned long, void*, void* ) ) );
+    this, SLOT( updateDicomTagWidget() ) );
 
   this->dicomTagsVisible = false;
   this->DicomTagWidget->hide();
@@ -363,11 +363,10 @@ void QMainAlderWindow::updateInterface()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QMainAlderWindow::updateDicomTagWidget( vtkObject*,
-                                          unsigned long,
-                                          void*,
-                                          void* callData )
+void QMainAlderWindow::updateDicomTagWidget()
 {
-  QString fileName = callData ? (*static_cast<std::string*>( callData )).c_str() : "";
+  Alder::Application *app = Alder::Application::GetInstance();
+  Alder::Image *image = app->GetActiveImage();
+  QString fileName = image ? image->GetFileName().c_str() : "";
   this->DicomTagWidget->updateTableWidget( fileName );
 }

@@ -42,7 +42,7 @@ public slots:
   virtual void slotAbout();
   virtual void slotManual();
 
-  virtual void updateDicomTagWidget( vtkObject*, unsigned long, void*, void* );
+  virtual void updateDicomTagWidget();
 
 protected:
   // called whenever the main window is closed
