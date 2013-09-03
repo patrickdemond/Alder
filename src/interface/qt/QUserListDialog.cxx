@@ -11,8 +11,6 @@
 #include "QUserListDialog.h"
 #include "ui_QUserListDialog.h"
 
-#include "Application.h"
-#include "Database.h"
 #include "Modality.h"
 #include "User.h"
 
