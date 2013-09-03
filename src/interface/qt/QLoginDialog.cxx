@@ -12,7 +12,6 @@
 #include "ui_QLoginDialog.h"
 
 #include "Application.h"
-#include "Modality.h"
 #include "User.h"
 
 #include "vtkSmartPointer.h"
