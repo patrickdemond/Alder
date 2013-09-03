@@ -103,36 +103,18 @@ SET( ALDER_INCLUDE_DIR
   ${ALDER_VTK_DIR}
 )
 
+SUBDIRS( ${ALDER_MODEL_DIR} ${ALDER_VTK_DIR} )
+
+SET( ALDER_LIBRARIES 
+  AlderModel
+  AlderVTK
+  CACHE INTERNAL
+  "internal libraries for Alder"
+)
+
 SET( ALDER_SOURCE
   ${ALDER_SRC_DIR}/Alder.cxx
 
-  ${ALDER_MODEL_DIR}/ActiveRecord.cxx
-  ${ALDER_MODEL_DIR}/Application.cxx
-  ${ALDER_MODEL_DIR}/Configuration.cxx
-  ${ALDER_MODEL_DIR}/Database.cxx
-  ${ALDER_MODEL_DIR}/Exam.cxx
-  ${ALDER_MODEL_DIR}/Image.cxx
-  ${ALDER_MODEL_DIR}/Interview.cxx
-  ${ALDER_MODEL_DIR}/Modality.cxx
-  ${ALDER_MODEL_DIR}/ModelObject.cxx
-  ${ALDER_MODEL_DIR}/OpalService.cxx
-  ${ALDER_MODEL_DIR}/QueryModifier.cxx
-  ${ALDER_MODEL_DIR}/Rating.cxx
-  ${ALDER_MODEL_DIR}/User.cxx
-
-  ${ALDER_VTK_DIR}/vtkAnimationPlayer.cxx
-  ${ALDER_VTK_DIR}/vtkAlderMySQLDatabase.cxx
-  ${ALDER_VTK_DIR}/vtkAlderMySQLQuery.cxx
-  ${ALDER_VTK_DIR}/vtkCustomCornerAnnotation.cxx
-  ${ALDER_VTK_DIR}/vtkCustomInteractorStyleImage.cxx
-  ${ALDER_VTK_DIR}/vtkFrameAnimationPlayer.cxx
-  ${ALDER_VTK_DIR}/vtkImageCoordinateWidget.cxx
-  ${ALDER_VTK_DIR}/vtkImageDataReader.cxx
-  ${ALDER_VTK_DIR}/vtkImageWindowLevel.cxx
-  ${ALDER_VTK_DIR}/vtkMedicalImageViewer.cxx
-  ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
-  ${ALDER_VTK_DIR}/vtkXMLConfigurationFileReader.cxx
-  
   ${ALDER_QT_DIR}/QAlderApplication.cxx
   ${ALDER_QT_DIR}/QAboutDialog.cxx
   ${ALDER_QT_DIR}/QLoginDialog.cxx
@@ -148,14 +130,6 @@ SET( ALDER_SOURCE
   ${ALDER_QT_WIDGETS_DIR}/QAlderInterviewWidget.cxx
   ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.cxx
 )
-
-SET_SOURCE_FILES_PROPERTIES(
-  ${ALDER_MODEL_DIR}/ActiveRecord.cxx
-  ${ALDER_MODEL_DIR}/ModelObject.cxx
-
-  ${ALDER_VTK_DIR}/vtkAnimationPlayer.cxx
-  ${ALDER_VTK_DIR}/vtkXMLFileReader.cxx
-  ABSTRACT )
 
 SET( ALDER_UIS
   ${ALDER_QT_DIR}/QAboutDialog.ui
@@ -205,13 +179,13 @@ SET_SOURCE_FILES_PROPERTIES( ${ALDER_SOURCE} PROPERTIES OBJECT_DEPENDS "${UIHead
 INCLUDE_DIRECTORIES(
   ${ALDER_INCLUDE_DIR}
   ${QT_INCLUDE_DIR}
-  ${LIBXML2_INCLUDE_DIR}
+  # ${LIBXML2_INCLUDE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CRYPTO++_INCLUDE_DIR}
-  ${JSONCPP_INCLUDE_DIR}
-  ${MYSQL_INCLUDE_DIRECTORIES}
-  ${CURL_INCLUDE_DIR}
+  # ${CRYPTO++_INCLUDE_DIR}
+  # ${JSONCPP_INCLUDE_DIR}
+  # ${MYSQL_INCLUDE_DIRECTORIES}
+  # ${CURL_INCLUDE_DIR}
 )
 
 # We're using cbegin and cend so we need c++11
@@ -229,16 +203,17 @@ TARGET_LINK_LIBRARIES( alder
   vtkGraphics
   vtkIO
   vtkCommon
-  vtkgdcm
+  #vtkgdcm
   gdcmDSED
-  gdcmMSFF
+  #gdcmMSFF
   gdcmDICT
   ${QT_LIBRARIES}
-  ${LIBXML2_LIBRARIES}
-  ${CURL_LIBRARY}
-  ${CRYPTO++_LIBRARIES}
-  ${JSONCPP_LIBRARIES}
-  ${MYSQL_LIBRARY}
+  # ${LIBXML2_LIBRARIES}
+  # ${CURL_LIBRARY}
+  # ${CRYPTO++_LIBRARIES}
+  # ${JSONCPP_LIBRARIES}
+  #${MYSQL_LIBRARY}
+  ${ALDER_LIBRARIES}
 )
 INSTALL( TARGETS alder RUNTIME DESTINATION bin )
 INSTALL( FILES ${CMAKE_BINARY_DIR}/config.xml DESTINATION etc )
