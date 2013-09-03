@@ -317,7 +317,8 @@ namespace Alder
   void Application::SetActiveImage( Image* image )
   {
     vtkSetObjectBodyMacro( ActiveImage, Image, image);
-    this->InvokeEvent( Application::ActiveImageEvent );
+    std::string fileName = image ? image->GetFileName() : std::string();
+    this->InvokeEvent( Application::ActiveImageEvent, (void*)(&fileName) );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

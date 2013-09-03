@@ -17,6 +17,7 @@
 #include "vtkSmartPointer.h"
 
 class vtkEventQtSlotConnect;
+class vtkObject;
 class Ui_QMainAlderWindow;
 class QAlderDicomTagWidget;
 
@@ -40,6 +41,8 @@ public slots:
   // help event functions
   virtual void slotAbout();
   virtual void slotManual();
+
+  virtual void updateDicomTagWidget( vtkObject*, unsigned long, void*, void* );
 
 protected:
   // called whenever the main window is closed
