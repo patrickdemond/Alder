@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:  Alder (CLSA Medical Image Quality Assessment Tool)
-  Module:   QProgressDialog.h
+  Module:   QVTKProgressDialog.h
   Language: C++
 
   Author: Patrick Emond <emondpd AT mcmaster DOT ca>
@@ -9,17 +9,17 @@
 
 =========================================================================*/
 
-#ifndef __QProgressDialog_h
-#define __QProgressDialog_h
+#ifndef __QVTKProgressDialog_h
+#define __QVTKProgressDialog_h
 
 #include <QDialog>
 
 #include "vtkCommand.h"
 #include "vtkSmartPointer.h"
 
-class Ui_QProgressDialog;
+class Ui_QVTKProgressDialog;
 
-class QProgressDialog : public QDialog
+class QVTKProgressDialog : public QDialog
 {
   Q_OBJECT
 private:
@@ -28,7 +28,7 @@ private:
   public:
     static Command *New() { return new Command; }
     void Execute( vtkObject *caller, unsigned long eventId, void *callData );
-    Ui_QProgressDialog *ui;
+    Ui_QVTKProgressDialog *ui;
 
   protected:
     Command() { this->ui = NULL; }
@@ -36,9 +36,9 @@ private:
 
 public:
   //constructor
-  QProgressDialog( QWidget* parent = 0 );
+  QVTKProgressDialog( QWidget* parent = 0 );
   //destructor
-  ~QProgressDialog();
+  ~QVTKProgressDialog();
 
   void setMessage( QString message );
   
@@ -52,7 +52,7 @@ protected slots:
 
 private:
   // Designer form
-  Ui_QProgressDialog *ui;
+  Ui_QVTKProgressDialog *ui;
 };
 
 #endif

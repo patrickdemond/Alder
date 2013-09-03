@@ -21,6 +21,7 @@
 #include <QErrorMessage>
 #include <QFile>
 #include <QInputDialog>
+#include <QMessageBox>
 #include <QList>
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -150,7 +151,14 @@ void QUserListDialog::slotRemove()
     {
       vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
       user->Load( "Name", item->text().toStdString() );
-      user->Remove();
+
+      // show a warning to the user before continuing
+      std::stringstream stream;
+      stream << "Are you sure you wish to remove user \"" << user->Get( "Name" ).ToString() << "\"?  "
+             << "All of this user's ratings will also be permanantely removed.  "
+             << "This operation cannot be undone.";
+      if( QMessageBox::question( this, "Remove User", stream.str().c_str(),
+                                 QMessageBox::Yes | QMessageBox::No ) == QMessageBox::Yes ) user->Remove();
     }
   }
   this->updateInterface();

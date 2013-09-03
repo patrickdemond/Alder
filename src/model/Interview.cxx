@@ -166,7 +166,7 @@ namespace Alder
     if( !forward ) stream << "DESC ";
 
     app->Log( "Querying Database: " + stream.str() );
-    vtkSmartPointer<vtkAlderMySQLQuery> query = Application::GetInstance()->GetDB()->GetQuery();
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
     query->SetQuery( stream.str().c_str() );
     query->Execute();
 
@@ -291,62 +291,56 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void Interview::UpdateExamData()
   {
-    Application *app = Application::GetInstance();
-    OpalService *opal = app->GetOpal();
-
-    std::map< std::string, std::string > examData;
-    vtkSmartPointer<Exam> exam;
-
-    // make sure all stages exist
-
     // only update the exams if there are none in the database
-    if( !this->HasExamData() )
+    if( this->HasExamData() ) return;
+
+    OpalService *opal = Application::GetInstance()->GetOpal();
+
+    // get exam metadata from Opal for this interview
+    std::map< std::string, std::string > examData = 
+      opal->GetRow( "alder", "Exam", this->Get( "UId" ).ToString() );
+
+    // build a map of modalities and exams
+    std::map<  std::string, std::vector< std::pair< std::string, std::string > > >
+      modalityMap;
+
+     modalityMap["Ultrasound"] = {
+       {"CarotidIntima","left"},
+       {"CarotidIntima","right"},
+       {"Plaque","left"},
+       {"Plaque","right"}
+     };
+     modalityMap["Dexa"] = {
+       {"DualHipBoneDensity","left"},
+       {"DualHipBoneDensity","right"},
+       {"ForearmBoneDensity","left"},
+       {"ForearmBoneDensity","right"},
+       {"LateralBoneDensity","none"},
+       {"WholeBodyBoneDensity","none"}
+     };
+     modalityMap["Retinal"] = {
+       {"RetinalScan","left"},
+       {"RetinalScan","right"}
+     };  
+
+    vtkVariant interviewId = this->Get( "Id" );
+
+    for( auto mapIt = modalityMap.cbegin(); mapIt != modalityMap.cend(); ++mapIt )
     {
-      vtkVariant interviewId = this->Get( "Id" );
-
-      // get exam metadata from Opal for this interview
-      examData = opal->GetRow( "alder", "Exam", this->Get( "UId" ).ToString() );
-
-      // build a map of modalities and exams
-      std::map<  std::string, std::vector< std::pair< std::string, std::string > > >
-        modalityMap;
-
-       modalityMap["Ultrasound"] = {
-         {"CarotidIntima","left"},
-         {"CarotidIntima","right"},
-         {"Plaque","left"},
-         {"Plaque","right"}
-       };
-       modalityMap["Dexa"] = {
-         {"DualHipBoneDensity","left"},
-         {"DualHipBoneDensity","right"},
-         {"ForearmBoneDensity","left"},
-         {"ForearmBoneDensity","right"},
-         {"LateralBoneDensity","none"},
-         {"WholeBodyBoneDensity","none"}
-       };
-       modalityMap["Retinal"] = {
-         {"RetinalScan","left"},
-         {"RetinalScan","right"}
-       };  
-
-      for( auto mapIt = modalityMap.cbegin(); mapIt != modalityMap.cend(); ++mapIt )
+      vtkNew<Modality> modality;
+      modality->Load( "Name", mapIt->first );
+      vtkVariant modalityId = modality->Get( "Id" );
+      for( auto vecIt = mapIt->second.cbegin(); vecIt != mapIt->second.cend(); ++vecIt )
       {
-        vtkNew<Modality> modality;
-        modality->Load( "Name", mapIt->first );
-        vtkVariant modalityId = modality->Get( "Id" );
-        for( auto vecIt = mapIt->second.cbegin(); vecIt != mapIt->second.cend(); ++vecIt )
-        {
-          exam = vtkSmartPointer<Exam>::New();
-          exam->Set( "InterviewId", interviewId );
-          exam->Set( "ModalityId", modalityId );
-          exam->Set( "Type", vecIt->first );
-          exam->Set( "Laterality", vecIt->second );
-          exam->Set( "Stage", examData[ vecIt->first + ".Stage" ] );
-          exam->Set( "Interviewer", examData[ vecIt->first + ".Interviewer"] );
-          exam->Set( "DatetimeAcquired", examData[ vecIt->first + ".DatetimeAcquired"] );
-          exam->Save();
-        }
+        vtkNew<Exam> exam;
+        exam->Set( "InterviewId", interviewId );
+        exam->Set( "ModalityId", modalityId );
+        exam->Set( "Type", vecIt->first );
+        exam->Set( "Laterality", vecIt->second );
+        exam->Set( "Stage", examData[ vecIt->first + ".Stage" ] );
+        exam->Set( "Interviewer", examData[ vecIt->first + ".Interviewer"] );
+        exam->Set( "DatetimeAcquired", examData[ vecIt->first + ".DatetimeAcquired"] );
+        exam->Save();
       }
     }
   }
@@ -370,17 +364,18 @@ namespace Alder
       OpalService::SetCurlProgressChecking( false );
 
       app->InvokeEvent( vtkCommand::StartEvent, static_cast<void *>( &global ) );
-
+      double size = examList.size();
       for( auto examIt = examList.cbegin(); examIt != examList.cend(); ++examIt, ++index )
       {
-        progressConfig.second = index / examList.size();
+        progressConfig.second = index / size;
         app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progressConfig ) );
         if( app->GetAbortFlag() ) break;
         ( *examIt )->UpdateImageData(); // invokes progress events
       }
 
       if( app->GetAbortFlag() ) app->SetAbortFlag( false );
-      else app->InvokeEvent( vtkCommand::EndEvent, static_cast<void *>( &global ) );
+
+      app->InvokeEvent( vtkCommand::EndEvent, static_cast<void *>( &global ) );
     }
   }
 
@@ -441,4 +436,44 @@ namespace Alder
     if( app->GetAbortFlag() ) app->SetAbortFlag( false );
     else app->InvokeEvent( vtkCommand::EndEvent, static_cast<void *>( &global ) );
   }
-}
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  std::string Interview::GetSimilarImage( const std::string imageId )
+  { 
+    this->AssertPrimaryId();
+    std::string matchId = "";
+    if( imageId.empty() ) return matchId;
+    
+    std::stringstream stream;
+    stream << "SELECT Image.Id "
+           << "FROM Image "
+           << "JOIN Exam ON Image.ExamId = Exam.Id "
+           << "JOIN Exam AS simExam ON Exam.ModalityId = simExam.ModalityId "
+           << "AND Exam.Type = simExam.Type "
+           << "AND Exam.Laterality = simExam.Laterality "
+           << "AND Exam.Stage = simExam.Stage "
+           << "JOIN Image AS simImage ON simImage.ExamId = simExam.Id "
+           << "WHERE Exam.InterviewId = " << this->Get( "Id" ).ToString() << " "
+           << "AND simImage.Id = " << imageId << " "
+           << "LIMIT 1";
+
+    Application *app = Application::GetInstance();
+    app->Log( "Querying Database: " + stream.str() );
+    vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
+    query->SetQuery( stream.str().c_str() );
+    query->Execute();
+
+    if( query->HasError() )
+    {
+      app->Log( query->GetLastErrorText() );
+      throw std::runtime_error( "There was an error while trying to query the database." );
+    }
+
+    if( query->NextRow() )
+    {
+      matchId = query->DataValue( 0 ).ToString();
+    }
+    return matchId;
+  }
+
+} // end namespace Alder

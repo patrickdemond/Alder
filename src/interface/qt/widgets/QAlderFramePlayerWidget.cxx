@@ -247,7 +247,8 @@ void QAlderFramePlayerWidgetPrivate::updateUi(const PipelineInfoType& pipeInfo)
   // value.  The speed can be set and is clamped between 1 and whatever the max frame
   // rate set through the QAlderFramePlayerWidget's maxFrameRate property.
   this->speedFactorSpinBox->blockSignals( true );
-  this->speedFactorSpinBox->setValue( pipeInfo.maxFrameRate );
+  this->speedFactorSpinBox->setValue(
+    qMin( this->speedFactorSpinBox->value(), this->maxFrameRate ) );
   this->speedFactorSpinBox->blockSignals( false );
 }
 
@@ -265,7 +266,6 @@ void QAlderFramePlayerWidgetPrivate::requestData(const PipelineInfoType& pipeInf
   // Abort the request
   if (!pipeInfo.isConnected || frame == pipeInfo.currentFrame)
     return;
-
 
   this->viewer->SetSlice( frame );
   emit q->currentFrameChanged(frame); // Emit the change
