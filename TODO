@@ -7,3 +7,4 @@ A list of things which need to be done (in no particular order)
 - minimize lag time between login dialog closing and interview widget populating with last image
 - add warning when user logs in and they do not have access to any modalities
 - add way for user to change password
+- consider adding a modal-less text display window to monitor and scroll the log 
