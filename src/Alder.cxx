@@ -14,6 +14,7 @@
 //
 
 #include "Application.h"
+#include "Configuration.h"
 #include "User.h"
 #include "Utilities.h"
 

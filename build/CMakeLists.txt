@@ -50,6 +50,7 @@ ENDIF( UNIX AND NOT APPLE )
 SET( ALDER_ROOT_DIR         ${PROJECT_SOURCE_DIR}/.. )
 SET( ALDER_AUX_DIR          ${ALDER_ROOT_DIR}/aux )
 SET( ALDER_SRC_DIR          ${ALDER_ROOT_DIR}/src )
+SET( ALDER_COMMON_DIR       ${ALDER_SRC_DIR}/common )
 SET( ALDER_MODEL_DIR        ${ALDER_SRC_DIR}/model )
 SET( ALDER_QT_DIR           ${ALDER_SRC_DIR}/interface/qt )
 SET( ALDER_QT_WIDGETS_DIR   ${ALDER_QT_DIR}/widgets )
@@ -77,9 +78,9 @@ SET( ALDER_SALT_STRING "this is salt" CACHE STRING "This is salt for encrypting 
 # Define stack depth to display on thrown exceptions
 SET( ALDER_STACK_DEPTH "10" CACHE STRING "The stack depth to display on thrown exceptions" )
 
-# Configure the utitlities header
-CONFIGURE_FILE( ${ALDER_SRC_DIR}/Utilities.h.in
-                ${PROJECT_BINARY_DIR}/Utilities.h @ONLY IMMEDIATE )
+# Configure a header file to pass CMake settings to
+CONFIGURE_FILE( ${ALDER_SRC_DIR}/AlderConfig.h.in
+                ${PROJECT_BINARY_DIR}/AlderConfig.h @ONLY IMMEDIATE )
 
 # Configure the desktop file
 CONFIGURE_FILE( ${ALDER_AUX_DIR}/alder.desktop.in
@@ -97,19 +98,25 @@ ENDIF( NOT EXISTS ${ALDER_CONFIG_FILE} )
 
 # Set up include directories
 SET( ALDER_INCLUDE_DIR
+  ${ALDER_COMMON_DIR}
   ${ALDER_MODEL_DIR}
   ${ALDER_QT_DIR}
   ${ALDER_QT_WIDGETS_DIR}
   ${ALDER_VTK_DIR}
 )
 
-SUBDIRS( ${ALDER_MODEL_DIR} ${ALDER_VTK_DIR} )
+SUBDIRS(
+  ${ALDER_COMMON_DIR}
+  ${ALDER_MODEL_DIR}
+  ${ALDER_VTK_DIR}
+)
 
 SET( ALDER_LIBRARIES 
+  AlderCommon
   AlderModel
   AlderVTK
-  CACHE INTERNAL
-  "internal libraries for Alder"
+#  CACHE INTERNAL
+#  "internal libraries for Alder"
 )
 
 SET( ALDER_SOURCE
@@ -179,13 +186,13 @@ SET_SOURCE_FILES_PROPERTIES( ${ALDER_SOURCE} PROPERTIES OBJECT_DEPENDS "${UIHead
 INCLUDE_DIRECTORIES(
   ${ALDER_INCLUDE_DIR}
   ${QT_INCLUDE_DIR}
-  # ${LIBXML2_INCLUDE_DIR}
+  ${LIBXML2_INCLUDE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
-  # ${CRYPTO++_INCLUDE_DIR}
-  # ${JSONCPP_INCLUDE_DIR}
-  # ${MYSQL_INCLUDE_DIRECTORIES}
-  # ${CURL_INCLUDE_DIR}
+  ${CRYPTO++_INCLUDE_DIR}
+  ${JSONCPP_INCLUDE_DIR}
+  ${MYSQL_INCLUDE_DIRECTORIES}
+  ${CURL_INCLUDE_DIR}
 )
 
 # We're using cbegin and cend so we need c++11
@@ -203,16 +210,16 @@ TARGET_LINK_LIBRARIES( alder
   vtkGraphics
   vtkIO
   vtkCommon
-  #vtkgdcm
+  vtkgdcm
   gdcmDSED
-  #gdcmMSFF
+  gdcmMSFF
   gdcmDICT
   ${QT_LIBRARIES}
-  # ${LIBXML2_LIBRARIES}
-  # ${CURL_LIBRARY}
-  # ${CRYPTO++_LIBRARIES}
-  # ${JSONCPP_LIBRARIES}
-  #${MYSQL_LIBRARY}
+  ${LIBXML2_LIBRARIES}
+  ${CURL_LIBRARY}
+  ${CRYPTO++_LIBRARIES}
+  ${JSONCPP_LIBRARIES}
+  ${MYSQL_LIBRARY}
   ${ALDER_LIBRARIES}
 )
 INSTALL( TARGETS alder RUNTIME DESTINATION bin )

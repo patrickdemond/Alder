@@ -8,23 +8,22 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-//
-// .SECTION Description
-// A utilities header to include typedefs, macros, global functions, etc.
-//
 
+/**
+ * @class Utilities
+ *
+ * @author Patrick Emond <emondpd AT mcmaster DOT ca>
+ * @author Dean Inglis <inglisd AT mcmaster DOT ca>
+ *
+ * @brief Utilities class includes typedefs, macros, global functions, etc.
+ *
+ * All methods in this class are static.  There is no need to instantiate
+ * and instance of the Utilities class.  The class implementation file
+ * exists solely for the creation of a library.
+ *
+ */
 #ifndef __Utilities_h
 #define __Utilities_h
-
-#define ALDER_VERSION_MAJOR @ALDER_VERSION_MAJOR@
-#define ALDER_VERSION_MINOR @ALDER_VERSION_MINOR@
-#define ALDER_VERSION_PATCH @ALDER_VERSION_PATCH@
-
-#define ALDER_CONFIG_FILE "@ALDER_CONFIG_FILE@"
-#define ALDER_SALT_STRING "@ALDER_SALT_STRING@"
-#define ALDER_STACK_DEPTH @ALDER_STACK_DEPTH@
-
-#include "Configuration.h"
 
 #include <algorithm>
 #include <base64.h>
@@ -38,6 +37,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <AlderConfig.h>
+
 /**
  * @addtogroup Alder
  * @{
@@ -48,6 +49,7 @@ namespace Alder
   class Utilities
   {
   public:
+
     inline static void hashString( std::string input, std::string &output )
     {
       input += ALDER_SALT_STRING;
@@ -187,6 +189,11 @@ namespace Alder
       if( str.length() > 0 ) results.push_back( str );
       return results;
     }
+
+  protected:
+    Utilities() {}
+    ~Utilities() {}
+
   };
 }
 
