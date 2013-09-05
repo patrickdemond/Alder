@@ -29,7 +29,7 @@
 #include <base64.h>
 #include <cctype>
 #include <fstream>
-#include <json/reader.h>
+//#include <json/reader.h>
 #include <sha.h>
 #include <sstream>
 #include <sys/stat.h>

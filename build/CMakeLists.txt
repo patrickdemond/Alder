@@ -47,18 +47,18 @@ IF( UNIX AND NOT APPLE )
   FIND_PACKAGE( ImageMagick COMPONENTS convert REQUIRED )
 ENDIF( UNIX AND NOT APPLE )
 
-SET( ALDER_ROOT_DIR         ${PROJECT_SOURCE_DIR}/.. )
-SET( ALDER_AUX_DIR          ${ALDER_ROOT_DIR}/aux )
-SET( ALDER_SRC_DIR          ${ALDER_ROOT_DIR}/src )
-SET( ALDER_COMMON_DIR       ${ALDER_SRC_DIR}/common )
-SET( ALDER_MODEL_DIR        ${ALDER_SRC_DIR}/model )
-SET( ALDER_QT_DIR           ${ALDER_SRC_DIR}/interface/qt )
-SET( ALDER_QT_WIDGETS_DIR   ${ALDER_QT_DIR}/widgets )
-SET( ALDER_QT_RESOURCES_DIR ${ALDER_QT_WIDGETS_DIR}/resources )
-SET( ALDER_VTK_DIR          ${ALDER_SRC_DIR}/vtk )
-SET( ALDER_DOC_DIR          ${ALDER_ROOT_DIR}/doc )
-SET( ALDER_DOXY_DIR         ${PROJECT_BINARY_DIR}/doxygen )
-SET( ALDER_TESTING_DIR      ${ALDER_ROOT_DIR}/testing )
+SET( ALDER_ROOT_DIR       ${PROJECT_SOURCE_DIR}/.. )
+SET( ALDER_AUX_DIR        ${ALDER_ROOT_DIR}/aux )
+SET( ALDER_SRC_DIR        ${ALDER_ROOT_DIR}/src )
+SET( ALDER_COMMON_DIR     ${ALDER_SRC_DIR}/common )
+SET( ALDER_BUSINESS_DIR   ${ALDER_SRC_DIR}/business )
+SET( ALDER_QT_DIR         ${ALDER_SRC_DIR}/interface/qt )
+SET( ALDER_QT_GENERIC_DIR ${ALDER_QT_DIR}/generic )
+SET( ALDER_QT_MODEL_DIR   ${ALDER_QT_DIR}/model )
+SET( ALDER_VTK_DIR        ${ALDER_SRC_DIR}/vtk )
+SET( ALDER_DOC_DIR        ${ALDER_ROOT_DIR}/doc )
+SET( ALDER_DOXY_DIR       ${PROJECT_BINARY_DIR}/doxygen )
+SET( ALDER_TESTING_DIR    ${ALDER_ROOT_DIR}/testing )
 
 # Define the config file location, then test to see if it is in the install path when installing
 SET( ALDER_CONFIG_FILE ${PROJECT_BINARY_DIR}/config.xml CACHE PATH "The location of Alder's runtime config file" )
@@ -99,100 +99,63 @@ ENDIF( NOT EXISTS ${ALDER_CONFIG_FILE} )
 # Set up include directories
 SET( ALDER_INCLUDE_DIR
   ${ALDER_COMMON_DIR}
-  ${ALDER_MODEL_DIR}
-  ${ALDER_QT_DIR}
-  ${ALDER_QT_WIDGETS_DIR}
   ${ALDER_VTK_DIR}
+  ${ALDER_BUSINESS_DIR}
+  ${ALDER_QT_DIR}
+  ${ALDER_QT_MODEL_DIR}
+  ${ALDER_QT_GENERIC_DIR}
 )
 
 SUBDIRS(
   ${ALDER_COMMON_DIR}
-  ${ALDER_MODEL_DIR}
+  ${ALDER_BUSINESS_DIR}
   ${ALDER_VTK_DIR}
+  ${ALDER_QT_MODEL_DIR}
+  ${ALDER_QT_GENERIC_DIR}
 )
 
 SET( ALDER_LIBRARIES 
   AlderCommon
-  AlderModel
+  AlderBusiness
   AlderVTK
-#  CACHE INTERNAL
-#  "internal libraries for Alder"
+  AlderQtModel
+  AlderQtGeneric
 )
 
-SET( ALDER_SOURCE
+# source for the alder application
+SET( ALDER_APP_SRC
   ${ALDER_SRC_DIR}/Alder.cxx
-
   ${ALDER_QT_DIR}/QAlderApplication.cxx
-  ${ALDER_QT_DIR}/QAboutDialog.cxx
-  ${ALDER_QT_DIR}/QLoginDialog.cxx
   ${ALDER_QT_DIR}/QMainAlderWindow.cxx
-  ${ALDER_QT_DIR}/QVTKProgressDialog.cxx
-  ${ALDER_QT_DIR}/QSelectInterviewDialog.cxx
-  ${ALDER_QT_DIR}/QUserListDialog.cxx
-
-  ${ALDER_QT_WIDGETS_DIR}/QAlderAtlasWidget.cxx
-  ${ALDER_QT_WIDGETS_DIR}/QAlderDicomTagWidget.cxx
-  ${ALDER_QT_WIDGETS_DIR}/QAlderDoubleSlider.cxx
-  ${ALDER_QT_WIDGETS_DIR}/QAlderFramePlayerWidget.cxx
-  ${ALDER_QT_WIDGETS_DIR}/QAlderInterviewWidget.cxx
-  ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.cxx
 )
 
-SET( ALDER_UIS
-  ${ALDER_QT_DIR}/QAboutDialog.ui
-  ${ALDER_QT_DIR}/QLoginDialog.ui
+SET( ALDER_APP_UI
   ${ALDER_QT_DIR}/QMainAlderWindow.ui
-  ${ALDER_QT_DIR}/QVTKProgressDialog.ui
-  ${ALDER_QT_DIR}/QSelectInterviewDialog.ui
-  ${ALDER_QT_DIR}/QUserListDialog.ui
-
-  ${ALDER_QT_WIDGETS_DIR}/QAlderAtlasWidget.ui
-  ${ALDER_QT_WIDGETS_DIR}/QAlderDicomTagWidget.ui
-  ${ALDER_QT_WIDGETS_DIR}/QAlderFramePlayerWidget.ui
-  ${ALDER_QT_WIDGETS_DIR}/QAlderInterviewWidget.ui
-  ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.ui
 )
 
-SET( ALDER_HEADERS
-  ${ALDER_QT_DIR}/QAboutDialog.h
-  ${ALDER_QT_DIR}/QLoginDialog.h
+SET( ALDER_APP_MOC
   ${ALDER_QT_DIR}/QMainAlderWindow.h
-  ${ALDER_QT_DIR}/QSelectInterviewDialog.h
-  ${ALDER_QT_DIR}/QUserListDialog.h
-  ${ALDER_QT_DIR}/QVTKProgressDialog.h
-
-  ${ALDER_QT_WIDGETS_DIR}/QAlderAtlasWidget.h
-  ${ALDER_QT_WIDGETS_DIR}/QAlderDicomTagWidget.h
-  ${ALDER_QT_WIDGETS_DIR}/QAlderDoubleSlider.h
-  ${ALDER_QT_WIDGETS_DIR}/QAlderFramePlayerWidget.h
-  ${ALDER_QT_WIDGETS_DIR}/QAlderInterviewWidget.h
-  ${ALDER_QT_WIDGETS_DIR}/QAlderSliderWidget.h
-)
-
-SET( ALDER_QT_QRC
-  ${ALDER_QT_RESOURCES_DIR}/QAlderWidgets.qrc
 )
 
 # Wrap QT files
-QT4_WRAP_UI( UIHeaders ${ALDER_UIS} )
-QT4_WRAP_CPP( MOCSrcs ${ALDER_HEADERS} )
-QT4_ADD_RESOURCES( QRCSrcs ${ALDER_QT_QRC} )
+QT4_WRAP_UI( AlderApp_UI   ${ALDER_APP_UI} )
+QT4_WRAP_CPP( AlderApp_MOC ${ALDER_APP_MOC_HEADERS} )
 
 ADD_DEFINITIONS( -DQT_GUI_LIBS -DQT_CORE_LIB )
 
-SET_SOURCE_FILES_PROPERTIES( ${ALDER_SOURCE} PROPERTIES OBJECT_DEPENDS "${UIHeaders}" )
+SET_SOURCE_FILES_PROPERTIES( ${ALDER_APP_SRC} PROPERTIES OBJECT_DEPENDS "${AlderApp_UI}" )
 
 # Use the include path and library for Qt
 INCLUDE_DIRECTORIES(
   ${ALDER_INCLUDE_DIR}
-  ${QT_INCLUDE_DIR}
-  ${LIBXML2_INCLUDE_DIR}
+  #${QT_INCLUDE_DIR}
+  # ${LIBXML2_INCLUDE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CRYPTO++_INCLUDE_DIR}
-  ${JSONCPP_INCLUDE_DIR}
-  ${MYSQL_INCLUDE_DIRECTORIES}
-  ${CURL_INCLUDE_DIR}
+  #${CRYPTO++_INCLUDE_DIR}
+  #${JSONCPP_INCLUDE_DIR}
+  #${MYSQL_INCLUDE_DIRECTORIES}
+  #${CURL_INCLUDE_DIR}
 )
 
 # We're using cbegin and cend so we need c++11
@@ -202,26 +165,31 @@ SET( CMAKE_CXX_FLAGS "-std=c++0x -Wno-deprecated " )
 SET( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
 
 # Targets
-ADD_EXECUTABLE( alder ${ALDER_SOURCE} ${ALDER_UISrcs} ${MOCSrcs} ${QRCSrcs})
+ADD_EXECUTABLE( alder 
+  ${ALDER_APP_SRC}
+  ${AlderApp_UI}
+  ${AlderApp_MOC}
+)
 
 TARGET_LINK_LIBRARIES( alder
-  QVTK
-  vtkRendering
-  vtkGraphics
-  vtkIO
-  vtkCommon
-  vtkgdcm
-  gdcmDSED
-  gdcmMSFF
-  gdcmDICT
-  ${QT_LIBRARIES}
-  ${LIBXML2_LIBRARIES}
-  ${CURL_LIBRARY}
-  ${CRYPTO++_LIBRARIES}
-  ${JSONCPP_LIBRARIES}
-  ${MYSQL_LIBRARY}
+  #QVTK
+  #vtkRendering
+  #vtkGraphics
+  #vtkIO
+  #vtkCommon
+  #vtkgdcm
+  #gdcmDSED
+  #gdcmMSFF
+  #gdcmDICT
+  #${QT_LIBRARIES}
+  #${LIBXML2_LIBRARIES}
+  #${CURL_LIBRARY}
+  #${CRYPTO++_LIBRARIES}
+  #${JSONCPP_LIBRARIES}
+  #${MYSQL_LIBRARY}
   ${ALDER_LIBRARIES}
 )
+
 INSTALL( TARGETS alder RUNTIME DESTINATION bin )
 INSTALL( FILES ${CMAKE_BINARY_DIR}/config.xml DESTINATION etc )
 
@@ -276,12 +244,12 @@ IF( BUILD_DOCUMENTATION )
 
   SET( DOXY_INPUT_SOURCE 
     ${ALDER_SRC_DIR}
-    ${ALDER_MODEL_DIR}
+    ${ALDER_BUSINESS_DIR}
     ${ALDER_VTK_DIR}
     ${ALDER_QT_DIR}
     ${ALDER_DOXY_DIR}/doc_mainpage.dox )
 
-  string( REPLACE ";" "\" \"" ALDER_DOXY_LIST "${DOXY_INPUT_SOURCE}" )
+  STRING( REPLACE ";" "\" \"" ALDER_DOXY_LIST "${DOXY_INPUT_SOURCE}" )
   
   CONFIGURE_FILE(
     ${ALDER_DOC_DIR}/config.dox.in
