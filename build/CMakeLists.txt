@@ -14,6 +14,9 @@ SET( ALDER_ICON_SIZES 16x16 22x22 24x24 32x32 48x48 64x64 128x128 )
 # Look in the build directory for cmake modules
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/" )
 
+# We're using cbegin and cend so we need c++11
+SET( CMAKE_CXX_FLAGS "-std=c++0x -Wno-deprecated" )
+
 # We need VTK
 FIND_PACKAGE( VTK REQUIRED )
 INCLUDE( ${VTK_USE_FILE} )
@@ -97,29 +100,51 @@ IF( NOT EXISTS ${ALDER_CONFIG_FILE} )
 ENDIF( NOT EXISTS ${ALDER_CONFIG_FILE} )
 
 # Set up include directories
-SET( ALDER_INCLUDE_DIR
+
+SET(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+#SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
+
+SET(BUILD_SHARED_LIBS ON)
+
+# The libraries need AlderConfig.h
+INCLUDE_DIRECTORIES( BEFORE
+  ${PROJECT_BINARY_DIR}
+)
+
+SET( ALDER_LIBRARIES
+  AlderQtGeneric
+  AlderQtModel
+  AlderVTK
+  AlderBusiness
+  AlderCommon
+)  
+
+# Alder libraries for use in other applications
+ADD_SUBDIRECTORY( 
+  ${ALDER_COMMON_DIR} ${PROJECT_BINARY_DIR}/common
+)  
+ADD_SUBDIRECTORY( 
+  ${ALDER_VTK_DIR} ${PROJECT_BINARY_DIR}/vtk
+)  
+ADD_SUBDIRECTORY( 
+  ${ALDER_BUSINESS_DIR} ${PROJECT_BINARY_DIR}/business
+)  
+ADD_SUBDIRECTORY( 
+  ${ALDER_QT_MODEL_DIR} ${PROJECT_BINARY_DIR}/model
+)  
+ADD_SUBDIRECTORY( 
+  ${ALDER_QT_GENERIC_DIR} ${PROJECT_BINARY_DIR}/generic
+)  
+
+# CMake configurations for the Alder application
+SET( ALDER_INCLUDE_DIRS
   ${ALDER_COMMON_DIR}
   ${ALDER_VTK_DIR}
   ${ALDER_BUSINESS_DIR}
   ${ALDER_QT_DIR}
   ${ALDER_QT_MODEL_DIR}
   ${ALDER_QT_GENERIC_DIR}
-)
-
-SUBDIRS(
-  ${ALDER_COMMON_DIR}
-  ${ALDER_BUSINESS_DIR}
-  ${ALDER_VTK_DIR}
-  ${ALDER_QT_MODEL_DIR}
-  ${ALDER_QT_GENERIC_DIR}
-)
-
-SET( ALDER_LIBRARIES 
-  AlderCommon
-  AlderBusiness
-  AlderVTK
-  AlderQtModel
-  AlderQtGeneric
 )
 
 # source for the alder application
@@ -139,7 +164,7 @@ SET( ALDER_APP_MOC
 
 # Wrap QT files
 QT4_WRAP_UI( AlderApp_UI   ${ALDER_APP_UI} )
-QT4_WRAP_CPP( AlderApp_MOC ${ALDER_APP_MOC_HEADERS} )
+QT4_WRAP_CPP( AlderApp_MOC ${ALDER_APP_MOC} )
 
 ADD_DEFINITIONS( -DQT_GUI_LIBS -DQT_CORE_LIB )
 
@@ -147,19 +172,14 @@ SET_SOURCE_FILES_PROPERTIES( ${ALDER_APP_SRC} PROPERTIES OBJECT_DEPENDS "${Alder
 
 # Use the include path and library for Qt
 INCLUDE_DIRECTORIES(
-  ${ALDER_INCLUDE_DIR}
-  #${QT_INCLUDE_DIR}
+  ${ALDER_INCLUDE_DIRS}
+  ${QT_INCLUDE_DIR}
   # ${LIBXML2_INCLUDE_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  #${CRYPTO++_INCLUDE_DIR}
+  ${CRYPTO++_INCLUDE_DIR}
   #${JSONCPP_INCLUDE_DIR}
   #${MYSQL_INCLUDE_DIRECTORIES}
   #${CURL_INCLUDE_DIR}
 )
-
-# We're using cbegin and cend so we need c++11
-SET( CMAKE_CXX_FLAGS "-std=c++0x -Wno-deprecated " )
 
 # Make sure to include RPATH in the installed binary to support linking to libraries
 SET( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
@@ -172,6 +192,7 @@ ADD_EXECUTABLE( alder
 )
 
 TARGET_LINK_LIBRARIES( alder
+  ${ALDER_LIBRARIES}
   #QVTK
   #vtkRendering
   #vtkGraphics
@@ -181,13 +202,12 @@ TARGET_LINK_LIBRARIES( alder
   #gdcmDSED
   #gdcmMSFF
   #gdcmDICT
-  #${QT_LIBRARIES}
+  ${QT_LIBRARIES}
   #${LIBXML2_LIBRARIES}
   #${CURL_LIBRARY}
   #${CRYPTO++_LIBRARIES}
   #${JSONCPP_LIBRARIES}
   #${MYSQL_LIBRARY}
-  ${ALDER_LIBRARIES}
 )
 
 INSTALL( TARGETS alder RUNTIME DESTINATION bin )

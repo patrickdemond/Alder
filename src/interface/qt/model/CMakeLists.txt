@@ -36,9 +36,12 @@ QT4_WRAP_UI(       AlderQtModelLib_UI  ${AlderQtModel_Uis} )
 QT4_WRAP_CPP(      AlderQtModelLib_MOC ${AlderQtModel_MocHeaders} )
 QT4_ADD_RESOURCES( AlderQtModelLib_QRC ${AlderQtModel_Resources} )
 
-ADD_DEFINITIONS( -DQT_GUI_LIBS -DQT_CORE_LIB )
-
-INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR} )
+INCLUDE_DIRECTORIES(
+  ${ALDER_COMMON_DIR}
+  ${ALDER_BUSINESS_DIR}
+  ${ALDER_VTK_DIR}
+  ${CRYPTO++_INCLUDE_DIR}
+)
 
 ADD_LIBRARY( AlderQtModel
   ${AlderQtModelLib_SRC}
@@ -48,9 +51,8 @@ ADD_LIBRARY( AlderQtModel
 )
 
 TARGET_LINK_LIBRARIES( AlderQtModel
+  AlderVTK
   QVTK
-  AlderBusiness
-  ${QT_LIBRARIES}
 )
 
 INSTALL( TARGETS AlderQtModel
@@ -58,4 +60,3 @@ INSTALL( TARGETS AlderQtModel
   LIBRARY DESTINATION lib
   COMPONENT library
 )
-
