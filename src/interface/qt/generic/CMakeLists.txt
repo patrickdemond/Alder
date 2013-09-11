@@ -47,7 +47,5 @@ ADD_LIBRARY( AlderQtGeneric
 )
 
 INSTALL( TARGETS AlderQtGeneric 
-  ARCHIVE DESTINATION lib  
-  LIBRARY DESTINATION lib
-  COMPONENT library
+  DESTINATION lib
 )
