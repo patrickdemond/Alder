@@ -63,6 +63,7 @@ SET( ALDER_APP_DIR        ${ALDER_SRC_DIR}/application )
 SET( ALDER_DOC_DIR        ${ALDER_ROOT_DIR}/doc )
 SET( ALDER_DOXY_DIR       ${PROJECT_BINARY_DIR}/doxygen )
 SET( ALDER_TESTING_DIR    ${ALDER_ROOT_DIR}/testing )
+SET( ALDER_PROGRAMS_DIR   ${ALDER_SRC_DIR}/programs )
 
 # Define the config file location, then test to see if it is in the install path when installing
 SET( ALDER_CONFIG_FILE ${PROJECT_BINARY_DIR}/config.xml CACHE PATH "The location of Alder's runtime config file" )
@@ -219,4 +220,7 @@ IF( BUILD_DOCUMENTATION )
 
 ENDIF( BUILD_DOCUMENTATION )
 
-SUBDIRS( ${ALDER_TESTING_DIR} )
+SUBDIRS( 
+  ${ALDER_TESTING_DIR} 
+  ${ALDER_PROGRAMS_DIR}
+)
