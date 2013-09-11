@@ -59,6 +59,7 @@ SET( ALDER_QT_DIR         ${ALDER_SRC_DIR}/interface/qt )
 SET( ALDER_QT_GENERIC_DIR ${ALDER_QT_DIR}/generic )
 SET( ALDER_QT_MODEL_DIR   ${ALDER_QT_DIR}/model )
 SET( ALDER_VTK_DIR        ${ALDER_SRC_DIR}/vtk )
+SET( ALDER_APP_DIR        ${ALDER_SRC_DIR}/application )
 SET( ALDER_DOC_DIR        ${ALDER_ROOT_DIR}/doc )
 SET( ALDER_DOXY_DIR       ${PROJECT_BINARY_DIR}/doxygen )
 SET( ALDER_TESTING_DIR    ${ALDER_ROOT_DIR}/testing )
@@ -137,60 +138,10 @@ ADD_SUBDIRECTORY(
 ADD_SUBDIRECTORY( 
   ${ALDER_QT_GENERIC_DIR} ${PROJECT_BINARY_DIR}/generic
 )  
-
-# CMake configurations for the Alder application
-SET( ALDER_INCLUDE_DIRS
-  ${ALDER_COMMON_DIR}
-  ${ALDER_VTK_DIR}
-  ${ALDER_BUSINESS_DIR}
-  ${ALDER_QT_DIR}
-  ${ALDER_QT_MODEL_DIR}
-  ${ALDER_QT_GENERIC_DIR}
+ADD_SUBDIRECTORY( 
+  ${ALDER_APP_DIR} ${PROJECT_BINARY_DIR}/application
 )
 
-# source for the alder application
-SET( ALDER_APP_SRC
-  ${ALDER_SRC_DIR}/Alder.cxx
-  ${ALDER_QT_DIR}/QAlderApplication.cxx
-  ${ALDER_QT_DIR}/QMainAlderWindow.cxx
-)
-
-SET( ALDER_APP_UI
-  ${ALDER_QT_DIR}/QMainAlderWindow.ui
-)
-
-SET( ALDER_APP_MOC
-  ${ALDER_QT_DIR}/QMainAlderWindow.h
-)
-
-# Wrap QT files
-QT4_WRAP_UI( AlderApp_UI   ${ALDER_APP_UI} )
-QT4_WRAP_CPP( AlderApp_MOC ${ALDER_APP_MOC} )
-
-ADD_DEFINITIONS( -DQT_GUI_LIBS -DQT_CORE_LIB )
-
-SET_SOURCE_FILES_PROPERTIES( ${ALDER_APP_SRC} PROPERTIES OBJECT_DEPENDS "${AlderApp_UI}" )
-
-# Use the include path and library for Qt
-INCLUDE_DIRECTORIES(
-  ${ALDER_INCLUDE_DIRS}
-  ${QT_INCLUDE_DIR}
-  ${CRYPTO++_INCLUDE_DIR}
-)
-
-# Targets
-ADD_EXECUTABLE( alder 
-  ${ALDER_APP_SRC}
-  ${AlderApp_UI}
-  ${AlderApp_MOC}
-)
-
-TARGET_LINK_LIBRARIES( alder
-  ${ALDER_LIBRARIES}
-  ${QT_LIBRARIES}
-)
-
-INSTALL( TARGETS alder RUNTIME DESTINATION bin )
 INSTALL( FILES ${CMAKE_BINARY_DIR}/config.xml DESTINATION etc )
 
 ADD_CUSTOM_TARGET( dist
