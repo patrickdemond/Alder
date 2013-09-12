@@ -22,8 +22,9 @@
 #include "vtkNew.h"
 #include "vtkObjectFactory.h"
 
-#include "gdcmImageReader.h"
 #include "gdcmDirectoryHelper.h"
+#include "gdcmImageReader.h"
+#include "gdcmTrace.h"
 
 #include <stdexcept>
 
@@ -185,11 +186,14 @@ namespace Alder
     gdcm::Tag tag;
     if( "AcquisitionDateTime" == tagName ) tag = gdcm::Tag( 0x0008, 0x002a );
     else if( "SeriesNumber" == tagName ) tag = gdcm::Tag( 0x0020,0x0011 );
+    else if( "PatientsName" == tagName ) tag = gdcm::Tag( 0x0010, 0x0010 );
+    else if( "Laterality" == tagName ) tag = gdcm::Tag( 0x0020, 0x0060 );
     else throw std::runtime_error( "Unknown DICOM tag name." );
 
     if( !ds.FindDataElement( tag ) )
       throw std::runtime_error( "Unknown DICOM tag with name " + tagName );
 
+    gdcm::Trace::WarningOff();
     return std::string( 
       gdcm::DirectoryHelper::GetStringValueFromTag( tag, ds ) );
   }
