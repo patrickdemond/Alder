@@ -9,14 +9,14 @@
 
 =========================================================================*/
 
-#include "OpalService.h"
+#include <OpalService.h>
 
-#include "Application.h"
-#include "Configuration.h"
-#include "Utilities.h"
+#include <Application.h>
+#include <Configuration.h>
+#include <Utilities.h>
 
-#include "vtkCommand.h"
-#include "vtkObjectFactory.h"
+#include <vtkCommand.h>
+#include <vtkObjectFactory.h>
 
 #include <sstream>
 #include <stdexcept>

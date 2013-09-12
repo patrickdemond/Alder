@@ -8,19 +8,19 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "Interview.h"
+#include <Interview.h>
 
-#include "Application.h"
-#include "Exam.h"
-#include "Modality.h"
-#include "OpalService.h"
-#include "User.h"
-#include "Utilities.h"
+#include <Application.h>
+#include <Exam.h>
+#include <Modality.h>
+#include <OpalService.h>
+#include <User.h>
+#include <Utilities.h>
 
-#include "vtkCommand.h"
-#include "vtkNew.h"
-#include "vtkObjectFactory.h"
-#include "vtkSmartPointer.h"
+#include <vtkCommand.h>
+#include <vtkNew.h>
+#include <vtkObjectFactory.h>
+#include <vtkSmartPointer.h>
 
 #include <map>
 #include <stdexcept>

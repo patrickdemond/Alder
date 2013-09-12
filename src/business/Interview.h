@@ -22,8 +22,8 @@
 #ifndef __Interview_h
 #define __Interview_h
 
-#include "ActiveRecord.h"
-#include "Image.h"
+#include <ActiveRecord.h>
+#include <Image.h>
 
 #include <iostream>
 

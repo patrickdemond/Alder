@@ -22,7 +22,7 @@
 #ifndef __Image_h
 #define __Image_h
 
-#include "ActiveRecord.h"
+#include <ActiveRecord.h>
 
 /**
  * @addtogroup Alder

@@ -8,10 +8,10 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "User.h"
-#include "Utilities.h"
+#include <User.h>
+#include <Utilities.h>
 
-#include "vtkObjectFactory.h"
+#include <vtkObjectFactory.h>
 
 namespace Alder
 {

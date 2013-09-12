@@ -22,7 +22,7 @@
 #ifndef __Rating_h
 #define __Rating_h
 
-#include "ActiveRecord.h"
+#include <ActiveRecord.h>
 
 #include <iostream>
 

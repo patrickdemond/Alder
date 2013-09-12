@@ -8,11 +8,11 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "Modality.h"
+#include <Modality.h>
 
-#include "Utilities.h"
+#include <Utilities.h>
 
-#include "vtkObjectFactory.h"
+#include <vtkObjectFactory.h>
 
 namespace Alder
 {

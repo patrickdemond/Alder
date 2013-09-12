@@ -26,10 +26,10 @@
 #ifndef __OpalService_h
 #define __OpalService_h
 
-#include "ModelObject.h"
+#include <ModelObject.h>
 
-#include "vtkSmartPointer.h"
-#include "vtkAlderMySQLQuery.h"
+#include <vtkSmartPointer.h>
+#include <vtkAlderMySQLQuery.h>
 
 #include <iostream>
 #include <json/reader.h>

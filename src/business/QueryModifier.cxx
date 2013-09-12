@@ -9,14 +9,14 @@
 
 =========================================================================*/
 
-#include "QueryModifier.h"
+#include <QueryModifier.h>
 
-#include "Application.h"
-#include "Database.h"
+#include <Application.h>
+#include <Database.h>
 
-#include "vtkAlderMySQLQuery.h"
-#include "vtkObjectFactory.h"
-#include "vtkSmartPointer.h"
+#include <vtkAlderMySQLQuery.h>
+#include <vtkObjectFactory.h>
+#include <vtkSmartPointer.h>
 
 #include <sstream>
 #include <vector>

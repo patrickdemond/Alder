@@ -22,7 +22,7 @@
 #ifndef __Modality_h
 #define __Modality_h
 
-#include "ActiveRecord.h"
+#include <ActiveRecord.h>
 
 #include <iostream>
 

@@ -9,11 +9,11 @@
 
 =========================================================================*/
 
-#include "Configuration.h"
+#include <Configuration.h>
 
-#include "vtkObjectFactory.h"
-#include "vtkSmartPointer.h"
-#include "vtkXMLConfigurationFileReader.h"
+#include <vtkObjectFactory.h>
+#include <vtkSmartPointer.h>
+#include <vtkXMLConfigurationFileReader.h>
 
 namespace Alder
 {

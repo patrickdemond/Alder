@@ -27,11 +27,11 @@
 #ifndef __Database_h
 #define __Database_h
 
-#include "ModelObject.h"
+#include <ModelObject.h>
 
-#include "vtkAlderMySQLQuery.h"
-#include "vtkSmartPointer.h"
-#include "vtkVariant.h"
+#include <vtkAlderMySQLQuery.h>
+#include <vtkSmartPointer.h>
+#include <vtkVariant.h>
 
 #include <iostream>
 #include <map>

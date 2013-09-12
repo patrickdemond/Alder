@@ -8,16 +8,16 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "Exam.h"
+#include <Exam.h>
 
-#include "Application.h"
-#include "Image.h"
-#include "Interview.h"
-#include "OpalService.h"
-#include "Utilities.h"
+#include <Application.h>
+#include <Image.h>
+#include <Interview.h>
+#include <OpalService.h>
+#include <Utilities.h>
 
-#include "vtkNew.h"
-#include "vtkObjectFactory.h"
+#include <vtkNew.h>
+#include <vtkObjectFactory.h>
 
 namespace Alder
 {

@@ -26,9 +26,9 @@
 #ifndef __Configuration_h
 #define __Configuration_h
 
-#include "ModelObject.h"
+#include <ModelObject.h>
 
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 #include <iostream>
 #include <map>

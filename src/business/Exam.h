@@ -22,7 +22,7 @@
 #ifndef __Exam_h
 #define __Exam_h
 
-#include "ActiveRecord.h"
+#include <ActiveRecord.h>
 
 #include <iostream>
 

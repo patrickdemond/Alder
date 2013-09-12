@@ -22,7 +22,7 @@
 #ifndef __User_h
 #define __User_h
 
-#include "ActiveRecord.h"
+#include <ActiveRecord.h>
 
 #include <iostream>
 

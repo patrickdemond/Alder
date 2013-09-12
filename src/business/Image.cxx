@@ -8,20 +8,20 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "Image.h"
+#include <Image.h>
 
-#include "Configuration.h"
-#include "Exam.h"
-#include "Interview.h"
-#include "Modality.h"
-#include "Rating.h"
-#include "User.h"
-#include "Utilities.h"
+#include <Configuration.h>
+#include <Exam.h>
+#include <Interview.h>
+#include <Modality.h>
+#include <Rating.h>
+#include <User.h>
+#include <Utilities.h>
 
-#include "vtkDirectory.h"
-#include "vtkImageDataReader.h"
-#include "vtkNew.h"
-#include "vtkObjectFactory.h"
+#include <vtkDirectory.h>
+#include <vtkImageDataReader.h>
+#include <vtkNew.h>
+#include <vtkObjectFactory.h>
 
 #include <gdcmAnonymizer.h>
 #include <gdcmDirectoryHelper.h>

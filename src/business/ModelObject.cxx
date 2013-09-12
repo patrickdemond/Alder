@@ -9,7 +9,7 @@
 
 =========================================================================*/
 
-#include "ModelObject.h"
+#include <ModelObject.h>
 
 namespace Alder
 {

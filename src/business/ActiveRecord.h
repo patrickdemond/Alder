@@ -26,16 +26,16 @@
 #ifndef __ActiveRecord_h
 #define __ActiveRecord_h
 
-#include "ModelObject.h"
+#include <ModelObject.h>
 
-#include "Application.h"
-#include "Database.h"
-#include "QueryModifier.h"
+#include <Application.h>
+#include <Database.h>
+#include <QueryModifier.h>
 
-#include "vtkAlderMySQLQuery.h"
-#include "vtkNew.h"
-#include "vtkSmartPointer.h"
-#include "vtkVariant.h"
+#include <vtkAlderMySQLQuery.h>
+#include <vtkNew.h>
+#include <vtkSmartPointer.h>
+#include <vtkVariant.h>
 
 #include <map>
 #include <stdexcept>

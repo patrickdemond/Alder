@@ -22,8 +22,8 @@
 #ifndef __ModelObject_h
 #define __ModelObject_h
 
-#include "vtkObject.h"
-#include "vtkSetGet.h"
+#include <vtkObject.h>
+#include <vtkSetGet.h>
 
 /**
  * @addtogroup Alder

@@ -9,18 +9,18 @@
 
 =========================================================================*/
 
-#include "Database.h"
+#include <Database.h>
 
-#include "Configuration.h"
-#include "User.h"
-#include "Utilities.h"
+#include <Configuration.h>
+#include <User.h>
+#include <Utilities.h>
 
-#include "vtkAlderMySQLDatabase.h"
-#include "vtkObjectFactory.h"
-#include "vtkSmartPointer.h"
-#include "vtkAlderMySQLQuery.h"
-#include "vtkTable.h"
-#include "vtkVariant.h"
+#include <vtkAlderMySQLDatabase.h>
+#include <vtkObjectFactory.h>
+#include <vtkSmartPointer.h>
+#include <vtkAlderMySQLQuery.h>
+#include <vtkTable.h>
+#include <vtkVariant.h>
 
 #include <sstream>
 #include <stdexcept>

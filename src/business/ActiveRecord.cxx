@@ -9,12 +9,12 @@
 
 =========================================================================*/
 
-#include "ActiveRecord.h"
+#include <ActiveRecord.h>
 
-#include "Application.h"
-#include "Database.h"
+#include <Application.h>
+#include <Database.h>
 
-#include "vtkAlderMySQLQuery.h"
+#include <vtkAlderMySQLQuery.h>
 
 #include <sstream>
 #include <stdexcept>

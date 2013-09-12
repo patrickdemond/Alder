@@ -9,21 +9,21 @@
 
 =========================================================================*/
 
-#include "Application.h"
+#include <Application.h>
 
-#include "Configuration.h"
-#include "Database.h"
-#include "Exam.h"
-#include "Image.h"
-#include "Interview.h"
-#include "Modality.h"
-#include "OpalService.h"
-#include "Rating.h"
-#include "User.h"
+#include <Configuration.h>
+#include <Database.h>
+#include <Exam.h>
+#include <Image.h>
+#include <Interview.h>
+#include <Modality.h>
+#include <OpalService.h>
+#include <Rating.h>
+#include <User.h>
 
-#include "vtkDirectory.h"
-#include "vtkObjectFactory.h"
-#include "vtkVariant.h"
+#include <vtkDirectory.h>
+#include <vtkObjectFactory.h>
+#include <vtkVariant.h>
 
 #include <cxxabi.h>
 #include <dlfcn.h>

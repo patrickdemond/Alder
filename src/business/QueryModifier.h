@@ -25,9 +25,9 @@
 #ifndef __QueryModifier_h
 #define __QueryModifier_h
 
-#include "ModelObject.h"
+#include <ModelObject.h>
 
-#include "vtkVariant.h"
+#include <vtkVariant.h>
 
 #include <map>
 #include <vector>

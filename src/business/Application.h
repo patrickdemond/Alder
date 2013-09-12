@@ -28,11 +28,10 @@
 #ifndef __Application_h
 #define __Application_h
 
-#include "ModelObject.h"
+#include <ModelObject.h>
+#include <Utilities.h>
 
-#include "Utilities.h"
-
-#include "vtkCommand.h"
+#include <vtkCommand.h>
 
 #include <iostream>
 #include <ostream>
