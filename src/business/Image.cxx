@@ -225,9 +225,9 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  void Image::AnonymizeDICOM()
+  bool Image::AnonymizeDICOM()
   {
-    if( !this->IsDICOM() ) return;
+    if( !this->IsDICOM() ) return false;
     if( !this->GetDICOMTag( "PatientsName" ).empty() )
     {
       gdcm::Reader gdcmRead;
@@ -248,7 +248,9 @@ namespace Alder
       {
         throw std::runtime_error("Failed to anonymize dicom data during write" );
       }
+      return true;
     }
+    return false;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

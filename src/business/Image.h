@@ -98,8 +98,9 @@ namespace Alder
 
     /**
      * Anonymize a dicom image by clearing the PatientsName tag.
+     * @return bool Whethere the file was anonymized
      */
-    void AnonymizeDICOM();
+    bool AnonymizeDICOM();
 
     /**
      * Returns the neighbouring interview in UId/VisitDate order.
