@@ -13,9 +13,6 @@ TARGET_LINK_LIBRARIES( ${PROJECT_NAME}
   AlderCommon
   AlderBusiness
   AlderVTK
-#  gdcmMSFF
-#  gdcmDSED
-#  gdcmCommon 
 )
 
 INSTALL( TARGETS ${PROJECT_NAME}
