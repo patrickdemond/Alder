@@ -1,3 +1,13 @@
+/*=========================================================================
+
+  Program:  Alder (CLSA Medical Image Quality Assessment Tool)
+  Module:   DexaClean.cxx
+  Language: C++
+
+  Author: Patrick Emond <emondpd AT mcmaster DOT ca>
+  Author: Dean Inglis <inglisd AT mcmaster DOT ca>
+
+=========================================================================*/
 #include <Application.h>
 #include <Configuration.h>
 #include <Exam.h>
@@ -12,26 +22,72 @@
 #include <vtkNew.h>
 #include <vtkSmartPointer.h>
 
-#include <gdcmAnonymizer.h>
-#include <gdcmReader.h>
-#include <gdcmWriter.h>
-
 #include <fstream>
 #include <stdexcept>
+
+#include <termios.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <iostream>
 
 bool ApplicationInit();
 bool CleanImage( std::string const &fileName, int const &examType );
 
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+int getch()
+{
+  int ch;
+  struct termios t_old, t_new;
+
+  tcgetattr( STDIN_FILENO, &t_old );
+  t_new = t_old;
+  t_new.c_lflag &= ~(ICANON | ECHO);
+  tcsetattr( STDIN_FILENO, TCSANOW, &t_new );
+
+  ch = getchar();
+
+  tcsetattr( STDIN_FILENO, TCSANOW, &t_old );
+  return ch;
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+std::string getpass( const char *prompt, bool show_asterisk = true )
+{
+  const char BACKSPACE = 127;
+  const char RETURN = 10;
+
+  std::string password;
+  unsigned char ch = 0;
+
+  std::cout << prompt << std::endl;
+
+  while( ( ch = getch() ) != RETURN )
+  {
+    if( ch == BACKSPACE )
+    {
+      if( !password.empty() )
+      {
+        if( show_asterisk )
+          std::cout << "\b \b";
+        password.resize( password.size() - 1 );
+      }
+    }
+    else
+    {
+      password += ch;
+      if( show_asterisk )
+        std::cout <<'*';
+    }
+  }
+  std::cout << std::endl;
+  return password;
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 int main( int argc, char** argv )
 {
   // stand alone console application that makes use of the
   // Alder business logic
-
-  if( argc != 2 )
-  {
-    std::cout << "Usage: DexaClean <Alder admin pwd>" << std::endl;
-    return EXIT_FAILURE;
-  }
 
   if( !ApplicationInit() )
   {
@@ -40,7 +96,7 @@ int main( int argc, char** argv )
 
   vtkNew< Alder::User > user;
   user->Load( "Name", "administrator" );
-  std::string pwd = argv[1];
+  std::string pwd = getpass( "Please enter the Alder admin password: ", true );
   if( !user->IsPassword( pwd ) )
   {
     std::cout << "Error: wrong administrator password" << std::endl;
@@ -74,7 +130,6 @@ int main( int argc, char** argv )
         std::string typeStr = exam->Get( "Type" ).ToString();
 
         if( modStr != "Dexa" ) continue;
-        if( typeStr == "LateralBoneDensity" ) continue;
 
         std::string latStr = exam->Get( "Laterality" ).ToString();
 
@@ -84,14 +139,15 @@ int main( int argc, char** argv )
         {
           Alder::Image *image = imageIt->GetPointer();
           std::string fileName = image->GetFileName();
-          std::cout << "Inter: " << exam->Get( "Interviewer" ).ToString() << ", "
-           << "Site: " << siteStr << ", "
-           << "Date: " << exam->Get( "DatetimeAcquired" ).ToString() << ", "
-           << "Mod: " << modStr << ", "
-           << "Type: " << typeStr << ", "
-           << "Lat: " << latStr << ", "
-           << "Dl: " << exam->Get( "Downloaded" ).ToInt() << ", "
-           << "Path: " << fileName << std::endl;
+          std::cout << "-------------- PROCESSING IMAGE --------------" << std::endl
+           << "Interviewer: " << exam->Get( "Interviewer" ).ToString() << std::endl
+           << "Site: "        << siteStr << std::endl
+           << "Datetime: "    << exam->Get( "DatetimeAcquired" ).ToString() << std::endl
+           << "Modality: "    << modStr << std::endl
+           << "Type: "        << typeStr << std::endl
+           << "Laterality: "  << latStr << std::endl
+           << "Downloaded: "  << exam->Get( "Downloaded" ).ToInt() << std::endl
+           << "Path: "        << fileName << std::endl;
 
           //check the dicom tag for laterality
           if( latStr != "none" )
@@ -100,7 +156,7 @@ int main( int argc, char** argv )
               std::string tagStr = image->GetDICOMTag( "Laterality" );
               if( tagStr.size() > 0 )
               {
-                tagStr = Alder::Utilities::toLower( tagStr ); // tagStr will either be R or L
+                tagStr = Alder::Utilities::toLower( tagStr );
                 if( tagStr.compare(0, 1, latStr, 0, 1) != 0 )
                 {
                   latStr = tagStr.compare(0, 1, "l", 0, 1) == 0 ? "left" : "right";
@@ -118,7 +174,7 @@ int main( int argc, char** argv )
           std::string nameStr = image->GetDICOMTag( "PatientsName" );
           if( !nameStr.empty() ) 
           {
-            std::cout << "CONF BREECH!!! " << nameStr << std::endl;
+            std::cout << "CONFIDENTIALITY BREECH! " << nameStr << std::endl;
             int examType = -1;
             if( typeStr == "DualHipBoneDensity" )
             {  
@@ -133,7 +189,11 @@ int main( int argc, char** argv )
               // check if the image has a parent, if so, it is a body composition file
               examType =( image->Get( "ParentImageId" ).IsValid() ) ? 4 : 3;
             }  
-            CleanImage( fileName, examType );
+
+            if( CleanImage( fileName, examType ) ) std::cout << "CLEANED" << std::endl;
+            
+
+            if( image->AnonymizeDICOM() ) std::cout << "ANONYMIZED" << std::endl;
           }
         }
       }
@@ -144,6 +204,7 @@ int main( int argc, char** argv )
   return EXIT_SUCCESS;
 }
 
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 bool ApplicationInit()
 {
   bool status = true;
@@ -180,7 +241,7 @@ bool ApplicationInit()
   return status;
 }
 
-
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 bool CleanImage( std::string const &fileName, int const &examType )
 {
   if( examType < 0 || examType > 4 ) return false;
@@ -243,21 +304,12 @@ bool CleanImage( std::string const &fileName, int const &examType )
   flip->SetFilteredAxis( 1 );
   flip->Update();
 
-  unsigned pos = fileName.find_last_of( "." );
-  std::string outName = fileName.substr( 0, pos );
-  outName += "_repaired.dcm";
-
   // byte size of the original dicom file
   unsigned long flength = Alder::Utilities::getFileLength( fileName );
   // byte size of the image
   unsigned long ilength = dims[0]*dims[1]*3;
   // byte size of the dicom header
   unsigned long hlength = flength - ilength;
-
-  std::cout << "image dims: " << dims[0] << " x " << dims[1] << " x " << dims[2] << std::endl;
-  std::cout << "file size: " << flength << std::endl;
-  std::cout << "image size: " << ilength << std::endl;
-  std::cout << "header size: " << hlength << std::endl;
 
   // read in the input dicom file
   std::ifstream infs;
@@ -274,7 +326,7 @@ bool CleanImage( std::string const &fileName, int const &examType )
 
   // output the repaired dicom file
   std::ofstream outfs;
-  outfs.open( outName.c_str(), std::ofstream::binary | std::ofstream::trunc );
+  outfs.open( fileName.c_str(), std::ofstream::binary | std::ofstream::trunc );
 
   if( !outfs.is_open() )
   {
@@ -289,25 +341,5 @@ bool CleanImage( std::string const &fileName, int const &examType )
 
   delete[] buffer;
 
-  // anonymize the name field dicom tags
-  gdcm::Reader gdcmRead;
-  gdcmRead.SetFileName( outName.c_str() );
-  if( !gdcmRead.Read() )
-  {
-    std::cout << "ERROR: failed to anonymize dicom data during read" << std::cout;
-    return false;
-  }
-  gdcm::Anonymizer gdcmAnon;
-  gdcmAnon.SetFile( gdcmRead.GetFile() );
-  gdcmAnon.Empty( gdcm::Tag(0x10, 0x10) );
-
-  gdcm::Writer gdcmWriter;
-  gdcmWriter.SetFile( gdcmAnon.GetFile() );
-  gdcmWriter.SetFileName( outName.c_str() );
-  if( !gdcmWriter.Write() )
-  {
-    std::cout << "ERROR: failed to anonymize dicom data during write" << std::cout;
-    return false;
-  }
   return true;
 }
