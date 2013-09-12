@@ -26,7 +26,7 @@ public:
   virtual ~QAlderDicomTagWidget();
 
 public Q_SLOTS:
-  virtual void updateTableWidget();
+  virtual void updateTableWidget( QString );
 
 protected:
   QScopedPointer<QAlderDicomTagWidgetPrivate> d_ptr;

@@ -89,6 +89,10 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   this->atlasVisible = true;
   this->slotShowAtlas();
   this->DicomTagWidget = new QAlderDicomTagWidget( this );
+  this->Connections->Connect( Alder::Application::GetInstance(),
+    Alder::Application::ActiveImageEvent,
+    this, SLOT( updateDicomTagWidget() ) );
+
   this->dicomTagsVisible = false;
   this->DicomTagWidget->hide();
 
@@ -356,4 +360,13 @@ void QMainAlderWindow::updateInterface()
 
   this->ui->actionShowDicomTags->setEnabled( loggedIn );
   this->DicomTagWidget->setEnabled( loggedIn );
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::updateDicomTagWidget()
+{
+  Alder::Application *app = Alder::Application::GetInstance();
+  Alder::Image *image = app->GetActiveImage();
+  QString fileName = image ? image->GetFileName().c_str() : "";
+  this->DicomTagWidget->updateTableWidget( fileName );
 }

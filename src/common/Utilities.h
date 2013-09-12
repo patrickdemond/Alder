@@ -8,35 +8,35 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-//
-// .SECTION Description
-// A utilities header to include typedefs, macros, global functions, etc.
-//
 
+/**
+ * @class Utilities
+ *
+ * @author Patrick Emond <emondpd AT mcmaster DOT ca>
+ * @author Dean Inglis <inglisd AT mcmaster DOT ca>
+ *
+ * @brief Utilities class includes typedefs, macros, global functions, etc.
+ *
+ * All methods in this class are static.  There is no need to instantiate
+ * and instance of the Utilities class.  The class implementation file
+ * exists solely for the creation of a library.
+ *
+ */
 #ifndef __Utilities_h
 #define __Utilities_h
-
-#define ALDER_VERSION_MAJOR @ALDER_VERSION_MAJOR@
-#define ALDER_VERSION_MINOR @ALDER_VERSION_MINOR@
-#define ALDER_VERSION_PATCH @ALDER_VERSION_PATCH@
-
-#define ALDER_CONFIG_FILE "@ALDER_CONFIG_FILE@"
-#define ALDER_SALT_STRING "@ALDER_SALT_STRING@"
-#define ALDER_STACK_DEPTH @ALDER_STACK_DEPTH@
-
-#include "Configuration.h"
 
 #include <algorithm>
 #include <base64.h>
 #include <cctype>
 #include <fstream>
-#include <json/reader.h>
 #include <sha.h>
 #include <sstream>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
+
+#include <AlderConfig.h>
 
 /**
  * @addtogroup Alder
@@ -48,6 +48,7 @@ namespace Alder
   class Utilities
   {
   public:
+
     inline static void hashString( std::string input, std::string &output )
     {
       input += ALDER_SALT_STRING;
@@ -85,7 +86,7 @@ namespace Alder
       return size * count;
     }
 
-    inline static std::string exec( std::string command )
+    inline static std::string exec( std::string const &command )
     {
       FILE* pipe = popen( command.c_str(), "r" );
       if( !pipe ) return "ERROR";
@@ -96,7 +97,7 @@ namespace Alder
       return result;
     } 
 
-    inline static std::string getTime( std::string format )
+    inline static std::string getTime( std::string const &format )
     {
       char buffer[256];
       time_t rawtime;
@@ -105,27 +106,46 @@ namespace Alder
       return std::string( buffer );
     }
 
-    inline static std::string toLower( std::string str )
+    inline static std::string toLower( std::string const &str )
     {
       std::string returnString = str;
       std::transform( str.begin(), str.end(), returnString.begin(), tolower );
       return returnString;
     }
 
-    inline static std::string toUpper( std::string str )
+    inline static std::string toUpper( std::string const &str )
     {
       std::string returnString = str;
       std::transform( str.begin(), str.end(), returnString.begin(), toupper );
       return returnString;
     }
 
-    inline static bool fileExists( std::string filename )
+    inline static std::string removeLeadingTrailing( std::string const &str,
+      const char ch = ' ' )
+    {
+      std::string result(str);
+      std::string::iterator first = result.begin(), last = result.end();
+      while ( first != last && *first == ch ) first++;
+      if ( first != result.begin() ) result.erase( result.begin(), first );
+      first = result.begin();
+      last = result.end();
+      if ( first != last )
+      {
+        last--;
+        while ( first != last && *last == ch ) last--;
+        if ( *last != ch ) last++;
+      }
+      if ( last != result.end() ) result.erase( last, result.end() );
+      return result;
+    }
+
+    inline static bool fileExists( std::string const &filename )
     {
       if( filename.empty() ) return false;
       return access( filename.c_str(), R_OK ) == 0;
     }
 
-    inline static std::string getFileExtension( std::string filename )
+    inline static std::string getFileExtension( std::string const &filename )
     {
       std::string::size_type dot_pos = filename.rfind(".");
       std::string extension = (dot_pos == std::string::npos) ? "" :
@@ -133,7 +153,7 @@ namespace Alder
       return extension;  
     }
 
-    inline static std::string getFilenamePath( std::string filename )
+    inline static std::string getFilenamePath( std::string const &filename )
     {
       std::string::size_type slash_pos = filename.rfind("/");
       if( slash_pos != std::string::npos )
@@ -155,7 +175,7 @@ namespace Alder
       }
     }
 
-    inline static unsigned long getFileLength( std::string filename )
+    inline static unsigned long getFileLength( std::string const &filename )
     {
       struct stat fs;
       return 0 != stat( filename.c_str(), &fs ) ? 0 : static_cast<unsigned long>( fs.st_size );
@@ -184,9 +204,14 @@ namespace Alder
         str = str.substr( found + 1 );
         found = str.find_first_of( separator );
       }
-      if( str.length() > 0 ) results.push_back( str );
+      if( str.size() > 0 ) results.push_back( str );
       return results;
     }
+
+  protected:
+    Utilities() {}
+    ~Utilities() {}
+
   };
 }
 

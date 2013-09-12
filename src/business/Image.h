@@ -77,6 +77,11 @@ namespace Alder
     bool IsRatedBy( User* user );
 
     /**
+     *  Is this a dicom image?
+     */
+    bool IsDICOM();
+
+    /**
      * Get arbitrary DICOM tag value.  Works only for dicom images.
      */
     std::string GetDICOMTag( const std::string tagName );
@@ -90,6 +95,12 @@ namespace Alder
      * Get the number of rows, columns and frames.  Works only for dicom images.
      */
     std::vector<int> GetDICOMDimensions();
+
+    /**
+     * Anonymize a dicom image by clearing the PatientsName tag.
+     * @return bool Whethere the file was anonymized
+     */
+    bool AnonymizeDICOM();
 
     /**
      * Returns the neighbouring interview in UId/VisitDate order.

@@ -11,12 +11,6 @@
 #include <QAlderDicomTagWidget.h>
 #include <ui_QAlderDicomTagWidget.h>
 
-#include <Application.h>
-#include <Image.h>
-
-#include <vtkEventQtSlotConnect.h>
-#include <vtkSmartPointer.h>
-
 #include <gdcmReader.h>
 #include <gdcmDataSet.h>
 #include <gdcmSequenceOfItems.h>
@@ -47,13 +41,12 @@ public:
 
   virtual void setupUi( QWidget* );
   virtual void updateUi();
-
-  virtual void buildDicomStrings( const std::string& fileName );
-  virtual void clearDicomStrings();
+  virtual void setFileName( QString );
+  virtual void buildDicomStrings();
   
 private:
-  vtkSmartPointer< vtkEventQtSlotConnect > connections;
   std::vector< std::vector< std::string > > dicomStrings;
+  QString fileName;
 
   std::string getTagString( const gdcm::Tag& t, const int& item = 0 );
   void dumpElements( const std::vector< std::pair< std::string, gdcm::DataElement > >& elemMap,
@@ -71,7 +64,6 @@ private:
 QAlderDicomTagWidgetPrivate::QAlderDicomTagWidgetPrivate(
   QAlderDicomTagWidget& object ) : q_ptr(&object)
 {
-  this->connections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -80,25 +72,24 @@ void QAlderDicomTagWidgetPrivate::setupUi(QWidget* widget)
   Q_Q(QAlderDicomTagWidget);
 
   this->Ui_QAlderDicomTagWidget::setupUi(widget);
-
-  Alder::Application *app = Alder::Application::GetInstance();
-  this->connections->Connect( app,
-    Alder::Application::ActiveImageEvent,
-    q,
-    SLOT( updateTableWidget() ) );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QAlderDicomTagWidgetPrivate::clearDicomStrings()
+void QAlderDicomTagWidgetPrivate::setFileName( QString fileName )
 {
-  this->dicomStrings.clear();
+  this->fileName = fileName;
+  this->updateUi();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QAlderDicomTagWidgetPrivate::buildDicomStrings( const std::string& fileName )
+void QAlderDicomTagWidgetPrivate::buildDicomStrings()
 {
+  if( this->fileName.isEmpty() || this->fileName.isNull() )
+  {
+    return;
+  }
   gdcm::Reader reader;
-  reader.SetFileName( fileName.c_str() );
+  reader.SetFileName( this->fileName.toStdString().c_str() );
   bool success = reader.Read();
   if( !success )
   {
@@ -120,9 +111,6 @@ void QAlderDicomTagWidgetPrivate::buildDicomStrings( const std::string& fileName
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QAlderDicomTagWidgetPrivate::updateUi()
 {
-  Alder::Application *app = Alder::Application::GetInstance();
-  Alder::Image *image = app->GetActiveImage();
-
   this->tableWidget->clearContents();
   QStringList labels;
   labels << "Group,Element";
@@ -132,42 +120,39 @@ void QAlderDicomTagWidgetPrivate::updateUi()
   this->tableWidget->setHorizontalHeaderLabels(labels);
   this->tableWidget->setColumnCount( labels.size() );
   
-  this->clearDicomStrings();
-  if(image)
-  {
-    this->buildDicomStrings( image->GetFileName() );
+  this->dicomStrings.clear();
+  this->buildDicomStrings();
 
-    if( !this->dicomStrings.empty() )
+  if( !this->dicomStrings.empty() )
+  {
+    this->tableWidget->setRowCount( this->dicomStrings.size() );
+    int row = 0;
+    for( auto it = this->dicomStrings.begin(); it != this->dicomStrings.end(); ++it )
     {
-      this->tableWidget->setRowCount( this->dicomStrings.size() );
-      int row = 0;
-      for( auto it = this->dicomStrings.begin(); it != this->dicomStrings.end(); ++it )
+      std::stringstream tag;        
+      int i = 0;
+      int col = 0;
+      for( auto vIt = (*it).begin(); vIt != (*it).end(); ++vIt )
       {
-        std::stringstream tag;        
-        int i = 0;
-        int col = 0;
-        for( auto vIt = (*it).begin(); vIt != (*it).end(); ++vIt )
+        if(i==0) tag << "(" << *vIt << ",";
+        else if(i==1) 
         {
-          if(i==0) tag << "(" << *vIt << ",";
-          else if(i==1) 
-          {
-            tag << *vIt << ")";
-            QTableWidgetItem* item = new QTableWidgetItem();
-            item->setText( tag.str().c_str() );
-            this->tableWidget->setItem( row, col++, item );   
-          }
-          else
-          { 
-            QTableWidgetItem* item = new QTableWidgetItem();
-            item->setText( (*vIt).c_str() );
-            this->tableWidget->setItem( row, col++, item );   
-          }
-          i++;
+          tag << *vIt << ")";
+          QTableWidgetItem* item = new QTableWidgetItem();
+          item->setText( tag.str().c_str() );
+          this->tableWidget->setItem( row, col++, item );   
         }
-        row++;
+        else
+        { 
+          QTableWidgetItem* item = new QTableWidgetItem();
+          item->setText( (*vIt).c_str() );
+          this->tableWidget->setItem( row, col++, item );   
+        }
+        i++;
       }
-      this->tableWidget->resizeColumnsToContents();
+      row++;
     }
+    this->tableWidget->resizeColumnsToContents();
   }
 }
 
@@ -396,8 +381,9 @@ QAlderDicomTagWidget::~QAlderDicomTagWidget()
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QAlderDicomTagWidget::updateTableWidget()
+void QAlderDicomTagWidget::updateTableWidget( QString fileName )
 {
   Q_D(QAlderDicomTagWidget);
+  d->setFileName( fileName );
   d->updateUi();
 }
