@@ -260,7 +260,8 @@ namespace Alder
       vtkSmartPointer< Modality > modality;
       if( exam->GetRecord( modality ) )
       {
-        return modality->Get( "Name" ).ToString() == "Dexa" ;
+        std::string modStr = modality->Get( "Name" ).ToString();
+        return ( modStr == "Dexa" || modStr == "Ultrasound" );
       }
       return false; 
     }
