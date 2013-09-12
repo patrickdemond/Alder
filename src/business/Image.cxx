@@ -13,6 +13,7 @@
 #include "Configuration.h"
 #include "Exam.h"
 #include "Interview.h"
+#include "Modality.h"
 #include "Rating.h"
 #include "User.h"
 #include "Utilities.h"
@@ -22,9 +23,12 @@
 #include "vtkNew.h"
 #include "vtkObjectFactory.h"
 
-#include "gdcmDirectoryHelper.h"
-#include "gdcmImageReader.h"
-#include "gdcmTrace.h"
+#include <gdcmAnonymizer.h>
+#include <gdcmDirectoryHelper.h>
+#include <gdcmImageReader.h>
+#include <gdcmReader.h>
+#include <gdcmTrace.h>
+#include <gdcmWriter.h>
 
 #include <stdexcept>
 
@@ -218,6 +222,49 @@ namespace Alder
       dims.push_back( image.GetDimension(i) );
     
     return dims;  
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Image::AnonymizeDICOM()
+  {
+    if( !this->IsDICOM() ) return;
+    if( !this->GetDICOMTag( "PatientsName" ).empty() )
+    {
+      gdcm::Reader gdcmRead;
+      std::string fileName = this->GetFileName();
+      gdcmRead.SetFileName( fileName.c_str() );
+      if( !gdcmRead.Read() )
+      {
+        throw std::runtime_error( "Failed to anonymize dicom data during read" );
+      }
+      gdcm::Anonymizer gdcmAnon;
+      gdcmAnon.SetFile( gdcmRead.GetFile() );
+      gdcmAnon.Empty( gdcm::Tag(0x10, 0x10) );
+
+      gdcm::Writer gdcmWriter;
+      gdcmWriter.SetFile( gdcmAnon.GetFile() );
+      gdcmWriter.SetFileName( fileName.c_str() );
+      if( !gdcmWriter.Write() )
+      {
+        throw std::runtime_error("Failed to anonymize dicom data during write" );
+      }
+    }
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Image::IsDICOM()
+  {
+    vtkSmartPointer< Exam > exam;
+    if( this->GetRecord( exam ) )
+    {
+      vtkSmartPointer< Modality > modality;
+      if( exam->GetRecord( modality ) )
+      {
+        return modality->Get( "Name" ).ToString() == "Dexa" ;
+      }
+      return false; 
+    }
+    return false;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
