@@ -205,7 +205,7 @@ namespace Alder
     std::string port = this->Config->GetValue( "Database", "Port" );
 
     // make sure the database and user names are provided
-    if( 0 == name.length() || 0 == user.length() )
+    if( 0 == name.size() || 0 == user.size() )
     {
       cerr << "ERROR: database name and database user name must be included in "
            << "configuration file" << endl;
@@ -213,8 +213,8 @@ namespace Alder
     }
 
     // defaint host and port
-    if( 0 == host.length() ) host = "localhost";
-    if( 0 == port.length() ) port = "3306";
+    if( 0 == host.size() ) host = "localhost";
+    if( 0 == port.size() ) port = "3306";
 
     return this->DB->Connect( name, user, pass, host, vtkVariant( port ).ToInt() );
   }
@@ -236,8 +236,8 @@ namespace Alder
     std::string port = this->Config->GetValue( "Opal", "Port" );
     std::string timeout = this->Config->GetValue( "Opal", "Timeout" );
     this->Opal->Setup( user, pass, host );
-    if( 0 < port.length() ) this->Opal->SetPort( vtkVariant( port ).ToInt() );
-    if( 0 < timeout.length() ) this->Opal->SetTimeout( vtkVariant( timeout ).ToInt() );
+    if( 0 < port.size() ) this->Opal->SetPort( vtkVariant( port ).ToInt() );
+    if( 0 < timeout.size() ) this->Opal->SetTimeout( vtkVariant( timeout ).ToInt() );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

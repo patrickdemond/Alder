@@ -85,7 +85,7 @@ namespace Alder
       // if we are starting a new table save the old one and start over
       if( query->DataValue( 0 ).ToString() != tableName )
       {
-        if( 0 != tableName.length() ) this->Columns.insert(
+        if( 0 != tableName.size() ) this->Columns.insert(
           std::pair< std::string, std::map< std::string,std::map< std::string, vtkVariant > > >(
             tableName, tableMap ) );
         tableName = query->DataValue( 0 ).ToString();
@@ -105,7 +105,7 @@ namespace Alder
     }
 
     // save the last table
-    if( 0 != tableName.length() ) this->Columns.insert(
+    if( 0 != tableName.size() ) this->Columns.insert(
       std::pair< std::string, std::map< std::string,std::map< std::string, vtkVariant > > >(
         tableName, tableMap ) );
   }
@@ -216,7 +216,7 @@ namespace Alder
       throw std::runtime_error( error.str() );
     }
 
-    return 3 <= column.length() && 0 == column.compare( column.length() - 2, 2, "Id" );
+    return 3 <= column.size() && 0 == column.compare( column.size() - 2, 2, "Id" );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

@@ -93,10 +93,10 @@ namespace Alder
     else // file exists
     {
       // if the file has a .gz extension, unzip it
-      if( ".gz" == fileName.substr( fileName.length() - 3, 3 ) )
+      if( ".gz" == fileName.substr( fileName.size() - 3, 3 ) )
       {
         std::string zipFileName = fileName;
-        fileName = fileName.substr( 0, fileName.length() - 3 );
+        fileName = fileName.substr( 0, fileName.size() - 3 );
 
         std::string command = "gunzip ";
         command += zipFileName;
@@ -138,7 +138,7 @@ namespace Alder
     for( vtkIdType index = 0; index < directory->GetNumberOfFiles(); index++ )
     {
       std::string fileName = directory->GetFile( index );
-      if( fileName.substr( 0, id.length() ) == id )
+      if( fileName.substr( 0, id.size() ) == id )
       {
         std::stringstream name;
         name << path << "/" << fileName;
@@ -177,8 +177,8 @@ namespace Alder
 
     // get the name of the unzipped file
     std::string fileName = this->GetFileName();
-    if( ".gz" == fileName.substr( fileName.length() - 3, 3 ) )
-      fileName = fileName.substr( 0, fileName.length() - 3 );
+    if( ".gz" == fileName.substr( fileName.size() - 3, 3 ) )
+      fileName = fileName.substr( 0, fileName.size() - 3 );
 
     gdcm::ImageReader reader;
     reader.SetFileName( fileName.c_str() );
@@ -209,8 +209,8 @@ namespace Alder
 
     // get the name of the unzipped file
     std::string fileName = this->GetFileName();
-    if( ".gz" == fileName.substr( fileName.length() - 3, 3 ) )
-      fileName = fileName.substr( 0, fileName.length() - 3 );
+    if( ".gz" == fileName.substr( fileName.size() - 3, 3 ) )
+      fileName = fileName.substr( 0, fileName.size() - 3 );
 
     gdcm::ImageReader reader;
     reader.SetFileName( fileName.c_str() );

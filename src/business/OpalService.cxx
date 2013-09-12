@@ -90,7 +90,7 @@ namespace Alder
   Json::Value OpalService::Read(
     const std::string servicePath, const std::string fileName, const bool progress ) const
   {
-    bool toFile = 0 < fileName.length();
+    bool toFile = 0 < fileName.size();
     FILE *file;
     CURL *curl;
     std::stringstream urlStream;
@@ -178,7 +178,7 @@ namespace Alder
 
     if( !toFile )
     {
-      if( 0 == result.length() )
+      if( 0 == result.size() )
         throw std::runtime_error( "Empty response from Opal service" );
       else if( !reader.parse( result.c_str(), root ) )
         throw std::runtime_error( "Unable to parse result from Opal service" );
@@ -199,7 +199,7 @@ namespace Alder
     for( int i = 0; i < root.size(); ++i )
     {
       std::string identifier = root[i].get( "identifier", "" ).asString();
-      if( 0 < identifier.length() ) list.push_back( identifier );
+      if( 0 < identifier.size() ) list.push_back( identifier );
     }
 
     // Opal doesn't sort results, do so now
@@ -223,7 +223,7 @@ namespace Alder
     {
       identifier = root["valueSets"][i].get( "identifier", "" ).asString();
 
-      if( 0 < identifier.length() )
+      if( 0 < identifier.size() )
       {
         std::map< std::string, std::string > map;
         for( int j = 0; j < root["valueSets"][i]["values"].size(); ++j )
@@ -251,7 +251,7 @@ namespace Alder
            << "/valueSet/" << identifier;
     Json::Value root = this->Read( stream.str(), "", false );
     
-    if( 0 < root["valueSets"][0].get( "identifier", "" ).asString().length() )
+    if( 0 < root["valueSets"][0].get( "identifier", "" ).asString().size() )
     {
       for( int j = 0; j < root["valueSets"][0]["values"].size(); ++j )
       {
@@ -282,7 +282,7 @@ namespace Alder
     {
       identifier = root["valueSets"][i].get( "identifier", "" ).asString();
 
-      if( 0 < identifier.length() )
+      if( 0 < identifier.size() )
       {
         value = root["valueSets"][i]["values"][0].get( "value", "" ).asString();
         map[identifier] = value;

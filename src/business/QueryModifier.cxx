@@ -138,7 +138,7 @@ namespace Alder
 
     // add "WHERE" at the front, if necessary
     std::string sql = stream.str();
-    if( !appending || 0 < sql.length() ) sql = "WHERE" + sql;
+    if( !appending || 0 < sql.size() ) sql = "WHERE" + sql;
 
     return sql;
   }

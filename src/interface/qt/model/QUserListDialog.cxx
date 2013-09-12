@@ -114,7 +114,7 @@ void QUserListDialog::slotAdd()
     QObject::tr( "New user's name:" ),
     QLineEdit::Normal ).toStdString();
 
-  if( 0 < name.length() )
+  if( 0 < name.size() )
   {
     // make sure the user name doesn't already exist
     vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
