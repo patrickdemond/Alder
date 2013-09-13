@@ -8,13 +8,13 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "QLoginDialog.h"
-#include "ui_QLoginDialog.h"
+#include <QLoginDialog.h>
+#include <ui_QLoginDialog.h>
 
-#include "Application.h"
-#include "User.h"
+#include <Application.h>
+#include <User.h>
 
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 #include <QFile>
 #include <QInputDialog>

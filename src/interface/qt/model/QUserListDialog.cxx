@@ -8,13 +8,13 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "QUserListDialog.h"
-#include "ui_QUserListDialog.h"
+#include <QUserListDialog.h>
+#include <ui_QUserListDialog.h>
 
-#include "Modality.h"
-#include "User.h"
+#include <Modality.h>
+#include <User.h>
 
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 #include <QErrorMessage>
 #include <QFile>

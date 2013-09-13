@@ -45,9 +45,9 @@
 #define __QAlderFramePlayerWidget_h
 
 // Qt includes
+#include <QAbstractAnimation>
 #include <QIcon>
 #include <QWidget>
-#include <QAbstractAnimation>
 
 // VTK includes
 class vtkMedicalImageViewer;

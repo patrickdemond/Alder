@@ -11,22 +11,22 @@
 #include <QAlderDicomTagWidget.h>
 #include <ui_QAlderDicomTagWidget.h>
 
-#include <gdcmReader.h>
 #include <gdcmDataSet.h>
-#include <gdcmSequenceOfItems.h>
 #include <gdcmDict.h>
 #include <gdcmDicts.h>
-#include <gdcmGroupDict.h>
-#include <gdcmVR.h>
 #include <gdcmElement.h>
 #include <gdcmGlobal.h>
+#include <gdcmGroupDict.h>
+#include <gdcmReader.h>
+#include <gdcmSequenceOfItems.h>
+#include <gdcmVR.h>
 
 #include <QTableWidgetItem>
 
-#include <stdexcept>
-#include <vector>
 #include <map>
 #include <sstream>
+#include <stdexcept>
+#include <vector>
 
 class QAlderDicomTagWidgetPrivate : public Ui_QAlderDicomTagWidget
 {

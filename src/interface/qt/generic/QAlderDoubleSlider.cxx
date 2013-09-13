@@ -24,7 +24,7 @@
   limitations under the License.
 
 =========================================================================*/
-#include "QAlderDoubleSlider.h"
+#include <QAlderDoubleSlider.h>
 
 // QT includes
 #include <QDebug>

@@ -14,7 +14,7 @@
 
 #include <QWidget>
 
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 class vtkEventQtSlotConnect;
 class vtkMedicalImageViewer;

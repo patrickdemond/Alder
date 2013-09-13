@@ -8,11 +8,11 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "QMedicalImageWidget.h"
+#include <QMedicalImageWidget.h>
 
-#include "ui_QMedicalImageWidget.h"
+#include <ui_QMedicalImageWidget.h>
 
-#include "vtkMedicalImageViewer.h"
+#include <vtkMedicalImageViewer.h>
 
 #include <QScrollBar>
 

@@ -7,29 +7,29 @@
   Author:    Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "vtkImageDataReader.h"
+#include <vtkImageDataReader.h>
 
-#include "Utilities.h"
+#include <Utilities.h>
 
-#include "vtkBMPReader.h"
-#include "vtkGDCMImageReader.h"
-#include "vtkGESignaReader.h"
-#include "vtkImageData.h"
-#include "vtkJPEGReader.h"
-#include "vtkMedicalImageProperties.h"
-#include "vtkMetaImageReader.h"
-#include "vtkMINCImageReader.h"
-#include "vtkNew.h"
-#include "vtkObjectFactory.h"
-#include "vtkPNGReader.h"
-#include "vtkPNMReader.h"
-#include "vtkSLCReader.h"
-#include "vtkStringArray.h"
-#include "vtkTIFFReader.h"
-#include "vtkXMLImageDataReader.h"
+#include <vtkBMPReader.h>
+#include <vtkGDCMImageReader.h>
+#include <vtkGESignaReader.h>
+#include <vtkImageData.h>
+#include <vtkJPEGReader.h>
+#include <vtkMedicalImageProperties.h>
+#include <vtkMetaImageReader.h>
+#include <vtkMINCImageReader.h>
+#include <vtkNew.h>
+#include <vtkObjectFactory.h>
+#include <vtkPNGReader.h>
+#include <vtkPNMReader.h>
+#include <vtkSLCReader.h>
+#include <vtkStringArray.h>
+#include <vtkTIFFReader.h>
+#include <vtkXMLImageDataReader.h>
 
-#include "gdcmImageReader.h"
-#include "gdcmDirectoryHelper.h"
+#include <gdcmDirectoryHelper.h>
+#include <gdcmImageReader.h>
 
 #include <sstream>
 #include <stdexcept>

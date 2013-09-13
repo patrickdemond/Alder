@@ -8,7 +8,7 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "QAlderApplication.h"
+#include <QAlderApplication.h>
 
 #include <QErrorMessage>
 

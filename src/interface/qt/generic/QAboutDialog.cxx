@@ -8,8 +8,8 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "QAboutDialog.h"
-#include "ui_QAboutDialog.h"
+#include <QAboutDialog.h>
+#include <ui_QAboutDialog.h>
 
 #include <QFile>
 #include <QTextStream>

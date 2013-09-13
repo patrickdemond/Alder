@@ -24,8 +24,8 @@
   limitations under the License.
 
 =========================================================================*/
-#include "QAlderSliderWidget.h"
-#include "ui_QAlderSliderWidget.h"
+#include <QAlderSliderWidget.h>
+#include <ui_QAlderSliderWidget.h>
 
 // Qt includes
 #include <QDebug>

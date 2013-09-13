@@ -20,8 +20,8 @@
 
 #include <vtkAnimationScene.h>
 #include <vtkCommand.h>
-#include <vtkObjectFactory.h>
 #include <vtkMath.h>
+#include <vtkObjectFactory.h>
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 vtkAnimationPlayer::vtkAnimationPlayer()

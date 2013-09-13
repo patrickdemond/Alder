@@ -13,18 +13,18 @@
 // The main function which launches the application.
 //
 
-#include "Application.h"
-#include "Configuration.h"
-#include "User.h"
-#include "Utilities.h"
+#include <Application.h>
+#include <Configuration.h>
+#include <User.h>
+#include <Utilities.h>
 
-#include "QMainAlderWindow.h"
-#include "QAlderApplication.h"
+#include <QMainAlderWindow.h>
+#include <QAlderApplication.h>
 #include <QInputDialog>
 #include <QObject>
 #include <QString>
 
-#include "vtkNew.h"
+#include <vtkNew.h>
 
 #include <stdexcept>
 

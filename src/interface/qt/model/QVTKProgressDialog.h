@@ -14,8 +14,8 @@
 
 #include <QDialog>
 
-#include "vtkCommand.h"
-#include "vtkSmartPointer.h"
+#include <vtkCommand.h>
+#include <vtkSmartPointer.h>
 
 class Ui_QVTKProgressDialog;
 

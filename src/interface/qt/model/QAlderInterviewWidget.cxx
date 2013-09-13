@@ -8,24 +8,24 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "QAlderInterviewWidget.h"
-#include "ui_QAlderInterviewWidget.h"
+#include <QAlderInterviewWidget.h>
+#include <ui_QAlderInterviewWidget.h>
 
-#include "Application.h"
-#include "Exam.h"
-#include "Image.h"
-#include "Interview.h"
-#include "Modality.h"
-#include "Rating.h"
-#include "User.h"
+#include <Application.h>
+#include <Exam.h>
+#include <Image.h>
+#include <Interview.h>
+#include <Modality.h>
+#include <Rating.h>
+#include <User.h>
 
-#include "vtkEventQtSlotConnect.h"
-#include "vtkMedicalImageViewer.h"
-#include "vtkNew.h"
-#include "vtkRenderer.h"
-#include "vtkRenderWindow.h"
+#include <vtkEventQtSlotConnect.h>
+#include <vtkMedicalImageViewer.h>
+#include <vtkNew.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
 
-#include "QVTKProgressDialog.h"
+#include <QVTKProgressDialog.h>
 
 #include <QMessageBox>
 #include <QTreeWidgetItem>

@@ -8,17 +8,17 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "QSelectInterviewDialog.h"
-#include "ui_QSelectInterviewDialog.h"
+#include <QSelectInterviewDialog.h>
+#include <ui_QSelectInterviewDialog.h>
 
-#include "Application.h"
-#include "Database.h"
-#include "Exam.h"
-#include "Interview.h"
-#include "Modality.h"
-#include "QueryModifier.h"
+#include <Application.h>
+#include <Database.h>
+#include <Exam.h>
+#include <Interview.h>
+#include <Modality.h>
+#include <QueryModifier.h>
 
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 #include <QInputDialog>
 #include <QList>

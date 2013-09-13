@@ -22,7 +22,7 @@
 #ifndef __vtkCustomInteractorStyleImage_h
 #define __vtkCustomInteractorStyleImage_h
 
-#include "vtkInteractorStyleImage.h"
+#include <vtkInteractorStyleImage.h>
 
 class vtkCustomInteractorStyleImage : public vtkInteractorStyleImage
 {

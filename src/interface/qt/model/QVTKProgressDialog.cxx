@@ -8,10 +8,10 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "QVTKProgressDialog.h"
-#include "ui_QVTKProgressDialog.h"
+#include <QVTKProgressDialog.h>
+#include <ui_QVTKProgressDialog.h>
 
-#include "Application.h"
+#include <Application.h>
 
 #include <utility>
 

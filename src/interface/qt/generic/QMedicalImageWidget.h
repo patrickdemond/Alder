@@ -13,6 +13,7 @@
 #define __QMedicalImageWidget_h
 
 #include <QWidget>
+
 #include <vtkSmartPointer.h>
 
 class vtkMedicalImageViewer;
