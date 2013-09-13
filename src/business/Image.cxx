@@ -182,7 +182,10 @@ namespace Alder
 
     gdcm::ImageReader reader;
     reader.SetFileName( fileName.c_str() );
-    reader.Read();
+    if( !reader.Read() )
+    {
+      throw std::runtime_error( "Unable to read file as DICOM." );
+    }
     const gdcm::File &file = reader.GetFile();
     const gdcm::DataSet &ds = file.GetDataSet();
 
@@ -197,9 +200,13 @@ namespace Alder
     if( !ds.FindDataElement( tag ) )
       throw std::runtime_error( "Unknown DICOM tag with name " + tagName );
 
+    // suppress gdcm warnings
+    bool warn = gdcm::Trace::GetWarningFlag();
     gdcm::Trace::WarningOff();
-    return std::string( 
-      gdcm::DirectoryHelper::GetStringValueFromTag( tag, ds ) );
+    std::string value = 
+      gdcm::DirectoryHelper::GetStringValueFromTag( tag, ds );
+    gdcm::Trace::SetWarning( warn );
+    return value;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -251,6 +258,36 @@ namespace Alder
       return true;
     }
     return false;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Image::SetLateralityFromDICOM()
+  {
+    if( !this->IsDICOM() ) return;
+    vtkSmartPointer< Exam > exam;
+    if( this->GetRecord( exam ) )
+    {
+      std::string latStr = exam->Get( "Laterality" ).ToString();
+      if( latStr != "none" )
+      {   
+        try{
+          std::string tagStr = this->GetDICOMTag( "Laterality" );
+          if( tagStr.size() > 0 ) 
+          {   
+            tagStr = Utilities::toLower( tagStr );
+            if( tagStr.compare(0, 1, latStr, 0, 1) != 0 ) 
+            {   
+              latStr = tagStr.compare(0, 1, "l", 0, 1) == 0 ? "left" : "right";
+              exam->Set( "Laterality", latStr );
+              exam->Save();
+            }   
+          }    
+        }   
+        catch(...)
+        {   
+        }   
+      } 
+    }
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

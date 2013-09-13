@@ -149,26 +149,8 @@ int main( int argc, char** argv )
            << "Downloaded: "  << exam->Get( "Downloaded" ).ToInt() << std::endl
            << "Path: "        << fileName << std::endl;
 
-          //check the dicom tag for laterality
-          if( latStr != "none" )
-          {
-            try{
-              std::string tagStr = image->GetDICOMTag( "Laterality" );
-              if( tagStr.size() > 0 )
-              {
-                tagStr = Alder::Utilities::toLower( tagStr );
-                if( tagStr.compare(0, 1, latStr, 0, 1) != 0 )
-                {
-                  latStr = tagStr.compare(0, 1, "l", 0, 1) == 0 ? "left" : "right";
-                  exam->Set( "Laterality", latStr );
-                  exam->Save();
-                }
-              }            
-            }
-            catch(...)
-            {
-            }
-          }
+          //check and set the laterality correctly from the dicom tag
+          image->SetLateralityFromDICOM();
 
           //check the dicom tag for a patient name
           std::string nameStr = image->GetDICOMTag( "PatientsName" );

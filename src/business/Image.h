@@ -97,6 +97,11 @@ namespace Alder
     std::vector<int> GetDICOMDimensions();
 
     /**
+     * Set the laterality of the image's parent exam from its dicom tag if available.
+     */
+    void SetLateralityFromDICOM();
+
+    /**
      * Anonymize a dicom image by clearing the PatientsName tag.
      * @return bool Whethere the file was anonymized
      */
