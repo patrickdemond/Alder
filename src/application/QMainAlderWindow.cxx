@@ -280,7 +280,7 @@ void QMainAlderWindow::slotUpdateDatabase()
     if( text.isEmpty() ) break;
 
     vtkNew< Alder::User > user;
-    user->Load( "name", "administrator" );
+    user->Load( "Name", "administrator" );
     if( user->IsPassword( text.toStdString().c_str() ) )
     {
       // create a progress dialog to observe the progress of the update

@@ -14,6 +14,7 @@
 #include <Modality.h>
 #include <User.h>
 
+#include <vtkNew.h>
 #include <vtkSmartPointer.h>
 
 #include <QErrorMessage>
@@ -117,7 +118,7 @@ void QUserListDialog::slotAdd()
   if( 0 < name.size() )
   {
     // make sure the user name doesn't already exist
-    vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
+    vtkNew< Alder::User > user;
     if( user->Load( "Name", name ) )
     {
       std::stringstream stream;
@@ -147,7 +148,7 @@ void QUserListDialog::slotRemove()
     item = list.at( i );
     if( this->columnIndex["Name"] == item->column() )
     {
-      vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
+      vtkNew< Alder::User > user;
       user->Load( "Name", item->text().toStdString() );
 
       // show a warning to the user before continuing
@@ -174,7 +175,7 @@ void QUserListDialog::slotResetPassword()
     item = list.at( i );
     if( this->columnIndex["Name"] == item->column() )
     {
-      vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
+      vtkNew< Alder::User > user;
       user->Load( "Name", item->text().toStdString() );
       user->ResetPassword();
       user->Save();
@@ -225,7 +226,7 @@ void QUserListDialog::slotHeaderClicked( int index )
 void QUserListDialog::slotItemChanged( QTableWidgetItem *item )
 {
   // get the user
-  vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
+  vtkNew< Alder::User > user;
   user->Load( "Name",
     this->ui->userTableWidget->item( item->row(), this->columnIndex["Name"] )->text().toStdString() );
 
