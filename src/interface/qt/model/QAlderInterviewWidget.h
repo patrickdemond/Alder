@@ -68,6 +68,9 @@ private:
    * Internal update method used in slotPrevious, slotNext
    */
   void updateActiveInterview( Alder::Interview* );
+
+  void initializeTreeWidget();
+  std::map< std::string, QTreeWidgetItem* > ModalityLookup;
 };
 
 #endif
