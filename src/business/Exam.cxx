@@ -130,7 +130,7 @@ namespace Alder
           // the group of cineloops
 
           int parentId = -1;
-          for( auto mapIt = acqDateTimes.cbegin(); mapIt != acqDateTimes.cend(); mapIt++ )
+          for( auto mapIt = acqDateTimes.cbegin(); mapIt != acqDateTimes.cend(); ++mapIt )
           {
           
             if( mapIt->first == stillId ) continue;
@@ -301,7 +301,7 @@ namespace Alder
 
     // add a new entry in the image table (or replace it)
     vtkNew< Alder::Image > image;
-    for( auto it = settings.cbegin(); it != settings.cend(); it++ ) image->Set( it->first, it->second );
+    for( auto it = settings.cbegin(); it != settings.cend(); ++it ) image->Set( it->first, it->second );
     image->Save( true );
 
     // now write the file and validate it
