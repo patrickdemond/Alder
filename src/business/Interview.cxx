@@ -438,13 +438,20 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string Interview::GetSimilarImage( const std::string imageId )
+  std::string Interview::GetSimilarImage( std::string const &imageId )
   { 
     this->AssertPrimaryId();
-    std::string matchId = "";
+    std::string matchId;
     if( imageId.empty() ) return matchId;
-    
+
+    vtkNew<Image> image;
+    image->Load( "Id", imageId );
+    bool hasParent = image->Get( "ParentImageId" ).IsValid();
+
     std::stringstream stream;
+    
+    // given an image Id, find an image in this record having the same
+    // characteristics
     stream << "SELECT Image.Id "
            << "FROM Image "
            << "JOIN Exam ON Image.ExamId = Exam.Id "
@@ -455,6 +462,8 @@ namespace Alder
            << "JOIN Image AS simImage ON simImage.ExamId = simExam.Id "
            << "WHERE Exam.InterviewId = " << this->Get( "Id" ).ToString() << " "
            << "AND simImage.Id = " << imageId << " "
+           << "AND simImage.ParentImageId IS " << (hasParent ? "NOT NULL " : "NULL " )
+           << "AND Image.ParentImageId IS " << (hasParent ? "NOT NULL " : "NULL " )
            << "LIMIT 1";
 
     Application *app = Application::GetInstance();

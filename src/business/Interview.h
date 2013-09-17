@@ -48,6 +48,7 @@ namespace Alder
 
     /**
      * Returns whether this interview's exam and image data has been downloaded
+     * @return bool
      */
     bool HasExamData();
     bool HasImageData();
@@ -58,11 +59,16 @@ namespace Alder
      */
     void UpdateExamData();
     void UpdateImageData();
-
-     std::string GetSimilarImage( const std::string imageId );
+    /**
+     * Given an image Id, find an image in this record having the same
+     * characteristics and return its Id
+     * @return std::string Id of a similar image or empty string on fail
+     */
+    std::string GetSimilarImage( std::string const &imageId );
 
     /**
-     * Returns the neighbouring interview in UId/VisitDate order.
+     * Get the neighbouring interview in UId/VisitDate order
+     * @return vtkSmartPointer<Alder::Interview> The neighbouring interview in UId/VisidDate order
      */
     vtkSmartPointer<Interview> GetNeighbour( const bool forward, const bool loaded, const bool unRated );
     vtkSmartPointer<Interview> GetNext( const bool loaded, const bool unRated )
@@ -80,12 +86,14 @@ namespace Alder
 
     /**
      * Convenience method to determine how many images this interview has
+     * @return int Number of images this interview has
      */
     int GetImageCount();
 
     /**
      * Returns whether a user has rated all images associated with the interview.
-     * If the interview has no images this method returns true.
+     * If the interview has no images this method returns true
+     * @return bool Whether all images in this interview are rated by the User
      */
     bool IsRatedBy( User* user );
 
