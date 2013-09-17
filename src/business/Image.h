@@ -41,21 +41,25 @@ namespace Alder
 
     /**
      * Returns the image's code (used to determine the image's path in the image data directory)
+     * @return std::string The InterviewId/ExamId/ImageId code
+     * @throw std::runtime_error
      */
     virtual std::string GetCode();
 
     /**
      * Get the full path to where the image associated with this record belongs.
+     * @return std::string The path to this image (excludes file name)
+     * @throw std::runtime_error
      */
     std::string GetFilePath();
 
     /**
-     * Create the path to the file name that this record represents (including path and provided suffix)
-     * and returns the result (with full path, file name and suffix)
+     * Create the path to the file name that this record represents (including path and provided
+     * suffix) and returns the result (with full path, file name and suffix).
      * NOTE: this method does not depend on the file already existing, it simply uses
      * the image's path and the provided extension to create an empty file.
      */
-    std::string CreateFile( const std::string suffix );
+    std::string CreateFile( std::string const &suffix );
 
     /**
      * Once the file is written to the disk this method validates it.  It will unzip gzipped files
@@ -65,34 +69,50 @@ namespace Alder
     bool ValidateFile();
 
     /**
-     * Get the file name that this record represents (including path)
-     * NOTE: this method depends on the file already existing, if it doesn't already
-     * exist it will throw an exception
+     * Get the file name that this record represents (including path).
+     * NOTE: this method depends on the file already existing: if it doesn't already
+     * exist, an exception is thrown.
+     * @return std::string Full path and file name of this image
+     * @throw std::runtime_error
      */
     std::string GetFileName();
 
     /**
-     * Get whether a particular user has rated this image
+     * Get whether a particular user has rated this image.
+     * @param User The user to check against
+     * @return bool Whether a user has rated this image
+     * @throw std::runtime_error
      */
     bool IsRatedBy( User* user );
 
     /**
      *  Is this a dicom image?
+     * @return bool Whether this is a dicom image
      */
     bool IsDICOM();
 
     /**
-     * Get arbitrary DICOM tag value.  Works only for dicom images.
+     * Get a DICOM tag value. Accepted tag names are: 
+     *   AcquisitionDateTime - 0x0008, 0x002a
+     *   SeriesNumber        - 0x0020,0x0011
+     *   PatientsName        - 0x0010, 0x0010
+     *   Laterality          - 0x0020, 0x0060
+     * @param tagName Description of the dicom tag
+     * @return std::string Value of a dicom tag
+     * @throw std::runtime_error
      */
-    std::string GetDICOMTag( const std::string tagName );
+    std::string GetDICOMTag( std::string const &tagName );
 
     /**
      * Get the acquisition date time.  Works only for dicom images.
+     * @return std::string Value of the dicom AcquistionDateTime tag
      */
     std::string GetDICOMAcquisitionDateTime();
 
     /**
-     * Get the number of rows, columns and frames.  Works only for dicom images.
+     * Get the number of rows, columns and frames of a dicom image.
+     * @return std::vector<int> Dimensions in x, y, z: x, y only if 2D
+     * @throw std::runtime_error
      */
     std::vector<int> GetDICOMDimensions();
 
@@ -103,24 +123,39 @@ namespace Alder
 
     /**
      * Anonymize a dicom image by clearing the PatientsName tag.
-     * @return bool Whethere the file was anonymized
+     * @return bool Whether the file was anonymized
+     * @throw std::runtime_error
      */
     bool AnonymizeDICOM();
 
     /**
-     * Returns the neighbouring interview in UId/VisitDate order.
-     * The rating must be provided since an image may have more than one rating
+     * Erase the rectangular Patient Name box in Hologic DEXA images.
+     * @return bool Success status of the clean
+     * @throw std::runtime_error
      */
-    vtkSmartPointer<Image> GetNeighbourAtlasImage( const int rating, const bool forward );
-    vtkSmartPointer<Image> GetNextAtlasImage( const int rating )
+    bool CleanHologicDICOM();
+
+    /**
+     * Returns the neighbouring interview in UId/VisitDate order.
+     * A rating must be provided since an image may have more than one rating.
+     * @param rating The rating of the atlas image that matches this one
+     * @param forward The order ASC (forward=true) or DESC to search by Interview.UId 
+     * @return vtkSmartPointer<Image> Neigbouring atlas image
+     * @throw std::runtime_error
+     */
+    vtkSmartPointer<Image> GetNeighbourAtlasImage( int const &rating, bool const &forward );
+    vtkSmartPointer<Image> GetNextAtlasImage( int const &rating )
     { return this->GetNeighbourAtlasImage( rating, true ); }
-    vtkSmartPointer<Image> GetPreviousAtlasImage( const int rating )
+    vtkSmartPointer<Image> GetPreviousAtlasImage( int const &rating )
     { return this->GetNeighbourAtlasImage( rating, false ); }
 
     /**
-     * Returns an atlas image matching the current image type
+     * Returns an atlas image matching the current image type.
+     * @param rating The rating of the atlas image that matches this one
+     * @return vtkSmartPointer<Image> Atlas image matching this image
+     * @throw std::runtime_error
      */
-    vtkSmartPointer<Image> GetAtlasImage( const int rating );
+    vtkSmartPointer<Image> GetAtlasImage( int const &rating );
 
   protected:
     Image() {}

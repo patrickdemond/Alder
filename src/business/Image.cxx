@@ -13,15 +13,18 @@
 #include <Configuration.h>
 #include <Exam.h>
 #include <Interview.h>
-#include <Modality.h>
 #include <Rating.h>
 #include <User.h>
 #include <Utilities.h>
 
 #include <vtkDirectory.h>
+#include <vtkImageData.h>
 #include <vtkImageDataReader.h>
+#include <vtkImageCanvasSource2D.h>
+#include <vtkImageFlip.h>
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
+#include <vtkSmartPointer.h>
 
 #include <gdcmAnonymizer.h>
 #include <gdcmDirectoryHelper.h>
@@ -69,7 +72,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string Image::CreateFile( const std::string suffix )
+  std::string Image::CreateFile( std::string const &suffix )
   {
     // first get the path and create it if it doesn't exist
     std::string path = this->GetFilePath();
@@ -171,7 +174,7 @@ namespace Alder
   }
   
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  std::string Image::GetDICOMTag( const std::string tagName )
+  std::string Image::GetDICOMTag( std::string const &tagName )
   {
     this->AssertPrimaryId();
 
@@ -192,9 +195,9 @@ namespace Alder
     // TODO: use GDCM to get the correct tags
     gdcm::Tag tag;
     if( "AcquisitionDateTime" == tagName ) tag = gdcm::Tag( 0x0008, 0x002a );
-    else if( "SeriesNumber" == tagName ) tag = gdcm::Tag( 0x0020,0x0011 );
-    else if( "PatientsName" == tagName ) tag = gdcm::Tag( 0x0010, 0x0010 );
-    else if( "Laterality" == tagName ) tag = gdcm::Tag( 0x0020, 0x0060 );
+    else if( "SeriesNumber" == tagName )   tag = gdcm::Tag( 0x0020, 0x0011 );
+    else if( "PatientsName" == tagName )   tag = gdcm::Tag( 0x0010, 0x0010 );
+    else if( "Laterality" == tagName )     tag = gdcm::Tag( 0x0020, 0x0060 );
     else throw std::runtime_error( "Unknown DICOM tag name." );
 
     if( !ds.FindDataElement( tag ) )
@@ -221,7 +224,10 @@ namespace Alder
 
     gdcm::ImageReader reader;
     reader.SetFileName( fileName.c_str() );
-    reader.Read();
+    if( !reader.Read() )
+    {
+      throw std::runtime_error( "Unable to read file as DICOM." );
+    }
     gdcm::Image &image = reader.GetImage();
     
     std::vector<int> dims;
@@ -296,19 +302,13 @@ namespace Alder
     vtkSmartPointer< Exam > exam;
     if( this->GetRecord( exam ) )
     {
-      vtkSmartPointer< Modality > modality;
-      if( exam->GetRecord( modality ) )
-      {
-        std::string modStr = modality->Get( "Name" ).ToString();
-        return ( modStr == "Dexa" || modStr == "Ultrasound" );
-      }
-      return false; 
+      return exam->IsDICOM();
     }
-    return false;
+    return false; 
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  vtkSmartPointer<Image> Image::GetNeighbourAtlasImage( const int rating, const bool forward )
+  vtkSmartPointer<Image> Image::GetNeighbourAtlasImage( int const &rating, bool const &forward )
   {
     this->AssertPrimaryId();
     Application *app = Application::GetInstance();
@@ -385,7 +385,7 @@ namespace Alder
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  vtkSmartPointer<Image> Image::GetAtlasImage( const int rating )
+  vtkSmartPointer<Image> Image::GetAtlasImage( int const &rating )
   {
     Application *app = Application::GetInstance();
     vtkSmartPointer<vtkAlderMySQLQuery> query = app->GetDB()->GetQuery();
@@ -421,5 +421,129 @@ namespace Alder
     vtkSmartPointer<Image> image = vtkSmartPointer<Image>::New();
     if( query->NextRow() ) image->Load( "Id", query->DataValue( 0 ).ToString() );
     return image;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Image::CleanHologicDICOM()
+  {
+    vtkSmartPointer<Exam> exam = vtkSmartPointer<Exam>::New();
+    if( !this->GetRecord( exam ) )
+      throw std::runtime_error( "ERROR: no exam record for this image." );
+
+    std::string latStr = exam->Get( "Laterality" ).ToString();
+    std::string typeStr = exam->Get( "Type" ).ToString();
+    int examType = -1;
+
+    if( typeStr == "DualHipBoneDensity" )
+    {
+      examType = latStr == "left" ? 0 : 1;
+    }
+    else if( typeStr == "ForearmBoneDensity" )
+    {
+      examType = 2;
+    }
+    else if( typeStr == "WholeBodyBoneDensity" )
+    {
+      // check if the image has a parent, if so, it is a body composition file
+      examType =( this->Get( "ParentImageId" ).IsValid() ) ? 4 : 3;
+    }
+    else if( typeStr == "LateralBoneDensity" ) return true;
+
+    if( examType == -1 )
+    {
+      std::string str =  "ERROR: unrecognized Hologic DEXA file type: " + typeStr;
+      throw std::runtime_error( str );
+    }  
+    
+    std::string fileName = this->GetFileName();
+    vtkNew<vtkImageDataReader> reader;
+    reader->SetFileName( fileName.c_str() );
+    vtkImageData* image = reader->GetOutput();
+
+    int extent[6];
+    image->GetExtent( extent );
+    int dims[3];
+    image->GetDimensions(dims);
+
+    // start in the middle of the left edge,
+    // increment across until the color changes to 255,255,255
+    
+    // left edge coordinates for each DEXA exam type
+    int x0[5] = { 168, 168, 168, 168, 193 };
+    // bottom edge coordinates
+    int y0[5] = { 1622, 1622, 1111, 1377, 1434 };
+    // top edge coordinates
+    int y1[5] = { 1648, 1648, 1138, 1403, 1456 };
+
+    bool found = false;
+    // start search from the middle of the left edge 
+    int ix = x0[ examType ];
+    int iy = y0[ examType ] + ( y1[ examType ] - y0[ examType ] )/2; 
+    do  
+    {
+      int val = static_cast<int>( image->GetScalarComponentAsFloat( ix++, iy, 0, 0 ) );
+      if( val == 255 )
+      {   
+        found = true;
+        ix--;
+      }   
+    }while( !found && ix < extent[1] );
+
+    if( !found )
+    {
+      return false;
+    }
+
+    vtkNew<vtkImageCanvasSource2D> canvas;
+    // copy the image onto the canvas
+    canvas->SetNumberOfScalarComponents( image->GetNumberOfScalarComponents() );
+    canvas->SetScalarType( image->GetScalarType() );
+    canvas->SetExtent( extent );
+    canvas->DrawImage( 0, 0, image );
+    // erase the name field with its gray background color
+    canvas->SetDrawColor( 222, 222, 222 );
+    canvas->FillBox( x0[ examType ] , ix, y0[ examType ], y1[ examType ] );
+    canvas->Update();
+
+    // flip the canvas vertically
+    vtkNew< vtkImageFlip > flip;
+    flip->SetInput( canvas->GetOutput() );
+    flip->SetFilteredAxis( 1 );
+    flip->Update();
+
+    // byte size of the original dicom file
+    unsigned long flength = Alder::Utilities::getFileLength( fileName );
+    // byte size of the image
+    unsigned long ilength = dims[0]*dims[1]*3;
+    // byte size of the dicom header
+    unsigned long hlength = flength - ilength;
+
+    // read in the input dicom file
+    std::ifstream infs;
+    infs.open( fileName.c_str(), std::fstream::binary );
+    if( !infs.is_open() )
+      throw std::runtime_error( "ERROR: failed to stream in dicom data" );
+
+    char* buffer = new char[flength];
+    infs.read( buffer, hlength );
+    infs.close();
+
+    // output the repaired dicom file
+    std::ofstream outfs;
+    outfs.open( fileName.c_str(), std::ofstream::binary | std::ofstream::trunc );
+
+    if( !outfs.is_open() )
+    {
+      delete[] buffer;
+      throw std::runtime_error( "ERROR: failed to stream out dicom data" );
+    }
+
+    outfs.write( buffer, hlength );
+    outfs.write( (char*)(flip->GetOutput()->GetScalarPointer()), ilength );
+    outfs.close();
+
+    delete[] buffer;
+
+    return true;  
   }
 }

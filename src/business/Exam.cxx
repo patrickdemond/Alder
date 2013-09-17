@@ -13,6 +13,7 @@
 #include <Application.h>
 #include <Image.h>
 #include <Interview.h>
+#include <Modality.h>
 #include <OpalService.h>
 #include <Utilities.h>
 
@@ -56,9 +57,9 @@ namespace Alder
     // start by getting the UId
     this->GetRecord( interview );
     std::string UId = interview->Get( "UId" ).ToString();
-    bool result;
+    bool result = true;
 
-    if( !this->HasImageData() )
+    if( result &= !this->HasImageData() )
     {
       // determine which Opal table to fetch from based on exam modality
       std::string type = this->Get( "Type" ).ToString();
@@ -83,7 +84,7 @@ namespace Alder
           variable += vtkVariant( i ).ToString();
           settings[ "Acquisition" ] = i;
 
-          result = this->RetrieveImage( 
+          result &= this->RetrieveImage( 
             type, variable, UId, settings, suffix, repeatable, sideVariable );
 
           if( result )
@@ -98,7 +99,7 @@ namespace Alder
         acquisition++;
         settings[ "Acquisition" ] = acquisition;
         std::string variable = "Measure.STILL_IMAGE";
-        result = this->RetrieveImage( 
+        result &= this->RetrieveImage( 
           type, variable, UId, settings, suffix, repeatable, sideVariable );
 
         if( hasParent && result )
@@ -161,7 +162,8 @@ namespace Alder
         std::string sideVariable = "Measure.OUTPUT_HIP_SIDE";
         std::string suffix = ".dcm";
         bool repeatable = true;
-        this->RetrieveImage( type, variable, UId, settings, suffix, repeatable, sideVariable );
+        result &= this->RetrieveImage( type, variable, UId, settings, suffix, repeatable,
+          sideVariable );
       }
       else if( "ForearmBoneDensity" == type )
       {
@@ -169,13 +171,14 @@ namespace Alder
         std::string sideVariable = "OUTPUT_FA_SIDE";
         std::string suffix = ".dcm";
         bool repeatable = false;
-        this->RetrieveImage( type, variable, UId, settings, suffix, repeatable, sideVariable );
+        result &= this->RetrieveImage( type, variable, UId, settings, suffix, repeatable,
+          sideVariable );
       }
       else if( "LateralBoneDensity" == type )
       {
         std::string variable = "RES_SEL_DICOM_MEASURE";
         std::string suffix = ".dcm";
-        this->RetrieveImage( type, variable, UId, settings, suffix );
+        result &= this->RetrieveImage( type, variable, UId, settings, suffix );
       }
       else if( "Plaque" == type )
       {
@@ -183,7 +186,8 @@ namespace Alder
         std::string sideVariable = "Measure.SIDE";
         std::string suffix = ".dcm.gz";        
         bool repeatable = true;
-        this->RetrieveImage( type, variable, UId, settings, suffix, repeatable, sideVariable );
+        result &= this->RetrieveImage( type, variable, UId, settings, suffix, repeatable,
+          sideVariable );
       }
       else if( "RetinalScan" == type )
       {
@@ -191,13 +195,14 @@ namespace Alder
         std::string sideVariable = "Measure.SIDE";
         std::string suffix = ".jpg";
         bool repeatable = true;
-        this->RetrieveImage( type, variable, UId, settings, suffix, repeatable, sideVariable );
+        result &= this->RetrieveImage( type, variable, UId, settings, suffix, repeatable,
+          sideVariable );
       }
       else if( "WholeBodyBoneDensity" == type )
       {
         std::string variable = "RES_WB_DICOM_1";
         std::string suffix = ".dcm";
-        result = this->RetrieveImage( type, variable, UId, settings, suffix );
+        result &= this->RetrieveImage( type, variable, UId, settings, suffix );
 
         if( result )
         {
@@ -207,18 +212,25 @@ namespace Alder
 
           variable = "RES_WB_DICOM_2";
           settings[ "Acquisition" ] = 2;
-          this->RetrieveImage( type, variable, UId, settings, suffix );
+          result &= this->RetrieveImage( type, variable, UId, settings, suffix );
 
           // re-parent this image to the first one
-          image->Load( "Id", vtkVariant( image->GetLastInsertId() ).ToString() );
-          image->Set( "ParentImageId", parentId );
-          image->Save();
+          int lastId = image->GetLastInsertId();
+          if( result && parentId != lastId )
+          {  
+            image->Load( "Id", vtkVariant( lastId ).ToString() );
+            image->Set( "ParentImageId", parentId );
+            image->Save();
+          }  
         }
       }
 
       // now set that we have downloaded all the images
-      this->Set( "Downloaded", 1 );
-      this->Save();
+      if( result )
+      {
+        this->Set( "Downloaded", 1 );
+        this->Save();
+      }  
     }
   }
 
@@ -316,7 +328,59 @@ namespace Alder
       image->Remove();
       result = false;
     }
+    else
+    {
+      if( this->IsDICOM() )
+      {
+        // set the image record's Dimensionality column
+        std::vector<int> dims = image->GetDICOMDimensions();
+        // count the number of dimensions > 1
+        int count = 0;
+        for( auto it = dims.begin(); it != dims.end(); ++it ) if( *it > 1 ) count++;
+        image->Set( "Dimensionality", count );
+        image->Save();
+        
+
+      //try{
+        // if this is a DEXA image with laterality, have the image
+        // set it directly from the Laterality dicom tag
+        bool isdexa = type.find( "BoneDensity" ) != std::string::npos;
+        if( laterality != "none" && isdexa )
+        {
+          std::cout << "trying to fix laterality from " << laterality;
+          image->SetLateralityFromDICOM();
+          laterality = this->Get( "Laterality" ).ToString();
+          std::cout << " to " << laterality << std::endl;
+        }
+
+        // fix confidentiality breeches
+        std::string nameStr = image->GetDICOMTag( "PatientsName" );
+        if( !nameStr.empty() )
+        {
+          // CANT DO THIS UNTIL THE IMAGE IS PARENTED FOR BODY COMPO EXAMS
+          if( isdexa ) image->CleanHologicDICOM();
+          image->AnonymizeDICOM();
+        }
+      }
+      /*
+      catch(...)
+      {
+      }*/
+    }
+
     return result;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  bool Exam::IsDICOM()
+  {
+    vtkSmartPointer< Modality > modality;
+    if( this->GetRecord( modality ) )
+    {
+      std::string modStr = modality->Get( "Name" ).ToString();
+      return ( modStr == "Dexa" || modStr == "Ultrasound" );
+    }
+    return false;
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

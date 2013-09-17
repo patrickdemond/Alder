@@ -61,6 +61,12 @@ namespace Alder
      */
     bool IsRatedBy( User* user );
 
+    /** 
+     *  Is this a dicom image?
+     * @return bool Whether this is a dicom image
+     */
+    bool IsDICOM();
+
     /**
      * Retrieves an image from Opal.
      * @throws exception 

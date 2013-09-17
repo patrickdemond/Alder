@@ -442,8 +442,6 @@ void QAlderInterviewWidget::updateExamTreeWidget()
         QIcon(":/icons/x-icon" ) : 
         QIcon(":/icons/eye-visible-icon" ) );
 
-      bool checkDims = "CarotidIntima" == examType || "Plaque" == examType;
-
       for( auto imageIt = imageList.begin(); imageIt != imageList.end(); ++imageIt )
       {
         Alder::Image *image = imageIt->GetPointer();
@@ -454,11 +452,9 @@ void QAlderInterviewWidget::updateExamTreeWidget()
         this->treeModelMap[imageItem] = *imageIt;
         imageItem->setText( 0, name );
 
-        if( checkDims )
+        if( image->Get( "Dimensionality" ).ToInt() == 3 )
         {
-          std::vector<int> dims = image->GetDICOMDimensions();
-          if ( dims.size() > 2 && dims[2] > 1 )
-            imageItem->setIcon(0, QIcon(":/icons/movie-icon" ) );             
+          imageItem->setIcon(0, QIcon(":/icons/movie-icon" ) );             
         }
          
         imageItem->setExpanded( true );
