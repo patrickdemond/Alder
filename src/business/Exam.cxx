@@ -57,10 +57,15 @@ namespace Alder
     // start by getting the UId
     this->GetRecord( interview );
     std::string UId = interview->Get( "UId" ).ToString();
-    bool result = true;
 
-    if( result &= !this->HasImageData() )
+    if( !this->HasImageData() )
     {
+      // status of download: all files of the exam are downloaded
+      bool resultAll = true;
+      bool resultAny = false;
+      // whether to clean up dicom images
+      bool clean = true;
+
       // determine which Opal table to fetch from based on exam modality
       std::string type = this->Get( "Type" ).ToString();
       std::map< std::string, vtkVariant > settings;
@@ -77,108 +82,88 @@ namespace Alder
         std::string sideVariable = "Measure.SIDE";
         int acquisition = 0;
         bool repeatable = true;
-
+          
         for( int i = 1; i <= 3; ++i )
         {
           std::string variable = "Measure.CINELOOP_";
           variable += vtkVariant( i ).ToString();
           settings[ "Acquisition" ] = i;
-
-          result &= this->RetrieveImage( 
+          
+          bool success = this->RetrieveImage( 
             type, variable, UId, settings, suffix, repeatable, sideVariable );
+          resultAll &= success;
 
-          if( result )
+          if( success )
           {
+            resultAny = success;
             hasParent = true;
             acquisition = i;
           }
         }
 
-        //TODO: SR files still need to be downloaded and processed
-
-        acquisition++;
-        settings[ "Acquisition" ] = acquisition;
-        std::string variable = "Measure.STILL_IMAGE";
-        result &= this->RetrieveImage( 
-          type, variable, UId, settings, suffix, repeatable, sideVariable );
-
-        if( hasParent && result )
+        if( hasParent )
         {
-          // get the list of cIMT images in this exam
+          //TODO: SR files still need to be downloaded and processed
 
-          std::vector< vtkSmartPointer< Alder::Image > > imageList;
-          this->GetList( &imageList );
-          if( imageList.empty() ) 
-            throw std::runtime_error( "Failed list load during cIMT parenting" );
+          settings[ "Acquisition" ] = ++acquisition;
+          std::string variable = "Measure.STILL_IMAGE";
+          bool success = this->RetrieveImage( 
+            type, variable, UId, settings, suffix, repeatable, sideVariable );
+          resultAll &= success;
 
-          // map the AcquisitionDateTimes from the dicom file headers to the images
-
-          std::map< int, std::string > acqDateTimes;
-          for( auto imageIt = imageList.cbegin(); imageIt != imageList.cend(); ++imageIt )
+          if( success )
           {
-            Alder::Image *image = imageIt->GetPointer();
-            acqDateTimes[ image->Get( "Id" ).ToInt() ] = image->GetDICOMTag( "AcquisitionDateTime" );
-          }
+            // get the list of cIMT images in this exam
 
-          // find which cineloop has a matching datetime to the still and set the still's
-          // ParentImageId
+            std::vector< vtkSmartPointer< Alder::Image > > imageList;
+            this->GetList( &imageList );
+            if( imageList.empty() ) 
+              throw std::runtime_error( "Failed list load during cIMT parenting" );
 
-          vtkNew< Alder::Image > still;
-          int stillId = still->GetLastInsertId();
-          std::string stillAcqDateTime = acqDateTimes[ stillId ];
+            // map the AcquisitionDateTimes from the dicom file headers to the images
 
-          // in case of no matching datetime associate the still with
-          // the group of cineloops
+            std::map< int, std::string > acqDateTimes;
+            for( auto imageIt = imageList.cbegin(); imageIt != imageList.cend(); ++imageIt )
+            {
+              Alder::Image *image = imageIt->GetPointer();
+              acqDateTimes[ image->Get( "Id" ).ToInt() ] = image->GetDICOMTag( "AcquisitionDateTime" );
+            }
 
-          int parentId = -1;
-          for( auto mapIt = acqDateTimes.cbegin(); mapIt != acqDateTimes.cend(); ++mapIt )
-          {
-          
-            if( mapIt->first == stillId ) continue;
+            // find which cineloop has a matching datetime to the still and set the still's
+            // ParentImageId
+
+            vtkNew< Alder::Image > still;
+            int stillId = still->GetLastInsertId();
+            std::string stillAcqDateTime = acqDateTimes[ stillId ];
+
+            // in case of no matching datetime, associate the still with
+            // the group of cineloops
+
+            int parentId = -1;
+            for( auto mapIt = acqDateTimes.cbegin(); mapIt != acqDateTimes.cend(); ++mapIt )
+            {
+              if( mapIt->first == stillId ) continue;
+              
+              if( mapIt->second == stillAcqDateTime ) 
+              {
+                parentId = mapIt->first;
+                break;
+              }
+              else
+              {
+                // use the last inserted cineloop Id in case of no match
+                parentId = mapIt->first > parentId ? mapIt->first : parentId;
+              }
+            }
+
+            if( parentId == -1 )
+              throw std::runtime_error( "Failed to parent cIMT still" );
             
-            if( mapIt->second == stillAcqDateTime ) 
-            {
-              parentId = mapIt->first;
-              break;
-            }
-            else
-            {
-              // use the last inserted cineloop Id in case of no match
-              parentId = mapIt->first > parentId ? mapIt->first : parentId;
-            }
+            still->Load( "Id", vtkVariant( stillId ).ToString() );
+            still->Set( "ParentImageId", parentId );
+            still->Save();
           }
-
-          if( parentId == -1 )
-            throw std::runtime_error( "Failed to parent cIMT still" );
-          
-          still->Load( "Id", vtkVariant( stillId ).ToString() );
-          still->Set( "ParentImageId", parentId );
-          still->Save();
         }
-      }
-      else if( "DualHipBoneDensity" == type )
-      {
-        std::string variable = "Measure.RES_HIP_DICOM";
-        std::string sideVariable = "Measure.OUTPUT_HIP_SIDE";
-        std::string suffix = ".dcm";
-        bool repeatable = true;
-        result &= this->RetrieveImage( type, variable, UId, settings, suffix, repeatable,
-          sideVariable );
-      }
-      else if( "ForearmBoneDensity" == type )
-      {
-        std::string variable = "RES_FA_DICOM";
-        std::string sideVariable = "OUTPUT_FA_SIDE";
-        std::string suffix = ".dcm";
-        bool repeatable = false;
-        result &= this->RetrieveImage( type, variable, UId, settings, suffix, repeatable,
-          sideVariable );
-      }
-      else if( "LateralBoneDensity" == type )
-      {
-        std::string variable = "RES_SEL_DICOM_MEASURE";
-        std::string suffix = ".dcm";
-        result &= this->RetrieveImage( type, variable, UId, settings, suffix );
       }
       else if( "Plaque" == type )
       {
@@ -186,37 +171,59 @@ namespace Alder
         std::string sideVariable = "Measure.SIDE";
         std::string suffix = ".dcm.gz";        
         bool repeatable = true;
-        result &= this->RetrieveImage( type, variable, UId, settings, suffix, repeatable,
+        resultAll &= this->RetrieveImage( type, variable, UId, settings, suffix, repeatable,
           sideVariable );
+        resultAny = resultAll;  
       }
-      else if( "RetinalScan" == type )
+      else if( "DualHipBoneDensity" == type )
       {
-        std::string variable = "Measure.EYE";
-        std::string sideVariable = "Measure.SIDE";
-        std::string suffix = ".jpg";
+        std::string variable = "Measure.RES_HIP_DICOM";
+        std::string sideVariable = "Measure.OUTPUT_HIP_SIDE";
+        std::string suffix = ".dcm";
         bool repeatable = true;
-        result &= this->RetrieveImage( type, variable, UId, settings, suffix, repeatable,
+        resultAll &= this->RetrieveImage( type, variable, UId, settings, suffix, repeatable,
           sideVariable );
+        resultAny = resultAll;  
+      }
+      else if( "ForearmBoneDensity" == type )
+      {
+        std::string variable = "RES_FA_DICOM";
+        std::string sideVariable = "OUTPUT_FA_SIDE";
+        std::string suffix = ".dcm";
+        bool repeatable = false;
+        resultAll &= this->RetrieveImage( type, variable, UId, settings, suffix, repeatable,
+          sideVariable );
+        resultAny = resultAll;  
+      }
+      else if( "LateralBoneDensity" == type )
+      {
+        std::string variable = "RES_SEL_DICOM_MEASURE";
+        std::string suffix = ".dcm";
+        resultAll &= this->RetrieveImage( type, variable, UId, settings, suffix );
+        resultAny = resultAll;  
       }
       else if( "WholeBodyBoneDensity" == type )
       {
         std::string variable = "RES_WB_DICOM_1";
         std::string suffix = ".dcm";
-        result &= this->RetrieveImage( type, variable, UId, settings, suffix );
+        bool success = this->RetrieveImage( type, variable, UId, settings, suffix );
+        resultAll &= success;
 
-        if( result )
+        if( success )
         {
+          resultAny = true;
           // store the previous image's id
           vtkNew< Alder::Image > image;
           int parentId = image->GetLastInsertId();
 
           variable = "RES_WB_DICOM_2";
           settings[ "Acquisition" ] = 2;
-          result &= this->RetrieveImage( type, variable, UId, settings, suffix );
+          success = this->RetrieveImage( type, variable, UId, settings, suffix );
+          resultAll &= success;
 
           // re-parent this image to the first one
           int lastId = image->GetLastInsertId();
-          if( result && parentId != lastId )
+          if( success && parentId != lastId )
           {  
             image->Load( "Id", vtkVariant( lastId ).ToString() );
             image->Set( "ParentImageId", parentId );
@@ -224,13 +231,31 @@ namespace Alder
           }  
         }
       }
+      else if( "RetinalScan" == type )
+      {
+        std::string variable = "Measure.EYE";
+        std::string sideVariable = "Measure.SIDE";
+        std::string suffix = ".jpg";
+        bool repeatable = true;
+        resultAll &= this->RetrieveImage( type, variable, UId, settings, suffix, repeatable,
+          sideVariable );
+        resultAny = resultAll;  
+        clean = false;  
+      }
+      else
+      {
+        std::string errStr = "Cannot retrieve images for unknown exam type: " + type;
+        throw std::runtime_error( errStr );
+      }  
 
-      // now set that we have downloaded all the images
-      if( result )
+      // now set that we have downloaded at least one of the images
+      if( resultAny )
       {
         this->Set( "Downloaded", 1 );
         this->Save();
-      }  
+        if( clean )
+          this->CleanImages( type );
+      }
     }
   }
 
@@ -338,37 +363,38 @@ namespace Alder
         int count = 0;
         for( auto it = dims.begin(); it != dims.end(); ++it ) if( *it > 1 ) count++;
         image->Set( "Dimensionality", count );
-        image->Save();
-        
-
-      //try{
-        // if this is a DEXA image with laterality, have the image
-        // set it directly from the Laterality dicom tag
-        bool isdexa = type.find( "BoneDensity" ) != std::string::npos;
-        if( laterality != "none" && isdexa )
-        {
-          std::cout << "trying to fix laterality from " << laterality;
-          image->SetLateralityFromDICOM();
-          laterality = this->Get( "Laterality" ).ToString();
-          std::cout << " to " << laterality << std::endl;
-        }
-
-        // fix confidentiality breeches
-        std::string nameStr = image->GetDICOMTag( "PatientsName" );
-        if( !nameStr.empty() )
-        {
-          // CANT DO THIS UNTIL THE IMAGE IS PARENTED FOR BODY COMPO EXAMS
-          if( isdexa ) image->CleanHologicDICOM();
-          image->AnonymizeDICOM();
-        }
       }
-      /*
-      catch(...)
+      else
       {
-      }*/
+        image->Set( "Dimensionality", 2 );
+      }
+      image->Save();
     }
 
     return result;
+  }
+
+  //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  void Exam::CleanImages( std::string const &type )
+  {
+    this->AssertPrimaryId();
+
+    if( !this->IsDICOM() ) return;
+
+    std::vector<vtkSmartPointer<Image>> imageList;
+    this->GetList( &imageList );
+    bool isHologic = type != "Plaque" && type != "CarotidIntima";
+    
+    for( auto it = imageList.begin(); it != imageList.end(); ++it )
+    {
+      Image* image = *it;
+      if( isHologic )
+      {
+        image->SetLateralityFromDICOM();
+        image->CleanHologicDICOM();
+      }  
+      else image->AnonymizeDICOM();
+    }
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

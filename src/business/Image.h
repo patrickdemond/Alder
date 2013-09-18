@@ -86,7 +86,8 @@ namespace Alder
     bool IsRatedBy( User* user );
 
     /**
-     *  Is this a dicom image?
+     * Is this a dicom image? Determined via the modality
+     * record associated with this image's parent exam.
      * @return bool Whether this is a dicom image
      */
     bool IsDICOM();
@@ -97,6 +98,8 @@ namespace Alder
      *   SeriesNumber        - 0x0020,0x0011
      *   PatientsName        - 0x0010, 0x0010
      *   Laterality          - 0x0020, 0x0060
+     * No checking is done to ensure this is a dicom image: use
+     * IsDICOM() method to check first.
      * @param tagName Description of the dicom tag
      * @return std::string Value of a dicom tag
      * @throw std::runtime_error
@@ -105,12 +108,16 @@ namespace Alder
 
     /**
      * Get the acquisition date time.  Works only for dicom images.
+     * No checking is done to ensure this is a dicom image: use
+     * IsDICOM() method to check first.
      * @return std::string Value of the dicom AcquistionDateTime tag
      */
     std::string GetDICOMAcquisitionDateTime();
 
     /**
      * Get the number of rows, columns and frames of a dicom image.
+     * No checking is done to ensure this is a dicom image: use
+     * IsDICOM() method to check first.
      * @return std::vector<int> Dimensions in x, y, z: x, y only if 2D
      * @throw std::runtime_error
      */
@@ -118,11 +125,15 @@ namespace Alder
 
     /**
      * Set the laterality of the image's parent exam from its dicom tag if available.
+     * No checking is done to ensure this is a dicom image: use
+     * IsDICOM() method to check first.
      */
     void SetLateralityFromDICOM();
 
     /**
      * Anonymize a dicom image by clearing the PatientsName tag.
+     * No checking is done to ensure this is a dicom image: use
+     * IsDICOM() method to check first.
      * @return bool Whether the file was anonymized
      * @throw std::runtime_error
      */
@@ -130,6 +141,10 @@ namespace Alder
 
     /**
      * Erase the rectangular Patient Name box in Hologic DEXA images.
+     * This method calls AnonymizeDICOM() after cleaning the actual
+     * image.
+     * No checking is done to ensure this is a dicom image: use
+     * IsDICOM() method to check first.
      * @return bool Success status of the clean
      * @throw std::runtime_error
      */

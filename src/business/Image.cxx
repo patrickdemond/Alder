@@ -240,7 +240,8 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool Image::AnonymizeDICOM()
   {
-    if( !this->IsDICOM() ) return false;
+    this->AssertPrimaryId();
+
     if( !this->GetDICOMTag( "PatientsName" ).empty() )
     {
       gdcm::Reader gdcmRead;
@@ -269,7 +270,8 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void Image::SetLateralityFromDICOM()
   {
-    if( !this->IsDICOM() ) return;
+    this->AssertPrimaryId();
+
     vtkSmartPointer< Exam > exam;
     if( this->GetRecord( exam ) )
     {
@@ -311,6 +313,7 @@ namespace Alder
   vtkSmartPointer<Image> Image::GetNeighbourAtlasImage( int const &rating, bool const &forward )
   {
     this->AssertPrimaryId();
+
     Application *app = Application::GetInstance();
     Image *activeImage = app->GetActiveImage();
     bool hasParent = this->Get( "ParentImageId" ).IsValid();
@@ -426,6 +429,8 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   bool Image::CleanHologicDICOM()
   {
+    this->AssertPrimaryId();
+
     vtkSmartPointer<Exam> exam = vtkSmartPointer<Exam>::New();
     if( !this->GetRecord( exam ) )
       throw std::runtime_error( "ERROR: no exam record for this image." );
@@ -447,13 +452,15 @@ namespace Alder
       // check if the image has a parent, if so, it is a body composition file
       examType =( this->Get( "ParentImageId" ).IsValid() ) ? 4 : 3;
     }
-    else if( typeStr == "LateralBoneDensity" ) return true;
-
-    if( examType == -1 )
+    else if( typeStr == "LateralBoneDensity" )
     {
-      std::string str =  "ERROR: unrecognized Hologic DEXA file type: " + typeStr;
-      throw std::runtime_error( str );
-    }  
+      // the lateral spine scans do not have a report to clean:
+      // anoymize the PatientsName dicom tag
+      this->AnonymizeDICOM();
+      return true;
+    }
+
+    if( examType == -1 ) return false;  
     
     std::string fileName = this->GetFileName();
     vtkNew<vtkImageDataReader> reader;
@@ -543,6 +550,9 @@ namespace Alder
     outfs.close();
 
     delete[] buffer;
+
+    // anonymize the PatientsName dicom tag
+    this->AnonymizeDICOM();
 
     return true;  
   }

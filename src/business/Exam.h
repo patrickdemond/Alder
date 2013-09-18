@@ -67,6 +67,10 @@ namespace Alder
      */
     bool IsDICOM();
 
+  protected:
+    Exam() {}
+    ~Exam() {}
+    
     /**
      * Retrieves an image from Opal.
      * @throws exception 
@@ -80,9 +84,11 @@ namespace Alder
       const bool repeatable = false,
       const std::string sideVariable = "" );
 
-  protected:
-    Exam() {}
-    ~Exam() {}
+    /**
+     * Fixes laterality and anonymization issues with dicom images.
+     * @param type The type of exam
+     */
+    void CleanImages( std::string const &type );
 
   private:
     Exam( const Exam& ); // Not implemented
