@@ -12,6 +12,7 @@
 #include <ui_QLoginDialog.h>
 
 #include <Application.h>
+#include <Modality.h>
 #include <User.h>
 
 #include <vtkSmartPointer.h>
@@ -78,10 +79,27 @@ void QLoginDialog::slotAccepted()
       }
     }
 
-    // log in the user and mark login time
-    Alder::Application::GetInstance()->SetActiveUser( user );
-    user->Set( "LastLogin", Alder::Utilities::getTime( "%Y-%m-%d %H:%M:%S" ) );
-    user->Save();
+    // warn the user if they do not have any modalitys assigned to them
+    std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
+    user->GetList( &modalityList );
+    if( modalityList.empty() )
+    {
+      QMessageBox errorMessage( this );
+      errorMessage.setWindowModality( Qt::WindowModal );
+      errorMessage.setIcon( QMessageBox::Warning );
+      std::string str = user->Get( "Name").ToString();
+      str += " has no modalities assigned.\n";
+      str += "Please contact the system administrator for modality assignment.";
+      errorMessage.setText( tr( str.c_str() ) );
+      errorMessage.exec();
+    }
+    else
+    {
+      // log in the user and mark login time
+      Alder::Application::GetInstance()->SetActiveUser( user );
+      user->Set( "LastLogin", Alder::Utilities::getTime( "%Y-%m-%d %H:%M:%S" ) );
+      user->Save();
+    }
     this->accept();
   }
   else
