@@ -348,11 +348,59 @@ namespace Alder
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   void Interview::UpdateImageData()
   {
+    Application *app = Application::GetInstance();
+    User* user = app->GetActiveUser();
     std::vector< vtkSmartPointer< Exam > > examList;
-    this->GetList( &examList );
+    if( user )
+    {
+      std::stringstream stream;
+
+      stream << "SELECT Exam.* FROM Exam "
+             << "JOIN Interview ON Interview.Id=Exam.InterviewId "
+             << "WHERE Exam.ModalityId IN ( "
+             << "SELECT Modality.Id FROM Modality "
+             << "JOIN UserHasModality ON UserHasModality.ModalityId=Modality.Id "
+             << "JOIN User on User.Id=UserHasModality.UserId "
+             << "WHERE User.Id=" << user->Get( "Id" ).ToString() << " ) "
+             << "AND Interview.Id=" << this->Get( "Id" ).ToString();
+
+      Database *db = app->GetDB();
+      vtkSmartPointer<vtkAlderMySQLQuery> query = db->GetQuery();
+             
+      app->Log( "Querying Database: " + stream.str() );
+      query->SetQuery( stream.str().c_str() );
+      query->Execute();
+
+      if( query->HasError() )
+      {
+        app->Log( query->GetLastErrorText() );
+        throw std::runtime_error( "There was an error while trying to query the database." );
+      }
+
+      while( query->NextRow() )
+      {
+        vtkSmartPointer<Exam> exam = vtkSmartPointer<Exam>::New();
+        exam->LoadFromQuery( query );
+        examList.push_back( exam );
+      }
+    }
+    else
+    { 
+      this->GetList( &examList );
+    }
 
     if( !examList.empty() )
     {
+      // only update image data for exams which have not been downloaded
+      std::vector< vtkSmartPointer< Exam > > revisedList;
+      for( auto it = examList.cbegin(); it != examList.cend(); ++it )
+      {
+         if( !(*it)->HasImageData() ) 
+           revisedList.push_back( *it );
+      }
+      examList.clear();
+      if( revisedList.empty() ) return;
+
       double index = 0;
       bool global = true;
       std::pair<bool, double> progressConfig = std::pair<bool, double>( global, 0.0 );
@@ -364,13 +412,13 @@ namespace Alder
       OpalService::SetCurlProgressChecking( false );
 
       app->InvokeEvent( vtkCommand::StartEvent, static_cast<void *>( &global ) );
-      double size = examList.size();
-      for( auto examIt = examList.cbegin(); examIt != examList.cend(); ++examIt, ++index )
+      double size = revisedList.size();
+      for( auto it = revisedList.cbegin(); it != revisedList.cend(); ++it, ++index )
       {
         progressConfig.second = index / size;
         app->InvokeEvent( vtkCommand::ProgressEvent, static_cast<void *>( &progressConfig ) );
         if( app->GetAbortFlag() ) break;
-        ( *examIt )->UpdateImageData(); // invokes progress events
+        ( *it )->UpdateImageData(); // invokes progress events
       }
 
       if( app->GetAbortFlag() ) app->SetAbortFlag( false );

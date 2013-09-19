@@ -370,6 +370,11 @@ namespace Alder
      */
     virtual std::string GetName() const = 0;
 
+    /**
+     * Loads values into the record from a query's current row
+     */
+    void LoadFromQuery( vtkAlderMySQLQuery *query );
+
   protected:
     ActiveRecord();
     ~ActiveRecord() {}
@@ -378,11 +383,6 @@ namespace Alder
      * Sets up the record with default values for all table columns
      */
     void Initialize();
-
-    /**
-     * Loads values into the record from a query's current row
-     */
-    void LoadFromQuery( vtkAlderMySQLQuery *query );
 
     /**
      * Runs a check to make sure the record exists in the database
