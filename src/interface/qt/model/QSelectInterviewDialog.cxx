@@ -17,6 +17,7 @@
 #include <Interview.h>
 #include <Modality.h>
 #include <QueryModifier.h>
+#include <User.h>
 
 #include <vtkSmartPointer.h>
 
@@ -49,7 +50,8 @@ QSelectInterviewDialog::QSelectInterviewDialog( QWidget* parent )
 
   // all modalities will fill up the remainder of the table
   std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
-  Alder::Modality::GetAll( &modalityList );
+  Alder::User *user = Alder::Application::GetInstance()->GetActiveUser();
+  user->GetList( &modalityList );
 
   // make enough columns for all modalities and set their names
   this->ui->interviewTableWidget->setColumnCount( index + modalityList.size() );
@@ -187,17 +189,19 @@ void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
   std::map< std::string, bool > updateItemText;
   std::map< std::string, int > examCount;
   std::map< std::string, int > ratedCount;
+  std::map< std::string, int > downloadCount;
   std::map< std::string, QString > itemText;
   std::string modalityName;
   std::vector< vtkSmartPointer< Alder::Modality > > modalityList;
+  user->GetList( &modalityList );
 
-  Alder::Modality::GetAll( &modalityList );
   for( auto modalityListIt = modalityList.begin(); modalityListIt != modalityList.end(); ++modalityListIt )
   {
     modalityName = (*modalityListIt)->Get( "Name" ).ToString();
     updateItemText[modalityName] = false;
     examCount[modalityName] = 0;
     ratedCount[modalityName] = 0;
+    downloadCount[modalityName] = 0;
     itemText[modalityName] = "?";
   }
 
@@ -214,8 +218,13 @@ void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
     
     // NOTE: it is possible that an exam with state "Ready" has valid data, but we are leaving
     // those exams out for now since we don't know for sure whether they are always valid
+
+    // the modalities and hence exams permitted to this user has already been determined
+    if( updateItemText.find(modalityName) == updateItemText.end() ) continue;
+
     updateItemText[modalityName] = true;
     if( "Completed" == exam->Get( "Stage" ).ToString() ) examCount[modalityName]++;
+    if( exam->HasImageData() ) downloadCount[modalityName]++;
     if( exam->IsRatedBy( user ) ) ratedCount[modalityName]++;
   }
 
@@ -227,9 +236,12 @@ void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
     modalityName = updateItemTextIt->first;
     if( updateItemTextIt->second )
     {
-      itemText[modalityName] = QString::number( ratedCount[modalityName] );
+      itemText[modalityName] = QString::number( downloadCount[modalityName] );
       itemText[modalityName] += tr( " of " );
       itemText[modalityName] += QString::number( examCount[modalityName] );
+      itemText[modalityName] += tr( ", " );
+      itemText[modalityName] += QString::number( ratedCount[modalityName] );
+      itemText[modalityName] += tr( " rated" );
     }
   }
 
