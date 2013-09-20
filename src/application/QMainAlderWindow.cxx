@@ -241,6 +241,9 @@ void QMainAlderWindow::slotUserManagement()
     user->Load( "Name", "administrator" );
     if( user->IsPassword( text.toStdString().c_str() ) )
     {
+      user->Set( "LastLogin", Alder::Utilities::getTime( "%Y-%m-%d %H:%M:%S" ) );
+      user->Save();
+
       // load the users dialog
       QUserListDialog usersDialog( this );
       usersDialog.setModal( true );
@@ -283,6 +286,9 @@ void QMainAlderWindow::slotUpdateDatabase()
     user->Load( "Name", "administrator" );
     if( user->IsPassword( text.toStdString().c_str() ) )
     {
+      user->Set( "LastLogin", Alder::Utilities::getTime( "%Y-%m-%d %H:%M:%S" ) );
+      user->Save();
+
       // create a progress dialog to observe the progress of the update
       QVTKProgressDialog dialog( this );
       dialog.setModal( true );
