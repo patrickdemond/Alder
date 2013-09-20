@@ -179,6 +179,7 @@
     <addaction name="actionShowDicomTags"/>
     <addaction name="separator"/>
     <addaction name="actionLogin"/>
+    <addaction name="actionChangePassword"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -288,6 +289,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionChangePassword">
+   <property name="text">
+    <string>Change Password</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
    </property>
   </action>
  </widget>

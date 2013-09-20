@@ -21,6 +21,7 @@
 
 #include <QAboutDialog.h>
 #include <QAlderDicomTagWidget.h>
+#include <QChangePasswordDialog.h>
 #include <QLoginDialog.h>
 #include <QSelectInterviewDialog.h>
 #include <QUserListDialog.h>
@@ -53,6 +54,9 @@ QMainAlderWindow::QMainAlderWindow( QWidget* parent )
   QObject::connect(
     this->ui->actionLogin, SIGNAL( triggered() ),
     this, SLOT( slotLogin() ) );
+  QObject::connect(
+    this->ui->actionChangePassword, SIGNAL( triggered() ),
+    this, SLOT( slotChangePassword() ) );
   QObject::connect(
     this->ui->actionUserManagement, SIGNAL( triggered() ),
     this, SLOT( slotUserManagement() ) );
@@ -296,6 +300,36 @@ void QMainAlderWindow::adminUserManagement( )
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::slotChangePassword()
+{
+  Alder::Application *app = Alder::Application::GetInstance();
+  Alder::User* user;
+  if(  NULL != ( user = app->GetActiveUser() ) )
+  {
+    QString password = user->Get("Password").ToString().c_str();
+    QChangePasswordDialog dialog( password, this );
+    dialog.setModal( true );
+    QObject::connect( 
+      &dialog , SIGNAL( passwordChange( QString ) ), 
+     this, SLOT( changeActiveUserPassword( QString ) ));
+    dialog.exec();
+  }   
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::changeActiveUserPassword( QString password )
+{
+  if( password.isEmpty() ) return;
+  Alder::Application *app = Alder::Application::GetInstance();
+  Alder::User* user;
+  if(  NULL != ( user = app->GetActiveUser() ) )
+  {
+    user->Set( "Password", password.toStdString() );
+    user->Save();
+  }
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotAbout()
 {
   QAboutDialog dialog( this );
@@ -346,6 +380,7 @@ void QMainAlderWindow::updateInterface()
 
   // set all widget enable states
   this->ui->actionOpenInterview->setEnabled( loggedIn );
+  this->ui->actionChangePassword->setEnabled( loggedIn );
   this->ui->actionShowAtlas->setEnabled( loggedIn );
 
   this->ui->framePlayerWidget->setEnabled( loggedIn );

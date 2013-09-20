@@ -35,6 +35,7 @@ public slots:
   virtual void slotShowAtlas();
   virtual void slotShowDicomTags();
   virtual void slotLogin();
+  virtual void slotChangePassword();
   virtual void slotUserManagement();
   virtual void slotUpdateDatabase();
 
@@ -43,6 +44,7 @@ public slots:
   virtual void slotManual();
 
   virtual void updateDicomTagWidget();
+  void changeActiveUserPassword( QString );
 
 protected:
   // called whenever the main window is closed
