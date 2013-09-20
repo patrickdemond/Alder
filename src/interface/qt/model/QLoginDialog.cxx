@@ -87,7 +87,7 @@ void QLoginDialog::slotAccepted()
       QMessageBox errorMessage( this );
       errorMessage.setWindowModality( Qt::WindowModal );
       errorMessage.setIcon( QMessageBox::Warning );
-      std::string str = user->Get( "Name").ToString();
+      std::string str = "User: " +  user->Get( "Name").ToString();
       str += " has no modalities assigned.\n";
       str += "Please contact the system administrator for modality assignment.";
       errorMessage.setText( tr( str.c_str() ) );
