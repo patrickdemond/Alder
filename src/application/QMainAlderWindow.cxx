@@ -223,50 +223,17 @@ void QMainAlderWindow::slotShowDicomTags()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotUserManagement()
 {
-  int attempt = 1;
-
-  while( attempt < 4 )
-  {
-    // check for admin password
-    QString text = QInputDialog::getText(
-      this,
-      QObject::tr( "User Management" ),
-      QObject::tr( attempt > 1 ? "Wrong password, try again:" : "Administrator password:" ),
-      QLineEdit::Password );
-    
-    // do nothing if the user hit the cancel button
-    if( text.isEmpty() ) break;
-
-    vtkNew< Alder::User > user;
-    user->Load( "Name", "administrator" );
-    if( user->IsPassword( text.toStdString().c_str() ) )
-    {
-      user->Set( "LastLogin", Alder::Utilities::getTime( "%Y-%m-%d %H:%M:%S" ) );
-      user->Save();
-
-      // load the users dialog
-      QUserListDialog usersDialog( this );
-      usersDialog.setModal( true );
-      usersDialog.setWindowTitle( tr( "User Management" ) );
-
-      Alder::Application *app = Alder::Application::GetInstance();
-      bool loggedIn = NULL != app->GetActiveUser();
-      if( loggedIn )
-      {
-        QObject::connect( 
-          &usersDialog , SIGNAL( userModalityChanged() ), 
-         this->ui->interviewWidget, SLOT( updateExamTreeWidget() ));
-      }   
-
-      usersDialog.exec();
-      break;
-    }
-    attempt++;
-  }
+  this->adminLoginDo( &QMainAlderWindow::adminUserManagement );
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QMainAlderWindow::slotUpdateDatabase()
+{
+  this->adminLoginDo( &QMainAlderWindow::adminUpdateDatabase );
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::adminLoginDo( void (QMainAlderWindow::*fn)() )
 {
   int attempt = 1;
 
@@ -289,18 +256,43 @@ void QMainAlderWindow::slotUpdateDatabase()
       user->Set( "LastLogin", Alder::Utilities::getTime( "%Y-%m-%d %H:%M:%S" ) );
       user->Save();
 
-      // create a progress dialog to observe the progress of the update
-      QVTKProgressDialog dialog( this );
-      dialog.setModal( true );
-      dialog.setWindowTitle( tr( "Updating Database" ) );
-      dialog.setMessage( tr( "Please wait while the database is updated." ) );
-      dialog.open();
-      Alder::Interview::UpdateInterviewData();
-      dialog.accept();
+      (this->*fn)();
+
       break;
     }
     attempt++;
   }
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::adminUpdateDatabase()
+{
+  // create a progress dialog to observe the progress of the update
+  QVTKProgressDialog dialog( this );
+  dialog.setModal( true );
+  dialog.setWindowTitle( tr( "Updating Database" ) );
+  dialog.setMessage( tr( "Please wait while the database is updated." ) );
+  dialog.open();
+  Alder::Interview::UpdateInterviewData();
+  dialog.accept();
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+void QMainAlderWindow::adminUserManagement( )
+{
+  // load the users dialog
+  QUserListDialog usersDialog( this );
+  usersDialog.setModal( true );
+  usersDialog.setWindowTitle( tr( "User Management" ) );
+
+  Alder::Application *app = Alder::Application::GetInstance();
+  if(  NULL != app->GetActiveUser() )
+  {
+    QObject::connect( 
+      &usersDialog , SIGNAL( userModalityChanged() ), 
+     this->ui->interviewWidget, SLOT( updateExamTreeWidget() ));
+  }   
+  usersDialog.exec();
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-

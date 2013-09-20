@@ -62,6 +62,10 @@ private:
   bool dicomTagsVisible;
   QAlderDicomTagWidget* DicomTagWidget;
 
+  void adminUserManagement();
+  void adminUpdateDatabase();
+  void adminLoginDo( void (QMainAlderWindow::*fn)() );
+
   vtkSmartPointer<vtkEventQtSlotConnect> Connections;
 };
 
