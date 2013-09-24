@@ -22,7 +22,7 @@ class QChangePasswordDialog : public QDialog
 
 public:
   //constructor
-  QChangePasswordDialog( QString password, QWidget* parent = 0 );
+  QChangePasswordDialog( QString const &pwd, QWidget* parent = 0 );
   //destructor
   ~QChangePasswordDialog();
   
@@ -30,13 +30,14 @@ public slots:
   virtual void slotAccepted();
 
 signals:
-  virtual void passwordChange( QString );
+  virtual void passwordChange( QString const &pwd );
 
 protected:
+  bool checkNewPassword();
+  bool confirmNewPassword();
+  virtual bool eventFilter( QObject*, QEvent* );
 
 protected slots:
-  virtual void slotPasswordConfirmed();
-  virtual void slotNewPassword();
 
 private:
   // Designer form

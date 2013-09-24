@@ -45,13 +45,15 @@ QLoginDialog::~QLoginDialog()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QLoginDialog::slotAccepted()
 {
-  std::string password = this->ui->passwordLineEdit->text().toStdString();
+  QString password = this->ui->passwordLineEdit->text();
 
   vtkSmartPointer< Alder::User > user = vtkSmartPointer< Alder::User >::New();
-  if( user->Load( "Name", this->ui->usernameLineEdit->text().toStdString() ) && user->IsPassword( password ) )
+  if( user->Load( "Name", this->ui->usernameLineEdit->text().toStdString() ) &&
+      user->IsPassword( password.toStdString() ) )
   { // login successful
     // if the password matches the default password, force the user to change it
-    while( Alder::User::GetDefaultPassword() == password )
+    QString defPassword = Alder::User::GetDefaultPassword().c_str();
+    while( defPassword == password )
     {
       // prompt for new password
       QString password1 = QInputDialog::getText(
@@ -60,7 +62,7 @@ void QLoginDialog::slotAccepted()
         QObject::tr( "Please provide a new password (cannot be \"password\") for your account:" ),
         QLineEdit::Password );
 
-      if( !password1.isEmpty() && password1 != QString( Alder::User::GetDefaultPassword().c_str() ) )
+      if( !password1.isEmpty() && password1 != defPassword )
       {
         // re-prompt to repeat password
         QString password2 = QInputDialog::getText(
@@ -72,8 +74,8 @@ void QLoginDialog::slotAccepted()
         if( password1 == password2 )
         {
           // set the replacement password
-          password = password1.toStdString();
-          user->Set( "Password", password );
+          password = password1;
+          user->Set( "Password", password.toStdString() );
           user->Save();
         }
       }
