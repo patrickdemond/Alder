@@ -22,9 +22,9 @@
 #ifndef __vtkXMLConfigurationFileReader_h
 #define __vtkXMLConfigurationFileReader_h
 
-#include "vtkXMLFileReader.h"
+#include <vtkXMLFileReader.h>
 
-#include "Utilities.h"
+#include <Utilities.h>
 
 class vtkXMLConfigurationFileReader : public vtkXMLFileReader
 {

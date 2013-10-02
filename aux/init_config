@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 # Program:  Alder (CLSA Medical Image Quality Assessment Tool)
-# Module:   Alder.cxx
-# Language: C++
+# Module:   init_config 
+# Language: bash
 #
 # Author: Patrick Emond <emondpd AT mcmaster DOT ca>
 # Author: Dean Inglis <inglisd AT mcmaster DOT ca>
@@ -55,7 +55,8 @@ prompt "Opal port?" opal_port "8843"
 prompt "Opal username?" opal_username "administrator"
 prompt "Opal password? " opal_password
 prompt "Opal timeout?" opal_timeout "10"
-prompt "Image data path?" imagedata_path "./data"
+prompt "Log file path?" log_path "/var/local/alder/log"
+prompt "Image data path?" imagedata_path "/var/local/alder/data"
 
 echo "Writing config file to $config_filename..."
 sed -e "s;%DB_HOST%;$db_host;" \
@@ -68,6 +69,7 @@ sed -e "s;%DB_HOST%;$db_host;" \
     -e "s;%OPAL_USERNAME%;$opal_username;" \
     -e "s;%OPAL_PASSWORD%;$opal_password;" \
     -e "s;%OPAL_TIMEOUT%;$opal_timeout;" \
+    -e "s;%LOG_PATH%;$log_path;" \
     -e "s;%IMAGEDATA_PATH%;$imagedata_path;" $DIR/config.xml > $config_filename
 echo
 

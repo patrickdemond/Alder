@@ -13,17 +13,16 @@
 
 =========================================================================*/
 
-#include "vtkAlderMySQLQuery.h"
-#include "vtkAlderMySQLDatabase.h"
-#include "vtkAlderMySQLDatabasePrivate.h"
-#include "vtkObjectFactory.h"
-#include "vtkStringArray.h"
-#include "vtkVariant.h"
-#include "vtkVariantArray.h"
+#include <vtkAlderMySQLQuery.h>
+#include <vtkAlderMySQLDatabase.h>
+#include <vtkAlderMySQLDatabasePrivate.h>
+#include <vtkObjectFactory.h>
+#include <vtkStringArray.h>
+#include <vtkVariant.h>
+#include <vtkVariantArray.h>
 
 #include <mysql.h>
 #include <errmsg.h>
-
 
 #if defined(WIN32)
 # include <string.h>

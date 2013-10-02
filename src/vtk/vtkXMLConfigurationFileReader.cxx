@@ -8,13 +8,13 @@
   Author: Dean Inglis <inglisd AT mcmaster DOT ca>
 
 =========================================================================*/
-#include "vtkXMLConfigurationFileReader.h"
+#include <vtkXMLConfigurationFileReader.h>
 
-#include "vtkInformation.h"
-#include "vtkInformationVector.h"
-#include "vtkObjectFactory.h"
-#include "vtkStreamingDemandDrivenPipeline.h"
-#include "vtkVariantArray.h"
+#include <vtkInformation.h>
+#include <vtkInformationVector.h>
+#include <vtkObjectFactory.h>
+#include <vtkStreamingDemandDrivenPipeline.h>
+#include <vtkVariantArray.h>
 
 #include <algorithm>
 #include <stdexcept>
