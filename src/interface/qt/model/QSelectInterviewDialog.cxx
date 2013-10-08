@@ -70,7 +70,7 @@ QSelectInterviewDialog::QSelectInterviewDialog( QWidget* parent )
   this->ui->interviewTableWidget->setSelectionBehavior( QAbstractItemView::SelectRows );
   this->ui->interviewTableWidget->setSelectionMode( QAbstractItemView::SingleSelection );
 
-  this->searchText = "";
+  //this->searchText = "";
   this->sortColumn = 1;
   this->sortOrder = Qt::AscendingOrder;
 
@@ -109,8 +109,19 @@ void QSelectInterviewDialog::slotSearch()
 
   if( ok )
   {
-    this->searchText = text;
+    QApplication::setOverrideCursor( QCursor( Qt::WaitCursor ) );
+    this->searchText.clear();
+    if( text.contains(",") )
+    {
+      this->searchText = text.split(",", QString::SkipEmptyParts );
+      this->searchText.removeDuplicates();
+    }
+    else
+    {
+      this->searchText << text;
+    }  
     this->updateInterface();
+    QApplication::restoreOverrideCursor();
   }
 }
 
@@ -179,7 +190,7 @@ void QSelectInterviewDialog::slotHeaderClicked( int index )
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
+void QSelectInterviewDialog::updateRow( const int row, Alder::Interview *interview )
 {
   std::vector< vtkSmartPointer< Alder::Exam > > examList;
   Alder::Exam *exam;
@@ -245,7 +256,7 @@ void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
     }
   }
 
-  if( this->searchText.isEmpty() || UId.contains( this->searchText, Qt::CaseInsensitive ) )
+  if( this->searchText.empty() || this->searchTextInUId( UId ) )
   {
     QTableWidgetItem *item;
     item = this->ui->interviewTableWidget->item( row, this->columnIndex["Site"] );
@@ -265,15 +276,31 @@ void QSelectInterviewDialog::updateRow( int row, Alder::Interview *interview )
 }
 
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+bool QSelectInterviewDialog::searchTextInUId( const QString UId )
+{
+  for( QStringList::const_iterator it = this->searchText.constBegin();
+       it != this->searchText.constEnd(); ++it )
+  {
+    if( UId.contains( (*it), Qt::CaseInsensitive ) ) return true;
+  }
+  return false;
+}
+
+//-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QSelectInterviewDialog::updateInterface()
 {
-  if( this->searchText.isEmpty() ) return;
+  if( this->searchText.empty() ) return;
 
-  // create a modifier using the search text
-  std::string where = this->searchText.toStdString();
-  where += "%";
   vtkSmartPointer< Alder::QueryModifier > modifier = vtkSmartPointer< Alder::QueryModifier >::New();
-  modifier->Where( "UId", "LIKE", vtkVariant( where ) );
+  for( QStringList::const_iterator it = this->searchText.constBegin(); 
+       it != this->searchText.constEnd(); ++it )
+  {
+    // create a modifier using the search text
+    std::string where = (*it).toStdString();
+    where += "%";
+    modifier->Where( "UId", "LIKE", vtkVariant( where ), true, 
+      (it != this->searchText.constBegin()) );
+  }
 
   // get all the interviews given the search text
   std::vector< vtkSmartPointer< Alder::Interview > > interviewList;
@@ -286,7 +313,7 @@ void QSelectInterviewDialog::updateInterface()
     messageBox.setWindowModality( Qt::WindowModal );
     messageBox.setIcon( QMessageBox::Information );
     std::string s = "No matches for search criteria ";
-    s += where.c_str();
+    s += modifier->GetSql();
     s += ", please try again.";
     messageBox.setText( tr( s.c_str() ) );
     messageBox.exec();
@@ -301,7 +328,7 @@ void QSelectInterviewDialog::updateInterface()
     Alder::Interview *interview = *it;
     QString UId = QString( interview->Get( "UId" ).ToString().c_str() );
     
-    if( this->searchText.isEmpty() || UId.contains( this->searchText, Qt::CaseInsensitive ) )
+    if( this->searchText.empty() || this->searchTextInUId( UId ) )
     {
       this->ui->interviewTableWidget->insertRow( 0 );
 
