@@ -42,11 +42,13 @@ namespace Alder
   bool Exam::HasImageData()
   {
     // An exam has all images if it is marked as downloaded and has a Completed status.
-    // Alder does not download images from incomplete exams.
+    // Alder does not download images from incomplete or contra-indicated exams.
     // NOTE: it is possible that an exam with state "Ready" has valid data, but we are leaving
     // those exams out for now since we don't know for sure whether they are always valid
-     return ( this->Get( "Downloaded" ).ToInt() == 1 &&
-              this->Get( "Stage" ).ToString() == "Completed" );
+    bool downLoaded = this->Get( "Downloaded" ).ToInt() == 1;
+    std::string stageStatus = this->Get( "Stage" ).ToString();
+    return ( ( downLoaded && stageStatus == "Completed" ) ||
+             ( !downLoaded && stageStatus == "NotApplicable" ) );
   }
 
   //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
