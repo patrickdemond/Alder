@@ -19,6 +19,8 @@
 #include <QueryModifier.h>
 #include <User.h>
 
+#include <QVTKProgressDialog.h>
+
 #include <vtkSmartPointer.h>
 
 #include <QInputDialog>
@@ -68,9 +70,8 @@ QSelectInterviewDialog::QSelectInterviewDialog( QWidget* parent )
   this->ui->interviewTableWidget->horizontalHeader()->setClickable( true );
   this->ui->interviewTableWidget->verticalHeader()->setVisible( false );
   this->ui->interviewTableWidget->setSelectionBehavior( QAbstractItemView::SelectRows );
-  this->ui->interviewTableWidget->setSelectionMode( QAbstractItemView::SingleSelection );
+  this->ui->interviewTableWidget->setSelectionMode( QAbstractItemView::ExtendedSelection );
 
-  //this->searchText = "";
   this->sortColumn = 1;
   this->sortOrder = Qt::AscendingOrder;
 
@@ -102,7 +103,8 @@ void QSelectInterviewDialog::slotSearch()
   QString text = QInputDialog::getText(
     this,
     QObject::tr( "Search Term" ),
-    QObject::tr( "Provide some or all of the interviews to search for:" ),
+    QObject::tr( 
+      "Provide some or all of the interviews to search for,\nusing commas to separate terms:" ),
     QLineEdit::Normal,
     QString(),
     &ok );
@@ -128,24 +130,62 @@ void QSelectInterviewDialog::slotSearch()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QSelectInterviewDialog::slotAccepted()
 {
-  // get the UId of the selected row
-  vtkSmartPointer< Alder::Interview > interview;
-  QList<QTableWidgetItem *> list = this->ui->interviewTableWidget->selectedItems();
-  if( !list.empty() )  
+  QList< QTableWidgetSelectionRange > ranges = this->ui->interviewTableWidget->selectedRanges();
+
+   //warn the user that multiple interviews are about to be downloaded
+   // and could take time ... allow for and respond to abort signals
+   // for multi selection, the first loaded interview will be set to the active
+   // interview
+
+
+  if( !ranges.empty() )  
   {
+    int uiCol = this->columnIndex["UId"];
+    int dateCol = this->columnIndex["VisitDate"];
+    bool first = true;
+
+    vtkSmartPointer< Alder::Interview > interview = 
+      vtkSmartPointer< Alder::Interview >::New();
+
     std::map< std::string, std::string > map;
-    map["UId"] = list.at( this->columnIndex["UId"] )->text().toStdString();
-    map["VisitDate"] = list.at( this->columnIndex["VisitDate"] )->text().toStdString();
-    interview = vtkSmartPointer< Alder::Interview >::New();
-    interview->Load( map );
+    
+    bool doProgress = ranges.size() > 1 || ranges.at(0).rowCount() > 1;
+    // create a progress dialog to observe the progress of the update
+    QVTKProgressDialog dialog( this->parentWidget() );
+    if( doProgress )
+    {
+      this->hide();
+      dialog.setModal( true );
+      dialog.setWindowTitle( tr( "Downloading Exam Images" ) );
+      dialog.setMessage( tr( "Please wait while the interview's images are downloaded." ) );
+      dialog.open();
+    } 
 
-    // if the active interview is changed, Application invokes an ActiveInterviewEvent
-    // the interview may not have downloaded images though
-    // this dialog closes after accept is called and the main application window
-    // slot that originally launched this dialog forces the active interview to 
-    // update its image data
+    for( QList< QTableWidgetSelectionRange >::const_iterator it = 
+         ranges.constBegin(); it != ranges.constEnd(); ++it )
+    { 
+      for( int row = (*it).topRow(); row <= (*it).bottomRow(); ++row )
+      {
+        QTableWidgetItem* item = this->ui->interviewTableWidget->item( row, uiCol );
+        map["UId"] = item->text().toStdString();
 
-    Alder::Application::GetInstance()->SetActiveInterview( interview );
+        item = this->ui->interviewTableWidget->item( row, dateCol );         
+        map["VisitDate"] = item->text().toStdString();
+
+        interview->Load( map );
+
+        if( !interview->HasImageData() && doProgress )
+          interview->UpdateImageData();
+
+        if( first )
+        {
+          Alder::Application::GetInstance()->SetActiveInterview( interview );
+          first = false;
+        }
+      }
+    }  
+
+    if( doProgress) dialog.accept();
   }
 
   this->accept();
@@ -154,24 +194,42 @@ void QSelectInterviewDialog::slotAccepted()
 //-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
 void QSelectInterviewDialog::slotSelectionChanged()
 {
-  vtkSmartPointer< Alder::Interview > interview;
-  QList<QTableWidgetItem *> list = this->ui->interviewTableWidget->selectedItems();
-  this->ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( !list.empty() );
+  QList< QTableWidgetSelectionRange > ranges = this->ui->interviewTableWidget->selectedRanges();
+  this->ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( !ranges.empty() );
 
-  if( !list.empty() )
+  if( !ranges.empty() )
   {
+    QApplication::setOverrideCursor( QCursor( Qt::WaitCursor ) );
+
+    int uiCol = this->columnIndex["UId"];
+    int dateCol = this->columnIndex["VisitDate"];
+
+    vtkSmartPointer< Alder::Interview > interview = 
+      vtkSmartPointer< Alder::Interview >::New();
+
     std::map< std::string, std::string > map;
-    map["UId"] = list.at( this->columnIndex["UId"] )->text().toStdString();
-    map["VisitDate"] = list.at( this->columnIndex["VisitDate"] )->text().toStdString();
-    interview = vtkSmartPointer< Alder::Interview >::New();
-    interview->Load( map );
-    if( !interview->HasExamData() )
-    {
-      QApplication::setOverrideCursor( QCursor( Qt::WaitCursor ) );
-      interview->UpdateExamData();
-      QApplication::restoreOverrideCursor();
-    }  
-    this->updateRow( list.at( 0 )->row(), interview );
+
+    for( QList< QTableWidgetSelectionRange >::const_iterator it = 
+         ranges.constBegin(); it != ranges.constEnd(); ++it )
+    { 
+      for( int row = (*it).topRow(); row <= (*it).bottomRow(); ++row )
+      {
+        QTableWidgetItem* item = this->ui->interviewTableWidget->item( row, uiCol );
+        map["UId"] = item->text().toStdString();
+
+        item = this->ui->interviewTableWidget->item( row, dateCol );         
+        map["VisitDate"] = item->text().toStdString();
+
+        interview->Load( map );
+
+        if( !interview->HasExamData() )
+        {
+          interview->UpdateExamData();
+        }  
+        this->updateRow( row, interview );
+      }
+    }
+    QApplication::restoreOverrideCursor();
   }
 }
 
