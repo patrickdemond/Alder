@@ -132,7 +132,7 @@ void QSelectInterviewDialog::slotAccepted()
 {
   QList< QTableWidgetSelectionRange > ranges = this->ui->interviewTableWidget->selectedRanges();
 
-   //warn the user that multiple interviews are about to be downloaded
+   // TODO: warn the user that multiple interviews are about to be downloaded
    // and could take time ... allow for and respond to abort signals
    // for multi selection, the first loaded interview will be set to the active
    // interview
