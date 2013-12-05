@@ -55,8 +55,9 @@
 #ifndef __vtkMedicalImageViewer_h
 #define __vtkMedicalImageViewer_h
 
-#include "vtkObject.h"
-#include "vtkSmartPointer.h"
+#include <vtkObject.h>
+#include <vtkSmartPointer.h>
+
 #include <vector>
 
 class vtkCustomCornerAnnotation;

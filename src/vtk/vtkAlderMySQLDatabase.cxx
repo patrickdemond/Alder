@@ -17,15 +17,13 @@
   Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
   the U.S. Government retains certain rights in this software.
 -------------------------------------------------------------------------*/
-#include "vtkAlderMySQLDatabase.h"
-#include "vtkAlderMySQLDatabasePrivate.h"
-#include "vtkAlderMySQLQuery.h"
+#include <vtkAlderMySQLDatabase.h>
+#include <vtkAlderMySQLDatabasePrivate.h>
+#include <vtkAlderMySQLQuery.h>
 
-#include "vtkSQLDatabaseSchema.h"
-
-#include "vtkObjectFactory.h"
-#include "vtkStringArray.h"
-
+#include <vtkObjectFactory.h>
+#include <vtkSQLDatabaseSchema.h>
+#include <vtkStringArray.h>
 #include <vtksys/SystemTools.hxx>
 #include <vtksys/ios/sstream>
 

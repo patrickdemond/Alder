@@ -33,6 +33,7 @@
 
 #include <vtkActor2D.h>
 #include <vtkSmartPointer.h>
+
 #include <string>
 
 class vtkImageActor;

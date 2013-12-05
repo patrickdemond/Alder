@@ -28,8 +28,8 @@
 #ifndef __vtkXMLFileReader_h
 #define __vtkXMLFileReader_h
 
-#include "vtkAlgorithm.h"
-#include "vtkVariant.h"
+#include <vtkAlgorithm.h>
+#include <vtkVariant.h>
 
 #include <libxml/xmlreader.h>
 

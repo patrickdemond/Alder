@@ -87,6 +87,7 @@ CREATE  TABLE IF NOT EXISTS `Alder`.`Image` (
   `ExamId` INT UNSIGNED NOT NULL ,
   `Acquisition` INT NOT NULL ,
   `ParentImageId` INT UNSIGNED NULL ,
+  `Dimensionality` INT NULL ,
   `Note` TEXT NULL ,
   PRIMARY KEY (`Id`) ,
   INDEX `fkImageExamId` (`ExamId` ASC) ,

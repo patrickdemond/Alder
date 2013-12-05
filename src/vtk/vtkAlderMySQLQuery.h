@@ -35,12 +35,12 @@
 #ifndef __vtkAlderMySQLQuery_h
 #define __vtkAlderMySQLQuery_h
 
-#include "vtkSQLQuery.h"
+#include <vtkSQLQuery.h>
 
 class vtkAlderMySQLDatabase;
+class vtkAlderMySQLQueryInternals;
 class vtkVariant;
 class vtkVariantArray;
-class vtkAlderMySQLQueryInternals;
 
 class vtkAlderMySQLQuery : public vtkSQLQuery
 {
